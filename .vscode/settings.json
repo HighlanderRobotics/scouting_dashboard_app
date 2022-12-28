@@ -1,0 +1,5 @@
+{
+    "diffEditor.codeLens": true,
+    "editor.tabCompletion": "on",
+    "discord.enabled": true
+}
