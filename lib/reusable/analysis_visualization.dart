@@ -16,11 +16,11 @@ abstract class AnalysisVisualization extends StatelessWidget {
         future: analysisFunction.getAnalysis(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const CircularProgressIndicator();
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (snapshot.hasError) {
-            return const Icon(Icons.cloud_off);
+            return const Icon(Icons.sentiment_dissatisfied_outlined);
           }
 
           return loadedData(context, snapshot);
