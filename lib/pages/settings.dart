@@ -204,16 +204,6 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                 const SizedBox(height: 40),
                 ElevatedButton(
                   onPressed: () {
-                    // final prefs = await SharedPreferences.getInstance();
-
-                    // await prefs.remove("role");
-                    // await prefs.remove("tournament");
-                    // await prefs.remove("serverAuthority");
-                    // await prefs.remove("onboardingCompleted");
-
-                    // Navigator.of(context)
-                    //     .pushNamedAndRemoveUntil("/loading", (route) => false);
-
                     showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
