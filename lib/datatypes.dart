@@ -16,21 +16,11 @@ class Tournament {
 }
 
 Future<ScoutSchedule> getScoutSchedule() async {
-  final json = jsonDecode(utf8.decode((await http.get(Uri.http(
+  final json = utf8.decode((await http.get(Uri.http(
           (await getServerAuthority())!, '/API/manager/getScoutersSchedule')))
-      .bodyBytes));
+      .bodyBytes);
 
-  return ScoutSchedule(
-    version: json['version'],
-    shifts: (json['shifts'] as List)
-        .map((shift) => ScoutingShift(
-              start: shift['start'],
-              end: shift['end'],
-              scouts:
-                  (shift['scouts'] as List).map((e) => e.toString()).toList(),
-            ))
-        .toList(),
-  );
+  return ScoutSchedule.fromJSON(json);
 }
 
 Future<List<String>> getScoutNames() async {
