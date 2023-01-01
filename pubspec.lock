@@ -121,6 +121,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  frc_8033_scouting_shared:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "25d2861e1e23e222d15e61defa8ba2f6e447cb37"
+      url: "https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git"
+    source: git
+    version: "1.0.0"
   http:
     dependency: "direct main"
     description:

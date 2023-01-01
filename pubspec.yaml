@@ -41,6 +41,8 @@ dependencies:
   shared_preferences: ^2.0.15
   dropdown_search: ^5.0.5
   mobile_scanner: ^2.1.0
+  frc_8033_scouting_shared:
+    git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
 
 dev_dependencies:
   flutter_test:

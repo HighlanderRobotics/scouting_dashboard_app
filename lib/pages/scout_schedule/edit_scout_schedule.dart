@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 
 class EditScoutSchedule extends StatefulWidget {
@@ -46,8 +48,10 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
                   onPressed: areSchedulesEqual(oldSchedule!, newSchedule!) ||
                           newSchedule!.validate() != null
                       ? null
-                      : () {
-                          newSchedule!.save().then((val) {
+                      : () async {
+                          newSchedule!
+                              .save((await getServerAuthority())!)
+                              .then((val) {
                             const SnackBar snackBar =
                                 SnackBar(content: Text("Saved"));
                             ScaffoldMessenger.of(context)
