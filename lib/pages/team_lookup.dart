@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
+import 'package:scouting_dashboard_app/analysis_functions/team_overview_analysis.dart';
+import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 
 import '../reusable/navigation_drawer.dart';
 
@@ -17,87 +20,306 @@ class _TeamLookupState extends State<TeamLookup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Team Lookup")),
-      body: ListView(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  label: Text("Team #"),
-                ),
-                onChanged: (value) {
-                  setState(() {
-                    teamFieldValue = value;
-                    if (int.tryParse(value) != null) {
-                      teamNumberForAnalysis = int.parse(value);
-                    }
-                  });
-                },
+      body: ListView(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextField(
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      label: Text("Team #"),
+                    ),
+                    keyboardType: TextInputType.number,
+                    onChanged: (value) {
+                      setState(() {
+                        teamFieldValue = value;
+                        if (int.tryParse(value) != null) {
+                          teamNumberForAnalysis = int.parse(value);
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  if (teamNumberForAnalysis != null)
+                    AnalysisOverview(
+                        analysis:
+                            TeamOverviewAnalysis(team: teamNumberForAnalysis!))
+                ],
               ),
-              const SizedBox(height: 24),
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: const BorderRadius.all(Radius.circular(4)),
+            )
+          ]),
+      drawer: const NavigationDrawer(),
+    );
+  }
+}
+
+class AnalysisOverview extends AnalysisVisualization {
+  const AnalysisOverview({
+    Key? key,
+    required TeamOverviewAnalysis analysis,
+  }) : super(key: key, analysisFunction: analysis);
+
+  @override
+  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OverviewMetricsList(
+          metricCategories: [
+            MetricCategory(
+              categoryName: "Cargo",
+              metricTiles: [
+                MetricTile(
+                  value: snapshot.data['cargoAccuracy']['result'] == null
+                      ? "--"
+                      : "${((snapshot.data['cargoAccuracy']['result'] as num) * 100).round()}%",
+                  label: "Accuracy",
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 10, 10, 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Total",
-                          style: Theme.of(context).textTheme.titleLarge!.merge(
-                                TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                                ),
-                              ),
-                        ),
-                      ),
-                      Row(children: [
-                        Container(
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF6F7200),
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: Column(
-                              children: [
-                                Text(
-                                  "41",
-                                  style:
-                                      Theme.of(context).textTheme.headlineSmall,
-                                ),
-                                Text(
-                                  "Avg score",
-                                  style:
-                                      Theme.of(context).textTheme.labelMedium,
-                                ),
-                              ],
+                MetricTile(
+                  value: snapshot.data['averageCount']['result']?.toString() ??
+                      "--",
+                  label: "Avg count",
+                ),
+              ],
+            ),
+            MetricCategory(
+              categoryName: "Climber",
+              metricTiles: [
+                MetricTile(
+                  value: snapshot.data['climberHighest']['result'] == null
+                      ? "--"
+                      : ClimbingChallenge
+                          .values[
+                              snapshot.data['climberHighest']['result'] as int]
+                          .name,
+                  label: "Max climb",
+                )
+              ],
+            ),
+            MetricCategory(
+              categoryName: "Defense",
+              metricTiles: [
+                MetricTile(
+                  value:
+                      "${snapshot.data['defenseQuality']['result'] ?? "--"}/5",
+                  label: "Success",
+                ),
+                MetricTile(
+                  value:
+                      "${snapshot.data['defenseQuantity']['result'] ?? "--"}/5",
+                  label: "Frequency",
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        Text(
+          "Notes",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 8),
+        if ((snapshot.data['notes']['result'] as List).isNotEmpty)
+          NotesList(
+              notes: ((snapshot.data['notes']['result'] as List)
+                      .cast<Map<String, dynamic>>())
+                  .map((note) => Note(
+                      matchName: "Match ${note['matchNum']}",
+                      noteBody: note['notes']))
+                  .toList()
+                  .cast<Note>()),
+      ],
+    );
+  }
+}
+
+class NotesList extends StatelessWidget {
+  const NotesList({
+    Key? key,
+    required this.notes,
+  }) : super(key: key);
+
+  final List<Note> notes;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: notes
+          .expand((element) => [element, const SizedBox(height: 20)])
+          .take(notes.length * 2 - 1)
+          .toList(),
+    );
+  }
+}
+
+class Note extends StatelessWidget {
+  const Note({
+    Key? key,
+    required this.matchName,
+    required this.noteBody,
+  }) : super(key: key);
+
+  final String matchName;
+  final String noteBody;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: Theme.of(context).colorScheme.primary,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              matchName,
+              style: Theme.of(context).textTheme.titleMedium!.merge(
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+            ),
+            Text(
+              noteBody,
+              style: Theme.of(context).textTheme.bodyMedium!.merge(
+                    TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OverviewMetricsList extends StatelessWidget {
+  const OverviewMetricsList({
+    Key? key,
+    this.metricCategories = const [],
+  }) : super(key: key);
+
+  final List<MetricCategory> metricCategories;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: metricCategories
+          .expand((element) => [element, const SizedBox(height: 15)])
+          .take(metricCategories.length * 2 - 1)
+          .toList(),
+    );
+  }
+}
+
+class MetricCategory extends StatelessWidget {
+  const MetricCategory({
+    Key? key,
+    required this.categoryName,
+    this.metricTiles = const <MetricTile>[],
+    this.onTap,
+  }) : super(key: key);
+
+  final String categoryName;
+  final List<MetricTile> metricTiles;
+  final void Function()? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      onTap: onTap,
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+          color: Theme.of(context).colorScheme.surfaceVariant,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      categoryName,
+                      style: Theme.of(context).textTheme.titleMedium!.merge(
+                            TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
-                        )
-                      ]),
-                      const SizedBox(width: 10),
-                      Icon(
-                        Icons.navigate_next,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      )
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 5),
+                    Row(
+                      children: metricTiles
+                          .expand(
+                              (element) => [element, const SizedBox(width: 10)])
+                          .take(metricTiles.length * 2 - 1)
+                          .toList(),
+                    ),
+                  ],
                 ),
+              ),
+              const SizedBox(width: 10),
+              Icon(
+                Icons.navigate_next,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               )
             ],
           ),
-        )
-      ]),
-      drawer: const NavigationDrawer(),
+        ),
+      ),
+    );
+  }
+}
+
+class MetricTile extends StatelessWidget {
+  const MetricTile({
+    Key? key,
+    required this.value,
+    required this.label,
+  }) : super(key: key);
+
+  final String value;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primary,
+        borderRadius: const BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: Theme.of(context).textTheme.headlineSmall!.merge(TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  )),
+            ),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelMedium!.merge(TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  )),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
