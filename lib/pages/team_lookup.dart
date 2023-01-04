@@ -104,16 +104,23 @@ class AnalysisOverview extends AnalysisVisualization {
               categoryName: "Defense",
               metricTiles: [
                 MetricTile(
-                  value:
-                      "${snapshot.data['defenseQuality']['result'] ?? "--"}/5",
+                  value: "${snapshot.data['defenseQuality'] ?? "--"}/5",
                   label: "Success",
                 ),
                 MetricTile(
-                  value:
-                      "${snapshot.data['defenseQuantity']['result'] ?? "--"}/5",
+                  value: "${snapshot.data['defenseQuantity'] ?? "--"}/5",
                   label: "Frequency",
                 ),
               ],
+              onTap: () {
+                Navigator.of(context).pushNamed(
+                  "/team_lookup_details",
+                  arguments: {
+                    'category': 'defense',
+                    'team': (analysisFunction as TeamOverviewAnalysis).team,
+                  },
+                );
+              },
             ),
           ],
         ),
@@ -271,11 +278,11 @@ class MetricCategory extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 10),
-              Icon(
-                Icons.navigate_next,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              )
+              if (onTap != null)
+                Icon(
+                  Icons.navigate_next,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )
             ],
           ),
         ),

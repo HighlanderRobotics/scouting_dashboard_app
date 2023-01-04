@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../reusable/navigation_drawer.dart';
-
 class TeamLookupDetails extends StatefulWidget {
   const TeamLookupDetails({super.key});
 
@@ -15,7 +13,6 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
     return Scaffold(
       appBar: AppBar(title: const Text("Team Lookup Details")),
       body: const Text("Team lookup details"),
-      drawer: const NavigationDrawer(),
     );
   }
 }
