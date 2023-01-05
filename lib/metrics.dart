@@ -53,16 +53,16 @@ List<MetricCategoryData> metricCategories = [
   ]),
   MetricCategoryData("Defense", [
     Metric(
-      localizedName: "Success",
-      abbreviatedLocalizedName: "Success",
-      valueVizualizationBuilder: (val) => "${val.round()}/5",
-      path: "defenseQuality",
-    ),
-    Metric(
       localizedName: "Frequency",
       abbreviatedLocalizedName: "Frequency",
       valueVizualizationBuilder: (val) => "${val.round()}/5",
       path: "defenseQuantity",
+    ),
+    Metric(
+      localizedName: "Success",
+      abbreviatedLocalizedName: "Success",
+      valueVizualizationBuilder: (val) => "${val.round()}/5",
+      path: "defenseQuality",
     ),
   ]),
 ];
