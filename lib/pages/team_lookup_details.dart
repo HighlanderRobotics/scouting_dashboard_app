@@ -107,83 +107,135 @@ class AnalysisOverview extends AnalysisVisualization {
       child: Column(children: [
         if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
           sparkline(context, snapshot),
+        Row(
+          children: [
+            if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
+              valueBox(
+                context,
+                Text(
+                  analysisFunction.metric
+                      .valueVizualizationBuilder(snapshot.data['result']),
+                  style: Theme.of(context).textTheme.headlineSmall!.merge(
+                        TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer),
+                      ),
+                ),
+                "Average",
+                false,
+              ),
+          ],
+        )
       ]),
     );
   }
 
-  AspectRatio sparkline(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-    return AspectRatio(
-      aspectRatio: 364 / 229,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: Theme.of(context).colorScheme.surfaceVariant,
+  Container valueBox(BuildContext context, Widget value, String description,
+      bool alternateColorScheme) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: const BorderRadius.all(Radius.circular(6)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            value,
+            Text(
+              description,
+              style: Theme.of(context).textTheme.labelMedium!.merge(
+                    TextStyle(
+                        color:
+                            Theme.of(context).colorScheme.onPrimaryContainer),
+                  ),
+            ),
+          ],
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: LineChart(
-            LineChartData(
-              titlesData: FlTitlesData(
-                bottomTitles: AxisTitles(axisNameWidget: const Text("Match")),
-                topTitles: AxisTitles(),
-                leftTitles: AxisTitles(
-                  axisNameWidget:
-                      Text(analysisFunction.metric.abbreviatedLocalizedName),
-                  sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) => SideTitleWidget(
-                            axisSide: meta.axisSide,
-                            child: Text(
-                              analysisFunction.metric
-                                  .valueVizualizationBuilder(value),
-                            ),
-                          ),
-                      reservedSize: 50),
-                ),
-                rightTitles: AxisTitles(),
-              ),
-              borderData: FlBorderData(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline,
-                ),
-              ),
-              gridData: FlGridData(
-                getDrawingHorizontalLine: (value) {
-                  return FlLine(
-                    color: Theme.of(context).colorScheme.outline,
-                    strokeWidth: 1,
-                  );
-                },
-                getDrawingVerticalLine: (value) {
-                  return FlLine(
-                    color: Theme.of(context).colorScheme.outline,
-                    strokeWidth: 1,
-                  );
-                },
-              ),
-              lineBarsData: [
-                LineChartBarData(
-                  spots: (() {
-                    final List array = snapshot.data['array'];
+      ),
+    );
+  }
 
-                    List<FlSpot> spots = [];
+  Widget sparkline(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+    return Column(
+      children: [
+        AspectRatio(
+          aspectRatio: 364 / 229,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+              color: Theme.of(context).colorScheme.surfaceVariant,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: LineChart(
+                LineChartData(
+                  titlesData: FlTitlesData(
+                    bottomTitles:
+                        AxisTitles(axisNameWidget: const Text("Match")),
+                    topTitles: AxisTitles(),
+                    leftTitles: AxisTitles(
+                      axisNameWidget: Text(
+                          analysisFunction.metric.abbreviatedLocalizedName),
+                      sideTitles: SideTitles(
+                          showTitles: true,
+                          getTitlesWidget: (value, meta) => SideTitleWidget(
+                                axisSide: meta.axisSide,
+                                child: Text(
+                                  analysisFunction.metric
+                                      .valueVizualizationBuilder(value),
+                                ),
+                              ),
+                          reservedSize: 50),
+                    ),
+                    rightTitles: AxisTitles(),
+                  ),
+                  borderData: FlBorderData(
+                    border: Border.all(
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                  ),
+                  gridData: FlGridData(
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(
+                        color: Theme.of(context).colorScheme.outline,
+                        strokeWidth: 1,
+                      );
+                    },
+                    getDrawingVerticalLine: (value) {
+                      return FlLine(
+                        color: Theme.of(context).colorScheme.outline,
+                        strokeWidth: 1,
+                      );
+                    },
+                  ),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: (() {
+                        final List array = snapshot.data['array'];
 
-                    for (var i = 0; i < array.length; i++) {
-                      spots.add(FlSpot(i.toDouble(), array[i].toDouble()));
-                    }
+                        List<FlSpot> spots = [];
 
-                    return spots;
-                  })(),
-                  isCurved: true,
-                  curveSmoothness: 0.4,
-                  preventCurveOverShooting: true,
-                  color: Theme.of(context).colorScheme.primary,
+                        for (var i = 0; i < array.length; i++) {
+                          spots.add(FlSpot(i.toDouble(), array[i].toDouble()));
+                        }
+
+                        return spots;
+                      })(),
+                      isCurved: true,
+                      curveSmoothness: 0.4,
+                      preventCurveOverShooting: true,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
-      ),
+        const SizedBox(height: 11),
+      ],
     );
   }
 }
