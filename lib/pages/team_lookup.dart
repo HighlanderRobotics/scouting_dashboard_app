@@ -47,8 +47,10 @@ class _TeamLookupState extends State<TeamLookup> {
                   const SizedBox(height: 24),
                   if (teamNumberForAnalysis != null)
                     AnalysisOverview(
-                        analysis:
-                            TeamOverviewAnalysis(team: teamNumberForAnalysis!))
+                      analysis:
+                          TeamOverviewAnalysis(team: teamNumberForAnalysis!),
+                      teamNumber: teamNumberForAnalysis!,
+                    )
                 ],
               ),
             )
@@ -62,7 +64,10 @@ class AnalysisOverview extends AnalysisVisualization {
   const AnalysisOverview({
     Key? key,
     required TeamOverviewAnalysis analysis,
+    required this.teamNumber,
   }) : super(key: key, analysisFunction: analysis);
+
+  final int teamNumber;
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
@@ -88,6 +93,13 @@ class AnalysisOverview extends AnalysisVisualization {
                           ),
                         )
                         .toList(),
+                    onTap: () {
+                      Navigator.of(context)
+                          .pushNamed("/team_lookup_details", arguments: {
+                        'category': category,
+                        'team': teamNumber,
+                      });
+                    },
                   ))
               .toList(),
         ),

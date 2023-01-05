@@ -43,6 +43,7 @@ dependencies:
   mobile_scanner: ^2.1.0
   frc_8033_scouting_shared:
     git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
+  fl_chart: ^0.55.2
 
 dev_dependencies:
   flutter_test:
