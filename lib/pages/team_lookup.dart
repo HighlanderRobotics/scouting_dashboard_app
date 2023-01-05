@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_overview_analysis.dart';
+import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 
 import '../reusable/navigation_drawer.dart';
@@ -69,62 +70,26 @@ class AnalysisOverview extends AnalysisVisualization {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         OverviewMetricsList(
-          metricCategories: [
-            MetricCategory(
-              categoryName: "Cargo",
-              metricTiles: [
-                MetricTile(
-                  value: snapshot.data['metrics']['cargoAccuracy'] == null
-                      ? "--"
-                      : "${((snapshot.data['metrics']['cargoAccuracy'] as num) * 100).round()}%",
-                  label: "Accuracy",
-                ),
-                MetricTile(
-                  value: snapshot.data['metrics']['averageCount']?.toString() ??
-                      "--",
-                  label: "Avg count",
-                ),
-              ],
-            ),
-            MetricCategory(
-              categoryName: "Climber",
-              metricTiles: [
-                MetricTile(
-                  value: snapshot.data['metrics']['climberHighest'] == null
-                      ? "--"
-                      : ClimbingChallenge
-                          .values[
-                              snapshot.data['metrics']['climberHighest'] as int]
-                          .name,
-                  label: "Max climb",
-                )
-              ],
-            ),
-            MetricCategory(
-              categoryName: "Defense",
-              metricTiles: [
-                MetricTile(
-                  value:
-                      "${snapshot.data['metrics']['defenseQuality'] ?? "--"}/5",
-                  label: "Success",
-                ),
-                MetricTile(
-                  value:
-                      "${snapshot.data['metrics']['defenseQuantity'] ?? "--"}/5",
-                  label: "Frequency",
-                ),
-              ],
-              onTap: () {
-                Navigator.of(context).pushNamed(
-                  "/team_lookup_details",
-                  arguments: {
-                    'category': 'defense',
-                    'team': (analysisFunction as TeamOverviewAnalysis).team,
-                  },
-                );
-              },
-            ),
-          ],
+          metricCategories: metricCategories
+              .map((category) => MetricCategory(
+                    categoryName: category.localizedName,
+                    metricTiles: category.metrics
+                        .map(
+                          (metric) => MetricTile(
+                            value: (() {
+                              try {
+                                return metric.valueVizualizationBuilder(
+                                    snapshot.data['metrics'][metric.path]);
+                              } catch (error) {
+                                return "--";
+                              }
+                            })(),
+                            label: metric.abbreviatedLocalizedName,
+                          ),
+                        )
+                        .toList(),
+                  ))
+              .toList(),
         ),
         const SizedBox(height: 20),
         Text(
