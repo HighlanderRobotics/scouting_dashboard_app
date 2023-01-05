@@ -29,65 +29,56 @@ class ScannerBody extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: AspectRatio(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Column(
+                  children: [
+                    const AspectRatio(
                       aspectRatio: 1 / 1,
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFFFFFFF),
-                          borderRadius: BorderRadius.all(Radius.circular(30)),
-                        ),
-                      ),
+                      child: Image(
+                          image:
+                              AssetImage('lib/assets/qr_guide_lines_mask.png')),
                     ),
-                  ),
-                  Opacity(
-                    opacity: 0,
-                    child: childBelow,
-                  ),
-                ],
+                    Opacity(
+                      opacity: 1,
+                      child: childBelow,
+                    ),
+                  ],
+                ),
               ),
             ),
           ]),
         ),
         Padding(
           padding: const EdgeInsets.all(21.5),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(
-                child: AspectRatio(
+          child: Center(
+            child: Column(
+              children: [
+                const AspectRatio(
                   aspectRatio: 1 / 1,
                   child:
                       Image(image: AssetImage('lib/assets/qr_guide_lines.png')),
                 ),
-              ),
-              Opacity(
-                opacity: 0,
-                child: childBelow,
-              ),
-            ],
+                Opacity(
+                  opacity: 0,
+                  child: childBelow,
+                ),
+              ],
+            ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: AspectRatio(
+          child: Center(
+            child: Column(
+              children: [
+                AspectRatio(
                   aspectRatio: 1 / 1,
                   child: Container(),
                 ),
-              ),
-              Container(child: childBelow),
-            ],
+                Container(child: childBelow),
+              ],
+            ),
           ),
         ),
       ],

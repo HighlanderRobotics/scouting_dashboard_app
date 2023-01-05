@@ -74,13 +74,13 @@ class AnalysisOverview extends AnalysisVisualization {
               categoryName: "Cargo",
               metricTiles: [
                 MetricTile(
-                  value: snapshot.data['cargoAccuracy']['result'] == null
+                  value: snapshot.data['metrics']['cargoAccuracy'] == null
                       ? "--"
-                      : "${((snapshot.data['cargoAccuracy']['result'] as num) * 100).round()}%",
+                      : "${((snapshot.data['metrics']['cargoAccuracy'] as num) * 100).round()}%",
                   label: "Accuracy",
                 ),
                 MetricTile(
-                  value: snapshot.data['averageCount']['result']?.toString() ??
+                  value: snapshot.data['metrics']['averageCount']?.toString() ??
                       "--",
                   label: "Avg count",
                 ),
@@ -90,11 +90,11 @@ class AnalysisOverview extends AnalysisVisualization {
               categoryName: "Climber",
               metricTiles: [
                 MetricTile(
-                  value: snapshot.data['climberHighest']['result'] == null
+                  value: snapshot.data['metrics']['climberHighest'] == null
                       ? "--"
                       : ClimbingChallenge
                           .values[
-                              snapshot.data['climberHighest']['result'] as int]
+                              snapshot.data['metrics']['climberHighest'] as int]
                           .name,
                   label: "Max climb",
                 )
@@ -104,11 +104,13 @@ class AnalysisOverview extends AnalysisVisualization {
               categoryName: "Defense",
               metricTiles: [
                 MetricTile(
-                  value: "${snapshot.data['defenseQuality'] ?? "--"}/5",
+                  value:
+                      "${snapshot.data['metrics']['defenseQuality'] ?? "--"}/5",
                   label: "Success",
                 ),
                 MetricTile(
-                  value: "${snapshot.data['defenseQuantity'] ?? "--"}/5",
+                  value:
+                      "${snapshot.data['metrics']['defenseQuantity'] ?? "--"}/5",
                   label: "Frequency",
                 ),
               ],
@@ -130,12 +132,13 @@ class AnalysisOverview extends AnalysisVisualization {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 8),
-        if ((snapshot.data['notes']['result'] as List).isNotEmpty)
+        if ((snapshot.data['notes'] as List).isNotEmpty)
           NotesList(
-              notes: ((snapshot.data['notes']['result'] as List)
+              notes: ((snapshot.data['notes'] as List)
                       .cast<Map<String, dynamic>>())
                   .map((note) => Note(
-                      matchName: "Match ${note['matchNum']}",
+                      matchName: GameMatch.fromLongKey(note['matchKey'])
+                          .getLocalizedDescription(includeTournament: false),
                       noteBody: note['notes']))
                   .toList()
                   .cast<Note>()),
