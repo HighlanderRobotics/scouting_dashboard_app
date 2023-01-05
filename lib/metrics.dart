@@ -38,8 +38,8 @@ List<MetricCategoryData> metricCategories = [
     Metric(
       localizedName: "Average count",
       abbreviatedLocalizedName: "Avg count",
-      valueVizualizationBuilder: (val) => (val as int).toString(),
-      path: "averageCount",
+      valueVizualizationBuilder: (val) => (val as num).round().toString(),
+      path: "cargoCount",
     ),
   ]),
   MetricCategoryData("Climber", [
@@ -48,20 +48,20 @@ List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Maximum climb",
       valueVizualizationBuilder: (val) =>
           ClimbingChallenge.values[val as int].name,
-      path: "climberHighest",
+      path: "climberMax",
     ),
   ]),
   MetricCategoryData("Defense", [
     Metric(
       localizedName: "Success",
       abbreviatedLocalizedName: "Success",
-      valueVizualizationBuilder: (val) => "$val/5",
+      valueVizualizationBuilder: (val) => "${val.round()}/5",
       path: "defenseQuality",
     ),
     Metric(
       localizedName: "Frequency",
       abbreviatedLocalizedName: "Frequency",
-      valueVizualizationBuilder: (val) => "$val/5",
+      valueVizualizationBuilder: (val) => "${val.round()}/5",
       path: "defenseQuantity",
     ),
   ]),
