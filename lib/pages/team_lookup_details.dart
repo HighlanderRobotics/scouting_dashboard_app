@@ -124,23 +124,43 @@ class AnalysisOverview extends AnalysisVisualization {
           child: LineChart(
             LineChartData(
               titlesData: FlTitlesData(
-                  bottomTitles: AxisTitles(axisNameWidget: const Text("Match")),
-                  topTitles: AxisTitles(),
-                  leftTitles: AxisTitles(
-                    axisNameWidget:
-                        Text(analysisFunction.metric.abbreviatedLocalizedName),
-                    sideTitles: SideTitles(
-                        showTitles: true,
-                        getTitlesWidget: (value, meta) => SideTitleWidget(
-                              axisSide: meta.axisSide,
-                              child: Text(
-                                analysisFunction.metric
-                                    .valueVizualizationBuilder(value),
-                              ),
+                bottomTitles: AxisTitles(axisNameWidget: const Text("Match")),
+                topTitles: AxisTitles(),
+                leftTitles: AxisTitles(
+                  axisNameWidget:
+                      Text(analysisFunction.metric.abbreviatedLocalizedName),
+                  sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) => SideTitleWidget(
+                            axisSide: meta.axisSide,
+                            child: Text(
+                              analysisFunction.metric
+                                  .valueVizualizationBuilder(value),
                             ),
-                        reservedSize: 50),
-                  ),
-                  rightTitles: AxisTitles()),
+                          ),
+                      reservedSize: 50),
+                ),
+                rightTitles: AxisTitles(),
+              ),
+              borderData: FlBorderData(
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                ),
+              ),
+              gridData: FlGridData(
+                getDrawingHorizontalLine: (value) {
+                  return FlLine(
+                    color: Theme.of(context).colorScheme.outline,
+                    strokeWidth: 1,
+                  );
+                },
+                getDrawingVerticalLine: (value) {
+                  return FlLine(
+                    color: Theme.of(context).colorScheme.outline,
+                    strokeWidth: 1,
+                  );
+                },
+              ),
               lineBarsData: [
                 LineChartBarData(
                   spots: (() {
