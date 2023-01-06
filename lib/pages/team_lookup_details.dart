@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_metric_details_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 class TeamLookupDetails extends StatefulWidget {
   const TeamLookupDetails({super.key});
@@ -28,18 +29,40 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
       child: Scaffold(
         appBar: AppBar(
           title: Text("$teamNumber - ${category.localizedName}"),
-          bottom: TabBar(
-            tabs: category.metrics
-                .map((metric) => Tab(
-                      text: metric.localizedName,
-                    ))
-                .toList(),
-            indicatorColor: Theme.of(context).colorScheme.primary,
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(49),
+            child: Column(
+              children: [
+                TabBar(
+                  tabs: category.metrics
+                      .map((metric) => Tab(
+                            text: metric.localizedName,
+                          ))
+                      .toList(),
+                  indicatorColor: Theme.of(context).colorScheme.primary,
+                  labelColor: Theme.of(context).colorScheme.primary,
+                  labelStyle: Theme.of(context).textTheme.titleSmall,
+                  unselectedLabelColor:
+                      Theme.of(context).colorScheme.onSurfaceVariant,
+                  indicatorSize: TabBarIndicatorSize.label,
+                  indicatorWeight: 3,
+                  indicatorPadding: const EdgeInsets.fromLTRB(2, 46, 2, 0),
+                  indicator: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(3),
+                      topRight: Radius.circular(3),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1),
+              ],
+            ),
           ),
         ),
         body: TabBarView(
           children: category.metrics
-              .map((metric) => ListView(
+              .map((metric) => ScrollablePageBody(
                     children: [
                       if (matchCount != null)
                         Column(
@@ -102,33 +125,29 @@ class AnalysisOverview extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(children: [
-        if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
-          sparkline(context, snapshot),
-        Row(
-          children: [
-            if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
-              valueBox(
-                context,
-                Text(
-                  analysisFunction.metric
-                      .valueVizualizationBuilder(snapshot.data['result']),
-                  style: Theme.of(context).textTheme.headlineSmall!.merge(
-                        TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer),
-                      ),
-                ),
-                "Average",
-                false,
+    return Column(children: [
+      if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
+        sparkline(context, snapshot),
+      Row(
+        children: [
+          if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
+            valueBox(
+              context,
+              Text(
+                analysisFunction.metric
+                    .valueVizualizationBuilder(snapshot.data['result']),
+                style: Theme.of(context).textTheme.headlineSmall!.merge(
+                      TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer),
+                    ),
               ),
-          ],
-        )
-      ]),
-    );
+              "Average",
+              false,
+            ),
+        ],
+      )
+    ]);
   }
 
   Container valueBox(BuildContext context, Widget value, String description,

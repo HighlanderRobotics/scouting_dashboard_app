@@ -3,6 +3,7 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_overview_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 import '../reusable/navigation_drawer.dart';
 
@@ -21,40 +22,29 @@ class _TeamLookupState extends State<TeamLookup> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Team Lookup")),
-      body: ListView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text("Team #"),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        teamFieldValue = value;
-                        if (int.tryParse(value) != null) {
-                          teamNumberForAnalysis = int.parse(value);
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 24),
-                  if (teamNumberForAnalysis != null)
-                    AnalysisOverview(
-                      analysis:
-                          TeamOverviewAnalysis(team: teamNumberForAnalysis!),
-                      teamNumber: teamNumberForAnalysis!,
-                    )
-                ],
-              ),
-            )
-          ]),
+      body: ScrollablePageBody(children: [
+        TextField(
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            label: Text("Team #"),
+          ),
+          keyboardType: TextInputType.number,
+          onChanged: (value) {
+            setState(() {
+              teamFieldValue = value;
+              if (int.tryParse(value) != null) {
+                teamNumberForAnalysis = int.parse(value);
+              }
+            });
+          },
+        ),
+        const SizedBox(height: 24),
+        if (teamNumberForAnalysis != null)
+          AnalysisOverview(
+            analysis: TeamOverviewAnalysis(team: teamNumberForAnalysis!),
+            teamNumber: teamNumberForAnalysis!,
+          )
+      ]),
       drawer: const NavigationDrawer(),
     );
   }
@@ -224,46 +214,52 @@ class MetricCategory extends StatelessWidget {
     return InkWell(
       borderRadius: const BorderRadius.all(Radius.circular(10)),
       onTap: onTap,
-      child: Ink(
+      child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
           color: Theme.of(context).colorScheme.surfaceVariant,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      categoryName,
-                      style: Theme.of(context).textTheme.titleMedium!.merge(
-                            TextStyle(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            color: Theme.of(context).colorScheme.surfaceVariant,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        categoryName,
+                        style: Theme.of(context).textTheme.titleMedium!.merge(
+                              TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
                             ),
-                          ),
-                    ),
-                    const SizedBox(height: 5),
-                    Row(
-                      children: metricTiles
-                          .expand(
-                              (element) => [element, const SizedBox(width: 10)])
-                          .take(metricTiles.length * 2 - 1)
-                          .toList(),
-                    ),
-                  ],
+                      ),
+                      const SizedBox(height: 5),
+                      Row(
+                        children: metricTiles
+                            .expand((element) =>
+                                [element, const SizedBox(width: 10)])
+                            .take(metricTiles.length * 2 - 1)
+                            .toList(),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              if (onTap != null)
-                Icon(
-                  Icons.navigate_next,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                )
-            ],
+                if (onTap != null)
+                  Icon(
+                    Icons.navigate_next,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  )
+              ],
+            ),
           ),
         ),
       ),

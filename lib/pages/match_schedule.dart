@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
+import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 import '../reusable/navigation_drawer.dart';
 
@@ -35,7 +36,7 @@ class _ScheduleState extends State<Schedule> {
           ),
         ],
       ),
-      body: const Text("Schedule"),
+      body: const ScrollablePageBody(children: [Text("Schedule")]),
       drawer: const NavigationDrawer(),
     );
   }

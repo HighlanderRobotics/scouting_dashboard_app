@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 class EditScoutSchedule extends StatefulWidget {
   const EditScoutSchedule({super.key});
@@ -36,8 +37,12 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
     return newSchedule == null
         ? Scaffold(
             appBar: AppBar(title: const Text("Edit Scout Schedule")),
-            body: const Center(
-              child: CircularProgressIndicator(),
+            body: const ScrollablePageBody(
+              children: [
+                Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ],
             ),
           )
         : Scaffold(
@@ -52,15 +57,20 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
                           newSchedule!
                               .save((await getServerAuthority())!)
                               .then((val) {
-                            const SnackBar snackBar =
-                                SnackBar(content: Text("Saved"));
+                            const SnackBar snackBar = SnackBar(
+                              content: Text("Saved"),
+                              behavior: SnackBarBehavior.floating,
+                            );
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           });
                           Navigator.pop(context);
 
-                          const SnackBar snackBar =
-                              SnackBar(content: Text("Saving..."));
+                          const SnackBar snackBar = SnackBar(
+                            content: Text("Saving..."),
+                            behavior: SnackBarBehavior.floating,
+                          );
                           ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         },
                   icon: const Icon(Icons.check),
@@ -68,7 +78,8 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
                 )
               ],
             ),
-            body: ListView(
+            body: ScrollablePageBody(
+              padding: EdgeInsets.zero,
               children: [
                 if (newSchedule!.validate() != null)
                   Padding(
