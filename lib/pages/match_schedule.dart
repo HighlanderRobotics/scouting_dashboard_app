@@ -30,7 +30,9 @@ class _ScheduleState extends State<Schedule> {
           RoleExclusive(
             role: "scouting_lead",
             child: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.of(context).pushNamed("/scout_schedule_qr");
+              },
               icon: const Icon(Icons.qr_code),
             ),
           ),

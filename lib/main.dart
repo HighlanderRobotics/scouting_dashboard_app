@@ -9,6 +9,7 @@ import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/score_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
+import 'package:scouting_dashboard_app/pages/scout_schedule/scout_schedule_qr.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup_details.dart';
@@ -32,6 +33,7 @@ void main() async {
       '/edit_scout_schedule': (context) => const EditScoutSchedule(),
       '/edit_scout_shift': (context) => const EditScoutShift(),
       '/new_scout_shift': (context) => const NewScoutShift(),
+      '/scout_schedule_qr': (context) => const ScoutScheduleQR(),
     },
     theme: ThemeData(
       useMaterial3: true,
