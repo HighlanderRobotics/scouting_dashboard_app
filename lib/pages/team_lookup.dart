@@ -104,7 +104,7 @@ class AnalysisOverview extends AnalysisVisualization {
               notes: ((snapshot.data['notes'] as List)
                       .cast<Map<String, dynamic>>())
                   .map((note) => Note(
-                      matchName: GameMatch.fromLongKey(note['matchKey'])
+                      matchName: GameMatchIdentity.fromLongKey(note['matchKey'])
                           .getLocalizedDescription(includeTournament: false),
                       noteBody: note['notes']))
                   .toList()
