@@ -19,10 +19,24 @@ class ScrollablePageBody extends StatelessWidget {
           SafeArea(
             child: Padding(
               padding: padding,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: children,
-              ),
+              child: LayoutBuilder(builder: (context, constraints) {
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth > 800
+                            ? 800
+                            : constraints.maxWidth,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: children,
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ),
           )
         ],

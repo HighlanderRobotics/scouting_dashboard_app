@@ -35,23 +35,38 @@ class _ScoutScheduleQRState extends State<ScoutScheduleQR> {
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),
-            AspectRatio(
-              aspectRatio: 1 / 1,
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFFFFFFF),
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(11),
-                  child: CustomPaint(
-                    painter: QrPainter(
-                        data: schedule.toCompressedJSON(),
-                        options: QrOptions(padding: 0)),
+            LayoutBuilder(builder: (context, constraints) {
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: constraints.maxWidth > 500
+                          ? 500
+                          : constraints.maxWidth,
+                    ),
+                    child: AspectRatio(
+                      aspectRatio: 1 / 1,
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFFFFFFF),
+                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(11),
+                          child: CustomPaint(
+                            painter: QrPainter(
+                              data: schedule.toCompressedJSON(),
+                              options: const QrOptions(padding: 0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
+                ],
+              );
+            }),
             const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
@@ -67,10 +82,20 @@ class _ScoutScheduleQRState extends State<ScoutScheduleQR> {
               ),
             ),
             const SizedBox(height: 20),
-            Text(
-              "Access this code at any time by clicking on the QR code icon at the top right of the match schedule.",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
+            RichText(
+                text: TextSpan(children: [
+              TextSpan(
+                text: "Access this code at any time by tapping the ",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const WidgetSpan(
+                  child: Icon(Icons.qr_code),
+                  alignment: PlaceholderAlignment.middle),
+              TextSpan(
+                text: " at the top right of the match schedule.",
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ]))
           ]);
         },
       ),
