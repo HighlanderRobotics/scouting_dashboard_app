@@ -29,15 +29,23 @@ class ScannerBody extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(21.5),
               child: Center(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const AspectRatio(
-                      aspectRatio: 1 / 1,
-                      child: Image(
-                          image:
-                              AssetImage('lib/assets/qr_guide_lines_mask.png')),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 400),
+                      child: const Padding(
+                        padding: EdgeInsets.all(2.5),
+                        child: AspectRatio(
+                          aspectRatio: 1 / 1,
+                          child: Image(
+                              image: AssetImage(
+                                  'lib/assets/qr_guide_lines_mask.png')),
+                        ),
+                      ),
                     ),
                     Opacity(
                       opacity: 1,
@@ -53,11 +61,16 @@ class ScannerBody extends StatelessWidget {
           padding: const EdgeInsets.all(21.5),
           child: Center(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const AspectRatio(
-                  aspectRatio: 1 / 1,
-                  child:
-                      Image(image: AssetImage('lib/assets/qr_guide_lines.png')),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  child: const AspectRatio(
+                    aspectRatio: 1 / 1,
+                    child: Image(
+                        image: AssetImage('lib/assets/qr_guide_lines.png')),
+                  ),
                 ),
                 Opacity(
                   opacity: 0,
@@ -68,13 +81,18 @@ class ScannerBody extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.all(21.5),
           child: Center(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                AspectRatio(
-                  aspectRatio: 1 / 1,
-                  child: Container(),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 400),
+                  child: AspectRatio(
+                    aspectRatio: 1 / 1,
+                    child: Container(),
+                  ),
                 ),
                 Container(child: childBelow),
               ],
