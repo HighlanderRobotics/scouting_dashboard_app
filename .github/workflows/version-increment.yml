@@ -46,7 +46,7 @@ jobs:
         sed -i "s/version: $VERSION/version: $MAJOR.$MINOR.$PATCH/g" pubspec.yaml
 
         # Commit the changes
-        git config --local user.email "github-actions@users.noreply.github.com"
-        git config --local user.name "github-actions"
+        git config user.email "github-actions@users.noreply.github.com"
+        git config user.name "github-actions"
         git commit -am "Bump version to $MAJOR.$MINOR.$PATCH"
-        git push origin ${{ github.head_ref }}
+        git push
