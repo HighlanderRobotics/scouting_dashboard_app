@@ -67,3 +67,10 @@ const darkColorScheme = ColorScheme(
   // outlineVariant: Color(0xFF4B444D),
   // scrim: Color(0xFF000000),
 );
+
+Color redAlliance = const Color(0xFF793F3F);
+Color onRedAlliance = const Color(0xFFD0A2A2);
+Color blueAlliance = const Color(0xFF364077);
+Color onBlueAlliance = const Color(0xFFA2A7D0);
+
+Color warningText = const Color(0xFFE7EC00);

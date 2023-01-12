@@ -9,6 +9,7 @@ List<Tournament> tournamentList = <Tournament>[
   Tournament("2023camb", "Monterey Bay Regional 2023"),
   Tournament("2023cmptx", "Houston World 2023"),
   Tournament("2023cc", "Chezy Champs 2023"),
+  Tournament("2022cc", "Chezy Champs 2022"),
 ];
 
 Tournament? getTournamentByKey(String key) {

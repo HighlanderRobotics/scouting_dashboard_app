@@ -34,7 +34,7 @@ SPEC CHECKSUMS:
   FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
   mobile_scanner: 35dc92ffdbd7934b0dbc411b1c731bc2ef23c2dc
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  shared_preferences_macos: a64dc611287ed6cbe28fd1297898db1336975727
+  shared_preferences_macos: 8b221d457159a85f478c0b9d2f19aeae9feff475
 
 PODFILE CHECKSUM: 8d40c19d3cbdb380d870685c3a564c989f1efa52
 

@@ -45,6 +45,7 @@ dependencies:
     git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
   fl_chart: ^0.55.2
   custom_qr_generator: ^0.1.2
+  skeletons: ^0.0.3
 
 dev_dependencies:
   flutter_test:
