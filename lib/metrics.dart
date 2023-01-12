@@ -26,4 +26,31 @@ class MetricCategoryData {
   List<CategoryMetric> metrics;
 }
 
+class BreakdownSegmentData {
+  BreakdownSegmentData({
+    required this.localizedNameSingular,
+    this.localizedNamePlural,
+    required this.path,
+  });
+
+  String localizedNameSingular;
+  String? localizedNamePlural;
+
+  String path;
+}
+
+class BreakdownData {
+  BreakdownData({
+    required this.localizedName,
+    required this.path,
+    required this.segments,
+  });
+
+  String localizedName;
+  String path;
+  List<BreakdownSegmentData> segments;
+}
+
 List<MetricCategoryData> metricCategories = [];
+
+List<BreakdownData> breakdowns = [];
