@@ -10,13 +10,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3.3.0
-      with:
-        ref: ${{ github.head_ref }}
-        persist-credentials: false
-    - name: Increment version
-      run: |
+    - uses: actions/checkout@v3.3.0
+    - run: |
         # Get the last commit message
         MESSAGE=$(git log -1 --pretty=%B)
 
