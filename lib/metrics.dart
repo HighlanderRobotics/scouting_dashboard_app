@@ -1,8 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 
-class Metric {
-  Metric({
+class CategoryMetric {
+  CategoryMetric({
     required this.localizedName,
     required this.abbreviatedLocalizedName,
     required this.valueVizualizationBuilder,
@@ -24,18 +23,18 @@ class MetricCategoryData {
   );
 
   String localizedName;
-  List<Metric> metrics;
+  List<CategoryMetric> metrics;
 }
 
 List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Cargo", [
-    Metric(
+    CategoryMetric(
       localizedName: "Accuracy",
       abbreviatedLocalizedName: "Accuracy",
       valueVizualizationBuilder: (val) => "${((val as num) * 100).round()}%",
       path: "cargoAccuracy",
     ),
-    Metric(
+    CategoryMetric(
       localizedName: "Average count",
       abbreviatedLocalizedName: "Avg count",
       valueVizualizationBuilder: (val) => (val as num).round().toString(),
@@ -43,7 +42,7 @@ List<MetricCategoryData> metricCategories = [
     ),
   ]),
   MetricCategoryData("Climber", [
-    Metric(
+    CategoryMetric(
       localizedName: "Max climb",
       abbreviatedLocalizedName: "Maximum climb",
       valueVizualizationBuilder: (val) =>
@@ -52,13 +51,13 @@ List<MetricCategoryData> metricCategories = [
     ),
   ]),
   MetricCategoryData("Defense", [
-    Metric(
+    CategoryMetric(
       localizedName: "Frequency",
       abbreviatedLocalizedName: "Frequency",
       valueVizualizationBuilder: (val) => "${val.round()}/5",
       path: "defenseQuantity",
     ),
-    Metric(
+    CategoryMetric(
       localizedName: "Success",
       abbreviatedLocalizedName: "Success",
       valueVizualizationBuilder: (val) => "${val.round()}/5",

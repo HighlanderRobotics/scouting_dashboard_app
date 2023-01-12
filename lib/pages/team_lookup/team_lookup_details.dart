@@ -39,7 +39,6 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
                             text: metric.localizedName,
                           ))
                       .toList(),
-                  indicatorColor: Theme.of(context).colorScheme.primary,
                   labelColor: Theme.of(context).colorScheme.primary,
                   labelStyle: Theme.of(context).textTheme.titleSmall,
                   unselectedLabelColor:
