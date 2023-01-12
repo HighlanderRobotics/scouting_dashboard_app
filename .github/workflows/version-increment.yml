@@ -26,8 +26,8 @@ jobs:
           exit 1
         fi
 
-        # Get the current version from pubspec.yml
-        VERSION=$(grep -oP '(?<=version:\ ).*(?=\+)' pubspec.yml)
+        # Get the current version from pubspec.yaml
+        VERSION=$(grep -oP '(?<=version:\ ).*(?=\+)' pubspec.yaml)
 
         # Split the version into major, minor, and patch parts
         MAJOR=$(echo $VERSION | cut -d'.' -f1)
@@ -42,8 +42,8 @@ jobs:
           PATCH=$((PATCH + 1))
         fi
 
-        # Update the version in pubspec.yml
-        sed -i "s/version: $VERSION/version: $MAJOR.$MINOR.$PATCH/g" pubspec.yml
+        # Update the version in pubspec.yaml
+        sed -i "s/version: $VERSION/version: $MAJOR.$MINOR.$PATCH/g" pubspec.yaml
 
         # Commit the changes
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
