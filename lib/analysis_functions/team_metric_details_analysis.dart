@@ -14,7 +14,7 @@ class TeamMetricDetailsAnalysis extends AnalysisFunction {
   });
 
   int teamNumber;
-  Metric metric;
+  CategoryMetric metric;
 
   @override
   Future getOnlineAnalysis() async {

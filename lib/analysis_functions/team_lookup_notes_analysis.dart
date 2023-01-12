@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 
-class TeamOverviewAnalysis extends AnalysisFunction {
-  TeamOverviewAnalysis({
+class TeamLookupNotesAnalysis extends AnalysisFunction {
+  TeamLookupNotesAnalysis({
     required this.team,
   });
 
@@ -18,6 +18,6 @@ class TeamOverviewAnalysis extends AnalysisFunction {
       "team": team.toString(),
     }));
 
-    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result'];
+    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result']['notes'];
   }
 }
