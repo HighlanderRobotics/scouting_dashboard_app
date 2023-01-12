@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
+import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_breakdowns.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_categories.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_notes.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -21,7 +23,7 @@ class _TeamLookupState extends State<TeamLookup> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text("Team Lookup"),
@@ -50,6 +52,7 @@ class _TeamLookupState extends State<TeamLookup> {
                 TabBar(
                   tabs: const [
                     Tab(text: "Categories"),
+                    Tab(text: "Breakdowns"),
                     Tab(text: "Notes"),
                   ],
                   labelColor: Theme.of(context).colorScheme.primary,
@@ -84,11 +87,18 @@ class _TeamLookupState extends State<TeamLookup> {
                   children: [
                     TeamLookupCategoriesVizualization(
                       function: TeamLookupCategoriesAnalysis(
-                          team: teamNumberForAnalysis!),
+                        team: teamNumberForAnalysis!,
+                      ),
+                    ),
+                    TeamLookupBreakdownsVizualization(
+                      function: TeamLookupBreakdownsAnalysis(
+                        team: teamNumberForAnalysis!,
+                      ),
                     ),
                     TeamLookupNotesVizualization(
-                      function:
-                          TeamLookupNotesAnalysis(team: teamNumberForAnalysis!),
+                      function: TeamLookupNotesAnalysis(
+                        team: teamNumberForAnalysis!,
+                      ),
                     ),
                   ],
                 ),
