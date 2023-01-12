@@ -1,0 +1,52 @@
+name: Version Increment
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  increment_version:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        ref: ${{ github.head_ref }}
+        persist-credentials: false
+    - name: Increment version
+      run: |
+        # Get the last commit message
+        MESSAGE=$(git log -1 --pretty=%B)
+
+        # Check if the commit message follows the conventional commit format
+        if ! [[ $MESSAGE =~ ^(feat|fix|docs|style|refactor|perf|test|chore)(\(.+\))?:\ .* ]]; then
+          echo "Invalid commit message format. Aborting version increment."
+          exit 1
+        fi
+
+        # Get the current version from pubspec.yml
+        VERSION=$(grep -oP '(?<=version:\ ).*(?=\+)' pubspec.yml)
+
+        # Split the version into major, minor, and patch parts
+        MAJOR=$(echo $VERSION | cut -d'.' -f1)
+        MINOR=$(echo $VERSION | cut -d'.' -f2)
+        PATCH=$(echo $VERSION | cut -d'.' -f3)
+
+        # Increment the version based on the commit type
+        if [[ $MESSAGE =~ ^feat ]]; then
+          MINOR=$((MINOR + 1))
+          PATCH=0
+        elif [[ $MESSAGE =~ ^fix ]]; then
+          PATCH=$((PATCH + 1))
+        fi
+
+        # Update the version in pubspec.yml
+        sed -i "s/version: $VERSION/version: $MAJOR.$MINOR.$PATCH/g" pubspec.yml
+
+        # Commit the changes
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "GitHub Actions"
+        git commit -am "Bump version to $MAJOR.$MINOR.$PATCH"
+        git push origin ${{ github.head_ref }}
