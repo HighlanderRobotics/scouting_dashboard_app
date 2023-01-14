@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,7 +6,7 @@ RegExp validServerAuthority = RegExp(
     "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost))(:\\d+)?\$");
 
 List<Tournament> tournamentList = <Tournament>[
-  Tournament("2022cc", "Chezy 2022"), // TODO: Remove when done
+  if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
 ];
 
 Tournament? getTournamentByKey(String key) {
