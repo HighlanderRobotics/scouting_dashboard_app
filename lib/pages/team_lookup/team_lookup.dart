@@ -18,10 +18,29 @@ class TeamLookup extends StatefulWidget {
 
 class _TeamLookupState extends State<TeamLookup> {
   String teamFieldValue = "";
+  TextEditingController? teamFieldController;
   int? teamNumberForAnalysis;
 
   @override
   Widget build(BuildContext context) {
+    if (teamFieldController == null) {
+      teamFieldController = TextEditingController(
+        text: ((ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>?)?['team'] as int?)
+            ?.toString(),
+      );
+
+      int? teamNumberFromRoute = (ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>?)?['team'];
+
+      if (teamNumberFromRoute != null) {
+        setState(() {
+          teamFieldValue = teamNumberFromRoute.toString();
+          teamNumberForAnalysis = teamNumberFromRoute;
+        });
+      }
+    }
+
     return DefaultTabController(
       length: 3,
       child: Scaffold(
@@ -47,6 +66,7 @@ class _TeamLookupState extends State<TeamLookup> {
                         }
                       });
                     },
+                    controller: teamFieldController,
                   ),
                 ),
                 TabBar(
