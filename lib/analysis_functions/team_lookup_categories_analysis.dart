@@ -13,8 +13,8 @@ class TeamLookupCategoriesAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http
-        .get(Uri.http((await getServerAuthority())!, "/API/analysis/overview", {
+    var response = await http.get(Uri.http(
+        (await getServerAuthority())!, "/API/analysis/categoryMetrics", {
       "team": team.toString(),
     }));
 

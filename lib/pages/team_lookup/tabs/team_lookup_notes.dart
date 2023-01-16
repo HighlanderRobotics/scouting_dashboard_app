@@ -16,15 +16,17 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return ScrollablePageBody(
       children: [
-        NotesList(
-          notes: ((snapshot.data as List).cast<Map<String, dynamic>>())
-              .map((note) => Note(
-                  matchName: GameMatchIdentity.fromLongKey(note['matchKey'])
-                      .getLocalizedDescription(includeTournament: false),
-                  noteBody: note['notes']))
-              .toList()
-              .cast<Note>(),
-        ),
+        if ((snapshot.data as List).isEmpty) const Text("No notes"),
+        if ((snapshot.data as List).isNotEmpty)
+          NotesList(
+            notes: ((snapshot.data as List).cast<Map<String, dynamic>>())
+                .map((note) => Note(
+                    matchName: GameMatchIdentity.fromLongKey(note['matchKey'])
+                        .getLocalizedDescription(includeTournament: false),
+                    noteBody: note['notes']))
+                .toList()
+                .cast<Note>(),
+          ),
       ],
     );
   }

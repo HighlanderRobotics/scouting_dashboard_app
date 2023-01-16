@@ -48,6 +48,7 @@ dependencies:
   skeletons: ^0.0.3
   chips_input: ^0.1.0
   pull_to_refresh: ^2.0.0
+  duration: ^3.0.12
 
 dev_dependencies:
   flutter_test:

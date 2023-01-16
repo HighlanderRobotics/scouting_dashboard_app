@@ -14,10 +14,10 @@ class TeamLookupNotesAnalysis extends AnalysisFunction {
   @override
   Future getOnlineAnalysis() async {
     var response = await http
-        .get(Uri.http((await getServerAuthority())!, "/API/analysis/overview", {
+        .get(Uri.http((await getServerAuthority())!, "/API/analysis/notes", {
       "team": team.toString(),
     }));
 
-    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result']['notes'];
+    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result'];
   }
 }
