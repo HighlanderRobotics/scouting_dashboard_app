@@ -168,10 +168,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: f21992e3aab34bbeaad975a7e4fccee846a16b18
+      resolved-ref: d8c691679a77c86b255bd697d786b2e06fcd6963
       url: "https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git"
     source: git
-    version: "3.3.1"
+    version: "3.4.0"
   http:
     dependency: "direct main"
     description:

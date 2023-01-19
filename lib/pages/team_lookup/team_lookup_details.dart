@@ -1,9 +1,12 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_metric_details_analysis.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TeamLookupDetails extends StatefulWidget {
   const TeamLookupDetails({super.key});
@@ -185,71 +188,109 @@ class AnalysisOverview extends AnalysisVisualization {
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               color: Theme.of(context).colorScheme.surfaceVariant,
             ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: LineChart(
-                LineChartData(
-                  titlesData: FlTitlesData(
-                    bottomTitles:
-                        AxisTitles(axisNameWidget: const Text("Match")),
-                    topTitles: AxisTitles(),
-                    leftTitles: AxisTitles(
-                      axisNameWidget: Text(
-                          analysisFunction.metric.abbreviatedLocalizedName),
-                      sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) => SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Text(
-                                  analysisFunction.metric
-                                      .valueVizualizationBuilder(value),
+            child: FutureBuilder(future: (() async {
+              return await TournamentSchedule.fromServer(
+                (await getServerAuthority())!,
+                (await SharedPreferences.getInstance())
+                    .getString("tournament")!,
+              );
+            })(), builder: (context, scheduleSnapshot) {
+              if (scheduleSnapshot.connectionState != ConnectionState.done) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: LineChart(
+                  LineChartData(
+                    titlesData: FlTitlesData(
+                      bottomTitles: AxisTitles(
+                          axisNameWidget: const Text("Match"),
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) => Text(
+                              scheduleSnapshot
+                                  .data!.matches[value.toInt()].identity
+                                  .getShortLocalizedDescription(),
+                            ),
+                          )),
+                      topTitles: AxisTitles(),
+                      leftTitles: AxisTitles(
+                        axisNameWidget: Text(
+                            analysisFunction.metric.abbreviatedLocalizedName),
+                        sideTitles: SideTitles(
+                            showTitles: true,
+                            getTitlesWidget: (value, meta) => SideTitleWidget(
+                                  axisSide: meta.axisSide,
+                                  child: Text(
+                                    analysisFunction.metric
+                                        .valueVizualizationBuilder(value),
+                                  ),
                                 ),
+                            reservedSize: 50),
+                      ),
+                      rightTitles: AxisTitles(),
+                    ),
+                    borderData: FlBorderData(
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline,
+                      ),
+                    ),
+                    gridData: FlGridData(
+                      getDrawingHorizontalLine: (value) {
+                        return FlLine(
+                          color: Theme.of(context).colorScheme.outline,
+                          strokeWidth: 1,
+                        );
+                      },
+                      getDrawingVerticalLine: (value) {
+                        return FlLine(
+                          color: Theme.of(context).colorScheme.outline,
+                          strokeWidth: 1,
+                        );
+                      },
+                    ),
+                    lineBarsData: [
+                      LineChartBarData(
+                        spots: (() {
+                          final TournamentSchedule schedule =
+                              scheduleSnapshot.data!;
+                          final List array = snapshot.data['array'];
+
+                          List<FlSpot> spots = [];
+
+                          for (var i = 0; i < array.length; i++) {
+                            spots.add(
+                              FlSpot(
+                                schedule.matches
+                                    .firstWhere(
+                                      (match) =>
+                                          match.identity.toMediumKey() ==
+                                          (array[i]["match"] as String)
+                                              .replaceAll(
+                                                  RegExp('_\\d+\$'), ""),
+                                    )
+                                    .ordinalNumber
+                                    .toDouble(),
+                                array[i]["value"].toDouble(),
                               ),
-                          reservedSize: 50),
-                    ),
-                    rightTitles: AxisTitles(),
-                  ),
-                  borderData: FlBorderData(
-                    border: Border.all(
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                  ),
-                  gridData: FlGridData(
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Theme.of(context).colorScheme.outline,
-                        strokeWidth: 1,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Theme.of(context).colorScheme.outline,
-                        strokeWidth: 1,
-                      );
-                    },
-                  ),
-                  lineBarsData: [
-                    LineChartBarData(
-                      spots: (() {
-                        final List array = snapshot.data['array'];
+                            );
+                          }
 
-                        List<FlSpot> spots = [];
-
-                        for (var i = 0; i < array.length; i++) {
-                          spots.add(FlSpot(i.toDouble(), array[i].toDouble()));
-                        }
-
-                        return spots;
-                      })(),
-                      isCurved: true,
-                      curveSmoothness: 0.4,
-                      preventCurveOverShooting: true,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
-                  ],
+                          return spots;
+                        })(),
+                        isCurved: true,
+                        curveSmoothness: 0.4,
+                        preventCurveOverShooting: true,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            }),
           ),
         ),
         const SizedBox(height: 11),
