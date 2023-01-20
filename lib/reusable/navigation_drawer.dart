@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class NavigationDrawer extends StatelessWidget {
@@ -56,6 +57,22 @@ class NavigationDrawer extends StatelessWidget {
                 isSelected:
                     ModalRoute.of(context)?.settings.name == "/match_schedule",
                 icon: Icons.today,
+              ),
+              RoleExclusive(
+                role: 'scouting_lead',
+                child: DrawerDestination(
+                  label: "Scan QR Codes",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      "/scan_qr_codes",
+                      (route) => false,
+                    );
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
+                  icon: Icons.qr_code,
+                ),
               ),
               const SectionHeader(title: "Data Analysis"),
               DrawerDestination(

@@ -122,26 +122,10 @@ class _ScheduleState extends State<Schedule> {
             (await SharedPreferences.getInstance()).getString('tournament')!,
           );
 
-          final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(
-                  utf8.decode((await http.get(Uri.http(
-                          (await getServerAuthority())!,
-                          '/API/manager/isScouted', {
-            'tournamentKey':
-                (await SharedPreferences.getInstance()).getString('tournament'),
-          })))
-                      .bodyBytes)) as List<dynamic>)
-              .cast();
-
-          Map<String, String?> isScoutedElegante = {};
-
-          for (var response in isScoutedResponse) {
-            isScoutedElegante[response['key']] = response['name'];
-          }
-
           return {
             'tournamentSchedule': tournamentSchedule,
             'scoutSchedule': await getScoutSchedule(),
-            'isScouted': isScoutedElegante,
+            'isScouted': await getScoutedStatuses(),
           };
         })(), builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done ||

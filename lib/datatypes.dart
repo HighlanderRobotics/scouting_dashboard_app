@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Tournament {
   Tournament(this.key, this.localized);
@@ -55,4 +56,23 @@ bool areSchedulesEqual(ScoutSchedule schedule1, ScoutSchedule schedule2) {
   } on RangeError {
     return false;
   }
+}
+
+Future<Map<String, String?>> getScoutedStatuses() async {
+  final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(utf8.decode(
+          (await http.get(Uri.http(
+                  (await getServerAuthority())!, '/API/manager/isScouted', {
+    'tournamentKey':
+        (await SharedPreferences.getInstance()).getString('tournament'),
+  })))
+              .bodyBytes)) as List<dynamic>)
+      .cast();
+
+  Map<String, String?> isScoutedElegante = {};
+
+  for (var response in isScoutedResponse) {
+    isScoutedElegante[response['key']] = response['name'];
+  }
+
+  return isScoutedElegante;
 }
