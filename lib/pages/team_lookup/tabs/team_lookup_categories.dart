@@ -21,6 +21,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
               .map((category) => MetricCategory(
                     categoryName: category.localizedName,
                     metricTiles: category.metrics
+                        .where((metric) => metric.hideOverview == false)
                         .map(
                           (metric) => MetricTile(
                             value: (() {

@@ -6,10 +6,14 @@ class CategoryMetric {
     required this.abbreviatedLocalizedName,
     required this.valueVizualizationBuilder,
     required this.path,
+    this.hideDetails = false,
+    this.hideOverview = false,
   });
 
   String abbreviatedLocalizedName;
   String localizedName;
+  bool hideDetails;
+  bool hideOverview;
 
   String path;
 
@@ -49,6 +53,10 @@ class BreakdownData {
   String localizedName;
   String path;
   List<BreakdownSegmentData> segments;
+}
+
+String numberVizualizationBuilder(num num) {
+  return num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
 }
 
 List<MetricCategoryData> metricCategories = [];

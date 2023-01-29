@@ -42,8 +42,9 @@ class ScannerBody extends StatelessWidget {
                         child: AspectRatio(
                           aspectRatio: 1 / 1,
                           child: Image(
-                              image: AssetImage(
-                                  'lib/assets/qr_guide_lines_mask.png')),
+                            image: AssetImage(
+                                'assets/images/qr_guide_lines_mask.png'),
+                          ),
                         ),
                       ),
                     ),
@@ -69,7 +70,7 @@ class ScannerBody extends StatelessWidget {
                   child: const AspectRatio(
                     aspectRatio: 1 / 1,
                     child: Image(
-                        image: AssetImage('lib/assets/qr_guide_lines.png')),
+                        image: AssetImage('assets/images/qr_guide_lines.png')),
                   ),
                 ),
                 Opacity(

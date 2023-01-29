@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -8,6 +9,7 @@ import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:soundpool/soundpool.dart';
 
 class ScanQRCodesPage extends StatefulWidget {
   const ScanQRCodesPage({super.key});
@@ -16,7 +18,26 @@ class ScanQRCodesPage extends StatefulWidget {
   State<ScanQRCodesPage> createState() => _ScanQRCodesPageState();
 }
 
+class QRDataCollection {
+  QRDataCollection({
+    required this.data,
+    this.totalPageCount,
+  });
+
+  List<Map<String, dynamic>> data;
+  int? totalPageCount;
+}
+
 class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
+  List<QRDataCollection> reportData = [
+    QRDataCollection(data: []),
+    QRDataCollection(data: []),
+    QRDataCollection(data: []),
+    QRDataCollection(data: []),
+    QRDataCollection(data: []),
+    QRDataCollection(data: []),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,43 +55,116 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
       drawer: const NavigationDrawer(),
       body: ScannerBody(
         onDetect: (code, args) {
-          Map<String, dynamic> scoutReport = jsonDecode(code.rawValue!);
+          print(code.rawValue);
 
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Scanned ${scoutReport['scouterName']}'s data on ${scoutReport['teamNumber']}",
-              ),
+          Map<String, dynamic> parsedData = jsonDecode(code.rawValue!);
+
+          if (reportData[parsedData['scouterId']].data.any((datum) =>
+              datum['uuid'] == parsedData['uuid'] &&
+              datum['currentPage'] == parsedData['currentPage'])) {
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Code already scaned"),
               behavior: SnackBarBehavior.floating,
-            ),
-          );
+            ));
 
-          (() async {
-            await http.post(
-              Uri.http(
-                (await getServerAuthority())!,
-                '/API/manager/addScoutReport',
-              ),
-              body: code.rawValue!,
-              headers: <String, String>{
-                'Content-Type': 'application/json',
-              },
-            );
+            (() async {
+              Soundpool pool = Soundpool.fromOptions(
+                options:
+                    const SoundpoolOptions(streamType: StreamType.notification),
+              );
 
-            ScaffoldMessenger.of(context)
-                .removeCurrentSnackBar(reason: SnackBarClosedReason.dismiss);
+              int soundId = await rootBundle
+                  .load("assets/sounds/fail.mp3")
+                  .then((ByteData soundData) {
+                return pool.load(soundData);
+              });
 
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
+              HapticFeedback.heavyImpact();
+
+              int streamId = await pool.play(soundId);
+            })();
+
+            return;
+          }
+
+          setState(() {
+            reportData[parsedData['scouterId']].data.add(parsedData);
+            reportData[parsedData['scouterId']].totalPageCount =
+                parsedData['totalPages'];
+          });
+
+          if (reportData[parsedData['scouterId']].data.length !=
+              reportData[parsedData['scouterId']].totalPageCount) {
+            (() async {
+              Soundpool pool = Soundpool.fromOptions(
+                options:
+                    const SoundpoolOptions(streamType: StreamType.notification),
+              );
+
+              int soundId = await rootBundle
+                  .load("assets/sounds/success.mp3")
+                  .then((ByteData soundData) {
+                return pool.load(soundData);
+              });
+
+              HapticFeedback.heavyImpact();
+
+              int streamId = await pool.play(soundId);
+            })();
+          } else {
+            (() async {
+              Soundpool pool = Soundpool.fromOptions(
+                options:
+                    const SoundpoolOptions(streamType: StreamType.notification),
+              );
+
+              int soundId = await rootBundle
+                  .load("assets/sounds/great_success.mp3")
+                  .then((ByteData soundData) {
+                return pool.load(soundData);
+              });
+
+              HapticFeedback.heavyImpact();
+
+              int streamId = await pool.play(soundId);
+
+              reportData[parsedData['scouterId']].data.sort(((a, b) =>
+                  (a['currentPage'] as int)
+                      .compareTo(b['currentPage'] as int)));
+
+              String fullJSON = reportData[parsedData['scouterId']]
+                  .data
+                  .map((e) => e['data'])
+                  .join();
+
+              Map<String, dynamic> parsedFullJSON = jsonDecode(fullJSON);
+
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(
-                  "Uploaded ${scoutReport['scouterName']}'s data on ${scoutReport['teamNumber']}",
-                ),
+                    "Uploading ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
                 behavior: SnackBarBehavior.floating,
-              ),
-            );
+              ));
 
-            setState(() {});
-          })();
+              await http.post(
+                  Uri.http(
+                    (await getServerAuthority())!,
+                    "/manager/addScoutReport",
+                  ),
+                  body: fullJSON,
+                  headers: <String, String>{
+                    'Content-Type': 'application/json',
+                  });
+
+              ScaffoldMessenger.of(context)
+                  .hideCurrentSnackBar(reason: SnackBarClosedReason.remove);
+
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text(
+                    "Uploaded ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
+                behavior: SnackBarBehavior.floating,
+              ));
+            })();
+          }
         },
         childBelow: FutureBuilder(future: (() async {
           Map<String, String?> isScoutedAll = await getScoutedStatuses();
@@ -142,6 +236,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
                       (i) => ScoutStatus(
                         name: nextMatchStatus[i] ?? nextMatchPlannedScouts[i],
                         scanned: nextMatchStatus[i] != null,
+                        dataCollection: reportData[i],
                       ),
                     )
                     .toList(),
@@ -159,17 +254,22 @@ class ScoutStatus extends StatelessWidget {
     Key? key,
     required this.name,
     required this.scanned,
+    required this.dataCollection,
   }) : super(key: key);
 
   final bool scanned;
   final String name;
+  final QRDataCollection dataCollection;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: [
-        Icon(scanned ? Icons.check_box : Icons.check_box_outline_blank),
+        scanned || dataCollection.data.length == dataCollection.totalPageCount
+            ? const Icon(Icons.check_box)
+            : Text(
+                "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
         const SizedBox(width: 5),
         Text(name),
       ]),

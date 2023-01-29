@@ -27,8 +27,11 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
     MetricCategoryData category = routeArgs['category'];
     int teamNumber = routeArgs['team'];
 
+    List<CategoryMetric> metricsToShow =
+        category.metrics.where(((metric) => !metric.hideDetails)).toList();
+
     return DefaultTabController(
-      length: category.metrics.length,
+      length: metricsToShow.length,
       child: Scaffold(
         appBar: AppBar(
           title: Text("$teamNumber - ${category.localizedName}"),
@@ -37,7 +40,7 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
             child: Column(
               children: [
                 TabBar(
-                  tabs: category.metrics
+                  tabs: metricsToShow
                       .map((metric) => Tab(
                             text: metric.localizedName,
                           ))
@@ -63,7 +66,7 @@ class _TeamLookupDetailsState extends State<TeamLookupDetails> {
           ),
         ),
         body: TabBarView(
-          children: category.metrics
+          children: metricsToShow
               .map((metric) => ScrollablePageBody(
                     children: [
                       if (matchCount != null)
@@ -127,11 +130,13 @@ class AnalysisOverview extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    return Column(children: [
-      if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
-        sparkline(context, snapshot),
-      Row(
-        children: [
+    Map<String, dynamic> analysisMap = snapshot.data;
+
+    return Column(
+      children: [
+        if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
+          sparkline(context, snapshot),
+        Row(children: [
           if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
             valueBox(
               context,
@@ -144,19 +149,69 @@ class AnalysisOverview extends AnalysisVisualization {
                               Theme.of(context).colorScheme.onPrimaryContainer),
                     ),
               ),
-              "Average",
+              "This team",
               false,
             ),
-        ],
-      )
-    ]);
+          const SizedBox(width: 10),
+          if (analysisMap.containsKey('all'))
+            Flexible(
+              flex: 5,
+              fit: FlexFit.tight,
+              child: valueBox(
+                context,
+                Text(
+                  analysisFunction.metric
+                      .valueVizualizationBuilder(snapshot.data['all']),
+                  style: Theme.of(context).textTheme.headlineSmall!.merge(
+                        TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary),
+                      ),
+                ),
+                "All teams",
+                true,
+              ),
+            ),
+          const SizedBox(width: 10),
+          if (analysisMap.containsKey('difference'))
+            Flexible(
+              flex: 6,
+              fit: FlexFit.tight,
+              child: valueBox(
+                context,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon((snapshot.data['difference'] as num).isNegative
+                        ? Icons.arrow_drop_down
+                        : Icons.arrow_drop_up),
+                    Text(
+                      analysisFunction.metric.valueVizualizationBuilder(
+                          (snapshot.data['difference'] as num).abs()),
+                      style: Theme.of(context).textTheme.headlineSmall!.merge(
+                            TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer),
+                          ),
+                    ),
+                  ],
+                ),
+                "Difference",
+                false,
+              ),
+            ),
+        ]),
+      ],
+    );
   }
 
   Container valueBox(BuildContext context, Widget value, String description,
       bool alternateColorScheme) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: alternateColorScheme
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.primaryContainer,
         borderRadius: const BorderRadius.all(Radius.circular(6)),
       ),
       child: Padding(
@@ -168,8 +223,9 @@ class AnalysisOverview extends AnalysisVisualization {
               description,
               style: Theme.of(context).textTheme.labelMedium!.merge(
                     TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onPrimaryContainer),
+                        color: alternateColorScheme
+                            ? Theme.of(context).colorScheme.onPrimary
+                            : Theme.of(context).colorScheme.onPrimaryContainer),
                   ),
             ),
           ],
@@ -211,9 +267,16 @@ class AnalysisOverview extends AnalysisVisualization {
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) => Text(
-                              scheduleSnapshot
-                                  .data!.matches[value.toInt()].identity
-                                  .getShortLocalizedDescription(),
+                              (snapshot.data['array'] as List<dynamic>)
+                                      .map((e) => (e['match'] as String)
+                                          .replaceAll(RegExp('_\\d+\$'), ""))
+                                      .contains(scheduleSnapshot.data!
+                                          .matches[value.toInt() - 1].identity
+                                          .toMediumKey())
+                                  ? scheduleSnapshot
+                                      .data!.matches[value.toInt() - 1].identity
+                                      .getShortLocalizedDescription()
+                                  : "",
                             ),
                           )),
                       topTitles: AxisTitles(),
