@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 RegExp validServerAuthority = RegExp(
@@ -7,6 +8,14 @@ RegExp validServerAuthority = RegExp(
 
 List<Tournament> tournamentList = <Tournament>[
   if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
+];
+
+// Picklists
+
+final List<PicklistWeight> picklistWeights = [];
+
+List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
+  ConfiguredPicklist.defaultWeights('Overall'),
 ];
 
 Tournament? getTournamentByKey(String key) {

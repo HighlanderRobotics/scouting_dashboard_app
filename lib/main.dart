@@ -6,6 +6,10 @@ import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selecto
 import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/score_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
@@ -36,6 +40,10 @@ void main() async {
       '/new_scout_shift': (context) => const NewScoutShift(),
       '/scout_schedule_qr': (context) => const ScoutScheduleQR(),
       '/scan_qr_codes': (context) => const ScanQRCodesPage(),
+      '/picklists': (context) => const PicklistsPage(),
+      '/picklist': (context) => const PicklistPage(),
+      '/new_picklist': (context) => const NewPicklistPage(),
+      '/edit_picklist': (context) => const EditPicklistPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

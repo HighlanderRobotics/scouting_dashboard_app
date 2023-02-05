@@ -223,6 +223,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                                   await prefs.remove("tournament");
                                   await prefs.remove("serverAuthority");
                                   await prefs.remove("onboardingCompleted");
+                                  await prefs.remove("picklists");
 
                                   Navigator.of(context).pushNamedAndRemoveUntil(
                                       "/loading", (route) => false);

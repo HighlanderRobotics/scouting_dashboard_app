@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitialLoader extends StatefulWidget {
@@ -23,6 +24,11 @@ class _InitialLoaderState extends State<InitialLoader> {
 
     if (prefs.getBool("onboardingCompleted") == true) {
       onboardingCompleted = true;
+    }
+
+    if (prefs.getStringList('picklists') == null) {
+      await prefs.setStringList(
+          'picklists', defaultPicklists.map((e) => e.toJSON()).toList());
     }
 
     if (onboardingCompleted) {
