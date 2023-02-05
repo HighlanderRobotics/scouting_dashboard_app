@@ -3,8 +3,8 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({
+class GlobalNavigationDrawer extends StatelessWidget {
+  const GlobalNavigationDrawer({
     Key? key,
   }) : super(key: key);
 
@@ -35,7 +35,9 @@ class NavigationDrawer extends StatelessWidget {
                       icon: const Icon(Icons.settings)),
                 ],
               ),
-              const Divider(),
+              Divider(
+                color: Theme.of(context).colorScheme.outline,
+              ),
               FutureBuilder(
                 builder: ((context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
@@ -46,7 +48,9 @@ class NavigationDrawer extends StatelessWidget {
                 }),
                 future: getTournamentName(),
               ),
-              const Divider(),
+              Divider(
+                color: Theme.of(context).colorScheme.outline,
+              ),
               const SectionHeader(title: "Scouting Lead"),
               DrawerDestination(
                 label: "Match Schedule",

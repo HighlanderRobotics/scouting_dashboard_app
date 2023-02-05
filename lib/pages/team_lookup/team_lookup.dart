@@ -90,7 +90,10 @@ class _TeamLookupState extends State<TeamLookup> {
                     ),
                   ),
                 ),
-                const Divider(height: 1),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ],
             ),
           ),
@@ -123,7 +126,7 @@ class _TeamLookupState extends State<TeamLookup> {
                   ],
                 ),
               ),
-        drawer: const NavigationDrawer(),
+        drawer: const GlobalNavigationDrawer(),
       ),
     );
   }

@@ -174,7 +174,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
             )
         ],
       ),
-      drawer: const NavigationDrawer(),
+      drawer: const GlobalNavigationDrawer(),
     );
   }
 }

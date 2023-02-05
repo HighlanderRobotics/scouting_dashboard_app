@@ -108,7 +108,10 @@ class _ScheduleState extends State<Schedule> {
                   ],
                 ),
               ),
-              const Divider(height: 1),
+              Divider(
+                height: 1,
+                color: Theme.of(context).colorScheme.outline,
+              ),
             ],
           ),
         ),
@@ -291,7 +294,7 @@ class _ScheduleState extends State<Schedule> {
           );
         }),
       ),
-      drawer: const NavigationDrawer(),
+      drawer: const GlobalNavigationDrawer(),
     );
   }
 

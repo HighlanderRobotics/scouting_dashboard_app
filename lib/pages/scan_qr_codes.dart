@@ -52,7 +52,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
           ),
         ],
       ),
-      drawer: const NavigationDrawer(),
+      drawer: const GlobalNavigationDrawer(),
       body: ScannerBody(
         onDetect: (code, args) {
           print(code.rawValue);
