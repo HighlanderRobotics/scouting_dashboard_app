@@ -135,8 +135,7 @@ class AnalysisOverview extends AnalysisVisualization {
 
     return Column(
       children: [
-        if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
-          sparkline(context, snapshot),
+        if (analysisMap.containsKey('array')) sparkline(context, snapshot),
         if (analysisMap.containsKey('one') &&
             analysisMap.containsKey('two') &&
             analysisMap.containsKey('three'))
@@ -162,7 +161,7 @@ class AnalysisOverview extends AnalysisVisualization {
             ],
           ),
         Row(children: [
-          if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
+          if (analysisMap.containsKey('result'))
             valueBox(
               context,
               Text(
