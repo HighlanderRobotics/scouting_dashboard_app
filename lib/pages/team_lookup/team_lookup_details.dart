@@ -5,6 +5,7 @@ import 'package:scouting_dashboard_app/analysis_functions/team_metric_details_an
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/auto_paths.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -201,7 +202,51 @@ class AnalysisOverview extends AnalysisVisualization {
               ),
             ),
         ]),
+        if (analysisMap.containsKey('paths')) autoPaths(context, analysisMap),
       ],
+    );
+  }
+
+  Container autoPaths(BuildContext context, Map<String, dynamic> analysisMap) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(10),
+        child: AutoPaths(
+            layers: (analysisMap['paths'] as List<dynamic>)
+                .map((path) => AutoPathLayer(
+                      positions: (path['positions'] as List<dynamic>)
+                          .fold(
+                              [],
+                              (previousValue, element) => [
+                                    ...previousValue,
+                                    if (AutoPathPosition.values.length >
+                                        element)
+                                      element
+                                  ])
+                          .map((positionInt) =>
+                              AutoPathPosition.values[positionInt])
+                          .toList(),
+                      color: HSLColor.fromAHSL(
+                        1,
+                        100,
+                        path['frequency'] /
+                            (analysisMap['paths'] as List<dynamic>)
+                                .map((e) => e['frequency'])
+                                .fold(
+                                    0,
+                                    (previousValue, element) =>
+                                        element > previousValue
+                                            ? element
+                                            : previousValue),
+                        0.5,
+                      ).toColor(),
+                    ))
+                .toList()),
+      ),
     );
   }
 

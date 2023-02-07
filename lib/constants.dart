@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
@@ -17,6 +19,12 @@ final List<PicklistWeight> picklistWeights = [];
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
   ConfiguredPicklist.defaultWeights('Overall'),
 ];
+
+enum AutoPathPosition {
+  none,
+}
+
+final Map<AutoPathPosition, Offset> autoPositions = {};
 
 Tournament? getTournamentByKey(String key) {
   try {
