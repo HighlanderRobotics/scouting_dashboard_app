@@ -113,6 +113,13 @@ List<MetricCategoryData> metricCategories = [
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "cubeCountAuto",
     ),
+    CategoryMetric(
+      localizedName: "Paths",
+      abbreviatedLocalizedName: "Paths",
+      valueVizualizationBuilder: ((p0) => "Shouldn't show up"),
+      path: "teamAutoPaths",
+      hideOverview: true,
+    ),
   ]),
   MetricCategoryData("Cones", [
     CategoryMetric(

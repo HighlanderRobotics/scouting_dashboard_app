@@ -33,9 +33,50 @@ List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
 
 enum AutoPathPosition {
   none,
+  grid1,
+  grid2,
+  grid3,
+  grid4,
+  grid5,
+  grid6,
+  grid7,
+  grid8,
+  grid9,
+  crossedCable,
+  crossedCharger,
+  crossedNearBarrier,
+
+  /// Farthest from the boundary that's near the cable protector
+  prePlacedPiece1,
+
+  /// 3rd closest to the boundary that's near the cable protector
+  prePlacedPiece2,
+
+  /// 2nd closest to the boundary that's near the cable protector
+  prePlacedPiece3,
+
+  /// Closest to the boundary that's near the cable protector
+  prePlacedPiece4,
 }
 
-final Map<AutoPathPosition, Offset> autoPositions = {};
+final Map<AutoPathPosition, Offset> autoPositions = {
+  AutoPathPosition.grid1: const Offset(263, 42),
+  AutoPathPosition.grid2: const Offset(263, 108),
+  AutoPathPosition.grid3: const Offset(263, 175),
+  AutoPathPosition.grid4: const Offset(278, 42),
+  AutoPathPosition.grid5: const Offset(278, 108),
+  AutoPathPosition.grid6: const Offset(278, 175),
+  AutoPathPosition.grid7: const Offset(297, 42),
+  AutoPathPosition.grid8: const Offset(297, 108),
+  AutoPathPosition.grid9: const Offset(297, 175),
+  AutoPathPosition.crossedCable: const Offset(157, 186),
+  AutoPathPosition.crossedCharger: const Offset(157, 109),
+  AutoPathPosition.crossedNearBarrier: const Offset(178, 32),
+  AutoPathPosition.prePlacedPiece1: const Offset(32, 35),
+  AutoPathPosition.prePlacedPiece2: const Offset(32, 83),
+  AutoPathPosition.prePlacedPiece3: const Offset(32, 131),
+  AutoPathPosition.prePlacedPiece4: const Offset(32, 179),
+};
 
 Tournament? getTournamentByKey(String key) {
   try {
