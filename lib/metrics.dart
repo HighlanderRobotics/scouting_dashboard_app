@@ -85,15 +85,15 @@ List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Feed time", [
     CategoryMetric(
       localizedName: "Cones",
-      abbreviatedLocalizedName: "Cubes",
+      abbreviatedLocalizedName: "Cones",
       valueVizualizationBuilder: ((p0) => prettyDuration(
           Duration(seconds: (p0 as num).toInt()),
           abbreviated: true)),
       path: "cycleConeTeam",
     ),
     CategoryMetric(
-      localizedName: "Cube feed time",
-      abbreviatedLocalizedName: "Cube feed time",
+      localizedName: "Cubes",
+      abbreviatedLocalizedName: "Cubes",
       valueVizualizationBuilder: ((p0) => prettyDuration(
           Duration(seconds: (p0 as num).toInt()),
           abbreviated: true)),
