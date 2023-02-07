@@ -14,7 +14,18 @@ List<Tournament> tournamentList = <Tournament>[
 
 // Picklists
 
-final List<PicklistWeight> picklistWeights = [];
+final List<PicklistWeight> picklistWeights = [
+  PicklistWeight('defenseScore', 'Defense score'),
+  PicklistWeight('teleopScore', 'Teleop score'),
+  PicklistWeight('coneOneScore', 'Cones L1'),
+  PicklistWeight('coneTwoScore', 'Cones L2'),
+  PicklistWeight('coneThreeScore', 'Cones L3'),
+  PicklistWeight('cubeOneScore', 'Cubes L1'),
+  PicklistWeight('cubeTwoScore', 'Cubes L2'),
+  PicklistWeight('cubeThreeScore', 'Cubes L3'),
+  PicklistWeight('autoCargo', 'Auto cargo'),
+  PicklistWeight('autoClimb', 'Auto climb'),
+];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
   ConfiguredPicklist.defaultWeights('Overall'),

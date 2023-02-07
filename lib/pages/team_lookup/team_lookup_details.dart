@@ -137,6 +137,30 @@ class AnalysisOverview extends AnalysisVisualization {
       children: [
         if ((snapshot.data as Map<String, dynamic>).containsKey('array'))
           sparkline(context, snapshot),
+        if (analysisMap.containsKey('one') &&
+            analysisMap.containsKey('two') &&
+            analysisMap.containsKey('three'))
+          Column(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  borderRadius: const BorderRadius.all(Radius.circular(10)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(children: [
+                    gridRow(context, analysisMap, 'three', 'Top'),
+                    const Divider(height: 21),
+                    gridRow(context, analysisMap, 'two', 'Middle'),
+                    const Divider(height: 21),
+                    gridRow(context, analysisMap, 'one', 'Hybrid'),
+                  ]),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
         Row(children: [
           if ((snapshot.data as Map<String, dynamic>).containsKey('result'))
             valueBox(
@@ -203,6 +227,31 @@ class AnalysisOverview extends AnalysisVisualization {
             ),
         ]),
         if (analysisMap.containsKey('paths')) autoPaths(context, analysisMap),
+      ],
+    );
+  }
+
+  Row gridRow(
+    BuildContext context,
+    Map<String, dynamic> analysisMap,
+    String key,
+    String label,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge!.merge(
+                TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+        ),
+        Text(
+          analysisFunction.metric.valueVizualizationBuilder(analysisMap[key]),
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
       ],
     );
   }
