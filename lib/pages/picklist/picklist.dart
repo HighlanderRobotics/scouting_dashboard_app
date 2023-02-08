@@ -59,18 +59,43 @@ class PicklistVisuzlization extends AnalysisVisualization {
         snapshot.data.map((e) => e['team'].toString()).toList().cast<String>();
 
     return ListView(
-      children: teams
-          .map((teamNumber) => ListTile(
-                title: Text(teamNumber),
-                trailing: Icon(
-                  Icons.arrow_right,
-                  color: Theme.of(context).colorScheme.onSurface,
+      children: (snapshot.data as List<dynamic>)
+          .map((teamData) => ListTile(
+                title: Text(teamData['team'].toString()),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed("/picklist_team_breakdown", arguments: {
+                          'team': int.parse(teamData['team'].toString()),
+                          'breakdown': teamData['breakdown'],
+                          'picklistTitle':
+                              (analysisFunction as PicklistAnalysis)
+                                  .picklist
+                                  .title,
+                        });
+                      },
+                      icon: Icon(
+                        Icons.balance,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed("/team_lookup", arguments: {
+                          'team': int.parse(teamData['team'].toString()),
+                        });
+                      },
+                      icon: Icon(
+                        Icons.dashboard_outlined,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ),
-                onTap: () {
-                  Navigator.of(context).pushNamed("/team_lookup", arguments: {
-                    'team': int.parse(teamNumber),
-                  });
-                },
               ))
           .toList(),
     );
