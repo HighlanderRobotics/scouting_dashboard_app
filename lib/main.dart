@@ -9,6 +9,7 @@ import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/score_predictor.dart';
@@ -44,6 +45,8 @@ void main() async {
       '/picklist': (context) => const PicklistPage(),
       '/new_picklist': (context) => const NewPicklistPage(),
       '/edit_picklist': (context) => const EditPicklistPage(),
+      '/picklist_team_breakdown': (context) =>
+          const PicklistTeamBreakdownPage(),
     },
     theme: ThemeData(
       useMaterial3: true,
