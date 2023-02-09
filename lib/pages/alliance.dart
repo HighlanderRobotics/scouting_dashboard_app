@@ -83,6 +83,8 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
       const SizedBox(height: 10),
+      cargoStack(context, analysisMap),
+      const SizedBox(height: 10),
       Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceVariant,
@@ -161,5 +163,98 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
     ]);
+  }
+
+  Container cargoStack(BuildContext context, Map<String, dynamic> analysisMap) {
+    int index = 0;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: (analysisMap['levelCargo'] as List<dynamic>)
+            .map((row) {
+              index++;
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    GridRow.values[index].localizedDescripton,
+                    style: Theme.of(context)
+                        .textTheme
+                        .labelLarge!
+                        .merge(TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        )),
+                  ),
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/frc_cone.svg',
+                              colorFilter: ColorFilter.mode(
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              numberVizualizationBuilder(row['cones'] as num),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .merge(TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 80,
+                        child: Row(
+                          children: [
+                            SvgPicture.asset(
+                              'assets/images/frc_cube.svg',
+                              colorFilter: ColorFilter.mode(
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                                BlendMode.srcIn,
+                              ),
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              numberVizualizationBuilder(row['cubes'] as num),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge!
+                                  .merge(TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            })
+            .toList()
+            .reversed
+            .toList(),
+      ),
+    );
   }
 }
