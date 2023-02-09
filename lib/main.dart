@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
+import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
@@ -47,6 +48,7 @@ void main() async {
       '/edit_picklist': (context) => const EditPicklistPage(),
       '/picklist_team_breakdown': (context) =>
           const PicklistTeamBreakdownPage(),
+      '/alliance': (context) => const AlliancePage(),
     },
     theme: ThemeData(
       useMaterial3: true,
