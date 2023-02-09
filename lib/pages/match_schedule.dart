@@ -375,17 +375,25 @@ class AllianceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: alliance == Alliance.red ? redAlliance : blueAlliance,
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            column(context, items[0], CrossAxisAlignment.start),
-            column(context, items[1], CrossAxisAlignment.center),
-            column(context, items[2], CrossAxisAlignment.end),
-          ],
+    return InkWell(
+      onTap: () {
+        Navigator.of(context)
+            .pushNamed('/alliance', arguments: <String, dynamic>{
+          'teams': items.map((e) => e.team).toList(),
+        });
+      },
+      child: Container(
+        color: alliance == Alliance.red ? redAlliance : blueAlliance,
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              column(context, items[0], CrossAxisAlignment.start),
+              column(context, items[1], CrossAxisAlignment.center),
+              column(context, items[2], CrossAxisAlignment.end),
+            ],
+          ),
         ),
       ),
     );
