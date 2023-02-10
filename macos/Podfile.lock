@@ -37,7 +37,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
-  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   mobile_scanner: 35dc92ffdbd7934b0dbc411b1c731bc2ef23c2dc
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
