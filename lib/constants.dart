@@ -25,6 +25,8 @@ final List<PicklistWeight> picklistWeights = [
   PicklistWeight('cubeOneScore', 'Cubes L1'),
   PicklistWeight('cubeTwoScore', 'Cubes L2'),
   PicklistWeight('cubeThreeScore', 'Cubes L3'),
+  PicklistWeight('feedCone', 'Cone feed time'),
+  PicklistWeight('feedCube', 'Cube feed time'),
   PicklistWeight('autoCargo', 'Auto cargo'),
   PicklistWeight('autoClimb', 'Auto climb'),
 ];
