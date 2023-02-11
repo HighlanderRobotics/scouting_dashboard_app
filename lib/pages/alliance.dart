@@ -74,7 +74,10 @@ class AllianceVizualization extends AnalysisVisualization {
                   )),
             ),
             Text(
-              numberVizualizationBuilder(analysisMap['totalPoints'] as num),
+              analysisMap['totalPoints'] == null
+                  ? '--'
+                  : numberVizualizationBuilder(
+                      analysisMap['totalPoints'] as num),
               style: Theme.of(context).textTheme.titleLarge!.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   )),
@@ -206,7 +209,10 @@ class AllianceVizualization extends AnalysisVisualization {
                             ),
                             const SizedBox(width: 2),
                             Text(
-                              numberVizualizationBuilder(row['cones'] as num),
+                              analysisMap['totalPoints'] == null
+                                  ? '--'
+                                  : numberVizualizationBuilder(
+                                      row['cones'] as num),
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge!
@@ -233,7 +239,10 @@ class AllianceVizualization extends AnalysisVisualization {
                             ),
                             const SizedBox(width: 2),
                             Text(
-                              numberVizualizationBuilder(row['cubes'] as num),
+                              analysisMap['totalPoints'] == null
+                                  ? '--'
+                                  : numberVizualizationBuilder(
+                                      row['cubes'] as num),
                               style: Theme.of(context)
                                   .textTheme
                                   .titleLarge!

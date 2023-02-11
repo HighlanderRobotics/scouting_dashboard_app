@@ -74,12 +74,23 @@ class _ScoutScheduleQRState extends State<ScoutScheduleQR> {
                 borderRadius: const BorderRadius.all(Radius.circular(5)),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text(
-                  "If scouts have the latest version of the schedule, the background of their home screen should be this color. If not, they should scan this QR code.",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
+                  padding: const EdgeInsets.all(10),
+                  child: RichText(
+                      text: TextSpan(children: [
+                    TextSpan(
+                      text:
+                          "If scouts have the latest version of the schedule, their home page will be this color. If not, they should scan this QR code by tapping the ",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    const WidgetSpan(
+                        child: Icon(Icons.settings),
+                        alignment: PlaceholderAlignment.middle),
+                    TextSpan(
+                      text:
+                          " in the top right of their home screen, then tapping the \"Scan Scouter Schedule QR Code\" button.",
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ]))),
             ),
             const SizedBox(height: 20),
             RichText(

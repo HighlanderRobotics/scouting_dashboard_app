@@ -220,7 +220,8 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
               snapshot.data!['nextMatchPlannedScouts'] as List<String>;
 
           return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -231,6 +232,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
                 ),
               ),
               Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: List.generate(6, (index) => index)
                     .map(
                       (i) => ScoutStatus(

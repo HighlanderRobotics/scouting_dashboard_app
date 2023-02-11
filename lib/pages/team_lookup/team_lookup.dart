@@ -126,7 +126,11 @@ class _TeamLookupState extends State<TeamLookup> {
                   ],
                 ),
               ),
-        drawer: const GlobalNavigationDrawer(),
+        drawer: ((ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>?)?['team'] as int?) ==
+                null
+            ? const GlobalNavigationDrawer()
+            : null,
       ),
     );
   }

@@ -66,10 +66,13 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
           Navigator.of(context)
               .pushNamedAndRemoveUntil("/match_schedule", (route) => false);
         }),
-        childBelow: Column(children: const [
-          SizedBox(height: 23),
-          Text("Ask your server manager for a setup code."),
-        ]),
+        childBelow: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            SizedBox(height: 23),
+            Text("Ask your server manager for a setup code."),
+          ],
+        ),
       ),
     );
   }
