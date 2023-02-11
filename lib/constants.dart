@@ -10,6 +10,7 @@ RegExp validServerAuthority = RegExp(
 
 List<Tournament> tournamentList = <Tournament>[
   if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
+  Tournament("2023nhwz", "Week 0 (testing)"),
   Tournament("2023cafr", "Fresno"),
   Tournament("2023camb", "Monterey"),
 ];
