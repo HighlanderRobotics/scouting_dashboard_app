@@ -192,6 +192,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                       : "Invalid",
                 ),
                 keyboardType: TextInputType.url,
+                autocorrect: false,
                 onChanged: (value) {
                   setState(() {
                     serverAuthority = value;
