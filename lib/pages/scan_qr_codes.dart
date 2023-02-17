@@ -148,7 +148,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
               await http.post(
                   Uri.http(
                     (await getServerAuthority())!,
-                    "/manager/addScoutReport",
+                    "/API/manager/addScoutReport",
                   ),
                   body: fullJSON,
                   headers: <String, String>{

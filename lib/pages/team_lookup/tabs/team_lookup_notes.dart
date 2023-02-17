@@ -20,6 +20,7 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
         if ((snapshot.data as List).isNotEmpty)
           NotesList(
             notes: ((snapshot.data as List).cast<Map<String, dynamic>>())
+                .where((note) => note['notes'] != null && note['notes'] != "")
                 .map((note) => Note(
                     matchName: GameMatchIdentity.fromLongKey(note['matchKey'])
                         .getLocalizedDescription(includeTournament: false),
@@ -43,10 +44,12 @@ class NotesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: notes
-          .expand((element) => [element, const SizedBox(height: 20)])
-          .take(notes.length * 2 - 1)
-          .toList(),
+      children: notes.isEmpty
+          ? []
+          : notes
+              .expand((element) => [element, const SizedBox(height: 20)])
+              .take(notes.length * 2 - 1)
+              .toList(),
     );
   }
 }
