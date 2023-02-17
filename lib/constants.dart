@@ -9,9 +9,9 @@ RegExp validServerAuthority = RegExp(
     "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost))(:\\d+)?\$");
 
 List<Tournament> tournamentList = <Tournament>[
-  if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
+  Tournament("2022cc", "Chezy 2022 (debug)"),
   Tournament("2023nhwz", "Week 0 (testing)"),
-  Tournament("2023cafr", "Fresno"),
+  Tournament("2022cc", "Fresno"),
   Tournament("2023camb", "Monterey"),
 ];
 
