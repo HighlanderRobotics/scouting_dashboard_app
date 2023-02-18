@@ -9,8 +9,8 @@ RegExp validServerAuthority = RegExp(
     "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost))(:\\d+)?\$");
 
 List<Tournament> tournamentList = <Tournament>[
-  Tournament("2022cc", "Chezy 2022 (debug)"),
-  Tournament("2023nhwz", "Week 0 (testing)"),
+  if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
+  Tournament("2023week0", "2023 Week 0"),
   Tournament("2022cc", "Fresno"),
   Tournament("2023camb", "Monterey"),
 ];
@@ -62,6 +62,10 @@ enum AutoPathPosition {
 
   /// Closest to the boundary that's near the cable protector
   prePlacedPiece4,
+
+  startingTagId3,
+  startingTagId2,
+  startingTagId1,
 }
 
 final Map<AutoPathPosition, Offset> autoPositions = {
@@ -81,6 +85,9 @@ final Map<AutoPathPosition, Offset> autoPositions = {
   AutoPathPosition.prePlacedPiece2: const Offset(32, 83),
   AutoPathPosition.prePlacedPiece3: const Offset(32, 131),
   AutoPathPosition.prePlacedPiece4: const Offset(32, 179),
+  AutoPathPosition.startingTagId3: const Offset(200, 42),
+  AutoPathPosition.startingTagId2: const Offset(200, 108),
+  AutoPathPosition.startingTagId1: const Offset(200, 175),
 };
 
 Tournament? getTournamentByKey(String key) {
