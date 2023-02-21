@@ -3,7 +3,7 @@ PODS:
     - FlutterMacOS
     - ReachabilitySwift
   - FlutterMacOS (1.0.0)
-  - mobile_scanner (0.0.1):
+  - mobile_scanner (3.0.0):
     - FlutterMacOS
   - ReachabilitySwift (5.0.0)
   - shared_preferences_foundation (0.0.1):
@@ -38,7 +38,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_plus: 18d3c32514c886e046de60e9c13895109866c747
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  mobile_scanner: 35dc92ffdbd7934b0dbc411b1c731bc2ef23c2dc
+  mobile_scanner: ed7618fb749adc6574563e053f3b8e5002c13994
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
   soundpool_macos: 3bc0b8b238407516ad9b8afc2647670ff58124f9

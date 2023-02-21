@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.15
   dropdown_search: ^5.0.5
-  mobile_scanner: ^2.1.0
+  mobile_scanner: ^3.0.0
   frc_8033_scouting_shared:
     git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
   fl_chart: ^0.55.2

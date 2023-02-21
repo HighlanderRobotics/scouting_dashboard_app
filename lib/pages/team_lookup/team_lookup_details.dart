@@ -280,7 +280,7 @@ class AnalysisOverview extends AnalysisVisualization {
                           .toList(),
                       color: HSLColor.fromAHSL(
                         1,
-                        100,
+                        200,
                         path['frequency'] /
                             (analysisMap['paths'] as List<dynamic>)
                                 .map((e) => e['frequency'])

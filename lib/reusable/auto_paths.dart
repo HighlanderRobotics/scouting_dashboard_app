@@ -1,3 +1,6 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 
@@ -18,23 +21,46 @@ class AutoPathPainter extends CustomPainter {
     paint.strokeJoin = StrokeJoin.round;
     paint.color = color;
 
+    Random randomGenerator = Random();
+
+    List<Offset> renderedPositions = positions
+        .fold(
+          [],
+          (previousValue, element) => [
+            ...previousValue,
+            if (autoPositions.containsKey(element)) element,
+          ],
+        )
+        .map((e) => autoPositions[e]!)
+        .map((e) => Offset(
+            e.dx + ((randomGenerator.nextDouble() - 0.5) * 2) * 10,
+            e.dy + ((randomGenerator.nextDouble() - 0.5) * 2) * 10))
+        .map((e) => Offset(e.dx / 306 * size.width, e.dy / 212 * size.height))
+        .toList();
+
     Path path = Path();
+
+    debugPrint(positions.toString());
+
     path.addPolygon(
-      positions
-          .fold(
-            [],
-            (previousValue, element) => [
-              ...previousValue,
-              if (autoPositions.containsKey(element)) element,
-            ],
-          )
-          .map((e) => autoPositions[e]!)
-          .map((e) => Offset(e.dx / 306 * size.width, e.dy / 212 * size.height))
-          .toList(),
+      renderedPositions,
       false,
     );
 
     canvas.drawPath(path, paint);
+
+    Offset startingPosition = autoPositions[
+        positions.firstWhere((element) => autoPositions.containsKey(element))]!;
+
+    Paint startPaint = Paint();
+    startPaint.color = Colors.green[600]!;
+
+    canvas.drawCircle(
+      renderedPositions[positions
+          .indexWhere((element) => autoPositions.containsKey(element))],
+      10,
+      startPaint,
+    );
   }
 
   @override
@@ -70,13 +96,17 @@ class AutoPathLayer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: AutoPathPainter(positions, color),
-      child: Opacity(
-        opacity: 0,
-        child: Image.asset('assets/images/auto_background.png'),
-      ),
-    );
+    return LayoutBuilder(builder: (context, constraints) {
+      return Stack(children: [
+        CustomPaint(
+          painter: AutoPathPainter(positions, color),
+          child: Opacity(
+            opacity: 0,
+            child: Image.asset('assets/images/auto_background.png'),
+          ),
+        ),
+      ]);
+    });
     ;
   }
 }

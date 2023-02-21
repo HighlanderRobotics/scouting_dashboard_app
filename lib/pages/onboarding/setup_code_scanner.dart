@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,8 +17,15 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
     return Scaffold(
       appBar: AppBar(title: const Text("Setup with QR Code")),
       body: ScannerBody(
-        onDetect: ((barcode, args) async {
-          if (barcode.rawValue == null) {
+        onDetect: ((barcodeCapture) async {
+          Barcode? barcode;
+          if (barcodeCapture.barcodes.isEmpty) {
+            barcode = null;
+          } else {
+            barcode = barcodeCapture.barcodes.first;
+          }
+
+          if (barcode == null) {
             const snackBar = SnackBar(
               content: Text("Failed to scan code"),
               behavior: SnackBarBehavior.floating,

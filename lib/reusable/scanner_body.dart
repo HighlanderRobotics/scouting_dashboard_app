@@ -9,7 +9,7 @@ class ScannerBody extends StatelessWidget {
   }) : super(key: key);
 
   final Widget? childBelow;
-  final Function(Barcode, MobileScannerArguments?) onDetect;
+  final Function(BarcodeCapture) onDetect;
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +17,9 @@ class ScannerBody extends StatelessWidget {
       return Stack(
         children: [
           MobileScanner(
-            onDetect: onDetect,
+            onDetect: (e) {
+              onDetect(e);
+            },
           ),
           ColorFiltered(
             colorFilter: ColorFilter.mode(

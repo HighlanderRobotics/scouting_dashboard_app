@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
@@ -54,8 +55,20 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
       ),
       drawer: const GlobalNavigationDrawer(),
       body: ScannerBody(
-        onDetect: (code, args) {
-          print(code.rawValue);
+        onDetect: (barcodeCapture) {
+          Barcode? code;
+          if (barcodeCapture.barcodes.isEmpty) {
+            code = null;
+          } else {
+            code = barcodeCapture.barcodes.first;
+          }
+
+          if (code == null || code.rawValue == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Something went wrong.")));
+          }
+
+          print(code!.rawValue);
 
           Map<String, dynamic> parsedData = jsonDecode(code.rawValue!);
 
