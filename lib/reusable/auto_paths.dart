@@ -53,7 +53,7 @@ class AutoPathPainter extends CustomPainter {
         positions.firstWhere((element) => autoPositions.containsKey(element))]!;
 
     Paint startPaint = Paint();
-    startPaint.color = Colors.green[600]!;
+    startPaint.color = color;
 
     canvas.drawCircle(
       renderedPositions[positions

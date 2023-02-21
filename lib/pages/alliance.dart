@@ -88,83 +88,7 @@ class AllianceVizualization extends AnalysisVisualization {
       const SizedBox(height: 10),
       cargoStack(context, analysisMap),
       const SizedBox(height: 10),
-      Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            AutoPaths(
-                layers: ((analysisMap['teams']) as List<dynamic>)
-                    .fold(<Map<String, dynamic>>[], (paths, teamData) {
-                      paths
-                          .addAll((teamData['paths'] as List<dynamic>).map((e) {
-                        Map<String, dynamic> path = e;
-
-                        return {
-                          ...path,
-                          'team': teamData['team'],
-                          'highestFrequency':
-                              (teamData['paths'] as List<dynamic>).fold(
-                            0,
-                            (previousValue, element) =>
-                                element['frequency'] > previousValue
-                                    ? element['frequency']
-                                    : previousValue,
-                          ),
-                        };
-                      }));
-
-                      return paths;
-                    })
-                    .map(
-                      (pathMap) => AutoPathLayer(
-                          positions: ((pathMap['positions']) as List<dynamic>)
-                              .map((e) => AutoPathPosition.values[e])
-                              .toList(),
-                          color: HSLColor.fromAHSL(
-                            1,
-                            int.parse(pathMap['team'] as String).toDouble() /
-                                5 %
-                                360,
-                            pathMap['frequency'] / pathMap['highestFrequency'],
-                            0.5,
-                          ).toColor()),
-                    )
-                    .toList()),
-            const SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: (analysisMap['teams'] as List<dynamic>)
-                  .map((e) => e['team'] as String)
-                  .toList()
-                  .map((e) => Row(
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(10)),
-                                    color: HSLColor.fromAHSL(
-                                      1,
-                                      int.parse(e).toDouble() / 5 % 360,
-                                      1,
-                                      0.5,
-                                    ).toColor())),
-                          ),
-                          const SizedBox(width: 5),
-                          Text(e),
-                        ],
-                      ))
-                  .toList(),
-            )
-          ],
-        ),
-      ),
+      AllianceAutoPaths(analysisMap: analysisMap),
     ]);
   }
 
@@ -263,6 +187,122 @@ class AllianceVizualization extends AnalysisVisualization {
             .toList()
             .reversed
             .toList(),
+      ),
+    );
+  }
+}
+
+class AllianceAutoPaths extends StatefulWidget {
+  const AllianceAutoPaths({
+    super.key,
+    required this.analysisMap,
+  });
+
+  final Map<String, dynamic> analysisMap;
+
+  @override
+  State<AllianceAutoPaths> createState() => _AllianceAutoPathsState();
+}
+
+class _AllianceAutoPathsState extends State<AllianceAutoPaths> {
+  int selectedTeam = -1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: const BorderRadius.all(Radius.circular(10)),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          AutoPaths(
+              layers: ((widget.analysisMap['teams']) as List<dynamic>)
+                  .fold(<Map<String, dynamic>>[], (paths, teamData) {
+                    if (selectedTeam == -1 ||
+                        selectedTeam.toString() == teamData['team']) {
+                      paths
+                          .addAll((teamData['paths'] as List<dynamic>).map((e) {
+                        Map<String, dynamic> path = e;
+
+                        return {
+                          ...path,
+                          'team': teamData['team'],
+                          'highestFrequency':
+                              (teamData['paths'] as List<dynamic>).fold(
+                            0,
+                            (previousValue, element) =>
+                                element['frequency'] > previousValue
+                                    ? element['frequency']
+                                    : previousValue,
+                          ),
+                        };
+                      }));
+                    }
+
+                    return paths;
+                  })
+                  .map(
+                    (pathMap) => AutoPathLayer(
+                        positions: ((pathMap['positions']) as List<dynamic>)
+                            .map((e) => AutoPathPosition.values[e])
+                            .toList(),
+                        color: HSLColor.fromAHSL(
+                          1,
+                          int.parse(pathMap['team'] as String).toDouble() /
+                              5 %
+                              360,
+                          pathMap['frequency'] / pathMap['highestFrequency'],
+                          0.5,
+                        ).toColor()),
+                  )
+                  .toList()),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: (widget.analysisMap['teams'] as List<dynamic>)
+                .map((e) => e['team'] as String)
+                .toList()
+                .map((e) => InkWell(
+                      onTap: () {
+                        if (selectedTeam == int.parse(e)) {
+                          setState(() {
+                            selectedTeam = -1;
+                          });
+                        } else {
+                          setState(() {
+                            selectedTeam = int.parse(e);
+                          });
+                        }
+                      },
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: const BorderRadius.all(
+                                        Radius.circular(10)),
+                                    color: HSLColor.fromAHSL(
+                                      1,
+                                      int.parse(e).toDouble() / 5 % 360,
+                                      selectedTeam == int.parse(e) ||
+                                              selectedTeam == -1
+                                          ? 1
+                                          : 0.1,
+                                      0.5,
+                                    ).toColor())),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(e),
+                        ],
+                      ),
+                    ))
+                .toList(),
+          )
+        ],
       ),
     );
   }

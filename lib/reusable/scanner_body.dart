@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 class ScannerBody extends StatelessWidget {
-  const ScannerBody({
+  ScannerBody({
     Key? key,
     required this.onDetect,
     this.childBelow,
@@ -11,12 +11,20 @@ class ScannerBody extends StatelessWidget {
   final Widget? childBelow;
   final Function(BarcodeCapture) onDetect;
 
+  final scannerController = MobileScannerController(
+    formats: [
+      BarcodeFormat.qrCode,
+    ],
+    detectionSpeed: DetectionSpeed.noDuplicates,
+  );
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return Stack(
         children: [
           MobileScanner(
+            controller: scannerController,
             onDetect: (e) {
               onDetect(e);
             },
