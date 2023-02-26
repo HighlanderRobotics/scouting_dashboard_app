@@ -44,14 +44,27 @@ class AllianceVizualization extends AnalysisVisualization {
             .map((teamData) => Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Icon(teamData['role'] == null
-                        ? Icons.question_mark
-                        : RobotRole
-                            .values[teamData['role'] as int].littleEmblem),
+                    Tooltip(
+                      message: teamData['role'] == null
+                          ? "No data"
+                          : RobotRole.values[teamData['role']].name,
+                      child: Icon(teamData['role'] == null
+                          ? Icons.question_mark
+                          : RobotRole
+                              .values[teamData['role'] as int].littleEmblem),
+                    ),
                     const SizedBox(width: 3),
-                    Text(
-                      teamData['team'],
-                      style: Theme.of(context).textTheme.titleLarge,
+                    InkWell(
+                      onTap: () => {
+                        Navigator.of(context).pushNamed("/team_lookup",
+                            arguments: <String, dynamic>{
+                              'team': int.parse(teamData['team'].toString())
+                            })
+                      },
+                      child: Text(
+                        teamData['team'],
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                     ),
                   ],
                 ))
