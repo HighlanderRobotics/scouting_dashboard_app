@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-class ScannerBody extends StatelessWidget {
-  ScannerBody({
+class ScannerBody extends StatefulWidget {
+  const ScannerBody({
     Key? key,
     required this.onDetect,
     this.childBelow,
@@ -11,12 +11,19 @@ class ScannerBody extends StatelessWidget {
   final Widget? childBelow;
   final Function(BarcodeCapture) onDetect;
 
+  @override
+  State<ScannerBody> createState() => _ScannerBodyState();
+}
+
+class _ScannerBodyState extends State<ScannerBody> {
   final scannerController = MobileScannerController(
     formats: [
       BarcodeFormat.qrCode,
     ],
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
+
+  String? previousCodeVal;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +33,13 @@ class ScannerBody extends StatelessWidget {
           MobileScanner(
             controller: scannerController,
             onDetect: (e) {
-              onDetect(e);
+              if (previousCodeVal != e.barcodes.first.rawValue) {
+                widget.onDetect(e);
+              }
+
+              setState(() {
+                previousCodeVal = e.barcodes.first.rawValue;
+              });
             },
           ),
           ColorFiltered(
@@ -60,7 +73,7 @@ class ScannerBody extends StatelessWidget {
                       ),
                       Opacity(
                         opacity: 1,
-                        child: childBelow,
+                        child: widget.childBelow,
                       ),
                     ],
                   ),
@@ -85,7 +98,7 @@ class ScannerBody extends StatelessWidget {
                   ),
                   Opacity(
                     opacity: 0,
-                    child: childBelow,
+                    child: widget.childBelow,
                   ),
                 ],
               ),
@@ -104,7 +117,7 @@ class ScannerBody extends StatelessWidget {
                       child: Container(),
                     ),
                   ),
-                  Container(child: childBelow),
+                  Container(child: widget.childBelow),
                 ],
               ),
             ),
