@@ -10,9 +10,9 @@ RegExp validServerAuthority = RegExp(
 
 List<Tournament> tournamentList = <Tournament>[
   if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
-  Tournament("2023week0", "2023 Week 0"),
-  Tournament("2022cc", "Fresno"),
-  Tournament("2023camb", "Monterey"),
+  Tournament("2023waahs", "2023 PNW District Auburn"),
+  Tournament("2023wayak", "2023 PNW District SunDome"),
+  Tournament("2023wasno", "2023 PNW District Glacier Peak"),
 ];
 
 // Picklists
