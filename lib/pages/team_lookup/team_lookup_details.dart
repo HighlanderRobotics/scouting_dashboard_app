@@ -360,12 +360,16 @@ class AnalysisOverview extends AnalysisVisualization {
                           sideTitles: SideTitles(
                             showTitles: true,
                             getTitlesWidget: (value, meta) => Text(
-                              (snapshot.data['array'] as List<dynamic>)
-                                      .map((e) => (e['match'] as String)
-                                          .replaceAll(RegExp('_\\d+\$'), ""))
-                                      .contains(scheduleSnapshot.data!
-                                          .matches[value.toInt() - 1].identity
-                                          .toMediumKey())
+                              value.roundToDouble() == value &&
+                                      (snapshot.data['array'] as List<dynamic>)
+                                          .map((e) => (e['match'] as String)
+                                              .replaceAll(
+                                                  RegExp('_\\d+\$'), ""))
+                                          .contains(scheduleSnapshot
+                                              .data!
+                                              .matches[value.toInt() - 1]
+                                              .identity
+                                              .toMediumKey())
                                   ? scheduleSnapshot
                                       .data!.matches[value.toInt() - 1].identity
                                       .getShortLocalizedDescription()
@@ -381,8 +385,10 @@ class AnalysisOverview extends AnalysisVisualization {
                             getTitlesWidget: (value, meta) => SideTitleWidget(
                                   axisSide: meta.axisSide,
                                   child: Text(
-                                    analysisFunction.metric
-                                        .valueVizualizationBuilder(value),
+                                    analysisFunction.metric == null
+                                        ? "--"
+                                        : analysisFunction.metric
+                                            .valueVizualizationBuilder(value),
                                   ),
                                 ),
                             reservedSize: 50),
@@ -418,21 +424,23 @@ class AnalysisOverview extends AnalysisVisualization {
                           List<FlSpot> spots = [];
 
                           for (var i = 0; i < array.length; i++) {
-                            spots.add(
-                              FlSpot(
-                                schedule.matches
-                                    .firstWhere(
-                                      (match) =>
-                                          match.identity.toMediumKey() ==
-                                          (array[i]["match"] as String)
-                                              .replaceAll(
-                                                  RegExp('_\\d+\$'), ""),
-                                    )
-                                    .ordinalNumber
-                                    .toDouble(),
-                                array[i]["value"].toDouble(),
-                              ),
-                            );
+                            if (array[i]["value"] != null) {
+                              spots.add(
+                                FlSpot(
+                                  schedule.matches
+                                      .firstWhere(
+                                        (match) =>
+                                            match.identity.toMediumKey() ==
+                                            (array[i]["match"] as String)
+                                                .replaceAll(
+                                                    RegExp('_\\d+\$'), ""),
+                                      )
+                                      .ordinalNumber
+                                      .toDouble(),
+                                  array[i]["value"].toDouble(),
+                                ),
+                              );
+                            }
                           }
 
                           return spots;
