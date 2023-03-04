@@ -131,6 +131,10 @@ class _ScheduleState extends State<Schedule> {
             'isScouted': await getScoutedStatuses(),
           };
         })(), builder: (context, snapshot) {
+					if (snapshot.hasError) {
+						return Text(snapshot.error);
+					}
+
           if (snapshot.connectionState != ConnectionState.done ||
               !snapshot.hasData) {
             return const Center(
