@@ -23,16 +23,16 @@ class ScorePredictorAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http
-        .get(Uri.http((await getServerAuthority())!, "/analysis/prediction", {
-      "bluea": blue1.toString(),
-      "blueb": blue2.toString(),
-      "bluec": blue3.toString(),
-      "reda": red1.toString(),
-      "redb": red2.toString(),
-      "redc": red3.toString(),
+    var response = await http.get(Uri.http(
+        (await getServerAuthority())!, "/API/analysis/predictWinning", {
+      "blue1": blue1.toString(),
+      "blue2": blue2.toString(),
+      "blue3": blue3.toString(),
+      "red1": red1.toString(),
+      "red2": red2.toString(),
+      "red3": red3.toString(),
     }));
 
-    return jsonDecode(utf8.decode(response.bodyBytes));
+    return jsonDecode(utf8.decode(response.bodyBytes))[0];
   }
 }

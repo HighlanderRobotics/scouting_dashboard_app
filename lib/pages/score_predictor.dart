@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/analysis_functions/score_predictor_analysis.dart';
+import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
@@ -188,56 +189,49 @@ class ScorePrediction extends AnalysisVisualization {
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: const BorderRadius.all(Radius.circular(7)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Red Alliance",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                Text(
-                  snapshot.data["redScore"].toString(),
-                  style: Theme.of(context).textTheme.headlineLarge!.merge(
-                      TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer)),
-                )
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  "Blue Alliance",
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
-                ),
-                Text(
-                  snapshot.data["blueScore"].toString(),
-                  style: Theme.of(context).textTheme.headlineLarge!.merge(
-                      TextStyle(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer)),
-                )
-              ],
-            ),
-          ],
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.all(Radius.circular(7)),
         ),
-      ),
-    );
+        clipBehavior: Clip.antiAlias,
+        child: Row(children: [
+          Flexible(
+            fit: FlexFit.tight,
+            flex: ((snapshot.data['redWinning'] as num) * 100).round(),
+            child: Container(
+              decoration: BoxDecoration(color: redAlliance),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Red alliance"),
+                      Text(
+                        "${((snapshot.data['redWinning'] as num) * 100).round()}%",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      )
+                    ]),
+              ),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            flex: ((snapshot.data['blueWinning'] as num) * 100).round(),
+            child: Container(
+              decoration: BoxDecoration(color: blueAlliance),
+              child: Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const Text("Blue alliance"),
+                      Text(
+                        "${((snapshot.data['blueWinning'] as num) * 100).round()}%",
+                        style: Theme.of(context).textTheme.titleLarge,
+                      )
+                    ]),
+              ),
+            ),
+          ),
+        ]));
   }
 }
