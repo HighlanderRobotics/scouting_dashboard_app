@@ -158,7 +158,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
                 behavior: SnackBarBehavior.floating,
               ));
 
-              await http.post(
+              final response = await http.post(
                   Uri.http(
                     (await getServerAuthority())!,
                     "/API/manager/addScoutReport",
@@ -171,11 +171,19 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
               ScaffoldMessenger.of(context)
                   .hideCurrentSnackBar(reason: SnackBarClosedReason.remove);
 
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    "Uploaded ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
-                behavior: SnackBarBehavior.floating,
-              ));
+              if (response.statusCode == 200) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      "Uploaded ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
+                  behavior: SnackBarBehavior.floating,
+                ));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                      "Failed: ${response.statusCode} ${response.reasonPhrase}"),
+                  behavior: SnackBarBehavior.floating,
+                ));
+              }
             })();
           }
         },
