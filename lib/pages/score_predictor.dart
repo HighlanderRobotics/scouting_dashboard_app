@@ -188,50 +188,54 @@ class ScorePrediction extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    return Container(
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(7)),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Row(children: [
-          Flexible(
-            fit: FlexFit.tight,
-            flex: ((snapshot.data['redWinning'] as num) * 100).round(),
-            child: Container(
-              decoration: BoxDecoration(color: redAlliance),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Red alliance"),
-                      Text(
-                        "${((snapshot.data['redWinning'] as num) * 100).round()}%",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      )
-                    ]),
+    if ((snapshot.data as Map<String, dynamic>).containsKey("blueWinning")) {
+      return Container(
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.all(Radius.circular(7)),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Row(children: [
+            Flexible(
+              fit: FlexFit.tight,
+              flex: ((snapshot.data['redWinning'] as num) * 100).round(),
+              child: Container(
+                decoration: BoxDecoration(color: redAlliance),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Red alliance"),
+                        Text(
+                          "${((snapshot.data['redWinning'] as num) * 100).round()}%",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        )
+                      ]),
+                ),
               ),
             ),
-          ),
-          Flexible(
-            fit: FlexFit.tight,
-            flex: ((snapshot.data['blueWinning'] as num) * 100).round(),
-            child: Container(
-              decoration: BoxDecoration(color: blueAlliance),
-              child: Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text("Blue alliance"),
-                      Text(
-                        "${((snapshot.data['blueWinning'] as num) * 100).round()}%",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      )
-                    ]),
+            Flexible(
+              fit: FlexFit.tight,
+              flex: ((snapshot.data['blueWinning'] as num) * 100).round(),
+              child: Container(
+                decoration: BoxDecoration(color: blueAlliance),
+                child: Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        const Text("Blue alliance"),
+                        Text(
+                          "${((snapshot.data['blueWinning'] as num) * 100).round()}%",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        )
+                      ]),
+                ),
               ),
             ),
-          ),
-        ]));
+          ]));
+    } else {
+      return const Text("Not enough data for prediction.");
+    }
   }
 }
