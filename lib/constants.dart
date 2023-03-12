@@ -31,6 +31,7 @@ final List<PicklistWeight> picklistWeights = [
   PicklistWeight('feedCube', 'Cube feeder'),
   PicklistWeight('autoCargo', 'Auto cargo'),
   PicklistWeight('autoClimb', 'Auto climb'),
+  PicklistWeight('teleopClimb', 'Teleop climb'),
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
