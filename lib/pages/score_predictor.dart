@@ -22,10 +22,51 @@ class _ScorePredictorState extends State<ScorePredictor> {
   String red2FieldValue = "";
   String red3FieldValue = "";
 
+  final TextEditingController blue1FieldController = TextEditingController();
+  final TextEditingController blue2FieldController = TextEditingController();
+  final TextEditingController blue3FieldController = TextEditingController();
+  final TextEditingController red1FieldController = TextEditingController();
+  final TextEditingController red2FieldController = TextEditingController();
+  final TextEditingController red3FieldController = TextEditingController();
+
   ScorePredictorAnalysis? analysisFunction;
+
+  bool initialized = false;
 
   @override
   Widget build(BuildContext context) {
+    if (ModalRoute.of(context)!.settings.arguments != null && !initialized) {
+      setState(() {
+        blue1FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue1'];
+        blue2FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue2'];
+        blue3FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue3'];
+        red1FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red1'];
+        red2FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red2'];
+        red3FieldValue = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red3'];
+
+        blue1FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue1'];
+        blue2FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue2'];
+        blue3FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['blue3'];
+        red1FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red1'];
+        red2FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red2'];
+        red3FieldController.text = (ModalRoute.of(context)!.settings.arguments!
+            as Map<String, dynamic>)['red3'];
+
+        initialized = true;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(title: const Text("Score Predictor")),
       body: ScrollablePageBody(
@@ -36,6 +77,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               const Text("Red Alliance"),
               const SizedBox(height: 10),
               TextField(
+                controller: red1FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 1",
@@ -53,6 +95,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               ),
               const SizedBox(height: 10),
               TextField(
+                controller: red2FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 2",
@@ -70,6 +113,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               ),
               const SizedBox(height: 10),
               TextField(
+                controller: red3FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 3",
@@ -94,6 +138,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               const Text("Blue Alliance"),
               const SizedBox(height: 10),
               TextField(
+                controller: blue1FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 1",
@@ -111,6 +156,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               ),
               const SizedBox(height: 10),
               TextField(
+                controller: blue2FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 2",
@@ -128,6 +174,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
               ),
               const SizedBox(height: 10),
               TextField(
+                controller: blue3FieldController,
                 decoration: const InputDecoration(
                   filled: true,
                   labelText: "Team 3",
@@ -175,7 +222,9 @@ class _ScorePredictorState extends State<ScorePredictor> {
             )
         ],
       ),
-      drawer: const GlobalNavigationDrawer(),
+      drawer: (ModalRoute.of(context)!.settings.arguments == null)
+          ? const GlobalNavigationDrawer()
+          : null,
     );
   }
 }

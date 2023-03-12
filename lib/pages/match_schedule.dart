@@ -193,20 +193,37 @@ class _ScheduleState extends State<Schedule> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Row(
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(10, 13, 10, 13),
-                                  child: Text(
-                                    match.identity.getLocalizedDescription(
-                                        includeTournament: false),
-                                    style:
-                                        Theme.of(context).textTheme.labelMedium,
+                            InkWell(
+                              onTap: () {
+                                Navigator.of(context).pushNamed(
+                                  "/score_predictor",
+                                  arguments: {
+                                    'red1': match.teams[0].toString(),
+                                    'red2': match.teams[1].toString(),
+                                    'red3': match.teams[2].toString(),
+                                    'blue1': match.teams[3].toString(),
+                                    'blue2': match.teams[4].toString(),
+                                    'blue3': match.teams[5].toString(),
+                                  },
+                                );
+                              },
+                              child: Row(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        10, 13, 10, 13),
+                                    child: Text(
+                                      match.identity.getLocalizedDescription(
+                                          includeTournament: false),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium,
+                                    ),
                                   ),
-                                ),
-                                if (!scouted.contains(null)) const ScoutedFlag()
-                              ],
+                                  if (!scouted.contains(null))
+                                    const ScoutedFlag()
+                                ],
+                              ),
                             ),
                             AllianceRow(
                               alliance: Alliance.red,
