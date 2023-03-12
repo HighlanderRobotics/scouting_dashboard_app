@@ -443,6 +443,8 @@ class AnalysisOverview extends AnalysisVisualization {
                             }
                           }
 
+                          spots.sort((a, b) => a.x.compareTo(b.x));
+
                           return spots;
                         })(),
                         isCurved: true,
