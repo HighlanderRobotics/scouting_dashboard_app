@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
+import 'package:scouting_dashboard_app/pages/my_alliance.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart';
@@ -49,6 +50,7 @@ void main() async {
       '/picklist_team_breakdown': (context) =>
           const PicklistTeamBreakdownPage(),
       '/alliance': (context) => const AlliancePage(),
+      '/my_alliance': (context) => const MyAlliancePage(),
     },
     theme: ThemeData(
       useMaterial3: true,

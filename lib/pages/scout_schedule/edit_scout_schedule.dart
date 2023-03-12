@@ -56,22 +56,17 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
                       : () async {
                           newSchedule!
                               .save((await getServerAuthority())!)
-                              .then((val) {
-                            const SnackBar snackBar = SnackBar(
-                              content: Text("Saved"),
+                              .then((response) {
+                            SnackBar snackBar = SnackBar(
+                              content: Text(response.statusCode == 200
+                                  ? "Saved"
+                                  : "Error saving: ${response.statusCode} ${response.reasonPhrase}"),
                               behavior: SnackBarBehavior.floating,
                             );
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           });
                           Navigator.pop(context);
-
-                          const SnackBar snackBar = SnackBar(
-                            content: Text("Saving..."),
-                            behavior: SnackBarBehavior.floating,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         },
                   icon: const Icon(Icons.check),
                   color: Colors.green,

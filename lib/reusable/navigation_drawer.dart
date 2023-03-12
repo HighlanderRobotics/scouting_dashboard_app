@@ -109,6 +109,16 @@ class GlobalNavigationDrawer extends StatelessWidget {
                     ModalRoute.of(context)?.settings.name == "/picklists",
                 icon: Icons.format_list_numbered,
               ),
+              DrawerDestination(
+                label: "My Alliance",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/my_alliance", (route) => false);
+                },
+                isSelected:
+                    ModalRoute.of(context)?.settings.name == "/my_alliance",
+                icon: Icons.group_work,
+              ),
             ],
           ),
         ),
