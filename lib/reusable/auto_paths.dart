@@ -97,15 +97,13 @@ class AutoPathLayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
-      return Stack(children: [
-        CustomPaint(
-          painter: AutoPathPainter(positions, color),
-          child: Opacity(
-            opacity: 0,
-            child: Image.asset('assets/images/auto_background.png'),
-          ),
+      return CustomPaint(
+        painter: AutoPathPainter(positions, color),
+        child: Opacity(
+          opacity: 0,
+          child: Image.asset('assets/images/auto_background.png'),
         ),
-      ]);
+      );
     });
     ;
   }

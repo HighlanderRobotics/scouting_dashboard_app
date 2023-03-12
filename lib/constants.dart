@@ -18,6 +18,7 @@ List<Tournament> tournamentList = <Tournament>[
 // Picklists
 
 final List<PicklistWeight> picklistWeights = [
+  PicklistWeight('avgTotal', 'Average total'),
   PicklistWeight('defenseScore', 'Defense score'),
   PicklistWeight('teleopScore', 'Teleop score'),
   PicklistWeight('coneOneScore', 'Cones L1'),
