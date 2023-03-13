@@ -169,7 +169,7 @@ class _ScheduleState extends State<Schedule> {
                   isScoutedResponse["${match.identity.toMediumKey()}_5"],
                 ];
 
-                if (!match.teams.any((team) => _teamsFilter.contains(team)) &&
+                if (!_teamsFilter.every((team) => match.teams.contains(team)) &&
                     _teamsFilter.isNotEmpty) {
                   return Container();
                 }
