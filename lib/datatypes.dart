@@ -76,3 +76,10 @@ Future<Map<String, String?>> getScoutedStatuses() async {
 
   return isScoutedElegante;
 }
+
+class ScoringMethod {
+  const ScoringMethod(this.path, this.localizedName);
+
+  final String path;
+  final String localizedName;
+}

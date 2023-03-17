@@ -15,6 +15,16 @@ List<Tournament> tournamentList = <Tournament>[
   Tournament("2023camb", "Monterey"),
 ];
 
+const List<ScoringMethod> scoringMethods = [
+  ScoringMethod('coneOne', "L1 Cones"),
+  ScoringMethod('coneTwo', "L2 Cones"),
+  ScoringMethod('coneThree', "L3 Cones"),
+  ScoringMethod('cubeOne', "L1 Cubes"),
+  ScoringMethod('cubeTwo', "L2 Cubes"),
+  ScoringMethod('cubeThree', "L3 Cubes"),
+  ScoringMethod('climb', "Charge Station"),
+];
+
 // Picklists
 
 final List<PicklistWeight> picklistWeights = [
