@@ -598,10 +598,13 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
                                           ),
                                         ]
                                       : data!.keys
-                                          .map((e) => PieChartSectionData(
-                                              radius: min(constraints.maxWidth, constraints.maxHeight) /
+                                          .map(
+                                            (e) => PieChartSectionData(
+                                              radius: min(constraints.maxWidth,
+                                                      constraints.maxHeight) /
                                                   2,
-                                              title: (data![e]!.toDouble() * 100)
+                                              title: (data![e]!.toDouble() *
+                                                          100)
                                                       .round()
                                                       .toString() +
                                                   "%\n" +
@@ -617,9 +620,13 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
                                                   .colorScheme
                                                   .primary,
                                               titleStyle: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onPrimary)))
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimary,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          )
                                           .toList(),
                                   centerSpaceRadius: 0,
                                   borderData: FlBorderData(show: false),

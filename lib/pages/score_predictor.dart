@@ -193,7 +193,7 @@ class _ScorePredictorState extends State<ScorePredictor> {
             ],
           ),
           const SizedBox(height: 40),
-          ElevatedButton(
+          FilledButton(
             onPressed: int.tryParse(red1FieldValue) == null ||
                     int.tryParse(red2FieldValue) == null ||
                     int.tryParse(red3FieldValue) == null ||

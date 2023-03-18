@@ -25,7 +25,8 @@ class _RoleSelectorState extends State<RoleSelector> {
           const SizedBox(height: 20),
           ListTile(
             title: const Text("Analyst"),
-            leading: const Icon(Icons.insights),
+            leading: Icon(Icons.insights,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
             trailing: Radio(
                 value: "analyst",
                 activeColor: Theme.of(context).colorScheme.primary,
@@ -39,7 +40,8 @@ class _RoleSelectorState extends State<RoleSelector> {
           ),
           ListTile(
             title: const Text("Scouting Lead"),
-            leading: const Icon(Icons.supervisor_account),
+            leading: Icon(Icons.supervisor_account,
+                color: Theme.of(context).colorScheme.onSurfaceVariant),
             trailing: Radio(
                 value: "scouting_lead",
                 activeColor: Theme.of(context).colorScheme.primary,
@@ -55,16 +57,21 @@ class _RoleSelectorState extends State<RoleSelector> {
           const Text(
               "Both get access to processed scouting data. Scouting leads get additional tools for modifying the scout schedule and scanning QR codes."),
           const SizedBox(height: 50),
-          ElevatedButton(
-            onPressed: (() async {
-              final SharedPreferences prefs =
-                  await SharedPreferences.getInstance();
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FilledButton(
+                onPressed: (() async {
+                  final SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
 
-              await prefs.setString("role", role);
+                  await prefs.setString("role", role);
 
-              Navigator.of(context).pushNamed("/server_authority_setup");
-            }),
-            child: const Text("Next"),
+                  Navigator.of(context).pushNamed("/server_authority_setup");
+                }),
+                child: const Text("Next"),
+              ),
+            ],
           ),
         ],
       ),

@@ -42,7 +42,7 @@ class _TournamentSelectorState extends State<TournamentSelector> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             const SizedBox(width: 10),
-            ElevatedButton(
+            FilledButton(
               onPressed: selectedTournament == null
                   ? null
                   : () async {

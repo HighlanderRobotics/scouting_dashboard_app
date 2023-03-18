@@ -51,7 +51,7 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ElevatedButton.icon(
+              FilledButton.tonalIcon(
                 onPressed: () {
                   Navigator.of(context).pushNamed("/setup_code_scanner");
                 },
@@ -59,7 +59,7 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
                 label: const Text("Use QR code"),
               ),
               const SizedBox(width: 10),
-              ElevatedButton(
+              FilledButton(
                   onPressed: validServerAuthority.hasMatch(serverAuthority)
                       ? () async {
                           final SharedPreferences prefs =

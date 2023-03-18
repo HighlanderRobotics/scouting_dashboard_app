@@ -26,6 +26,10 @@ class _InitialLoaderState extends State<InitialLoader> {
       onboardingCompleted = true;
     }
 
+    if (prefs.getString("tournament_localized") == null) {
+      onboardingCompleted = false;
+    }
+
     if (prefs.getStringList('picklists') == null) {
       await prefs.setStringList(
           'picklists', defaultPicklists.map((e) => e.toJSON()).toList());
