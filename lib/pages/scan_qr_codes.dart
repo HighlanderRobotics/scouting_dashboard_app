@@ -39,6 +39,8 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
     QRDataCollection(data: []),
   ];
 
+  String? mostRecentMatchShortKey;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -152,6 +154,10 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
 
               Map<String, dynamic> parsedFullJSON = jsonDecode(fullJSON);
 
+              setState(() {
+                mostRecentMatchShortKey = parsedFullJSON['matchKey'];
+              });
+
               ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(
                     "Uploading ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
@@ -168,8 +174,7 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
                     'Content-Type': 'application/json',
                   });
 
-              ScaffoldMessenger.of(context)
-                  .hideCurrentSnackBar(reason: SnackBarClosedReason.remove);
+              ScaffoldMessenger.of(context).removeCurrentSnackBar();
 
               if (response.statusCode == 200) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -210,11 +215,15 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
               "${match.identity.toMediumKey()}_5",
             ];
 
-            if (currentMatchStatus
-                .any((element) => isScoutedAll[element] == null)) {
+            if (mostRecentMatchShortKey == null
+                ? currentMatchStatus
+                    .any((element) => isScoutedAll[element] == null)
+                : "${match.identity.type.shortName}${match.identity.number}" ==
+                    mostRecentMatchShortKey) {
               nextUnscoutedMatch = match;
               nextUnscoutedMatchStatus =
                   currentMatchStatus.map((e) => isScoutedAll[e]).toList();
+
               nextUnscoutedMatchPlannedScouts = scoutSchedule.getScoutsForMatch(
                 match.ordinalNumber,
               );
@@ -289,7 +298,7 @@ class ScoutStatus extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: [
-        scanned || dataCollection.data.length == dataCollection.totalPageCount
+        scanned
             ? const Icon(Icons.check_box)
             : Text(
                 "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
