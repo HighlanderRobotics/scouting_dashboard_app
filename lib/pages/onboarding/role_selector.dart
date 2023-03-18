@@ -62,7 +62,7 @@ class _RoleSelectorState extends State<RoleSelector> {
 
               await prefs.setString("role", role);
 
-              Navigator.of(context).pushNamed("/tournament_selector");
+              Navigator.of(context).pushNamed("/server_authority_setup");
             }),
             child: const Text("Next"),
           ),

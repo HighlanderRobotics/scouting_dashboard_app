@@ -1,7 +1,9 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatefulWidget {
@@ -14,6 +16,7 @@ class Settings extends StatefulWidget {
 class _SettingsState extends State<Settings> {
   String? initialRole;
   String? initialTournament;
+  String? initialTournamentName;
   String? initialServerAuthority;
 
   Future<void> setInitialValues() async {
@@ -22,6 +25,7 @@ class _SettingsState extends State<Settings> {
     setState(() {
       initialRole = prefs.getString("role");
       initialTournament = prefs.getString("tournament");
+      initialTournamentName = prefs.getString("tournament_localized");
       initialServerAuthority = prefs.getString("serverAuthority");
     });
   }
@@ -37,7 +41,8 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     if (initialRole == null ||
         initialTournament == null ||
-        initialServerAuthority == null) {
+        initialServerAuthority == null ||
+        initialTournamentName == null) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -45,9 +50,11 @@ class _SettingsState extends State<Settings> {
       );
     } else {
       return LoadedSettings(
-          initialRole: initialRole!,
-          initialTournament: initialTournament!,
-          initialServerAuthority: initialServerAuthority!);
+        initialRole: initialRole!,
+        initialTournament: initialTournament!,
+        initialTournamentName: initialTournamentName!,
+        initialServerAuthority: initialServerAuthority!,
+      );
     }
   }
 }
@@ -57,11 +64,13 @@ class LoadedSettings extends StatefulWidget {
     Key? key,
     required this.initialRole,
     required this.initialTournament,
+    required this.initialTournamentName,
     required this.initialServerAuthority,
   }) : super(key: key);
 
   final String initialRole;
   final String initialTournament;
+  final String initialTournamentName;
   final String initialServerAuthority;
 
   @override
@@ -71,6 +80,7 @@ class LoadedSettings extends StatefulWidget {
 class _LoadedSettingsState extends State<LoadedSettings> {
   late String role = widget.initialRole;
   late String tournament = widget.initialTournament;
+  late String tournamentName = widget.initialTournamentName;
   late String serverAuthority = widget.initialServerAuthority;
   late final TextEditingController _serverAuthorityController =
       TextEditingController(text: serverAuthority);
@@ -102,6 +112,8 @@ class _LoadedSettingsState extends State<LoadedSettings> {
 
                     await prefs.setString("role", role);
                     await prefs.setString("tournament", tournament);
+                    await prefs.setString(
+                        "tournament_localized", tournamentName);
                     await prefs.setString("serverAuthority", serverAuthority);
 
                     const snackBar = SnackBar(
@@ -164,22 +176,21 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     color: Theme.of(context).colorScheme.onBackground)),
               ),
               const SizedBox(height: 40),
-              DropdownSearch(
-                popupProps: const PopupProps.menu(
-                  // showSelectedItems: true,
-                  fit: FlexFit.loose,
-                ),
-                selectedItem: getTournamentByKey(tournament),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration:
-                      InputDecoration(labelText: "Tournament", filled: true),
-                ),
-                items: tournamentList,
+              TournamentKeyPicker(
                 onChanged: (value) {
                   setState(() {
                     tournament = value.key;
+                    tournamentName = value.localized;
                   });
                 },
+                initialValue: Tournament(
+                  widget.initialTournament,
+                  widget.initialTournamentName,
+                ),
+                decoration: const InputDecoration(
+                  labelText: "Tournament",
+                  filled: true,
+                ),
               ),
               const SizedBox(height: 20),
               TextField(
@@ -222,6 +233,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
 
                                   await prefs.remove("role");
                                   await prefs.remove("tournament");
+                                  await prefs.remove("tournamentName");
                                   await prefs.remove("serverAuthority");
                                   await prefs.remove("onboardingCompleted");
                                   await prefs.remove("picklists");

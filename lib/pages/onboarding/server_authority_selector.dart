@@ -68,14 +68,12 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
                           await prefs.setString(
                               "serverAuthority", serverAuthority);
 
-                          await prefs.setBool("onboardingCompleted", true);
-
                           // ignore: use_build_context_synchronously
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                              "/match_schedule", (route) => false);
+                          Navigator.of(context)
+                              .pushNamed("/tournament_selector");
                         }
                       : null,
-                  child: const Text("Finish")),
+                  child: const Text("Next")),
             ],
           ),
         ],

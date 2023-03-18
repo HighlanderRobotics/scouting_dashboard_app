@@ -11,7 +11,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
   Future<String> getTournamentName() async {
     final prefs = await SharedPreferences.getInstance();
 
-    return getTournamentByKey(prefs.getString("tournament")!)!.localized;
+    return prefs.getString("tournament_localized")!;
   }
 
   @override
