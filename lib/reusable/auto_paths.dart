@@ -14,6 +14,8 @@ class AutoPathPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     print(size);
 
+    positions.retainWhere((element) => autoPositions.containsKey(element));
+
     Paint paint = Paint();
     paint.strokeWidth = 4;
     paint.style = PaintingStyle.stroke;
