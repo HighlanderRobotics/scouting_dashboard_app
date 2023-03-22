@@ -60,7 +60,7 @@ String numberVizualizationBuilder(num num) {
   return num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
 }
 
-List<MetricCategoryData> metricCategories = [
+final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Score", [
     CategoryMetric(
       localizedName: "Average total",
@@ -169,14 +169,28 @@ List<MetricCategoryData> metricCategories = [
       hideDetails: true,
     ),
   ]),
-  MetricCategoryData("Defense", [
+  MetricCategoryData("Misc", [
     CategoryMetric(
-      localizedName: "Average time",
-      abbreviatedLocalizedName: "Avg time",
+      localizedName: "Avg defense time",
+      abbreviatedLocalizedName: "Avg defense time",
       valueVizualizationBuilder: ((p0) => prettyDuration(
           Duration(seconds: (p0 as num).toInt()),
           abbreviated: true)),
       path: "defenseTime",
+    ),
+    CategoryMetric(
+      localizedName: "Adjusted docked",
+      abbreviatedLocalizedName: "Adjusted docked",
+      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
+      path: 'adjustedDocked',
+      hideDetails: true,
+    ),
+    CategoryMetric(
+      localizedName: "Adjusted engaged",
+      abbreviatedLocalizedName: "Adjusted engaged",
+      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
+      path: 'adjustedEngaged',
+      hideDetails: true,
     ),
   ]),
 ];
