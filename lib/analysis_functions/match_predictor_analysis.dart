@@ -4,8 +4,8 @@ import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
 
-class ScorePredictorAnalysis extends AnalysisFunction {
-  ScorePredictorAnalysis({
+class MatchPredictorAnalysis extends AnalysisFunction {
+  MatchPredictorAnalysis({
     required this.blue1,
     required this.blue2,
     required this.blue3,
@@ -23,8 +23,8 @@ class ScorePredictorAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/analysis/predictWinning", {
+    var response = await http.get(
+        Uri.http((await getServerAuthority())!, "/API/analysis/predictMatch", {
       "blue1": blue1.toString(),
       "blue2": blue2.toString(),
       "blue3": blue3.toString(),

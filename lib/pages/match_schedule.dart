@@ -196,7 +196,7 @@ class _ScheduleState extends State<Schedule> {
                             InkWell(
                               onTap: () {
                                 Navigator.of(context).pushNamed(
-                                  "/score_predictor",
+                                  "/match_predictor",
                                   arguments: {
                                     'red1': match.teams[0].toString(),
                                     'red2': match.teams[1].toString(),

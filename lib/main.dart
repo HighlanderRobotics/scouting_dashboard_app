@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
+import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
@@ -14,7 +15,7 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
-import 'package:scouting_dashboard_app/pages/score_predictor.dart';
+import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/scout_schedule_qr.dart';
@@ -32,7 +33,8 @@ void main() async {
       '/match_schedule': (context) => const Schedule(),
       '/team_lookup': (context) => const TeamLookup(),
       '/team_lookup_details': (context) => const TeamLookupDetails(),
-      '/score_predictor': (context) => const ScorePredictor(),
+      '/match_predictor_opener': (context) => const MatchPredictorOpenerPage(),
+      '/match_predictor': (context) => const MatchPredictor(),
       '/role_selector': (context) => const RoleSelector(),
       '/tournament_selector': (context) => const TournamentSelector(),
       '/server_authority_setup': (context) => const ServerAuthoritySetup(),

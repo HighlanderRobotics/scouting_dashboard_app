@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:http/http.dart' as http;
@@ -82,4 +83,13 @@ class ScoringMethod {
 
   final String path;
   final String localizedName;
+}
+
+extension ListSpaceBetweenExtension on List<Widget> {
+  List<Widget> withSpaceBetween({double? width, double? height}) => [
+        for (int i = 0; i < this.length; i++) ...[
+          if (i > 0) SizedBox(width: width, height: height),
+          this[i],
+        ],
+      ];
 }

@@ -80,13 +80,13 @@ class GlobalNavigationDrawer extends StatelessWidget {
               ),
               const SectionHeader(title: "Data Analysis"),
               DrawerDestination(
-                label: "Score Predictor",
+                label: "Match Predictor",
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
-                      context, "/score_predictor", (route) => false);
+                      context, "/match_predictor_opener", (route) => false);
                 },
                 isSelected:
-                    ModalRoute.of(context)?.settings.name == "/score_predictor",
+                    ModalRoute.of(context)?.settings.name == "/match_predictor",
                 icon: Icons.psychology,
               ),
               DrawerDestination(
