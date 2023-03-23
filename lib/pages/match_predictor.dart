@@ -334,7 +334,7 @@ class WinningPrediction extends StatelessWidget {
                         ),
                         const SizedBox(width: 5),
                         Text(
-                          "${(redWinning * 100).round()}%",
+                          "${(blueWinning * 100).round()}%",
                           // style: Theme.of(context).textTheme.titleLarge,
                           maxLines: 1,
                         )
