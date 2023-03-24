@@ -179,15 +179,23 @@ final List<MetricCategoryData> metricCategories = [
       path: "defenseTime",
     ),
     CategoryMetric(
-      localizedName: "Adjusted docked",
-      abbreviatedLocalizedName: "Adjusted docked",
+      localizedName: 'Driver abilitty',
+      abbreviatedLocalizedName: 'Driver ability',
+      valueVizualizationBuilder: (v) => numberVizualizationBuilder(v),
+      path: 'driverAbility',
+    ),
+  ]),
+  MetricCategoryData("Climber adjusted", [
+    CategoryMetric(
+      localizedName: "Docked",
+      abbreviatedLocalizedName: "Docked",
       valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
       path: 'adjustedDocked',
       hideDetails: true,
     ),
     CategoryMetric(
-      localizedName: "Adjusted engaged",
-      abbreviatedLocalizedName: "Adjusted engaged",
+      localizedName: "Engaged",
+      abbreviatedLocalizedName: "Engaged",
       valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
       path: 'adjustedEngaged',
       hideDetails: true,

@@ -30,6 +30,7 @@ const List<ScoringMethod> scoringMethods = [
 final List<PicklistWeight> picklistWeights = [
   PicklistWeight('avgTotal', 'Average total'),
   PicklistWeight('defenseScore', 'Defense score'),
+  PicklistWeight('driverAbility', 'Driver ability'),
   PicklistWeight('teleopScore', 'Teleop score'),
   PicklistWeight('coneOneScore', 'Cones L1'),
   PicklistWeight('coneTwoScore', 'Cones L2'),
