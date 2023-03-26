@@ -9,12 +9,14 @@ class CategoryMetric {
     required this.path,
     this.hideDetails = false,
     this.hideOverview = false,
+    this.max,
   });
 
   String abbreviatedLocalizedName;
   String localizedName;
   bool hideDetails;
   bool hideOverview;
+  double? max;
 
   String path;
 
@@ -179,10 +181,17 @@ final List<MetricCategoryData> metricCategories = [
       path: "defenseTime",
     ),
     CategoryMetric(
-      localizedName: 'Driver abilitty',
+      localizedName: 'Driver ability',
       abbreviatedLocalizedName: 'Driver ability',
       valueVizualizationBuilder: (v) => numberVizualizationBuilder(v),
       path: 'driverAbility',
+      max: 5,
+    ),
+    CategoryMetric(
+      localizedName: 'Penalties',
+      abbreviatedLocalizedName: 'Penalties',
+      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
+      path: 'pentalties',
     ),
   ]),
   MetricCategoryData("Climber adjusted", [
@@ -211,6 +220,7 @@ List<BreakdownData> breakdowns = [
       BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
       BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
       BreakdownSegmentData(localizedNameSingular: "Offense", path: "offense"),
+      BreakdownSegmentData(localizedNameSingular: "Immobile", path: "immobile"),
     ],
   ),
   BreakdownData(

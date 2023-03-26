@@ -7,10 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_metric_details_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/auto_paths.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
@@ -141,7 +143,8 @@ class AnalysisOverview extends AnalysisVisualization {
 
     return Column(
       children: [
-        if (analysisMap.containsKey('array')) sparkline(context, snapshot),
+        if (analysisMap.containsKey('array'))
+          sparkline(context, snapshot, analysisFunction.metric.max),
         if (analysisMap.containsKey('one') &&
             analysisMap.containsKey('two') &&
             analysisMap.containsKey('three'))
@@ -166,6 +169,77 @@ class AnalysisOverview extends AnalysisVisualization {
               const SizedBox(height: 10),
             ],
           ),
+        if (analysisFunction.metric.path == "pentalties") ...[
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Matches",
+                    style: Theme.of(context).textTheme.titleMedium!.merge(
+                          TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant),
+                        ),
+                  ),
+                  if (analysisMap['matches'].isEmpty)
+                    Text(
+                      "No penalties in any matches",
+                      style: Theme.of(context).textTheme.bodyMedium!.merge(
+                            TextStyle(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                    ),
+                  ...((analysisMap['matches'] as List<dynamic>).map((matchMap) {
+                    final match =
+                        GameMatchIdentity.fromLongKey(matchMap['match']);
+
+                    final penalty = Penalty.values[matchMap['cardType']];
+
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          style: Theme.of(context).textTheme.bodyMedium!.merge(
+                                TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                          match.getLocalizedDescription(
+                            includeTournament: false,
+                          ),
+                        ),
+                        Text(
+                          style: Theme.of(context).textTheme.bodyMedium!.merge(
+                                TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                              ),
+                          penalty.localizedDescription,
+                        )
+                      ],
+                    );
+                  }).toList())
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
         Row(children: [
           if (analysisMap.containsKey('result'))
             valueBox(
@@ -231,7 +305,12 @@ class AnalysisOverview extends AnalysisVisualization {
               ),
             ),
         ]),
-        if (analysisMap.containsKey('paths')) autoPaths(context, analysisMap),
+        if (analysisMap.containsKey('paths'))
+          TeamAutoPaths(
+            autoPaths: (analysisMap['paths'] as List<dynamic>)
+                .map((e) => AutoPath.fromMap(e))
+                .toList(),
+          ),
         if (analysisFunction.metric.path == "avgTeleScore")
           ScoringBreakdown(analysisMap, analysisFunction.teamNumber),
       ],
@@ -263,79 +342,8 @@ class AnalysisOverview extends AnalysisVisualization {
     );
   }
 
-  Container autoPaths(BuildContext context, Map<String, dynamic> analysisMap) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: AutoPaths(
-            layers: (analysisMap['paths'] as List<dynamic>)
-                .map((path) => AutoPathLayer(
-                      positions: (path['positions'] as List<dynamic>)
-                          .fold(
-                              [],
-                              (previousValue, element) => [
-                                    ...previousValue,
-                                    if (AutoPathPosition.values.length >
-                                        element)
-                                      element
-                                  ])
-                          .map((positionInt) =>
-                              AutoPathPosition.values[positionInt])
-                          .toList(),
-                      color: HSLColor.fromAHSL(
-                        1,
-                        200,
-                        path['frequency'] /
-                            (analysisMap['paths'] as List<dynamic>)
-                                .map((e) => e['frequency'])
-                                .fold(
-                                    0,
-                                    (previousValue, element) =>
-                                        element > previousValue
-                                            ? element
-                                            : previousValue),
-                        0.5,
-                      ).toColor(),
-                    ))
-                .toList()),
-      ),
-    );
-  }
-
-  Container valueBox(BuildContext context, Widget value, String description,
-      bool alternateColorScheme) {
-    return Container(
-      decoration: BoxDecoration(
-        color: alternateColorScheme
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.primaryContainer,
-        borderRadius: const BorderRadius.all(Radius.circular(6)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            value,
-            Text(
-              description,
-              style: Theme.of(context).textTheme.labelMedium!.merge(
-                    TextStyle(
-                        color: alternateColorScheme
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : Theme.of(context).colorScheme.onPrimaryContainer),
-                  ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget sparkline(BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+  Widget sparkline(
+      BuildContext context, AsyncSnapshot<dynamic> snapshot, double? max) {
     return Column(
       children: [
         AspectRatio(
@@ -362,6 +370,8 @@ class AnalysisOverview extends AnalysisVisualization {
                 padding: const EdgeInsets.all(8.0),
                 child: LineChart(
                   LineChartData(
+                    minY: 0,
+                    maxY: max,
                     titlesData: FlTitlesData(
                       bottomTitles: AxisTitles(
                           axisNameWidget: const Text("Match"),
@@ -683,4 +693,33 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
       ],
     );
   }
+}
+
+Container valueBox(BuildContext context, Widget value, String description,
+    bool alternateColorScheme) {
+  return Container(
+    decoration: BoxDecoration(
+      color: alternateColorScheme
+          ? Theme.of(context).colorScheme.primary
+          : Theme.of(context).colorScheme.primaryContainer,
+      borderRadius: const BorderRadius.all(Radius.circular(6)),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        children: [
+          value,
+          Text(
+            description,
+            style: Theme.of(context).textTheme.labelMedium!.merge(
+                  TextStyle(
+                      color: alternateColorScheme
+                          ? Theme.of(context).colorScheme.onPrimary
+                          : Theme.of(context).colorScheme.onPrimaryContainer),
+                ),
+          ),
+        ],
+      ),
+    ),
+  );
 }

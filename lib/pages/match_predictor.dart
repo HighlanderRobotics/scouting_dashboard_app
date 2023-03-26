@@ -165,67 +165,74 @@ class _MatchPredictorState extends State<MatchPredictor> {
     String allianceName = alliance == 0 ? 'red' : 'blue';
 
     return Column(children: [
-      Row(
-        children: (data["${allianceName}Alliance"]['teams']
-                .map((e) {
-                  final role = RobotRole.values[e['role']];
+      data["${allianceName}Alliance"]['teams'] == null
+          ? const Text("Not enough data")
+          : Row(
+              children: (data["${allianceName}Alliance"]['teams']
+                      .map((e) {
+                        final role = RobotRole.values[e['role']];
 
-                  return Flexible(
-                    flex: 1,
-                    child: InkWell(
-                      onTap: () => Navigator.of(context).pushNamed(
-                          "/team_lookup",
-                          arguments: <String, dynamic>{
-                            'team': int.parse(e['team'].toString())
-                          }),
-                      child: Container(
-                        decoration: BoxDecoration(
-                            color: [redAlliance, blueAlliance][alliance],
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(10))),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            children: [
-                              Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                        return Flexible(
+                          flex: 1,
+                          child: InkWell(
+                            onTap: () => Navigator.of(context).pushNamed(
+                                "/team_lookup",
+                                arguments: <String, dynamic>{
+                                  'team': int.parse(e['team'].toString())
+                                }),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  color: [redAlliance, blueAlliance][alliance],
+                                  borderRadius: const BorderRadius.all(
+                                      Radius.circular(10))),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
                                   children: [
-                                    Tooltip(
-                                      message: role.name,
-                                      child: Icon(role.littleEmblem),
-                                    ),
-                                    const SizedBox(width: 5),
+                                    Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Tooltip(
+                                            message: role.name,
+                                            child: Icon(role.littleEmblem),
+                                          ),
+                                          const SizedBox(width: 5),
+                                          Text(
+                                            e['team'],
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyLarge,
+                                          ),
+                                        ]),
+                                    const SizedBox(height: 10),
                                     Text(
-                                      e['team'],
-                                      style:
-                                          Theme.of(context).textTheme.bodyLarge,
+                                      "Avg score",
+                                      style: TextStyle(
+                                        color: [
+                                          onRedAlliance,
+                                          onBlueAlliance
+                                        ][alliance],
+                                      ),
                                     ),
-                                  ]),
-                              const SizedBox(height: 10),
-                              Text(
-                                "Avg score",
-                                style: TextStyle(
-                                  color: [
-                                    onRedAlliance,
-                                    onBlueAlliance
-                                  ][alliance],
+                                    Text(
+                                      numberVizualizationBuilder(
+                                          e['averagePoints']),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
+                                    )
+                                  ],
                                 ),
                               ),
-                              Text(
-                                numberVizualizationBuilder(e['averagePoints']),
-                                style: Theme.of(context).textTheme.titleMedium,
-                              )
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  );
-                })
-                .toList()
-                .cast<Widget>() as List<Widget>)
-            .withSpaceBetween(width: 15),
-      ),
+                        );
+                      })
+                      .toList()
+                      .cast<Widget>() as List<Widget>)
+                  .withSpaceBetween(width: 15),
+            ),
       const SizedBox(height: 15),
       Container(
         decoration: BoxDecoration(
@@ -239,21 +246,24 @@ class _MatchPredictorState extends State<MatchPredictor> {
             children: [
               const Text("Total points"),
               Text(
-                numberVizualizationBuilder(
-                  data["${allianceName}Alliance"]['totalPoints'],
-                ),
+                data["${allianceName}Alliance"]['totalPoints'] == null
+                    ? "--"
+                    : numberVizualizationBuilder(
+                        data["${allianceName}Alliance"]['totalPoints'],
+                      ),
               ),
             ],
           ),
         ),
       ),
       const SizedBox(height: 15),
-      cargoStack(
-        context,
-        data['${allianceName}Alliance'],
-        backgroundColor: [onRedAlliance, onBlueAlliance][alliance],
-        foregroundColor: [redAlliance, blueAlliance][alliance],
-      ),
+      if (data['levelCargo'] != null)
+        cargoStack(
+          context,
+          data['${allianceName}Alliance'],
+          backgroundColor: [onRedAlliance, onBlueAlliance][alliance],
+          foregroundColor: [redAlliance, blueAlliance][alliance],
+        ),
     ]);
   }
 }
@@ -261,89 +271,99 @@ class _MatchPredictorState extends State<MatchPredictor> {
 class WinningPrediction extends StatelessWidget {
   const WinningPrediction({
     super.key,
-    required this.redWinning,
-    required this.blueWinning,
+    this.redWinning,
+    this.blueWinning,
   });
 
-  final num redWinning;
-  final num blueWinning;
+  final num? redWinning;
+  final num? blueWinning;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(7)),
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(7)),
+        color: Theme.of(context).colorScheme.surfaceVariant,
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(
         height: 30,
-        child: Stack(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: (redWinning * 100).round(),
-                  child: Container(
-                    decoration: BoxDecoration(color: redAlliance),
+        child: (redWinning == null || blueWinning == null)
+            ? Center(
+                child: Text(
+                  "Not enough data",
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: (blueWinning * 100).round(),
-                  child: Container(
-                    decoration: BoxDecoration(color: blueAlliance),
+              )
+            : Stack(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Flexible(
+                        fit: FlexFit.tight,
+                        flex: (redWinning! * 100).round(),
+                        child: Container(
+                          decoration: BoxDecoration(color: redAlliance),
+                        ),
+                      ),
+                      Flexible(
+                        fit: FlexFit.tight,
+                        flex: (blueWinning! * 100).round(),
+                        child: Container(
+                          decoration: BoxDecoration(color: blueAlliance),
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Red alliance",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          "${(redWinning * 100).round()}%",
-                          // style: Theme.of(context).textTheme.titleLarge,
-                          maxLines: 1,
-                        )
-                      ]),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Blue alliance",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(width: 5),
-                        Text(
-                          "${(blueWinning * 100).round()}%",
-                          // style: Theme.of(context).textTheme.titleLarge,
-                          maxLines: 1,
-                        )
-                      ]),
-                ),
-              ],
-            ),
-          ],
-        ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Red alliance",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                "${(redWinning! * 100).round()}%",
+                                // style: Theme.of(context).textTheme.titleLarge,
+                                maxLines: 1,
+                              )
+                            ]),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Blue alliance",
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                style: Theme.of(context).textTheme.labelLarge,
+                              ),
+                              const SizedBox(width: 5),
+                              Text(
+                                "${(blueWinning! * 100).round()}%",
+                                // style: Theme.of(context).textTheme.titleLarge,
+                                maxLines: 1,
+                              )
+                            ]),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
       ),
     );
   }

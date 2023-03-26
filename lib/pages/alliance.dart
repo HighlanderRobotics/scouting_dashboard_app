@@ -99,7 +99,7 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
       const SizedBox(height: 10),
-      cargoStack(context, analysisMap),
+      if (analysisMap['levelCargo'] != null) cargoStack(context, analysisMap),
       const SizedBox(height: 10),
       AllianceAutoPaths(analysisMap: analysisMap),
     ]);

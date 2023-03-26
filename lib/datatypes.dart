@@ -59,6 +59,27 @@ bool areSchedulesEqual(ScoutSchedule schedule1, ScoutSchedule schedule2) {
   }
 }
 
+enum Penalty {
+  none,
+  yellowCard,
+  redCard,
+}
+
+extension PenaltyExtension on Penalty {
+  String get localizedDescription {
+    switch (this) {
+      case Penalty.none:
+        return "None";
+      case Penalty.yellowCard:
+        return "Yellow card";
+      case Penalty.redCard:
+        return "Red card";
+      default:
+        return "Unknown";
+    }
+  }
+}
+
 Future<Map<String, String?>> getScoutedStatuses() async {
   final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(utf8.decode(
           (await http.get(Uri.http(

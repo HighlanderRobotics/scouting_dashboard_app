@@ -300,8 +300,10 @@ class ScoutStatus extends StatelessWidget {
       child: Row(children: [
         scanned
             ? const Icon(Icons.check_box)
-            : Text(
-                "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
+            : dataCollection.data.isEmpty
+                ? const Icon(Icons.check_box_outline_blank)
+                : Text(
+                    "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
         const SizedBox(width: 5),
         Text(name),
       ]),
