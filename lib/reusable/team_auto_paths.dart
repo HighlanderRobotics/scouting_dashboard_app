@@ -11,9 +11,13 @@ class TeamAutoPaths extends StatefulWidget {
   const TeamAutoPaths({
     super.key,
     required this.autoPaths,
+    this.onChanged,
+    this.initialSelection,
   });
 
   final List<AutoPath> autoPaths;
+  final dynamic Function(AutoPath)? onChanged;
+  final AutoPath? initialSelection;
 
   @override
   State<TeamAutoPaths> createState() => _TeamAutoPathsState();
@@ -22,8 +26,17 @@ class TeamAutoPaths extends StatefulWidget {
 class _TeamAutoPathsState extends State<TeamAutoPaths> {
   AutoPath? selectedPath;
 
+  bool initialized = false;
+
   @override
   Widget build(BuildContext context) {
+    if (initialized == false) {
+      setState(() {
+        selectedPath = widget.initialSelection;
+        initialized = true;
+      });
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -230,9 +243,15 @@ class _TeamAutoPathsState extends State<TeamAutoPaths> {
       items: widget.autoPaths,
       itemAsString: (item) => item.shortDescription,
       selectedItem: selectedPath,
-      onChanged: (newValue) => setState(() {
-        selectedPath = newValue;
-      }),
+      onChanged: (newValue) {
+        setState(() {
+          selectedPath = newValue;
+        });
+
+        if (widget.onChanged != null) {
+          widget.onChanged!(newValue!);
+        }
+      },
       dropdownDecoratorProps: const DropDownDecoratorProps(
           dropdownSearchDecoration: InputDecoration(
         label: Text("Path"),

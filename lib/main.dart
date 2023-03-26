@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
+import 'package:scouting_dashboard_app/pages/auto_path_selector.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
@@ -53,6 +54,7 @@ void main() async {
           const PicklistTeamBreakdownPage(),
       '/alliance': (context) => const AlliancePage(),
       '/my_alliance': (context) => const MyAlliancePage(),
+      '/auto_path_selector': (context) => const AutoPathSelectorPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

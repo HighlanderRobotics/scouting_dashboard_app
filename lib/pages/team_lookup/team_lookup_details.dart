@@ -10,7 +10,6 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
-import 'package:scouting_dashboard_app/reusable/auto_paths.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:shared_preferences/shared_preferences.dart';
