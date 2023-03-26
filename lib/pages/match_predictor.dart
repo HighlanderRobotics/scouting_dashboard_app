@@ -257,7 +257,7 @@ class _MatchPredictorState extends State<MatchPredictor> {
         ),
       ),
       const SizedBox(height: 15),
-      if (data['levelCargo'] != null)
+      if (data['${allianceName}Alliance']['levelCargo'] != null)
         cargoStack(
           context,
           data['${allianceName}Alliance'],
