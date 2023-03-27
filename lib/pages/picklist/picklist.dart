@@ -4,14 +4,14 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
-class PicklistPage extends StatefulWidget {
-  const PicklistPage({super.key});
+class MyPicklistPage extends StatefulWidget {
+  const MyPicklistPage({super.key});
 
   @override
-  State<PicklistPage> createState() => _PicklistPageState();
+  State<MyPicklistPage> createState() => _MyPicklistPageState();
 }
 
-class _PicklistPageState extends State<PicklistPage> {
+class _MyPicklistPageState extends State<MyPicklistPage> {
   @override
   Widget build(BuildContext context) {
     ConfiguredPicklist picklist = (ModalRoute.of(context)!.settings.arguments
@@ -25,6 +25,45 @@ class _PicklistPageState extends State<PicklistPage> {
       appBar: AppBar(
         title: Text(picklist.title),
         actions: [
+          IconButton(
+            onPressed: () async {
+              try {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Uploading..."),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+
+                await picklist.upload();
+
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Successfully uploaded picklist."),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              } catch (error) {
+                debugPrint((error as TypeError).stackTrace.toString());
+
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text(
+                    "Error uploading picklist: $error",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer,
+                    ),
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                ));
+              }
+            },
+            icon: const Icon(Icons.upload),
+          ),
           IconButton(
             onPressed: () {
               Navigator.of(context).pushNamed("/edit_picklist", arguments: {

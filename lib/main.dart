@@ -13,8 +13,10 @@ import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
+import 'package:scouting_dashboard_app/pages/picklist/view_picklist_weights.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
@@ -47,7 +49,7 @@ void main() async {
       '/scout_schedule_qr': (context) => const ScoutScheduleQR(),
       '/scan_qr_codes': (context) => const ScanQRCodesPage(),
       '/picklists': (context) => const PicklistsPage(),
-      '/picklist': (context) => const PicklistPage(),
+      '/picklist': (context) => const MyPicklistPage(),
       '/new_picklist': (context) => const NewPicklistPage(),
       '/edit_picklist': (context) => const EditPicklistPage(),
       '/picklist_team_breakdown': (context) =>
@@ -55,6 +57,8 @@ void main() async {
       '/alliance': (context) => const AlliancePage(),
       '/my_alliance': (context) => const MyAlliancePage(),
       '/auto_path_selector': (context) => const AutoPathSelectorPage(),
+      '/shared_picklist': (context) => const SharedPicklistPage(),
+      '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
     },
     theme: ThemeData(
       useMaterial3: true,
