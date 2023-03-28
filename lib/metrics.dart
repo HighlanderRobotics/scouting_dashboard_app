@@ -185,7 +185,7 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: 'Driver ability',
       valueVizualizationBuilder: (v) => numberVizualizationBuilder(v),
       path: 'driverAbility',
-      max: 5,
+      max: 4,
     ),
     CategoryMetric(
       localizedName: 'Penalties',
