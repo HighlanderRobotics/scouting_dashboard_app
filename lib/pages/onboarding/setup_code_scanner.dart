@@ -60,8 +60,6 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
 
           await prefs.setString("serverAuthority", serverAuthority);
 
-          await prefs.setBool("onboardingCompleted", true);
-
           var snackBar = SnackBar(
             content: Text("Set server authority to $serverAuthority"),
             behavior: SnackBarBehavior.floating,
@@ -71,8 +69,8 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
           // ignore: use_build_context_synchronously
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil("/match_schedule", (route) => false);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              "/tournament_selector", (route) => false);
         }),
         childBelow: Column(
           mainAxisAlignment: MainAxisAlignment.center,
