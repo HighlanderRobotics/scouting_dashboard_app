@@ -171,15 +171,7 @@ final List<MetricCategoryData> metricCategories = [
       hideDetails: true,
     ),
   ]),
-  MetricCategoryData("Misc", [
-    CategoryMetric(
-      localizedName: "Avg defense time",
-      abbreviatedLocalizedName: "Avg defense time",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "defenseTime",
-    ),
+  MetricCategoryData("Driving", [
     CategoryMetric(
       localizedName: 'Driver ability',
       abbreviatedLocalizedName: 'Driver ability',
@@ -192,6 +184,22 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: 'Penalties',
       valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
       path: 'pentalties',
+    ),
+  ]),
+  MetricCategoryData("Misc", [
+    CategoryMetric(
+      localizedName: "Avg defense time",
+      abbreviatedLocalizedName: "Avg defense time",
+      valueVizualizationBuilder: ((p0) => prettyDuration(
+          Duration(seconds: (p0 as num).toInt()),
+          abbreviated: true)),
+      path: "defenseTime",
+    ),
+    CategoryMetric(
+      localizedName: "Links",
+      abbreviatedLocalizedName: "Links",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "links",
     ),
   ]),
   MetricCategoryData("Climber adjusted", [
