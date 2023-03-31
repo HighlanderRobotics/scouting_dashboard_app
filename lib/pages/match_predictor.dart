@@ -264,6 +264,33 @@ class _MatchPredictorState extends State<MatchPredictor> {
           backgroundColor: [onRedAlliance, onBlueAlliance][alliance],
           foregroundColor: [redAlliance, blueAlliance][alliance],
         ),
+      const SizedBox(height: 15),
+      Container(
+        decoration: BoxDecoration(
+          color: [onRedAlliance, onBlueAlliance][alliance],
+          borderRadius: const BorderRadius.all(Radius.circular(10)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(10),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "Links",
+                style: TextStyle(color: [redAlliance, blueAlliance][alliance]),
+              ),
+              Text(
+                data["${allianceName}Alliance"]['links'] == null
+                    ? "--"
+                    : numberVizualizationBuilder(
+                        data["${allianceName}Alliance"]['links'],
+                      ),
+                style: TextStyle(color: [redAlliance, blueAlliance][alliance]),
+              ),
+            ],
+          ),
+        ),
+      ),
     ]);
   }
 }
