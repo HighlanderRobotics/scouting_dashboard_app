@@ -217,6 +217,12 @@ final List<MetricCategoryData> metricCategories = [
       path: 'adjustedEngaged',
       hideDetails: true,
     ),
+    CategoryMetric(
+      localizedName: "Points",
+      abbreviatedLocalizedName: "Points",
+      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
+      path: 'adjustedClimbPoints',
+    ),
   ]),
 ];
 
