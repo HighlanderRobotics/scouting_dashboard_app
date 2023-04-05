@@ -11,9 +11,10 @@ import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart'
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
-import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/picklist/view_picklist_weights.dart';
@@ -59,6 +60,7 @@ void main() async {
       '/auto_path_selector': (context) => const AutoPathSelectorPage(),
       '/shared_picklist': (context) => const SharedPicklistPage(),
       '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
+      '/mutable_picklist': (context) => const MutablePicklistPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -19,45 +20,40 @@ class PicklistsPage extends StatefulWidget {
 }
 
 class _PicklistsPageState extends State<PicklistsPage> {
+  int selectedTab = 0;
+
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: getPicklists(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text("Picklists"),
-              ),
-              body: const PageBody(
-                padding: EdgeInsets.zero,
-                child: LinearProgressIndicator(),
-              ),
-              drawer: const GlobalNavigationDrawer(),
-            );
-          }
+    return DefaultTabController(
+      length: 3,
+      child: Builder(builder: (context) {
+        DefaultTabController.of(context).addListener(
+          () {
+            setState(() {
+              selectedTab = DefaultTabController.of(context).index;
+            });
+          },
+        );
 
-          if (snapshot.connectionState == ConnectionState.done &&
-              snapshot.hasData) {
-            List<ConfiguredPicklist> picklists = snapshot.data!;
-
-            return DefaultTabController(
-              length: 2,
-              child: Scaffold(
-                appBar: AppBar(
-                  title: const Text("Picklists"),
-                  bottom: const TabBar(tabs: [
-                    Text("Mine"),
-                    Text("Shared"),
-                  ]),
-                ),
-                body: TabBarView(
-                  children: [
-                    myPicklists(picklists, context),
-                    SharedPicklists(),
-                  ],
-                ),
-                floatingActionButton: FloatingActionButton(
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Picklists"),
+            bottom: const TabBar(tabs: [
+              Text("Mine"),
+              Text("Shared"),
+              Text("Mutable"),
+            ]),
+          ),
+          body: const TabBarView(
+            children: [
+              MyPicklists(),
+              SharedPicklists(),
+              MutablePicklists(),
+            ],
+          ),
+          floatingActionButton: selectedTab == 0 &&
+                  !DefaultTabController.of(context).indexIsChanging
+              ? FloatingActionButton(
                   onPressed: () {
                     Navigator.of(context).pushNamed('/new_picklist',
                         arguments: <String, dynamic>{
@@ -67,85 +63,109 @@ class _PicklistsPageState extends State<PicklistsPage> {
                         });
                   },
                   child: const Icon(Icons.add),
-                ),
-                drawer: const GlobalNavigationDrawer(),
+                )
+              : null,
+          drawer: const GlobalNavigationDrawer(),
+        );
+      }),
+    );
+  }
+}
+
+class MyPicklists extends StatefulWidget {
+  const MyPicklists({
+    super.key,
+  });
+
+  @override
+  State<MyPicklists> createState() => _MyPicklistsState();
+}
+
+class _MyPicklistsState extends State<MyPicklists> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: getPicklists(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return PageBody(
+              child: Text(
+                  "Encountered an error while fetching picklists:${snapshot.error}"),
+            );
+          }
+
+          if (snapshot.connectionState != ConnectionState.done) {
+            return PageBody(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: const [
+                  LinearProgressIndicator(),
+                ],
               ),
             );
           }
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Picklists"),
-            ),
-            body: const PageBody(
-              padding: EdgeInsets.zero,
-              child: Center(child: Icon(Icons.sentiment_dissatisfied_outlined)),
-            ),
-            drawer: const GlobalNavigationDrawer(),
+          List<ConfiguredPicklist> picklists = snapshot.data!;
+
+          return ScrollablePageBody(
+            padding: EdgeInsets.zero,
+            children: picklists
+                .map((picklist) => Column(
+                      children: [
+                        Dismissible(
+                          onUpdate: (details) {
+                            if ((details.reached && !details.previousReached) ||
+                                (!details.reached && details.previousReached)) {
+                              HapticFeedback.lightImpact();
+                            }
+                          },
+                          key: GlobalKey(),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Colors.red[900],
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: const [
+                                  Icon(Icons.delete),
+                                  SizedBox(width: 30),
+                                ],
+                              ),
+                            ),
+                          ),
+                          child: ListTile(
+                            title: Text(picklist.title),
+                            trailing: Icon(
+                              Icons.arrow_right,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pushNamed('/picklist',
+                                  arguments: <String, dynamic>{
+                                    'picklist': picklist,
+                                    'onChanged': () async {
+                                      await setPicklists(picklists);
+
+                                      setState(() {});
+                                    }
+                                  });
+                            },
+                          ),
+                          onDismissed: (direction) async {
+                            picklists.remove(picklist);
+
+                            await setPicklists(picklists);
+                          },
+                        ),
+                        Divider(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          height: 0,
+                        ),
+                      ],
+                    ))
+                .toList(),
           );
         });
-  }
-
-  ScrollablePageBody myPicklists(
-      List<ConfiguredPicklist> picklists, BuildContext context) {
-    return ScrollablePageBody(
-      padding: EdgeInsets.zero,
-      children: picklists
-          .map((picklist) => Column(
-                children: [
-                  Dismissible(
-                    onUpdate: (details) {
-                      if ((details.reached && !details.previousReached) ||
-                          (!details.reached && details.previousReached)) {
-                        HapticFeedback.lightImpact();
-                      }
-                    },
-                    key: GlobalKey(),
-                    direction: DismissDirection.endToStart,
-                    background: Container(
-                      color: Colors.red[900],
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: const [
-                            Icon(Icons.delete),
-                            SizedBox(width: 30),
-                          ],
-                        ),
-                      ),
-                    ),
-                    child: ListTile(
-                      title: Text(picklist.title),
-                      trailing: Icon(
-                        Icons.arrow_right,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/picklist',
-                            arguments: <String, dynamic>{
-                              'picklist': picklist,
-                              'onChanged': () async {
-                                await setPicklists(picklists);
-
-                                setState(() {});
-                              }
-                            });
-                      },
-                    ),
-                    onDismissed: (direction) async {
-                      picklists.remove(picklist);
-
-                      await setPicklists(picklists);
-                    },
-                  ),
-                  Divider(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
-                    height: 0,
-                  ),
-                ],
-              ))
-          .toList(),
-    );
   }
 }
 
@@ -277,6 +297,152 @@ class SharedPicklists extends StatelessWidget {
         );
       },
     );
+  }
+}
+
+Future<List<MutablePicklist>> getMutablePicklists() async {
+  final authority = (await getServerAuthority())!;
+
+  final response =
+      await http.get(Uri.http(authority, '/API/manager/getMutablePicklists'));
+
+  if (response.statusCode != 200) {
+    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+  }
+
+  return (jsonDecode(response.body) as List<dynamic>)
+      .map((listMap) => MutablePicklist(
+            uuid: listMap['uuid'],
+            name: listMap['name'],
+            teams: listMap['teams'].cast<int>(),
+          ))
+      .toList();
+}
+
+class MutablePicklists extends StatefulWidget {
+  const MutablePicklists({super.key});
+
+  @override
+  State<MutablePicklists> createState() => _MutablePicklistsState();
+}
+
+class _MutablePicklistsState extends State<MutablePicklists> {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: getMutablePicklists(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return PageBody(
+              child: Text(
+                  "Encountered an error while fetching picklists: ${snapshot.error}"),
+            );
+          }
+
+          if (snapshot.connectionState != ConnectionState.done) {
+            return PageBody(
+              padding: EdgeInsets.zero,
+              child: Column(
+                children: const [
+                  LinearProgressIndicator(),
+                ],
+              ),
+            );
+          }
+
+          List<MutablePicklist> picklists = snapshot.data!;
+
+          return ScrollablePageBody(
+            padding: EdgeInsets.zero,
+            children: picklists
+                .map((picklist) => Column(
+                      children: [
+                        Dismissible(
+                          onUpdate: (details) {
+                            if ((details.reached && !details.previousReached) ||
+                                (!details.reached && details.previousReached)) {
+                              HapticFeedback.lightImpact();
+                            }
+                          },
+                          key: GlobalKey(),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            color: Colors.red[900],
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: const [
+                                  Icon(Icons.delete),
+                                  SizedBox(width: 30),
+                                ],
+                              ),
+                            ),
+                          ),
+                          child: ListTile(
+                            title: Text(picklist.name),
+                            trailing: Icon(
+                              Icons.arrow_right,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                            onTap: () {
+                              Navigator.of(context).pushNamed(
+                                  '/mutable_picklist',
+                                  arguments: <String, dynamic>{
+                                    'picklist': picklist,
+                                    'callback': () => setState(() {}),
+                                  });
+                            },
+                          ),
+                          onDismissed: (direction) async {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Deleting..."),
+                              behavior: SnackBarBehavior.floating,
+                            ));
+
+                            try {
+                              await picklist.delete();
+                            } catch (error) {
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(SnackBar(
+                                content: Text(
+                                  "Error deleting: $error",
+                                  style: TextStyle(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onErrorContainer,
+                                  ),
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                                backgroundColor: Theme.of(context)
+                                    .colorScheme
+                                    .errorContainer,
+                              ));
+
+                              return;
+                            }
+
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Successfully deleted"),
+                              behavior: SnackBarBehavior.floating,
+                            ));
+                          },
+                        ),
+                        Divider(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          height: 0,
+                        ),
+                      ],
+                    ))
+                .toList(),
+          );
+        });
   }
 }
 

@@ -49,6 +49,28 @@ class ConfiguredPicklist {
   List<PicklistWeight> weights;
   String id;
 
+  Future<List<int>> fetchTeamRankings() async {
+    Map<String, dynamic> params = weights.asMap().map((key, value) => MapEntry(
+          value.path,
+          value.value.toString(),
+        ));
+
+    params['tournamentKey'] =
+        (await SharedPreferences.getInstance()).getString('tournament');
+
+    final response = await http.get(Uri.http(
+        (await getServerAuthority())!, "/API/analysis/picklist", params));
+
+    if (response.statusCode != 200) {
+      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+    }
+
+    return (jsonDecode(utf8.decode(response.bodyBytes))[0]['result']
+            as List<dynamic>)
+        .map((e) => e['team'] as int)
+        .toList();
+  }
+
   Future<void> upload() async {
     String authority = (await getServerAuthority())!;
 
@@ -137,34 +159,70 @@ Future<void> addPicklist(ConfiguredPicklist picklist) async {
   setPicklists(picklists);
 }
 
-class SharedPicklistPage extends StatelessWidget {
-  const SharedPicklistPage({super.key});
+class MutablePicklist {
+  MutablePicklist({
+    required this.uuid,
+    required this.name,
+    required this.teams,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    ConfiguredPicklist picklist = (ModalRoute.of(context)!.settings.arguments
-        as Map<String, dynamic>)['picklist'];
+  String uuid;
+  String name;
+  List<int> teams;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(picklist.title),
-        actions: [
-          IconButton(
-              onPressed: () {
-                Navigator.of(context)
-                    .pushNamed('/view_picklist_weights', arguments: {
-                  'picklist': picklist,
-                });
-              },
-              icon: const Icon(Icons.balance)),
-        ],
-      ),
-      body: PageBody(
-        padding: EdgeInsets.zero,
-        child: PicklistVisuzlization(
-          analysisFunction: PicklistAnalysis(picklist: picklist),
-        ),
-      ),
+  static Future<MutablePicklist> fromReactivePicklist(
+          ConfiguredPicklist reactivePicklist) async =>
+      MutablePicklist(
+        uuid: reactivePicklist.id,
+        name: reactivePicklist.title,
+        teams: await reactivePicklist.fetchTeamRankings(),
+      );
+
+  factory MutablePicklist.fromJSON(String json) {
+    final Map<String, dynamic> decodedJSON = jsonDecode(json);
+
+    return MutablePicklist(
+      uuid: decodedJSON['uuid'],
+      name: decodedJSON['name'],
+      teams: decodedJSON['teams'],
     );
+  }
+
+  Future<void> upload() async {
+    final authority = (await getServerAuthority())!;
+
+    final response =
+        await http.post(Uri.http(authority, '/API/manager/addMutablePicklist'),
+            body: jsonEncode({
+              'uuid': uuid,
+              'name': name,
+              'teams': teams,
+            }),
+            headers: {
+          'Content-Type': 'application/json',
+        });
+
+    if (response.statusCode != 200) {
+      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+    }
+  }
+
+  Future<void> delete() async {
+    final authority = (await getServerAuthority())!;
+
+    final response = await http
+        .post(Uri.http(authority, '/API/manager/deleteMutablePicklist'),
+            body: jsonEncode({
+              'uuid': uuid,
+              'name': name,
+              'teams': teams,
+            }),
+            headers: {
+          'Content-Type': 'application/json',
+        });
+
+    if (response.statusCode != 200) {
+      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+    }
   }
 }
