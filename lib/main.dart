@@ -18,6 +18,7 @@ import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/picklist/view_picklist_weights.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
@@ -61,6 +62,7 @@ void main() async {
       '/shared_picklist': (context) => const SharedPicklistPage(),
       '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
       '/mutable_picklist': (context) => const MutablePicklistPage(),
+      '/raw_scout_report': (context) => const RawScoutReportPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

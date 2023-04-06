@@ -229,6 +229,9 @@ class _ScheduleState extends State<Schedule> {
                               alliance: Alliance.red,
                               items: [
                                 AllianceRowItem(
+                                  scouted: scouted[0] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_0",
                                   team: match.teams[0],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[0],
@@ -240,6 +243,9 @@ class _ScheduleState extends State<Schedule> {
                                   ),
                                 ),
                                 AllianceRowItem(
+                                  scouted: scouted[1] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_1",
                                   team: match.teams[1],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[1],
@@ -251,6 +257,9 @@ class _ScheduleState extends State<Schedule> {
                                   ),
                                 ),
                                 AllianceRowItem(
+                                  scouted: scouted[2] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_2",
                                   team: match.teams[2],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[2],
@@ -267,6 +276,9 @@ class _ScheduleState extends State<Schedule> {
                               alliance: Alliance.blue,
                               items: [
                                 AllianceRowItem(
+                                  scouted: scouted[3] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_3",
                                   team: match.teams[3],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[3],
@@ -278,6 +290,9 @@ class _ScheduleState extends State<Schedule> {
                                   ),
                                 ),
                                 AllianceRowItem(
+                                  scouted: scouted[4] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_4",
                                   team: match.teams[4],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[4],
@@ -289,6 +304,9 @@ class _ScheduleState extends State<Schedule> {
                                   ),
                                 ),
                                 AllianceRowItem(
+                                  scouted: scouted[5] != null,
+                                  longMatchKey:
+                                      "${match.identity.toMediumKey()}_5",
                                   team: match.teams[5],
                                   scout: scoutSchedule.getScoutsForMatch(
                                       match.ordinalNumber)[5],
@@ -373,11 +391,15 @@ class AllianceRowItem {
     required this.team,
     required this.scout,
     this.warnings = const [],
+    this.longMatchKey,
+    required this.scouted,
   });
 
   final int team;
   final String scout;
   final List<String> warnings;
+  final String? longMatchKey;
+  final bool scouted;
 }
 
 class AllianceRow extends StatelessWidget {
@@ -422,16 +444,33 @@ class AllianceRow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: alignment,
         children: [
-          InkWell(
-            onTap: () {
-              Navigator.of(context).pushNamed("/team_lookup", arguments: {
-                'team': item.team,
-              });
-            },
-            child: Text(
-              item.team.toString(),
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).pushNamed("/team_lookup", arguments: {
+                    'team': item.team,
+                  });
+                },
+                child: Text(
+                  item.team.toString(),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              if (item.scouted)
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/raw_scout_report',
+                        arguments: <String, dynamic>{
+                          'longMatchKey': item.longMatchKey,
+                          'team': item.team,
+                        });
+                  },
+                  icon: const Icon(Icons.data_object),
+                  visualDensity: VisualDensity.compact,
+                )
+            ],
           ),
           Text(
             item.scout,
