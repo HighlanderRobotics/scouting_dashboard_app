@@ -201,6 +201,9 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
           );
           ScoutSchedule scoutSchedule = await getScoutSchedule();
 
+          tournamentSchedule.matches
+              .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+
           late final ScheduleMatch nextUnscoutedMatch;
           late final List<String?> nextUnscoutedMatchStatus;
           late final List<String> nextUnscoutedMatchPlannedScouts;
@@ -217,7 +220,22 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
 
             if (mostRecentMatchShortKey == null
                 ? currentMatchStatus
-                    .any((element) => isScoutedAll[element] == null)
+                        .any((element) => isScoutedAll[element] == null) &&
+                    !tournamentSchedule.matches
+                        .skip(tournamentSchedule.matches.indexOf(match) + 1)
+                        .any((element) {
+                      final otherMatchStatuses = [
+                        "${element.identity.toMediumKey()}_0",
+                        "${element.identity.toMediumKey()}_1",
+                        "${element.identity.toMediumKey()}_2",
+                        "${element.identity.toMediumKey()}_3",
+                        "${element.identity.toMediumKey()}_4",
+                        "${element.identity.toMediumKey()}_5",
+                      ];
+
+                      return otherMatchStatuses
+                          .any((element) => isScoutedAll[element] != null);
+                    })
                 : "${match.identity.type.shortName}${match.identity.number}" ==
                     mostRecentMatchShortKey) {
               nextUnscoutedMatch = match;
@@ -235,6 +253,21 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
               };
             }
           }
+
+          return {
+            'nextMatch': tournamentSchedule.matches.last,
+            'nextMatchStatus': [
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_0",
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_1",
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_2",
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_3",
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_4",
+              "${tournamentSchedule.matches.last.identity.toMediumKey()}_5"
+            ].map((e) => isScoutedAll[e]).toList(),
+            'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
+              tournamentSchedule.matches.last.ordinalNumber,
+            ),
+          };
         })(), builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(
