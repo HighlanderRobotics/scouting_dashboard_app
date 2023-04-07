@@ -429,11 +429,21 @@ class AutoPath {
     bool didCharge =
         timeline.any((e) => e.type == AutoPathEventType.chargeStation);
 
+    bool leftCommunity = timeline
+        .any((event) => event.type == AutoPathEventType.crossCommunityBorder);
+
     String name = <String>[
+      if (leftCommunity) "Mobility",
       if (coneCount > 0) "$coneCount Cone",
       if (cubeCount > 0) "$cubeCount Cube",
       if (didCharge) "Charger",
     ].join(", ");
+
+    name = "${{
+      AutoPathLocation.communityCenter1: "Bump-side",
+      AutoPathLocation.communityCenter2: "Middle",
+      AutoPathLocation.communityCenter3: "Clear-side",
+    }[timeline.first.location]} $name";
 
     if (name.isEmpty) name = "Nothing";
 
