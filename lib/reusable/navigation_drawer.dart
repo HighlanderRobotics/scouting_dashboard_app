@@ -63,7 +63,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                 icon: Icons.today,
               ),
               RoleExclusive(
-                role: 'scouting_lead',
+                roles: const ['8033_scouting_lead'],
                 child: DrawerDestination(
                   label: "Scan QR Codes",
                   onTap: () {

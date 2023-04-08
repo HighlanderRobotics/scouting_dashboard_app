@@ -144,7 +144,10 @@ class _LoadedSettingsState extends State<LoadedSettings> {
               ),
               ListTile(
                 title: const Text("Analyst"),
-                leading: const Icon(Icons.insights),
+                leading: Icon(
+                  Icons.timeline,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 trailing: Radio(
                     value: "analyst",
                     activeColor: Theme.of(context).colorScheme.primary,
@@ -157,10 +160,30 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     })),
               ),
               ListTile(
-                title: const Text("Scouting Lead"),
-                leading: const Icon(Icons.supervisor_account),
+                title: const Text("8033 Analyst"),
+                leading: Icon(
+                  Icons.insights,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 trailing: Radio(
-                    value: "scouting_lead",
+                    value: "8033_analyst",
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    groupValue: role,
+                    onChanged: ((value) {
+                      setState(() {
+                        if (value == null) return;
+                        role = value;
+                      });
+                    })),
+              ),
+              ListTile(
+                title: const Text("8033 Scouting Lead"),
+                leading: Icon(
+                  Icons.supervisor_account,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                trailing: Radio(
+                    value: "8033_scouting_lead",
                     activeColor: Theme.of(context).colorScheme.primary,
                     groupValue: role,
                     onChanged: ((value) {

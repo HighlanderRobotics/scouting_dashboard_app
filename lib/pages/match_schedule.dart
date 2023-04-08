@@ -36,7 +36,7 @@ class _ScheduleState extends State<Schedule> {
         title: const Text("Match Schedule"),
         actions: [
           RoleExclusive(
-            role: "scouting_lead",
+            roles: const ["8033_scouting_lead"],
             child: IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/edit_scout_schedule");
@@ -45,7 +45,7 @@ class _ScheduleState extends State<Schedule> {
             ),
           ),
           RoleExclusive(
-            role: "scouting_lead",
+            roles: const ["8033_scouting_lead"],
             child: IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/scout_schedule_qr");
