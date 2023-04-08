@@ -10,6 +10,7 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:skeletons/skeletons.dart';
 
 class TournamentKeyPicker extends StatefulWidget {
   TournamentKeyPicker({
@@ -104,37 +105,69 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        DropdownSearch(
-          onChanged: (value) {
-            setState(() {
-              selectedItem = value;
-            });
-            widget.onChanged(value);
-          },
-          itemAsString: (item) => item.localized,
-          items: tournaments,
-          dropdownDecoratorProps: DropDownDecoratorProps(
-            dropdownSearchDecoration: widget.decoration,
-          ),
-          selectedItem: selectedItem,
-          popupProps: PopupProps.modalBottomSheet(
-            modalBottomSheetProps: ModalBottomSheetProps(
-              backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-            ),
-            showSearchBox: true,
-            searchFieldProps: const TextFieldProps(
-              decoration: InputDecoration(
-                border: OutlineInputBorder(),
-                label: Text("Search"),
+        (tournaments.isEmpty && !hasError)
+            ? LayoutBuilder(builder: (context, constraints) {
+                return SkeletonAvatar(
+                  style: SkeletonAvatarStyle(
+                      height: 56,
+                      width: constraints.maxWidth,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(4),
+                        topRight: Radius.circular(4),
+                        bottomLeft: Radius.circular(0),
+                        bottomRight: Radius.circular(0),
+                      )),
+                );
+              })
+            : DropdownSearch<Tournament>(
+                onChanged: (value) {
+                  setState(() {
+                    selectedItem = value;
+                  });
+                  widget.onChanged(value!);
+                },
+                itemAsString: (item) => item.localized,
+                items: tournaments,
+                dropdownDecoratorProps: DropDownDecoratorProps(
+                  dropdownSearchDecoration: widget.decoration,
+                ),
+                selectedItem: selectedItem,
+                popupProps: PopupProps.modalBottomSheet(
+                  constraints: const BoxConstraints.expand(),
+                  modalBottomSheetProps: ModalBottomSheetProps(
+                    backgroundColor:
+                        Theme.of(context).colorScheme.surfaceVariant,
+                  ),
+                  fit: FlexFit.loose,
+                  showSearchBox: true,
+                  searchFieldProps: const TextFieldProps(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      label: Text("Search"),
+                    ),
+                  ),
+                  containerBuilder: (context, popupWidget) => SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: Stack(children: [
+                        Column(children: [
+                          const SizedBox(height: 40),
+                          Expanded(child: popupWidget),
+                        ]),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.expand_more),
+                            visualDensity: VisualDensity.comfortable,
+                          ),
+                        )
+                      ]),
+                    ),
+                  ),
+                  searchDelay: Duration.zero,
+                ),
               ),
-            ),
-            containerBuilder: (context, popupWidget) => Padding(
-              padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-              child: popupWidget,
-            ),
-            searchDelay: Duration.zero,
-          ),
-        ),
         if (hasError) ...[
           const SizedBox(height: 10),
           FilledButton(
