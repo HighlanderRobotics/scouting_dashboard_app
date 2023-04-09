@@ -117,3 +117,9 @@ extension ListSpaceBetweenExtension on List<Widget> {
 
 String minutesAndSeconds(Duration duration) =>
     "${duration.inMinutes}:${(duration.inSeconds.remainder(60).toString().padLeft(2, '0'))}";
+
+extension NumListExtension on List<num> {
+  num sum() => reduce((value, element) => value + element);
+
+  num average() => sum() / length;
+}

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/analysis_functions/alliance_analysis.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
@@ -213,8 +214,8 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths> {
                                     ? "--"
                                     : selectedPaths[
                                             widget.data['teams'].indexOf(e)]!
-                                        .score
-                                        .toString(),
+                                        .scores
+                                        .join(", "),
                                 style: Theme.of(context)
                                     .textTheme
                                     .bodyLarge!
@@ -264,8 +265,11 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths> {
                     selectedPaths.any((element) => element != null)
                         ? selectedPaths
                             .where((path) => path != null)
-                            .map((path) => path!.score)
-                            .reduce((value, element) => value + element)
+                            .map((path) =>
+                                path!.scores.toList().cast<num>().average())
+                            .toList()
+                            .cast<num>()
+                            .sum()
                             .toString()
                         : "--",
                     style: Theme.of(context).textTheme.bodyMedium!.merge(

@@ -208,14 +208,14 @@ class _TeamAutoPathsState extends State<TeamAutoPaths> {
         child: valueBox(
           context,
           Text(
-            selectedPath!.score.toString(),
+            selectedPath!.scores.join(", "),
             style: Theme.of(context).textTheme.titleLarge!.merge(
                   TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   ),
                 ),
           ),
-          "Score",
+          selectedPath!.scores.length == 1 ? "Score" : "Scores",
           false,
         ),
       ),
@@ -383,14 +383,14 @@ class AutoPathChargeSuccessRate {
 class AutoPath {
   const AutoPath({
     required this.frequency,
-    required this.score,
+    required this.scores,
     required this.timeline,
     required this.matches,
     required this.chargeSuccessRate,
   });
 
   final int frequency;
-  final int score;
+  final List<int> scores;
   final List<AutoPathEvent> timeline;
   final List<GameMatchIdentity> matches;
 
@@ -399,7 +399,7 @@ class AutoPath {
   factory AutoPath.fromMap(Map<String, dynamic> map) {
     AutoPath output = AutoPath(
       frequency: map['frequency'],
-      score: map['score'],
+      scores: map['score'].cast<int>(),
       timeline: (map['positions'] as List<dynamic>)
           .map((e) => AutoPathEvent.fromMap(e))
           .toList(),
