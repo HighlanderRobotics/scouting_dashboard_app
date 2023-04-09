@@ -4,6 +4,7 @@ import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_anal
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:http/http.dart' as http;
 
@@ -95,19 +96,22 @@ class Note extends StatelessWidget {
                       ),
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => EditNoteDialog(
-                        initialText: noteBody,
-                        uuid: uuid,
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.edit_outlined),
-                  color: Theme.of(context).colorScheme.onPrimary,
-                  visualDensity: VisualDensity.compact,
+                RoleExclusive(
+                  roles: const ["8033_scouting_lead"],
+                  child: IconButton(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => EditNoteDialog(
+                          initialText: noteBody,
+                          uuid: uuid,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_outlined),
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ),
               ],
             ),

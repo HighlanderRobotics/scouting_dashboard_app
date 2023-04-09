@@ -459,16 +459,19 @@ class AllianceRow extends StatelessWidget {
                 ),
               ),
               if (item.scouted)
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/raw_scout_report',
-                        arguments: <String, dynamic>{
-                          'longMatchKey': item.longMatchKey,
-                          'team': item.team,
-                        });
-                  },
-                  icon: const Icon(Icons.data_object),
-                  visualDensity: VisualDensity.compact,
+                RoleExclusive(
+                  roles: const ["8033_scouting_lead"],
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/raw_scout_report',
+                          arguments: <String, dynamic>{
+                            'longMatchKey': item.longMatchKey,
+                            'team': item.team,
+                          });
+                    },
+                    icon: const Icon(Icons.data_object),
+                    visualDensity: VisualDensity.compact,
+                  ),
                 )
             ],
           ),

@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 import 'package:http/http.dart' as http;
@@ -329,6 +330,25 @@ class MutablePicklists extends StatefulWidget {
 class _MutablePicklistsState extends State<MutablePicklists> {
   @override
   Widget build(BuildContext context) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        const RoleExclusive(
+          roles: ["analyst"],
+          child: Text("You don't have permission to access this."),
+        ),
+        RoleExclusive(
+          roles: const [
+            "8033_analyst",
+            "8033_scouting_lead",
+          ],
+          child: realListsWithPermission(),
+        ),
+      ],
+    );
+  }
+
+  FutureBuilder<List<MutablePicklist>> realListsWithPermission() {
     return FutureBuilder(
         future: getMutablePicklists(),
         builder: (context, snapshot) {
