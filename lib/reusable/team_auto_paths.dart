@@ -610,10 +610,10 @@ class AutoPathEvent {
 enum AutoPathEventType {
   pickUpCube,
   pickUpCone,
+  unknown2,
+  unknown3,
   placeCube,
   placeCone,
-  unknown4,
-  unknown5,
   unknown6,
   crossCommunityBorder,
   startWithoutItem,
