@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:dropdown_search/dropdown_search.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
@@ -455,13 +456,30 @@ class AutoPath {
   List<Offset> get randomizedOffsets {
     Random random = Random(timeline.hashCode);
 
-    return timeline
+    List<Offset> offsets = timeline
         .map((event) => Offset(
             event.offset.dx +
                 (((random.nextDouble() * 2) - 0.5) * event.randomVariance.dx),
             event.offset.dy +
                 (((random.nextDouble() * 2) - 0.5) * event.randomVariance.dy)))
         .toList();
+
+    for (var i = 0; i < offsets.length; i++) {
+      final event = timeline[i];
+
+      if (event.location == AutoPathLocation.none) {
+        if (offsets.length - 1 > i) {
+          offsets[i] = Offset(
+            (offsets[i - 1].dx + offsets[i + 1].dx) / 2,
+            (offsets[i - 1].dy + offsets[i + 1].dy) / 2,
+          );
+        } else {
+          offsets[i] = Offset(offsets[i - 1].dx, offsets[i - 1].dy - 5);
+        }
+      }
+    }
+
+    return offsets;
   }
 }
 
@@ -488,6 +506,17 @@ class AutoPathEvent {
 
   Widget indicator(Color? teamColor) {
     switch (type) {
+      case AutoPathEventType.dropItem:
+        return AutoPathEventIndicator(
+          teamColor: teamColor,
+          childBuilder: (context, teamColor, isHighlighted) =>
+              iconAutoPathEventIndicator(
+            context,
+            teamColor,
+            isHighlighted,
+            CupertinoIcons.bag_badge_minus,
+          ),
+        );
       case AutoPathEventType.startWithoutItem:
         return AutoPathEventIndicator(
           childBuilder: (context, teamColor, isHighlighted) =>
@@ -611,7 +640,7 @@ enum AutoPathEventType {
   pickUpCube,
   pickUpCone,
   unknown2,
-  unknown3,
+  dropItem,
   placeCube,
   placeCone,
   unknown6,
