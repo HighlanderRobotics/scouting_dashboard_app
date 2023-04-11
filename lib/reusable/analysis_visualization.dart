@@ -20,7 +20,25 @@ abstract class AnalysisVisualization extends StatelessWidget {
           }
 
           if (snapshot.hasError) {
-            return const Icon(Icons.sentiment_dissatisfied_outlined);
+            return IconButton(
+              icon: const Icon(Icons.sentiment_dissatisfied_outlined),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                          title: const Text("Error"),
+                          content: Text(snapshot.error.toString()),
+                          actions: [
+                            FilledButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text("Dismiss"),
+                            ),
+                          ],
+                        ));
+              },
+            );
           }
 
           return loadedData(context, snapshot);
