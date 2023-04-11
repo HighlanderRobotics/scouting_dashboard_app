@@ -85,8 +85,8 @@ class GlobalNavigationDrawer extends StatelessWidget {
                   Navigator.pushNamedAndRemoveUntil(
                       context, "/match_predictor_opener", (route) => false);
                 },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/match_predictor",
+                isSelected: ModalRoute.of(context)?.settings.name ==
+                    "/match_predictor_opener",
                 icon: Icons.psychology,
               ),
               DrawerDestination(
