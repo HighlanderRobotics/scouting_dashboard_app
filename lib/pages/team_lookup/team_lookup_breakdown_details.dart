@@ -40,9 +40,9 @@ class TeamLookupBreakdownDetailsPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text("Matches"),
-                  ...matches
+                  ...(matches
                       .map((match, value) => MapEntry(
-                          key,
+                          match,
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -59,7 +59,7 @@ class TeamLookupBreakdownDetailsPage extends StatelessWidget {
                             ],
                           )))
                       .values
-                      .toList(),
+                      .toList()),
                   if (matches.isEmpty)
                     const Text(
                       "No data in any matches",
