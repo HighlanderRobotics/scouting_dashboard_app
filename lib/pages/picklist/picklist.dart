@@ -115,6 +115,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                             .pushNamed("/picklist_team_breakdown", arguments: {
                           'team': int.parse(teamData['team'].toString()),
                           'breakdown': teamData['breakdown'],
+                          'unweighted': teamData['unweighted'],
                           'picklistTitle':
                               (analysisFunction as PicklistAnalysis)
                                   .picklist

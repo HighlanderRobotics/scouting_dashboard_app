@@ -15,6 +15,7 @@ class PicklistTeamBreakdownPage extends StatefulWidget {
 
 class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
   bool useSameHeights = false;
+  bool weighted = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +27,11 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
     List<Map<String, dynamic>> breakdown =
         routeArgs['breakdown'].cast<Map<String, dynamic>>();
 
+    List<Map<String, dynamic>> unweightedBreakdown =
+        routeArgs['unweighted'].cast<Map<String, dynamic>>();
+
+    unweightedBreakdown.sort((a, b) => b['result'].compareTo(a['result']));
+
     breakdown.sort((a, b) => (b['result'] as num).compareTo(a['result']));
     breakdown.removeWhere((e) => e['result'] == 0);
 
@@ -33,6 +39,12 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
       appBar: AppBar(
         title: Text("$teamNumber - $picklistTitle Picklist"),
         actions: [
+          IconButton(
+            onPressed: () => setState(() {
+              weighted = !weighted;
+            }),
+            icon: Icon(weighted ? Icons.fitness_center : Icons.balance),
+          ),
           IconButton(
             onPressed: () => setState(() {
               useSameHeights = !useSameHeights;
@@ -46,10 +58,14 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
         borderRadius: const BorderRadius.all(Radius.circular(10)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: breakdown.map((weight) {
+          children: (weighted ? breakdown : unweightedBreakdown).map((weight) {
             bool alternate = (weight['result'] as num).isNegative
-                ? breakdown.indexOf(weight).isOdd
-                : breakdown.indexOf(weight).isEven;
+                ? (weighted ? breakdown : unweightedBreakdown)
+                    .indexOf(weight)
+                    .isOdd
+                : (weighted ? breakdown : unweightedBreakdown)
+                    .indexOf(weight)
+                    .isEven;
 
             return Flexible(
               flex: useSameHeights
