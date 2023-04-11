@@ -75,7 +75,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                   },
                   isSelected:
                       ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
-                  icon: Icons.qr_code,
+                  icon: Icons.qr_code_scanner,
                 ),
               ),
               const SectionHeader(title: "Data Analysis"),
