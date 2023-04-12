@@ -198,7 +198,7 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Links",
       abbreviatedLocalizedName: "Links",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      valueVizualizationBuilder: ((p0) => (p0 as num).toStringAsFixed(1)),
       path: "links",
     ),
   ]),
