@@ -193,37 +193,58 @@ class _ScheduleState extends State<Schedule> {
                       child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            InkWell(
-                              onTap: () {
-                                Navigator.of(context).pushNamed(
-                                  "/match_predictor",
-                                  arguments: {
-                                    'red1': match.teams[0].toString(),
-                                    'red2': match.teams[1].toString(),
-                                    'red3': match.teams[2].toString(),
-                                    'blue1': match.teams[3].toString(),
-                                    'blue2': match.teams[4].toString(),
-                                    'blue3': match.teams[5].toString(),
-                                  },
-                                );
-                              },
-                              child: Row(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                        10, 13, 10, 13),
-                                    child: Text(
-                                      match.identity.getLocalizedDescription(
-                                          includeTournament: false),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .labelMedium,
-                                    ),
+                            Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 13, 10, 13),
+                                  child: Text(
+                                    match.identity.getLocalizedDescription(
+                                        includeTournament: false),
+                                    style:
+                                        Theme.of(context).textTheme.labelMedium,
                                   ),
-                                  if (!scouted.contains(null))
-                                    const ScoutedFlag()
-                                ],
-                              ),
+                                ),
+                                if (!scouted.contains(null))
+                                  const ScoutedFlag(),
+                                const Spacer(),
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed(
+                                      "/match_predictor",
+                                      arguments: {
+                                        'red1': match.teams[0].toString(),
+                                        'red2': match.teams[1].toString(),
+                                        'red3': match.teams[2].toString(),
+                                        'blue1': match.teams[3].toString(),
+                                        'blue2': match.teams[4].toString(),
+                                        'blue3': match.teams[5].toString(),
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(Icons.psychology),
+                                ),
+                                IconButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pushNamed(
+                                      "/match_suggestions",
+                                      arguments: {
+                                        'teams': <String, int>{
+                                          'red1': match.teams[0],
+                                          'red2': match.teams[1],
+                                          'red3': match.teams[2],
+                                          'blue1': match.teams[3],
+                                          'blue2': match.teams[4],
+                                          'blue3': match.teams[5],
+                                        },
+                                        'matchIdentity': match.identity,
+                                        'matchType': match.identity.type,
+                                      },
+                                    );
+                                  },
+                                  icon: const Icon(Icons.assistant),
+                                ),
+                              ],
                             ),
                             AllianceRow(
                               alliance: Alliance.red,

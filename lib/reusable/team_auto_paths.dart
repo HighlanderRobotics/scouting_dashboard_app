@@ -61,9 +61,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths> {
             ),
           ),
           valueBoxes(context),
-          if (selectedPath!.chargeSuccessRate.dockCount > 0 ||
-              selectedPath!.chargeSuccessRate.engageCount > 0 ||
-              selectedPath!.chargeSuccessRate.failCount > 0)
+          if (selectedPath!.chargeSuccessRate.hasAttempted)
             ClipRRect(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               child: Row(children: [
@@ -378,6 +376,8 @@ class AutoPathChargeSuccessRate {
   final int dockCount;
   final int engageCount;
   final int failCount;
+
+  bool get hasAttempted => dockCount > 0 || engageCount > 0 || failCount > 0;
 }
 
 class AutoPath {
