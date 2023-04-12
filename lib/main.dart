@@ -5,6 +5,7 @@ import 'package:scouting_dashboard_app/pages/auto_path_selector.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions.dart';
+import 'package:scouting_dashboard_app/pages/match_suggestions_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
@@ -68,6 +69,8 @@ void main() async {
       '/team_lookup_breakdown_details': (context) =>
           const TeamLookupBreakdownDetailsPage(),
       '/match_suggestions': (context) => const MatchSuggestionsPage(),
+      '/match_suggestions_opener': (context) =>
+          const MatchSuggestionsOpenerPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

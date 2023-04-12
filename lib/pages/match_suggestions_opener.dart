@@ -1,33 +1,51 @@
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class MatchPredictorOpenerPage extends StatefulWidget {
-  const MatchPredictorOpenerPage({super.key});
+class MatchSuggestionsOpenerPage extends StatefulWidget {
+  const MatchSuggestionsOpenerPage({super.key});
 
   @override
-  State<MatchPredictorOpenerPage> createState() =>
-      _MatchPredictorOpenerPageState();
+  State<MatchSuggestionsOpenerPage> createState() =>
+      _MatchSuggestionsOpenerPageState();
 }
 
-class _MatchPredictorOpenerPageState extends State<MatchPredictorOpenerPage> {
+class _MatchSuggestionsOpenerPageState
+    extends State<MatchSuggestionsOpenerPage> {
   String red1FieldValue = "";
   String red2FieldValue = "";
   String red3FieldValue = "";
   String blue1FieldValue = "";
   String blue2FieldValue = "";
   String blue3FieldValue = "";
+  MatchType matchType = MatchType.qualifier;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Hypothetical Match Prediction")),
+      appBar: AppBar(title: const Text("Hypothetical Match Suggestions")),
       body: ScrollablePageBody(
           children: [
+        DropdownSearch<MatchType>(
+          items: MatchType.values,
+          itemAsString: (item) => item.localizedDescriptionSingular,
+          selectedItem: matchType,
+          onChanged: (value) => setState(() {
+            matchType = value!;
+          }),
+          dropdownDecoratorProps: const DropDownDecoratorProps(
+              dropdownSearchDecoration: InputDecoration(
+            filled: true,
+            label: Text("Match Type"),
+          )),
+        ),
+        const SizedBox(height: 10),
         const Text("Red Alliance"),
         TextField(
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -91,13 +109,16 @@ class _MatchPredictorOpenerPageState extends State<MatchPredictorOpenerPage> {
               ? null
               : () {
                   Navigator.of(context)
-                      .pushNamed("/match_predictor", arguments: {
-                    'red1': red1FieldValue,
-                    'red2': red2FieldValue,
-                    'red3': red3FieldValue,
-                    'blue1': blue1FieldValue,
-                    'blue2': blue2FieldValue,
-                    'blue3': blue3FieldValue,
+                      .pushNamed("/match_suggestions", arguments: {
+                    'teams': <String, int>{
+                      'red1': int.parse(red1FieldValue),
+                      'red2': int.parse(red2FieldValue),
+                      'red3': int.parse(red3FieldValue),
+                      'blue1': int.parse(blue1FieldValue),
+                      'blue2': int.parse(blue2FieldValue),
+                      'blue3': int.parse(blue3FieldValue),
+                    },
+                    'matchType': matchType,
                   });
                 },
           child: const Text("View"),

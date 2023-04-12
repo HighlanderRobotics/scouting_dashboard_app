@@ -90,6 +90,16 @@ class GlobalNavigationDrawer extends StatelessWidget {
                 icon: Icons.psychology,
               ),
               DrawerDestination(
+                label: "Match Suggestions",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/match_suggestions_opener", (route) => false);
+                },
+                isSelected: ModalRoute.of(context)?.settings.name ==
+                    "/match_suggestions_opener",
+                icon: Icons.assistant,
+              ),
+              DrawerDestination(
                 label: "Team Lookup",
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
