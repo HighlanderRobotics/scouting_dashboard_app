@@ -173,9 +173,11 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
 
     for (var team in data['${alliance}Alliance']['teleop'] as List<dynamic>) {
       for (var item in (team['scoringGrid'] ?? []).where((e) => e != null)) {
-        positions[GridPosition.values[item]] = autoPathColors[
-            (data['${alliance}Alliance']['teleop'] as List<dynamic>)
-                .indexWhere((e) => e['team'] == team['team'])];
+        if (!positions.containsKey(GridPosition.values[item])) {
+          positions[GridPosition.values[item]] = autoPathColors[
+              (data['${alliance}Alliance']['teleop'] as List<dynamic>)
+                  .indexWhere((e) => e['team'] == team['team'])];
+        }
       }
     }
 
