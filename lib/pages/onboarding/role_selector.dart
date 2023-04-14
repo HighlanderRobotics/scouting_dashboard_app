@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/correct_passwords.dart';
+import 'package:scouting_dashboard_app/reusable/password_protection.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -47,9 +49,11 @@ class _RoleSelectorState extends State<RoleSelector> {
                 activeColor: Theme.of(context).colorScheme.primary,
                 groupValue: role,
                 onChanged: ((value) {
-                  setState(() {
-                    if (value == null) return;
-                    role = value;
+                  passwordProtected(context, teamAnalystCorrectPassword, () {
+                    setState(() {
+                      if (value == null) return;
+                      role = value;
+                    });
                   });
                 })),
           ),
@@ -62,15 +66,18 @@ class _RoleSelectorState extends State<RoleSelector> {
                 activeColor: Theme.of(context).colorScheme.primary,
                 groupValue: role,
                 onChanged: ((value) {
-                  setState(() {
-                    if (value == null) return;
-                    role = value;
+                  passwordProtected(context, teamScoutingLeadCorrectPassword,
+                      () {
+                    setState(() {
+                      if (value == null) return;
+                      role = value;
+                    });
                   });
                 })),
           ),
           const SizedBox(height: 20),
           const Text(
-              "Both get access to processed scouting data. Scouting leads get additional tools for modifying the scout schedule and scanning QR codes."),
+              "If you're on another team checking out our data, use Analyst. 8033 Analysts also get access to all the data, but can publish picklists to each other and use mutable picklists. 8033 Scouting Leads can do all of this, and also can view and delete raw data, manage schedules, and edit data."),
           const SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,

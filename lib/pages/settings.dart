@@ -1,7 +1,9 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/correct_passwords.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/password_protection.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -170,9 +172,12 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     activeColor: Theme.of(context).colorScheme.primary,
                     groupValue: role,
                     onChanged: ((value) {
-                      setState(() {
-                        if (value == null) return;
-                        role = value;
+                      passwordProtected(context, teamAnalystCorrectPassword,
+                          () {
+                        setState(() {
+                          if (value == null) return;
+                          role = value;
+                        });
                       });
                     })),
               ),
@@ -187,14 +192,17 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     activeColor: Theme.of(context).colorScheme.primary,
                     groupValue: role,
                     onChanged: ((value) {
-                      setState(() {
-                        if (value == null) return;
-                        role = value;
+                      passwordProtected(
+                          context, teamScoutingLeadCorrectPassword, () {
+                        setState(() {
+                          if (value == null) return;
+                          role = value;
+                        });
                       });
                     })),
               ),
               Text(
-                "Both get access to processed scouting data. Scouting leads get additional tools for modifying the scout schedule and scanning QR codes.",
+                "If you're on another team checking out our data, use Analyst. 8033 Analysts also get access to all the data, but can publish picklists to each other and use mutable picklists. 8033 Scouting Leads can do all of this, and also can view and delete raw data, manage schedules, and edit data.",
                 style: Theme.of(context).textTheme.bodyMedium?.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onBackground)),
               ),
