@@ -169,15 +169,18 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
   }
 
   Container teleopSuggestions(String alliance, Map<String, dynamic> data) {
-    Map<GridPosition, Color> positions = {};
+    List<GridColor> positions = [];
 
     for (var team in data['${alliance}Alliance']['teleop'] as List<dynamic>) {
       for (var item in (team['scoringGrid'] ?? []).where((e) => e != null)) {
-        if (!positions.containsKey(GridPosition.values[item])) {
-          positions[GridPosition.values[item]] = autoPathColors[
-              (data['${alliance}Alliance']['teleop'] as List<dynamic>)
-                  .indexWhere((e) => e['team'] == team['team'])];
-        }
+        positions.add(
+          GridColor(
+            color: autoPathColors[
+                (data['${alliance}Alliance']['teleop'] as List<dynamic>)
+                    .indexWhere((e) => e['team'] == team['team'])],
+            position: GridPosition.values[item],
+          ),
+        );
       }
     }
 
@@ -640,13 +643,23 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
   }
 }
 
+class GridColor {
+  const GridColor({
+    required this.color,
+    required this.position,
+  });
+
+  final Color color;
+  final GridPosition position;
+}
+
 class GridSuggestions extends StatelessWidget {
   const GridSuggestions({
     super.key,
     required this.positions,
   });
 
-  final Map<GridPosition, Color> positions;
+  final List<GridColor> positions;
 
   @override
   Widget build(BuildContext context) {
@@ -655,27 +668,27 @@ class GridSuggestions extends StatelessWidget {
       child: LayoutBuilder(
           builder: (context, constraints) => Stack(children: [
                 Image.asset('assets/images/grid.png'),
-                ...positions
-                    .map((position, color) => MapEntry(
-                        position,
-                        Positioned(
-                          left: (position.positionBounds[0].dx / 100) *
-                              constraints.maxWidth,
-                          top: (position.positionBounds[0].dy / 100) *
-                              constraints.maxHeight,
-                          child: SizedBox(
-                            height: ((position.positionBounds[1].dy -
-                                        position.positionBounds[0].dy) /
-                                    100) *
-                                constraints.maxHeight,
-                            width: ((position.positionBounds[1].dx -
-                                        position.positionBounds[0].dx) /
-                                    100) *
-                                constraints.maxWidth,
-                            child: Container(color: color.withOpacity(0.7)),
-                          ),
-                        )))
-                    .values,
+                ...positions.map(
+                  (i) => Positioned(
+                    left: (i.position.positionBounds[0].dx / 100) *
+                        constraints.maxWidth,
+                    top: (i.position.positionBounds[0].dy / 100) *
+                        constraints.maxHeight,
+                    child: SizedBox(
+                      height: ((i.position.positionBounds[1].dy -
+                                  i.position.positionBounds[0].dy) /
+                              100) *
+                          constraints.maxHeight,
+                      width: ((i.position.positionBounds[1].dx -
+                                  i.position.positionBounds[0].dx) /
+                              100) *
+                          constraints.maxWidth,
+                      child: Container(
+                        color: i.color.withOpacity(0.5),
+                      ),
+                    ),
+                  ),
+                ),
               ])),
     );
   }
