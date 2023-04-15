@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'package:skeletons/skeletons.dart';
 
 class MyPicklistPage extends StatefulWidget {
   const MyPicklistPage({super.key});
@@ -105,6 +109,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
     return ListView(
       children: (snapshot.data as List<dynamic>)
           .map((teamData) => ListTile(
+                leading: tbaRankBadge(teamData['team']),
                 title: Text(teamData['team'].toString()),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -145,4 +150,58 @@ class PicklistVisuzlization extends AnalysisVisualization {
           .toList(),
     );
   }
+}
+
+Widget tbaRankBadge(int team) {
+  return SizedBox(
+    height: 30,
+    width: 30,
+    child: Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFF3F51B5),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Center(
+        child: FutureBuilder(
+            future: getRank(team),
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                debugPrint(snapshot.error.toString());
+                return const Icon(Icons.error);
+              }
+
+              if (snapshot.connectionState != ConnectionState.done) {
+                return SkeletonAvatar(
+                  style: SkeletonAvatarStyle(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                );
+              }
+
+              return Text(
+                snapshot.data == null ? "-" : snapshot.data.toString(),
+              );
+            }),
+      ),
+    ),
+  );
+}
+
+Future<int?> getRank(int team) async {
+  final sharedPrefs = await SharedPreferences.getInstance();
+
+  final authority = (await getServerAuthority())!;
+  final tournamentKey = sharedPrefs.getString("tournament");
+
+  final response =
+      await http.get(Uri.http(authority, '/API/manager/getRankOfTeam', {
+    'teamKey': "frc$team",
+    'tournamentKey': tournamentKey,
+  }));
+
+  if (response.statusCode != 200) {
+    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+  }
+
+  return int.tryParse(response.body);
 }

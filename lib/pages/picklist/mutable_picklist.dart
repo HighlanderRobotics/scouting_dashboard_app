@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
@@ -87,6 +88,7 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
                     onLongPress: pendingTeamList == null ? null : () {},
                     child: ListTile(
                       title: Text(team.toString()),
+                      leading: tbaRankBadge(team),
                       trailing: Icon(
                         Icons.arrow_right,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
