@@ -328,11 +328,14 @@ class MutablePicklists extends StatefulWidget {
 }
 
 class _MutablePicklistsState extends State<MutablePicklists> {
+  bool loading = false;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
       children: [
+        if (loading) const LinearProgressIndicator(),
         const RoleExclusive(
           roles: ["analyst"],
           child: Text("You don't have permission to access this."),
@@ -404,13 +407,38 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                               Icons.arrow_right,
                               color: Theme.of(context).colorScheme.onSurface,
                             ),
-                            onTap: () {
-                              Navigator.of(context).pushNamed(
-                                  '/mutable_picklist',
-                                  arguments: <String, dynamic>{
-                                    'picklist': picklist,
-                                    'callback': () => setState(() {}),
-                                  });
+                            onTap: () async {
+                              setState(() {
+                                loading = true;
+                              });
+
+                              try {
+                                Navigator.of(context).pushNamed(
+                                    '/mutable_picklist',
+                                    arguments: <String, dynamic>{
+                                      'picklist': (await getMutablePicklists())
+                                          .firstWhere(
+                                              (e) => e.uuid == picklist.uuid),
+                                      'callback': () => setState(() {}),
+                                    });
+                              } catch (error) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Error: $error",
+                                        style: TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onErrorContainer)),
+                                    backgroundColor: Theme.of(context)
+                                        .colorScheme
+                                        .errorContainer,
+                                  ),
+                                );
+                              } finally {
+                                setState(() {
+                                  loading = false;
+                                });
+                              }
                             },
                           ),
                           onDismissed: (direction) async {

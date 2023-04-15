@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
@@ -22,11 +20,6 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
     final picklist = routeArgs['picklist'] as MutablePicklist;
     final callback = routeArgs['callback'] as void Function();
 
-    debugPrint("-----");
-    debugPrint(pendingTeamList.toString());
-    debugPrint(updatedTeamList.toString());
-    debugPrint(picklist.teams.toString());
-
     return Scaffold(
       appBar: AppBar(
         title: Text(picklist.name),
@@ -44,17 +37,12 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
             List<int> newTeams =
                 (updatedTeamList ?? picklist.teams).where((e) => true).toList();
 
-            debugPrint("Item $oldIndex moved to $newIndex");
-
             if (oldIndex < newIndex) {
               newIndex -= 1;
             }
 
             final int item = newTeams.removeAt(oldIndex);
-            print("Removed: $item");
             newTeams.insert(newIndex, item);
-
-            debugPrint("Setting teams to: $newTeams");
 
             setState(() {
               pendingTeamList = newTeams.where((e) => true).toList();
