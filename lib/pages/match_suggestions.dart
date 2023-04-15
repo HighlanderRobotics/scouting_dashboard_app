@@ -175,7 +175,7 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
       for (var item in (team['scoringGrid'] ?? []).where((e) => e != null)) {
         positions.add(
           GridColor(
-            color: autoPathColors[
+            color: gridSuggestionsColors[
                 (data['${alliance}Alliance']['teleop'] as List<dynamic>)
                     .indexWhere((e) => e['team'] == team['team'])],
             position: GridPosition.values[item],
@@ -214,7 +214,7 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
                                     decoration: BoxDecoration(
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(10)),
-                                      color: autoPathColors[
+                                      color: gridSuggestionsColors[
                                           (data["${alliance}Alliance"]['teleop']
                                                   as List<dynamic>)
                                               .indexWhere((e) =>
@@ -693,6 +693,12 @@ class GridSuggestions extends StatelessWidget {
     );
   }
 }
+
+const gridSuggestionsColors = <Color>[
+  Colors.red,
+  Colors.yellow,
+  Colors.blue,
+];
 
 enum GridPosition {
   none,
