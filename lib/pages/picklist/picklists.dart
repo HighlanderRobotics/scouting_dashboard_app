@@ -335,7 +335,6 @@ class _MutablePicklistsState extends State<MutablePicklists> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        if (loading) const LinearProgressIndicator(),
         const RoleExclusive(
           roles: ["analyst"],
           child: Text("You don't have permission to access this."),
@@ -347,6 +346,12 @@ class _MutablePicklistsState extends State<MutablePicklists> {
           ],
           child: realListsWithPermission(),
         ),
+        if (loading)
+          Column(
+            children: const [
+              LinearProgressIndicator(),
+            ],
+          ),
       ],
     );
   }
@@ -432,6 +437,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                     backgroundColor: Theme.of(context)
                                         .colorScheme
                                         .errorContainer,
+                                    behavior: SnackBarBehavior.floating,
                                   ),
                                 );
                               } finally {
