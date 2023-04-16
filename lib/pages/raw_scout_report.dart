@@ -76,7 +76,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
         ChallengeResult teleopChallengeResult =
             ChallengeResult.values[scoutReport['challengeResult']];
         Penalty penaltyCard = Penalty.values[scoutReport['penaltyCard']];
-        int links = scoutReport['links'];
+        int? links = scoutReport['links'];
         DriverAbility driverAbility =
             DriverAbility.values[scoutReport['driverAbility']];
 
@@ -262,7 +262,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     ChallengeResult teleopChallengeResult,
     DriverAbility driverAbility,
     Penalty penaltyCard,
-    int links,
+    int? links,
     String notes,
   ) {
     return ScrollablePageBody(
@@ -278,7 +278,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       field("Driver Ability",
           "${driverAbility.localizedDescription} (${driverAbility.index + 1}/${DriverAbility.values.length})"),
       field("Penalty Cards", penaltyCard.localizedDescription),
-      field("Links", links.toString()),
+      field("Links", links == null ? '--' : links.toString()),
       field("Notes", notes.isEmpty ? "--" : notes)
     ].withSpaceBetween(height: 10));
   }
