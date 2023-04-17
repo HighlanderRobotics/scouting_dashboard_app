@@ -78,22 +78,6 @@ class GlobalNavigationDrawer extends StatelessWidget {
                   icon: Icons.qr_code_scanner,
                 ),
               ),
-              RoleExclusive(
-                roles: const ['8033_scouting_lead'],
-                child: DrawerDestination(
-                  label: "Picked Teams",
-                  onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      "/picked_teams",
-                      (route) => false,
-                    );
-                  },
-                  isSelected:
-                      ModalRoute.of(context)?.settings.name == "/picked_teams",
-                  icon: Icons.rule,
-                ),
-              ),
               const SectionHeader(title: "Data Analysis"),
               DrawerDestination(
                 label: "Match Predictor",
