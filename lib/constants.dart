@@ -6,7 +6,7 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 RegExp validServerAuthority = RegExp(
-    "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost)|((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\b){4})(:\\d+)?\$");
+    "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost)|((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4})(:\\d+)?\$");
 
 List<Tournament> tournamentList = <Tournament>[
   if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
