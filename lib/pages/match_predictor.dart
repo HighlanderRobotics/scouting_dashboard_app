@@ -244,7 +244,7 @@ class _MatchPredictorState extends State<MatchPredictor> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text("Total points"),
+              const Text("Teleop points"),
               Text(
                 data["${allianceName}Alliance"]['totalPoints'] == null
                     ? "--"

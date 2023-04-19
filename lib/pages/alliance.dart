@@ -80,7 +80,7 @@ class AllianceVizualization extends AnalysisVisualization {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Total points",
+              "Teleop points",
               style: Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                   )),
