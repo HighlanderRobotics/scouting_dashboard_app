@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
@@ -71,6 +72,7 @@ void main() async {
       '/match_suggestions': (context) => const MatchSuggestionsPage(),
       '/match_suggestions_opener': (context) =>
           const MatchSuggestionsOpenerPage(),
+      '/picked_teams': (context) => const PickedTeamsPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

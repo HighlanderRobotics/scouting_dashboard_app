@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -13,6 +14,23 @@ class MutablePicklistPage extends StatefulWidget {
 class _MutablePicklistPageState extends State<MutablePicklistPage> {
   List<int>? pendingTeamList;
   List<int>? updatedTeamList;
+
+  List<int> pickedTeamList = [];
+
+  Future<void> refreshPickedTeams() async {
+    final teams = await getPickedTeams();
+
+    setState(() {
+      pickedTeamList = teams;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    refreshPickedTeams();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +48,32 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
                 child: LinearProgressIndicator(),
               )
             : null,
+        actions: [
+          IconButton(
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (context) => MarkPickedTeamDialog(
+                  onSubmit: (team) {
+                    refreshPickedTeams();
+                  },
+                ),
+              );
+            },
+            icon: const Icon(Icons.format_strikethrough),
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .pushNamed("/picked_teams", arguments: <String, dynamic>{
+                'onEdit': () {
+                  refreshPickedTeams();
+                }
+              });
+            },
+            icon: const Icon(Icons.rule),
+          ),
+        ],
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
@@ -87,6 +131,8 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
                     key: Key(team.toString()),
                     onLongPress: pendingTeamList == null ? null : () {},
                     child: ListTile(
+                      textColor:
+                          pickedTeamList.contains(team) ? Colors.red : null,
                       title: Text(team.toString()),
                       leading: tbaRankBadge(team),
                       trailing: Icon(
