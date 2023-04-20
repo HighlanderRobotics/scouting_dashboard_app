@@ -193,13 +193,21 @@ class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
           }
         },
         childBelow: FutureBuilder(future: (() async {
-          Map<String, String?> isScoutedAll = await getScoutedStatuses();
+          final responses = await Future.wait([
+            getScoutedStatuses(),
+            TournamentSchedule.fromServer(
+              (await getServerAuthority())!,
+              (await SharedPreferences.getInstance())
+                  .getString(("tournament"))!,
+            ),
+            getScoutSchedule(),
+          ]);
+
+          Map<String, String?> isScoutedAll =
+              responses[0] as Map<String, String?>;
           TournamentSchedule tournamentSchedule =
-              await TournamentSchedule.fromServer(
-            (await getServerAuthority())!,
-            (await SharedPreferences.getInstance()).getString(("tournament"))!,
-          );
-          ScoutSchedule scoutSchedule = await getScoutSchedule();
+              responses[1] as TournamentSchedule;
+          ScoutSchedule scoutSchedule = responses[2] as ScoutSchedule;
 
           tournamentSchedule.matches
               .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
