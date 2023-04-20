@@ -119,16 +119,23 @@ class _ScheduleState extends State<Schedule> {
       body: PageBody(
         padding: EdgeInsets.zero,
         child: FutureBuilder(future: (() async {
-          final TournamentSchedule tournamentSchedule =
-              await TournamentSchedule.fromServer(
-            (await getServerAuthority())!,
-            (await SharedPreferences.getInstance()).getString('tournament')!,
-          );
+          final outputs = await Future.wait([
+            TournamentSchedule.fromServer(
+              (await getServerAuthority())!,
+              (await SharedPreferences.getInstance()).getString('tournament')!,
+            ),
+            getScoutSchedule(),
+            getScoutedStatuses(),
+          ]);
+
+          final tournamentSchedule = outputs[0];
+          final scoutSchedule = outputs[1];
+          final isScouted = outputs[2];
 
           return {
             'tournamentSchedule': tournamentSchedule,
-            'scoutSchedule': await getScoutSchedule(),
-            'isScouted': await getScoutedStatuses(),
+            'scoutSchedule': scoutSchedule,
+            'isScouted': isScouted,
           };
         })(), builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done ||
