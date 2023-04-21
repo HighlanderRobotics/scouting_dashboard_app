@@ -206,8 +206,12 @@ class _ScheduleState extends State<Schedule> {
             : SmartRefresher(
                 controller: refreshController,
                 onRefresh: () async {
-                  await fetchData();
-                  refreshController.refreshCompleted();
+                  try {
+                    await fetchData();
+                    refreshController.refreshCompleted();
+                  } catch (error) {
+                    refreshController.refreshFailed();
+                  }
                 },
                 child: ListView.builder(
                   keyboardDismissBehavior:
