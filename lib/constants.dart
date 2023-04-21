@@ -46,7 +46,13 @@ final List<PicklistWeight> picklistWeights = [
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
-  ConfiguredPicklist.defaultWeights('Overall'),
+  ConfiguredPicklist.autoUuid(
+    "Average total",
+    picklistWeights
+        .map((weight) => PicklistWeight(weight.path, weight.localizedName,
+            value: weight.path == 'avgTotal' ? 1 : 0))
+        .toList(),
+  ),
 ];
 
 enum AutoPathPosition {
