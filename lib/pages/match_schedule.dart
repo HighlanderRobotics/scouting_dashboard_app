@@ -31,6 +31,64 @@ class _ScheduleState extends State<Schedule> {
 
   GameMatchIdentity? nextMatch;
 
+  TournamentSchedule? tournamentSchedule;
+  ScoutSchedule? scoutSchedule;
+  Map<String, String?>? isScouted;
+
+  Future<void> fetchData() async {
+    final outputs = await Future.wait([
+      TournamentSchedule.fromServer(
+        (await getServerAuthority())!,
+        (await SharedPreferences.getInstance()).getString('tournament')!,
+      ),
+      getScoutSchedule(),
+      getScoutedStatuses(),
+    ]);
+
+    final fetchedTournamentSchedule = outputs[0] as TournamentSchedule;
+    final fetchedScoutSchedule = outputs[1] as ScoutSchedule;
+    final fetchedIsScouted = outputs[2] as Map<String, String?>;
+
+    fetchedTournamentSchedule.matches
+        .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+
+    final ScheduleMatch fetchedLastScoutedMatch =
+        fetchedTournamentSchedule.matches.lastWhere((match) => [
+              fetchedIsScouted["${match.identity.toMediumKey()}_0"],
+              fetchedIsScouted["${match.identity.toMediumKey()}_1"],
+              fetchedIsScouted["${match.identity.toMediumKey()}_2"],
+              fetchedIsScouted["${match.identity.toMediumKey()}_3"],
+              fetchedIsScouted["${match.identity.toMediumKey()}_4"],
+              fetchedIsScouted["${match.identity.toMediumKey()}_5"],
+            ].any((e) => e != null));
+
+    final ScheduleMatch? nextScheduleMatch = fetchedTournamentSchedule.matches
+        .cast<ScheduleMatch?>()
+        .singleWhere(
+          (match) =>
+              match?.ordinalNumber == fetchedLastScoutedMatch.ordinalNumber + 1,
+          orElse: () => null,
+        );
+
+    setState(() {
+      if (nextScheduleMatch?.identity.toMediumKey() !=
+          nextMatch?.toMediumKey()) {
+        nextMatch = nextScheduleMatch?.identity;
+      }
+
+      tournamentSchedule = fetchedTournamentSchedule;
+      scoutSchedule = fetchedScoutSchedule;
+      isScouted = fetchedIsScouted;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -141,272 +199,215 @@ class _ScheduleState extends State<Schedule> {
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
-        child: FutureBuilder(future: (() async {
-          final outputs = await Future.wait([
-            TournamentSchedule.fromServer(
-              (await getServerAuthority())!,
-              (await SharedPreferences.getInstance()).getString('tournament')!,
-            ),
-            getScoutSchedule(),
-            getScoutedStatuses(),
-          ]);
+        child: (tournamentSchedule == null ||
+                scoutSchedule == null ||
+                isScouted == null)
+            ? Column(children: const [LinearProgressIndicator()])
+            : SmartRefresher(
+                controller: refreshController,
+                onRefresh: () async {
+                  await fetchData();
+                  refreshController.refreshCompleted();
+                },
+                child: ListView.builder(
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  addAutomaticKeepAlives: true,
+                  // itemExtent: 190,
+                  itemBuilder: (context, index) {
+                    ScheduleMatch match = tournamentSchedule!.matches[index];
 
-          final tournamentSchedule = outputs[0] as TournamentSchedule;
-          final scoutSchedule = outputs[1] as ScoutSchedule;
-          final isScouted = outputs[2] as Map<String, String?>;
+                    List<String?> scouted = [
+                      isScouted!["${match.identity.toMediumKey()}_0"],
+                      isScouted!["${match.identity.toMediumKey()}_1"],
+                      isScouted!["${match.identity.toMediumKey()}_2"],
+                      isScouted!["${match.identity.toMediumKey()}_3"],
+                      isScouted!["${match.identity.toMediumKey()}_4"],
+                      isScouted!["${match.identity.toMediumKey()}_5"],
+                    ];
 
-          tournamentSchedule.matches
-              .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+                    if (!_teamsFilter
+                            .every((team) => match.teams.contains(team)) &&
+                        _teamsFilter.isNotEmpty) {
+                      return Container();
+                    }
 
-          final ScheduleMatch lastScoutedMatch =
-              tournamentSchedule.matches.lastWhere((match) => [
-                    isScouted["${match.identity.toMediumKey()}_0"],
-                    isScouted["${match.identity.toMediumKey()}_1"],
-                    isScouted["${match.identity.toMediumKey()}_2"],
-                    isScouted["${match.identity.toMediumKey()}_3"],
-                    isScouted["${match.identity.toMediumKey()}_4"],
-                    isScouted["${match.identity.toMediumKey()}_5"],
-                  ].any((e) => e != null));
+                    if (completionFilter == CompletionFilter.finished &&
+                        !scouted.any((report) => report != null)) {
+                      return Container();
+                    }
 
-          final ScheduleMatch? nextScheduleMatch = tournamentSchedule.matches
-              .cast<ScheduleMatch?>()
-              .singleWhere(
-                (match) =>
-                    match?.ordinalNumber == lastScoutedMatch.ordinalNumber + 1,
-                orElse: () => null,
-              );
+                    if (completionFilter == CompletionFilter.upcoming &&
+                        scouted.any((report) => report != null)) {
+                      return Container();
+                    }
 
-          if (nextScheduleMatch?.identity.toMediumKey() !=
-              nextMatch?.toMediumKey()) {
-            setState(() {
-              nextMatch = nextScheduleMatch?.identity;
-            });
-          }
-
-          return {
-            'tournamentSchedule': tournamentSchedule,
-            'scoutSchedule': scoutSchedule,
-            'isScouted': isScouted,
-          };
-        })(), builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done ||
-              !snapshot.hasData) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          final TournamentSchedule tournamentSchedule =
-              snapshot.data!['tournamentSchedule'] as TournamentSchedule;
-          final ScoutSchedule scoutSchedule =
-              snapshot.data!['scoutSchedule'] as ScoutSchedule;
-          final Map<String, String?> isScoutedResponse =
-              snapshot.data!['isScouted'] as Map<String, String?>;
-
-          debugPrint(snapshot.toString());
-
-          return SmartRefresher(
-            controller: refreshController,
-            onRefresh: () {
-              refreshController.refreshCompleted();
-              setState(() {});
-            },
-            child: ListView.builder(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              addAutomaticKeepAlives: true,
-              // itemExtent: 190,
-              itemBuilder: (context, index) {
-                ScheduleMatch match = tournamentSchedule.matches[index];
-
-                List<String?> scouted = [
-                  isScoutedResponse["${match.identity.toMediumKey()}_0"],
-                  isScoutedResponse["${match.identity.toMediumKey()}_1"],
-                  isScoutedResponse["${match.identity.toMediumKey()}_2"],
-                  isScoutedResponse["${match.identity.toMediumKey()}_3"],
-                  isScoutedResponse["${match.identity.toMediumKey()}_4"],
-                  isScoutedResponse["${match.identity.toMediumKey()}_5"],
-                ];
-
-                if (!_teamsFilter.every((team) => match.teams.contains(team)) &&
-                    _teamsFilter.isNotEmpty) {
-                  return Container();
-                }
-
-                if (completionFilter == CompletionFilter.finished &&
-                    !scouted.any((report) => report != null)) {
-                  return Container();
-                }
-
-                if (completionFilter == CompletionFilter.upcoming &&
-                    scouted.any((report) => report != null)) {
-                  return Container();
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-                  child: ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(8)),
-                    child: Container(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                      child: ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(8)),
+                        child: Container(
+                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(10, 13, 10, 13),
-                                  child: Text(
-                                    match.identity.getLocalizedDescription(
-                                        includeTournament: false),
-                                    style:
-                                        Theme.of(context).textTheme.labelMedium,
-                                  ),
-                                ),
-                                if (!scouted.contains(null))
-                                  const ScoutedFlag(),
-                                const Spacer(),
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pushNamed(
-                                      "/match_predictor",
-                                      arguments: {
-                                        'red1': match.teams[0].toString(),
-                                        'red2': match.teams[1].toString(),
-                                        'red3': match.teams[2].toString(),
-                                        'blue1': match.teams[3].toString(),
-                                        'blue2': match.teams[4].toString(),
-                                        'blue3': match.teams[5].toString(),
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 13, 10, 13),
+                                      child: Text(
+                                        match.identity.getLocalizedDescription(
+                                            includeTournament: false),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelMedium,
+                                      ),
+                                    ),
+                                    if (!scouted.contains(null))
+                                      const ScoutedFlag(),
+                                    const Spacer(),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                          "/match_predictor",
+                                          arguments: {
+                                            'red1': match.teams[0].toString(),
+                                            'red2': match.teams[1].toString(),
+                                            'red3': match.teams[2].toString(),
+                                            'blue1': match.teams[3].toString(),
+                                            'blue2': match.teams[4].toString(),
+                                            'blue3': match.teams[5].toString(),
+                                          },
+                                        );
                                       },
-                                    );
-                                  },
-                                  icon: const Icon(Icons.psychology),
-                                ),
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pushNamed(
-                                      "/match_suggestions",
-                                      arguments: {
-                                        'teams': <String, int>{
-                                          'red1': match.teams[0],
-                                          'red2': match.teams[1],
-                                          'red3': match.teams[2],
-                                          'blue1': match.teams[3],
-                                          'blue2': match.teams[4],
-                                          'blue3': match.teams[5],
-                                        },
-                                        'matchIdentity': match.identity,
-                                        'matchType': match.identity.type,
+                                      icon: const Icon(Icons.psychology),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pushNamed(
+                                          "/match_suggestions",
+                                          arguments: {
+                                            'teams': <String, int>{
+                                              'red1': match.teams[0],
+                                              'red2': match.teams[1],
+                                              'red3': match.teams[2],
+                                              'blue1': match.teams[3],
+                                              'blue2': match.teams[4],
+                                              'blue3': match.teams[5],
+                                            },
+                                            'matchIdentity': match.identity,
+                                            'matchType': match.identity.type,
+                                          },
+                                        );
                                       },
-                                    );
-                                  },
-                                  icon: const Icon(Icons.assistant),
+                                      icon: const Icon(Icons.assistant),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            AllianceRow(
-                              alliance: Alliance.red,
-                              items: [
-                                AllianceRowItem(
-                                  scouted: scouted[0] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_0",
-                                  team: match.teams[0],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[0],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    0,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
+                                AllianceRow(
+                                  alliance: Alliance.red,
+                                  items: [
+                                    AllianceRowItem(
+                                      scouted: scouted[0] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_0",
+                                      team: match.teams[0],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[0],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        0,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                    AllianceRowItem(
+                                      scouted: scouted[1] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_1",
+                                      team: match.teams[1],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[1],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        1,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                    AllianceRowItem(
+                                      scouted: scouted[2] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_2",
+                                      team: match.teams[2],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[2],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        2,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                AllianceRowItem(
-                                  scouted: scouted[1] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_1",
-                                  team: match.teams[1],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[1],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    1,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
+                                AllianceRow(
+                                  alliance: Alliance.blue,
+                                  items: [
+                                    AllianceRowItem(
+                                      scouted: scouted[3] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_3",
+                                      team: match.teams[3],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[3],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        3,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                    AllianceRowItem(
+                                      scouted: scouted[4] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_4",
+                                      team: match.teams[4],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[4],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        4,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                    AllianceRowItem(
+                                      scouted: scouted[5] != null,
+                                      longMatchKey:
+                                          "${match.identity.toMediumKey()}_5",
+                                      team: match.teams[5],
+                                      scout: scoutSchedule!.getScoutsForMatch(
+                                          match.ordinalNumber)[5],
+                                      warnings: getWarnings(
+                                        scouted,
+                                        5,
+                                        scoutSchedule!.getScoutsForMatch(
+                                            match.ordinalNumber),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                AllianceRowItem(
-                                  scouted: scouted[2] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_2",
-                                  team: match.teams[2],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[2],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    2,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            AllianceRow(
-                              alliance: Alliance.blue,
-                              items: [
-                                AllianceRowItem(
-                                  scouted: scouted[3] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_3",
-                                  team: match.teams[3],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[3],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    3,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
-                                ),
-                                AllianceRowItem(
-                                  scouted: scouted[4] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_4",
-                                  team: match.teams[4],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[4],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    4,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
-                                ),
-                                AllianceRowItem(
-                                  scouted: scouted[5] != null,
-                                  longMatchKey:
-                                      "${match.identity.toMediumKey()}_5",
-                                  team: match.teams[5],
-                                  scout: scoutSchedule.getScoutsForMatch(
-                                      match.ordinalNumber)[5],
-                                  warnings: getWarnings(
-                                    scouted,
-                                    5,
-                                    scoutSchedule
-                                        .getScoutsForMatch(match.ordinalNumber),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ]),
-                    ),
-                  ),
-                );
-              },
-              itemCount: tournamentSchedule.matches.length,
-            ),
-          );
-        }),
+                              ]),
+                        ),
+                      ),
+                    );
+                  },
+                  itemCount: tournamentSchedule!.matches.length,
+                ),
+              ),
       ),
       drawer: const GlobalNavigationDrawer(),
     );
