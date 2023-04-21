@@ -375,22 +375,28 @@ class AnalysisOverview extends AnalysisVisualization {
                       bottomTitles: AxisTitles(
                           axisNameWidget: const Text("Match"),
                           sideTitles: SideTitles(
+                            interval: 1,
                             showTitles: true,
-                            getTitlesWidget: (value, meta) => Text(
-                              value.roundToDouble() == value &&
-                                      (snapshot.data['array'] as List<dynamic>)
-                                          .map((e) => (e['match'] as String)
-                                              .replaceAll(
-                                                  RegExp('_\\d+\$'), ""))
-                                          .contains(scheduleSnapshot
-                                              .data!
-                                              .matches[value.toInt() - 1]
-                                              .identity
-                                              .toMediumKey())
-                                  ? scheduleSnapshot
-                                      .data!.matches[value.toInt() - 1].identity
-                                      .getShortLocalizedDescription()
-                                  : "",
+                            reservedSize: 55,
+                            getTitlesWidget: (value, meta) => RotatedBox(
+                              quarterTurns: 1,
+                              child: Text(
+                                value.roundToDouble() == value &&
+                                        (snapshot.data['array']
+                                                as List<dynamic>)
+                                            .map((e) => (e['match'] as String)
+                                                .replaceAll(
+                                                    RegExp('_\\d+\$'), ""))
+                                            .contains(scheduleSnapshot
+                                                .data!
+                                                .matches[value.toInt() - 1]
+                                                .identity
+                                                .toMediumKey())
+                                    ? scheduleSnapshot.data!
+                                        .matches[value.toInt() - 1].identity
+                                        .getShortLocalizedDescription()
+                                    : "",
+                              ),
                             ),
                           )),
                       topTitles: AxisTitles(),
