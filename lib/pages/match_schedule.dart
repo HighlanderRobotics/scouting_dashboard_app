@@ -29,6 +29,8 @@ class _ScheduleState extends State<Schedule> {
   RefreshController refreshController =
       RefreshController(initialRefresh: false);
 
+  GameMatchIdentity? nextMatch;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -104,6 +106,27 @@ class _ScheduleState extends State<Schedule> {
                           });
                         },
                       ),
+                      const Spacer(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            "Up next",
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: 5),
+                          nextMatch == null
+                              ? const SkeletonLine(
+                                  style: SkeletonLineStyle(
+                                    width: 50,
+                                    height: 20,
+                                  ),
+                                )
+                              : Text(
+                                  nextMatch!.getShortLocalizedDescription(),
+                                ),
+                        ],
+                      ),
                     ])
                   ],
                 ),
@@ -128,9 +151,37 @@ class _ScheduleState extends State<Schedule> {
             getScoutedStatuses(),
           ]);
 
-          final tournamentSchedule = outputs[0];
-          final scoutSchedule = outputs[1];
-          final isScouted = outputs[2];
+          final tournamentSchedule = outputs[0] as TournamentSchedule;
+          final scoutSchedule = outputs[1] as ScoutSchedule;
+          final isScouted = outputs[2] as Map<String, String?>;
+
+          tournamentSchedule.matches
+              .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+
+          final ScheduleMatch lastScoutedMatch =
+              tournamentSchedule.matches.lastWhere((match) => [
+                    isScouted["${match.identity.toMediumKey()}_0"],
+                    isScouted["${match.identity.toMediumKey()}_1"],
+                    isScouted["${match.identity.toMediumKey()}_2"],
+                    isScouted["${match.identity.toMediumKey()}_3"],
+                    isScouted["${match.identity.toMediumKey()}_4"],
+                    isScouted["${match.identity.toMediumKey()}_5"],
+                  ].any((e) => e != null));
+
+          final ScheduleMatch? nextScheduleMatch = tournamentSchedule.matches
+              .cast<ScheduleMatch?>()
+              .singleWhere(
+                (match) =>
+                    match?.ordinalNumber == lastScoutedMatch.ordinalNumber + 1,
+                orElse: () => null,
+              );
+
+          if (nextScheduleMatch?.identity.toMediumKey() !=
+              nextMatch?.toMediumKey()) {
+            setState(() {
+              nextMatch = nextScheduleMatch?.identity;
+            });
+          }
 
           return {
             'tournamentSchedule': tournamentSchedule,
