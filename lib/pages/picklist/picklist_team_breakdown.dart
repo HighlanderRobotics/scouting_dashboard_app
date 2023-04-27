@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
@@ -54,24 +55,39 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
         ],
       ),
       body: PageBody(
-          child: ClipRRect(
-        borderRadius: const BorderRadius.all(Radius.circular(10)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: (weighted ? breakdown : unweightedBreakdown).map((weight) {
-            bool alternate = (weight['result'] as num).isNegative
-                ? (weighted ? breakdown : unweightedBreakdown)
-                    .indexOf(weight)
-                    .isOdd
-                : (weighted ? breakdown : unweightedBreakdown)
-                    .indexOf(weight)
-                    .isEven;
+          child: Container(
+        decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+            color: Theme.of(context).colorScheme.primaryContainer),
+        clipBehavior: Clip.antiAlias,
+        child: LayoutBuilder(builder: (context, constraints) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children:
+                (weighted ? breakdown : unweightedBreakdown).map((weight) {
+              bool alternate = (weight['result'] as num).isNegative
+                  ? (weighted ? breakdown : unweightedBreakdown)
+                      .indexOf(weight)
+                      .isOdd
+                  : (weighted ? breakdown : unweightedBreakdown)
+                      .indexOf(weight)
+                      .isEven;
 
-            return Flexible(
-              flex: useSameHeights
-                  ? 1
-                  : ((weight['result'] as num).abs() * 100).round(),
-              child: Container(
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOutCubicEmphasized,
+                key: Key(weight['type']),
+                height: useSameHeights
+                    ? (1 /
+                            (weighted ? breakdown : unweightedBreakdown)
+                                .length) *
+                        constraints.maxHeight
+                    : ((weight['result'] as num).abs() /
+                            ((weighted ? breakdown : unweightedBreakdown)
+                                .map((e) => (e['result'] as num).abs())
+                                .toList()
+                                .sum())) *
+                        constraints.maxHeight,
                 color: alternate
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.primaryContainer,
@@ -112,10 +128,10 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                     ),
                   ),
                 ),
-              ),
-            );
-          }).toList(),
-        ),
+              );
+            }).toList(),
+          );
+        }),
       )),
     );
   }
