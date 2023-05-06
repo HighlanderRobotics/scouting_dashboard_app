@@ -31,6 +31,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   ScoutSchedule? scoutSchedule;
   Map<String, String?>? isScouted;
 
+  bool isDataFetched = false;
+
   Future<void> fetchData() async {
     final outputs = await Future.wait([
       TournamentSchedule.fromServer(
@@ -75,6 +77,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       tournamentSchedule = fetchedTournamentSchedule;
       scoutSchedule = fetchedScoutSchedule;
       isScouted = fetchedIsScouted;
+
+      isDataFetched = true;
     });
   }
 
@@ -169,15 +173,16 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                             style: Theme.of(context).textTheme.labelMedium,
                           ),
                           const SizedBox(height: 5),
-                          nextMatch == null
-                              ? const SkeletonLine(
+                          isDataFetched
+                              ? Text(
+                                  nextMatch?.getShortLocalizedDescription() ??
+                                      "No more",
+                                )
+                              : const SkeletonLine(
                                   style: SkeletonLineStyle(
                                     width: 50,
                                     height: 20,
                                   ),
-                                )
-                              : Text(
-                                  nextMatch!.getShortLocalizedDescription(),
                                 ),
                         ],
                       ),
