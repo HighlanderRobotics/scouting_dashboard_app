@@ -194,6 +194,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         ),
       ),
       body: PageBody(
+        bottom: false,
         padding: EdgeInsets.zero,
         child: (tournamentSchedule == null ||
                 scoutSchedule == null ||
