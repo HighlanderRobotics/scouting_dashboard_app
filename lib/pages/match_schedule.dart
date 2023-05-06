@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:chips_input/chips_input.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -25,9 +24,6 @@ class MatchSchedulePage extends StatefulWidget {
 class _MatchSchedulePageState extends State<MatchSchedulePage> {
   List<int> _teamsFilter = [];
   CompletionFilter completionFilter = CompletionFilter.any;
-
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
 
   GameMatchIdentity? nextMatch;
 
@@ -203,16 +199,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                 scoutSchedule == null ||
                 isScouted == null)
             ? Column(children: const [LinearProgressIndicator()])
-            : SmartRefresher(
-                controller: refreshController,
-                onRefresh: () async {
-                  try {
-                    await fetchData();
-                    refreshController.refreshCompleted();
-                  } catch (error) {
-                    refreshController.refreshFailed();
-                  }
-                },
+            : RefreshIndicator(
+                onRefresh: () => fetchData(),
                 child: ListView.builder(
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
