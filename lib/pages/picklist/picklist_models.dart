@@ -1,12 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
-import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;

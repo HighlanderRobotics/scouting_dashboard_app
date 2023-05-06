@@ -2,8 +2,6 @@ import 'dart:convert';
 
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/color_schemes.g.dart';

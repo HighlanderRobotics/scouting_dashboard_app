@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

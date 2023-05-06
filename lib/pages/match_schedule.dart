@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:chips_input/chips_input.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
@@ -10,7 +8,6 @@ import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
-import 'package:http/http.dart' as http;
 
 import '../reusable/navigation_drawer.dart';
 

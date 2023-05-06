@@ -8,7 +8,6 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
-import 'package:http/http.dart' as http;
 
 class RawScoutReportPage extends StatefulWidget {
   const RawScoutReportPage({super.key});
