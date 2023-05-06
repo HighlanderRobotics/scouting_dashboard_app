@@ -5,14 +5,14 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class MyAlliancePage extends StatefulWidget {
-  const MyAlliancePage({super.key});
+class AllianceOpenerPage extends StatefulWidget {
+  const AllianceOpenerPage({super.key});
 
   @override
-  State<MyAlliancePage> createState() => _MyAlliancePageState();
+  State<AllianceOpenerPage> createState() => _AllianceOpenerPageState();
 }
 
-class _MyAlliancePageState extends State<MyAlliancePage> {
+class _AllianceOpenerPageState extends State<AllianceOpenerPage> {
   String field1Val = "";
   String field2Val = "";
   String field3Val = "";

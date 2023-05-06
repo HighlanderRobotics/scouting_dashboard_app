@@ -15,14 +15,14 @@ import 'package:http/http.dart' as http;
 
 import '../reusable/navigation_drawer.dart';
 
-class Schedule extends StatefulWidget {
-  const Schedule({super.key});
+class MatchSchedulePage extends StatefulWidget {
+  const MatchSchedulePage({super.key});
 
   @override
-  State<Schedule> createState() => _ScheduleState();
+  State<MatchSchedulePage> createState() => _MatchSchedulePageState();
 }
 
-class _ScheduleState extends State<Schedule> {
+class _MatchSchedulePageState extends State<MatchSchedulePage> {
   List<int> _teamsFilter = [];
   CompletionFilter completionFilter = CompletionFilter.any;
 

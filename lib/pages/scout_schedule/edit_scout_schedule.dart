@@ -5,14 +5,14 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class EditScoutSchedule extends StatefulWidget {
-  const EditScoutSchedule({super.key});
+class EditScoutSchedulePage extends StatefulWidget {
+  const EditScoutSchedulePage({super.key});
 
   @override
-  State<EditScoutSchedule> createState() => _EditScoutScheduleState();
+  State<EditScoutSchedulePage> createState() => _EditScoutSchedulePageState();
 }
 
-class _EditScoutScheduleState extends State<EditScoutSchedule> {
+class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
   Future<void> setOldSchedule() async {
     oldSchedule = await getScoutSchedule();
 

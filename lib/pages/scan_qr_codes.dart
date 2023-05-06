@@ -12,11 +12,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:soundpool/soundpool.dart';
 
-class ScanQRCodesPage extends StatefulWidget {
-  const ScanQRCodesPage({super.key});
+class ScoutReportScannerPage extends StatefulWidget {
+  const ScoutReportScannerPage({super.key});
 
   @override
-  State<ScanQRCodesPage> createState() => _ScanQRCodesPageState();
+  State<ScoutReportScannerPage> createState() => _ScoutReportScannerPageState();
 }
 
 class QRDataCollection {
@@ -29,7 +29,7 @@ class QRDataCollection {
   int? totalPageCount;
 }
 
-class _ScanQRCodesPageState extends State<ScanQRCodesPage> {
+class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
   List<QRDataCollection> reportData = [
     QRDataCollection(data: []),
     QRDataCollection(data: []),

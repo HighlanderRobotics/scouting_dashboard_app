@@ -5,14 +5,14 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scout_name_selector.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class EditScoutShift extends StatefulWidget {
-  const EditScoutShift({super.key});
+class EditScoutShiftPage extends StatefulWidget {
+  const EditScoutShiftPage({super.key});
 
   @override
-  State<EditScoutShift> createState() => _EditScoutShiftState();
+  State<EditScoutShiftPage> createState() => _EditScoutShiftPageState();
 }
 
-class _EditScoutShiftState extends State<EditScoutShift> {
+class _EditScoutShiftPageState extends State<EditScoutShiftPage> {
   ScoutingShift? shift;
 
   TextEditingController? startController;

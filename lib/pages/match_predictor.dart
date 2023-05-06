@@ -12,14 +12,14 @@ import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 import '../reusable/analysis_visualization.dart';
 
-class MatchPredictor extends StatefulWidget {
-  const MatchPredictor({super.key});
+class MatchPredictorPage extends StatefulWidget {
+  const MatchPredictorPage({super.key});
 
   @override
-  State<MatchPredictor> createState() => _MatchPredictorState();
+  State<MatchPredictorPage> createState() => _MatchPredictorPageState();
 }
 
-class _MatchPredictorState extends State<MatchPredictor> {
+class _MatchPredictorPageState extends State<MatchPredictorPage> {
   MatchPredictorAnalysis? analysisFunction;
 
   @override

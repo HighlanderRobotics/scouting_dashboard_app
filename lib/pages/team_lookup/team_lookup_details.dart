@@ -16,14 +16,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:http/http.dart' as http;
 
-class TeamLookupDetails extends StatefulWidget {
-  const TeamLookupDetails({super.key});
+class TeamLookupDetailsPage extends StatefulWidget {
+  const TeamLookupDetailsPage({super.key});
 
   @override
-  State<TeamLookupDetails> createState() => _TeamLookupDetailsState();
+  State<TeamLookupDetailsPage> createState() => _TeamLookupDetailsPageState();
 }
 
-class _TeamLookupDetailsState extends State<TeamLookupDetails> {
+class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
   int? matchCount;
   RangeValues timeSliderValues = const RangeValues(0, 1);
 

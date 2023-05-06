@@ -4,14 +4,16 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class ScoutScheduleQR extends StatefulWidget {
-  const ScoutScheduleQR({super.key});
+class DisplayScoutScheduleQRPage extends StatefulWidget {
+  const DisplayScoutScheduleQRPage({super.key});
 
   @override
-  State<ScoutScheduleQR> createState() => _ScoutScheduleQRState();
+  State<DisplayScoutScheduleQRPage> createState() =>
+      _DisplayScoutScheduleQRPageState();
 }
 
-class _ScoutScheduleQRState extends State<ScoutScheduleQR> {
+class _DisplayScoutScheduleQRPageState
+    extends State<DisplayScoutScheduleQRPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -4,14 +4,14 @@ import 'package:scouting_dashboard_app/reusable/password_protection.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class RoleSelector extends StatefulWidget {
-  const RoleSelector({super.key});
+class RoleSelectorPage extends StatefulWidget {
+  const RoleSelectorPage({super.key});
 
   @override
-  State<RoleSelector> createState() => _RoleSelectorState();
+  State<RoleSelectorPage> createState() => _RoleSelectorPageState();
 }
 
-class _RoleSelectorState extends State<RoleSelector> {
+class _RoleSelectorPageState extends State<RoleSelectorPage> {
   String role = "analyst";
 
   @override

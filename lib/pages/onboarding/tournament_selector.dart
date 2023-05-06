@@ -7,14 +7,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
 
-class TournamentSelector extends StatefulWidget {
-  const TournamentSelector({super.key});
+class TournamentSelectorPage extends StatefulWidget {
+  const TournamentSelectorPage({super.key});
 
   @override
-  State<TournamentSelector> createState() => _TournamentSelectorState();
+  State<TournamentSelectorPage> createState() => _TournamentSelectorPageState();
 }
 
-class _TournamentSelectorState extends State<TournamentSelector> {
+class _TournamentSelectorPageState extends State<TournamentSelectorPage> {
   Tournament? selectedTournament;
 
   @override

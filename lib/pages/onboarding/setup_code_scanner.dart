@@ -4,14 +4,14 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SetupCodeScanner extends StatefulWidget {
-  const SetupCodeScanner({super.key});
+class SetupCodeScannerPage extends StatefulWidget {
+  const SetupCodeScannerPage({super.key});
 
   @override
-  State<SetupCodeScanner> createState() => _SetupCodeScannerState();
+  State<SetupCodeScannerPage> createState() => _SetupCodeScannerPageState();
 }
 
-class _SetupCodeScannerState extends State<SetupCodeScanner> {
+class _SetupCodeScannerPageState extends State<SetupCodeScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

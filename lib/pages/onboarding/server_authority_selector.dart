@@ -4,14 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
 
-class ServerAuthoritySetup extends StatefulWidget {
-  const ServerAuthoritySetup({super.key});
+class ServerAuthoritySelectorPage extends StatefulWidget {
+  const ServerAuthoritySelectorPage({super.key});
 
   @override
-  State<ServerAuthoritySetup> createState() => _ServerAuthoritySetupState();
+  State<ServerAuthoritySelectorPage> createState() =>
+      _ServerAuthoritySelectorPageState();
 }
 
-class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
+class _ServerAuthoritySelectorPageState
+    extends State<ServerAuthoritySelectorPage> {
   String serverAuthority = "";
 
   @override
