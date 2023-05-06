@@ -76,6 +76,7 @@ class SharedPicklistPage extends StatelessWidget {
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
+        bottom: false,
         child: PicklistVisuzlization(
           analysisFunction: PicklistAnalysis(picklist: picklist),
         ),
