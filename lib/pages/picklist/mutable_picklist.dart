@@ -77,6 +77,7 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
+        bottom: false,
         child: ReorderableListView(
           onReorder: (int oldIndex, int newIndex) async {
             List<int> newTeams =
