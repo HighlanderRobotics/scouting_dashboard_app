@@ -90,6 +90,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
+        bottom: false,
         child: PicklistVisuzlization(
           analysisFunction: PicklistAnalysis(picklist: picklist),
         ),
