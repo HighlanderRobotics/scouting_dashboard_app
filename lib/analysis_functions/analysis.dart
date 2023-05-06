@@ -3,6 +3,7 @@ class OfflineAnalysisUnavailableException extends Error {
 
   final String onlineError;
 
+  @override
   String toString() =>
       "Online analysis failed, and offline analysis is unavailable: $onlineError";
 }
