@@ -161,7 +161,7 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
           }
 
           if (snapshot.connectionState != ConnectionState.done) {
-            return Column(children: const [LinearProgressIndicator()]);
+            return const Column(children: [LinearProgressIndicator()]);
           }
 
           List<int> teams = snapshot.data!;
@@ -181,10 +181,10 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
                         },
                         background: Container(
                           color: Colors.red[900],
-                          child: Center(
+                          child: const Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
+                              children: [
                                 Icon(Icons.delete),
                                 SizedBox(width: 30),
                               ],
