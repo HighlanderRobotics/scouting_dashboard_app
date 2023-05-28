@@ -71,7 +71,7 @@ DEPENDENCIES:
   - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - Flutter (from `Flutter`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/ios`)
-  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - soundpool (from `.symlinks/plugins/soundpool/ios`)
 
 SPEC REPOS:
@@ -98,7 +98,7 @@ EXTERNAL SOURCES:
   mobile_scanner:
     :path: ".symlinks/plugins/mobile_scanner/ios"
   shared_preferences_foundation:
-    :path: ".symlinks/plugins/shared_preferences_foundation/ios"
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   soundpool:
     :path: ".symlinks/plugins/soundpool/ios"
 
