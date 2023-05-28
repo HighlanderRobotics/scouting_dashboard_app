@@ -187,7 +187,7 @@ class ManualTournamentInputDialog extends StatefulWidget {
     required this.onSubmit,
   });
 
-  final void Function(Tournament) onSubmit;
+  final dynamic Function(Tournament) onSubmit;
 
   @override
   State<ManualTournamentInputDialog> createState() =>
