@@ -9,16 +9,16 @@ import 'package:http/http.dart' as http;
 import 'package:skeletons/skeletons.dart';
 
 class TournamentKeyPicker extends StatefulWidget {
-  TournamentKeyPicker({
+  const TournamentKeyPicker({
     super.key,
     this.decoration,
     required this.onChanged,
     this.initialValue,
   });
 
-  InputDecoration? decoration;
-  dynamic Function(Tournament) onChanged;
-  Tournament? initialValue;
+  final InputDecoration? decoration;
+  final dynamic Function(Tournament) onChanged;
+  final Tournament? initialValue;
 
   @override
   State<TournamentKeyPicker> createState() => _TournamentKeyPickerState();
