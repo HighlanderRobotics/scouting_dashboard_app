@@ -182,12 +182,12 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
 }
 
 class ManualTournamentInputDialog extends StatefulWidget {
-  ManualTournamentInputDialog({
+  const ManualTournamentInputDialog({
     super.key,
     required this.onSubmit,
   });
 
-  void Function(Tournament) onSubmit;
+  final void Function(Tournament) onSubmit;
 
   @override
   State<ManualTournamentInputDialog> createState() =>
