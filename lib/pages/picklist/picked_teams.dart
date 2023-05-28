@@ -167,6 +167,7 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
           List<int> teams = snapshot.data!;
 
           return PageBody(
+            padding: EdgeInsets.zero,
             child: ListView(
               children: teams
                   .map((team) => Dismissible(
