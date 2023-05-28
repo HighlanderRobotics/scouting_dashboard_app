@@ -100,7 +100,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
 }
 
 class PicklistVisuzlization extends AnalysisVisualization {
-  PicklistVisuzlization({required super.analysisFunction});
+  const PicklistVisuzlization({required super.analysisFunction});
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
