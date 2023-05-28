@@ -112,6 +112,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
           .map((teamData) => ListTile(
                 leading: tbaRankBadge(teamData['team']),
                 title: Text(teamData['team'].toString()),
+                contentPadding: const EdgeInsets.only(left: 16, right: 4),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
