@@ -99,6 +99,38 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
+    List<ScheduleMatch>? filteredMatches;
+
+    if (isDataFetched) {
+      filteredMatches = tournamentSchedule!.matches.where((match) {
+        List<String?> scouted = [
+          isScouted!["${match.identity.toMediumKey()}_0"],
+          isScouted!["${match.identity.toMediumKey()}_1"],
+          isScouted!["${match.identity.toMediumKey()}_2"],
+          isScouted!["${match.identity.toMediumKey()}_3"],
+          isScouted!["${match.identity.toMediumKey()}_4"],
+          isScouted!["${match.identity.toMediumKey()}_5"],
+        ];
+
+        if (!_teamsFilter.every((team) => match.teams.contains(team)) &&
+            _teamsFilter.isNotEmpty) {
+          return false;
+        }
+
+        if (completionFilter == CompletionFilter.finished &&
+            !scouted.any((report) => report != null)) {
+          return false;
+        }
+
+        if (completionFilter == CompletionFilter.upcoming &&
+            scouted.any((report) => report != null)) {
+          return false;
+        }
+
+        return true;
+      }).toList();
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Match Schedule"),
@@ -225,7 +257,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                     addAutomaticKeepAlives: true,
                     // itemExtent: 190,
                     itemBuilder: (context, index) {
-                      ScheduleMatch match = tournamentSchedule!.matches[index];
+                      ScheduleMatch match = filteredMatches![index];
 
                       List<String?> scouted = [
                         isScouted!["${match.identity.toMediumKey()}_0"],
@@ -235,22 +267,6 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         isScouted!["${match.identity.toMediumKey()}_4"],
                         isScouted!["${match.identity.toMediumKey()}_5"],
                       ];
-
-                      if (!_teamsFilter
-                              .every((team) => match.teams.contains(team)) &&
-                          _teamsFilter.isNotEmpty) {
-                        return Container();
-                      }
-
-                      if (completionFilter == CompletionFilter.finished &&
-                          !scouted.any((report) => report != null)) {
-                        return Container();
-                      }
-
-                      if (completionFilter == CompletionFilter.upcoming &&
-                          scouted.any((report) => report != null)) {
-                        return Container();
-                      }
 
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
@@ -421,7 +437,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         ),
                       );
                     },
-                    itemCount: tournamentSchedule!.matches.length,
+                    itemCount: filteredMatches!.length,
                   ),
                 ),
               ),
