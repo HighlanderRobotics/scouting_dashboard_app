@@ -253,8 +253,12 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                     }
                     return false;
                   },
-                  child: ListView(
-                    children: filteredMatches!.map((match) {
+                  child: ListView.builder(
+                    addAutomaticKeepAlives: true,
+                    // itemExtent: 190,
+                    itemBuilder: (context, index) {
+                      ScheduleMatch match = filteredMatches![index];
+
                       List<String?> scouted = [
                         isScouted!["${match.identity.toMediumKey()}_0"],
                         isScouted!["${match.identity.toMediumKey()}_1"],
@@ -432,7 +436,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                           ),
                         ),
                       );
-                    }).toList(),
+                    },
+                    itemCount: filteredMatches!.length,
                   ),
                 ),
               ),
