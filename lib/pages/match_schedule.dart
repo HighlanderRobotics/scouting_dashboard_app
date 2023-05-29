@@ -208,7 +208,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         child: (tournamentSchedule == null ||
                 scoutSchedule == null ||
                 isScouted == null)
-            ? Column(children: const [LinearProgressIndicator()])
+            ? const SkeletonMatches()
             : RefreshIndicator(
                 onRefresh: () => fetchData(),
                 child: NotificationListener<ScrollUpdateNotification>(
@@ -480,6 +480,40 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           matchScheduleScouts[scoutIndex] != scouted[scoutIndex])
         "By ${scouted[scoutIndex]}",
     ];
+  }
+}
+
+class SkeletonMatches extends StatelessWidget {
+  const SkeletonMatches({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const NeverScrollableScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.all(24).copyWith(bottom: 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            skeletonMatch(),
+            skeletonMatch(),
+            skeletonMatch(),
+            skeletonMatch(),
+          ].withSpaceBetween(height: 20),
+        ),
+      ),
+    );
+  }
+
+  Widget skeletonMatch() {
+    return SkeletonAvatar(
+      style: SkeletonAvatarStyle(
+        height: 170,
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
   }
 }
 
