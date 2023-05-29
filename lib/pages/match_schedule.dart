@@ -29,6 +29,16 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   Map<String, String?>? isScouted;
 
   bool isDataFetched = false;
+  bool? isScoutingLead;
+
+  Future<void> checkRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString("role");
+
+    setState(() {
+      isScoutingLead = role == "8033_scouting_lead";
+    });
+  }
 
   Future<void> fetchData() async {
     final outputs = await Future.wait([
@@ -84,6 +94,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
     super.initState();
 
     fetchData();
+    checkRole();
   }
 
   @override
@@ -92,24 +103,20 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       appBar: AppBar(
         title: const Text("Match Schedule"),
         actions: [
-          RoleExclusive(
-            roles: const ["8033_scouting_lead"],
-            child: IconButton(
+          if (isScoutingLead ?? false)
+            IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/edit_scout_schedule");
               },
               icon: const Icon(Icons.edit_outlined),
             ),
-          ),
-          RoleExclusive(
-            roles: const ["8033_scouting_lead"],
-            child: IconButton(
+          if (isScoutingLead ?? false)
+            IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/scout_schedule_qr");
               },
               icon: const Icon(Icons.qr_code),
             ),
-          ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(177),
@@ -315,6 +322,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                   ),
                                   AllianceRow(
                                     alliance: Alliance.red,
+                                    isScoutingLead: isScoutingLead,
                                     items: [
                                       AllianceRowItem(
                                         scouted: scouted[0] != null,
@@ -362,6 +370,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                   ),
                                   AllianceRow(
                                     alliance: Alliance.blue,
+                                    isScoutingLead: isScoutingLead,
                                     items: [
                                       AllianceRowItem(
                                         scouted: scouted[3] != null,
@@ -495,10 +504,12 @@ class AllianceRow extends StatelessWidget {
     Key? key,
     required this.alliance,
     required this.items,
+    this.isScoutingLead,
   }) : super(key: key);
 
   final Alliance alliance;
   final List<AllianceRowItem> items;
+  final bool? isScoutingLead;
 
   @override
   Widget build(BuildContext context) {
@@ -546,21 +557,18 @@ class AllianceRow extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              if (item.scouted)
-                RoleExclusive(
-                  roles: const ["8033_scouting_lead"],
-                  child: IconButton(
-                    onPressed: () {
-                      Navigator.of(context).pushNamed('/raw_scout_report',
-                          arguments: <String, dynamic>{
-                            'longMatchKey': item.longMatchKey,
-                            'team': item.team,
-                          });
-                    },
-                    icon: const Icon(Icons.data_object),
-                    visualDensity: VisualDensity.compact,
-                  ),
-                )
+              if (item.scouted && (isScoutingLead ?? false))
+                IconButton(
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/raw_scout_report',
+                        arguments: <String, dynamic>{
+                          'longMatchKey': item.longMatchKey,
+                          'team': item.team,
+                        });
+                  },
+                  icon: const Icon(Icons.data_object),
+                  visualDensity: VisualDensity.compact,
+                ),
             ],
           ),
           Text(
