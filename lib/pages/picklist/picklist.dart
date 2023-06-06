@@ -104,9 +104,6 @@ class PicklistVisuzlization extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    List<String> teams =
-        snapshot.data.map((e) => e['team'].toString()).toList().cast<String>();
-
     return ListView(
       children: (snapshot.data as List<dynamic>)
           .map((teamData) => ListTile(
