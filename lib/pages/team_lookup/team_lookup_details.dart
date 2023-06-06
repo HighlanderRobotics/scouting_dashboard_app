@@ -489,10 +489,10 @@ class AnalysisOverview extends AnalysisVisualization {
 }
 
 class ScoringBreakdown extends StatefulWidget {
-  ScoringBreakdown(this.detailsAnalysisMap, this.team, {super.key});
+  const ScoringBreakdown(this.detailsAnalysisMap, this.team, {super.key});
 
-  Map<String, dynamic> detailsAnalysisMap;
-  int team;
+  final Map<String, dynamic> detailsAnalysisMap;
+  final int team;
 
   @override
   State<ScoringBreakdown> createState() => _ScoringBreakdownState();
