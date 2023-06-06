@@ -96,7 +96,7 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
 
               HapticFeedback.heavyImpact();
 
-              int streamId = await pool.play(soundId);
+              await pool.play(soundId);
             })();
 
             return;
@@ -124,7 +124,7 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
 
               HapticFeedback.heavyImpact();
 
-              int streamId = await pool.play(soundId);
+              await pool.play(soundId);
             })();
           } else {
             (() async {
@@ -141,7 +141,7 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
 
               HapticFeedback.heavyImpact();
 
-              int streamId = await pool.play(soundId);
+              await pool.play(soundId);
 
               reportData[parsedData['scouterId']].data.sort(((a, b) =>
                   (a['currentPage'] as int)
