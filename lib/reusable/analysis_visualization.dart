@@ -16,7 +16,7 @@ abstract class AnalysisVisualization extends StatelessWidget {
         future: analysisFunction.getAnalysis(),
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return loadingView();
           }
 
           if (snapshot.hasError) {
@@ -46,6 +46,8 @@ abstract class AnalysisVisualization extends StatelessWidget {
           return loadedData(context, snapshot);
         });
   }
+
+  Widget loadingView() => const Center(child: CircularProgressIndicator());
 
   Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
 }
