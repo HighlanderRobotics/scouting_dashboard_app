@@ -4,9 +4,11 @@ import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_anal
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:http/http.dart' as http;
+import 'package:skeletons/skeletons.dart';
 
 class TeamLookupNotesVizualization extends AnalysisVisualization {
   const TeamLookupNotesVizualization({
@@ -15,6 +17,26 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
   }) : super(analysisFunction: function);
 
   final TeamLookupNotesAnalysis function;
+
+  @override
+  Widget loadingView() {
+    return PageBody(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: SkeletonListView(
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 20),
+          child: SkeletonAvatar(
+            style: SkeletonAvatarStyle(
+              borderRadius: BorderRadius.circular(10),
+              randomHeight: true,
+              minHeight: 74,
+              maxHeight: 160,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {

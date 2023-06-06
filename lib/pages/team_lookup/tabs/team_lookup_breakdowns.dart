@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:skeletons/skeletons.dart';
 
 class TeamLookupBreakdownsVizualization extends AnalysisVisualization {
   const TeamLookupBreakdownsVizualization({
@@ -11,6 +13,27 @@ class TeamLookupBreakdownsVizualization extends AnalysisVisualization {
   }) : super(analysisFunction: function);
 
   final TeamLookupBreakdownsAnalysis function;
+
+  @override
+  Widget loadingView() {
+    return PageBody(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      child: SkeletonListView(
+        itemCount: breakdowns.length,
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 10),
+          child: SizedBox(
+            height: 118,
+            child: SkeletonAvatar(
+              style: SkeletonAvatarStyle(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
