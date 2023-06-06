@@ -59,13 +59,17 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                           ),
                         )
                         .toList(),
-                    onTap: () {
-                      Navigator.of(context)
-                          .pushNamed("/team_lookup_details", arguments: {
-                        'category': category,
-                        'team': function.team,
-                      });
-                    },
+                    onTap: category.metrics
+                            .where((metric) => !metric.hideDetails)
+                            .isEmpty
+                        ? null
+                        : () {
+                            Navigator.of(context)
+                                .pushNamed("/team_lookup_details", arguments: {
+                              'category': category,
+                              'team': function.team,
+                            });
+                          },
                   ))
               .toList(),
         ),
