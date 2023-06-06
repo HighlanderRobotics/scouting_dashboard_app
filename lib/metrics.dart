@@ -58,8 +58,10 @@ class BreakdownData {
   List<BreakdownSegmentData> segments;
 }
 
-String numberVizualizationBuilder(num num) {
-  return num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
+String numberVizualizationBuilder(num? num) {
+  return num == null
+      ? "--"
+      : num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
 }
 
 final List<MetricCategoryData> metricCategories = [
