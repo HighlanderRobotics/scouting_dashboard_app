@@ -103,6 +103,13 @@ class PicklistVisuzlization extends AnalysisVisualization {
   const PicklistVisuzlization({super.key, required super.analysisFunction});
 
   @override
+  Widget loadingView() {
+    return SkeletonListView(
+      itemBuilder: (context, index) => SkeletonListTile(),
+    );
+  }
+
+  @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return ListView(
       children: (snapshot.data as List<dynamic>)
