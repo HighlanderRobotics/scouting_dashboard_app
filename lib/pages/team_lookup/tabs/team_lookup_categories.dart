@@ -17,11 +17,11 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
   @override
   Widget loadingView() {
     return PageBody(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
       child: SkeletonListView(
         itemCount: metricCategories.length,
         itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.only(bottom: 15),
           child: SizedBox(
             height: 117,
             child: SkeletonAvatar(
