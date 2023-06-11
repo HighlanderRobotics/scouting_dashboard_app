@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chips_input/chips_input.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
@@ -9,6 +11,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 
 import '../reusable/navigation_drawer.dart';
+
+import 'package:http/http.dart' as http;
 
 class MatchSchedulePage extends StatefulWidget {
   const MatchSchedulePage({super.key});
@@ -26,6 +30,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   TournamentSchedule? tournamentSchedule;
   ScoutSchedule? scoutSchedule;
   Map<String, String?>? isScouted;
+
+  List<Map<String, dynamic>>? teamsInTournament;
 
   bool isDataFetched = false;
   bool? isScoutingLead;
@@ -88,12 +94,43 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
     });
   }
 
+  Future<void> fetchTeamsInTournament() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final response = await http.get(Uri.http(
+        (await getServerAuthority())!, "/API/manager/getTeamsInTournament", {
+      'tournamentKey': prefs.getString("tournament")!,
+    }));
+
+    if (response.statusCode != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Error fetching teams: ${response.statusCode} ${response.reasonPhrase}: ${response.body}",
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onErrorContainer,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        ),
+      );
+
+      return;
+    }
+
+    setState(() {
+      teamsInTournament =
+          jsonDecode(response.body).cast<Map<String, dynamic>>();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
     fetchData();
     checkRole();
+    fetchTeamsInTournament();
   }
 
   @override
@@ -460,7 +497,14 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       }),
       findSuggestions: ((query) {
         if (int.tryParse(query) != null) {
-          return <int>[int.parse(query)];
+          return <int>[
+            int.parse(query),
+            ...(teamsInTournament
+                    ?.map((e) => e['teamNumber'])
+                    .cast<int>()
+                    .where((e) => e.toString().startsWith(query)) ??
+                [])
+          ];
         }
 
         return <int>[];
