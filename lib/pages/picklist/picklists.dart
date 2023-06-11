@@ -20,6 +20,7 @@ class PicklistsPage extends StatefulWidget {
 
 class _PicklistsPageState extends State<PicklistsPage> {
   int selectedTab = 0;
+  dynamic Function()? onNewPicklist;
 
   @override
   Widget build(BuildContext context) {
@@ -43,11 +44,13 @@ class _PicklistsPageState extends State<PicklistsPage> {
               Text("Mutable"),
             ]),
           ),
-          body: const TabBarView(
+          body: TabBarView(
             children: [
-              MyPicklists(),
-              SharedPicklists(),
-              MutablePicklists(),
+              MyPicklists(
+                onCallFrontAvailable: (callFront) => onNewPicklist = callFront,
+              ),
+              const SharedPicklists(),
+              const MutablePicklists(),
             ],
           ),
           floatingActionButton: selectedTab == 0 &&
@@ -57,7 +60,9 @@ class _PicklistsPageState extends State<PicklistsPage> {
                     Navigator.of(context).pushNamed('/new_picklist',
                         arguments: <String, dynamic>{
                           'onCreate': () {
-                            setState(() {});
+                            if (onNewPicklist != null) {
+                              onNewPicklist!();
+                            }
                           }
                         });
                   },
@@ -74,13 +79,25 @@ class _PicklistsPageState extends State<PicklistsPage> {
 class MyPicklists extends StatefulWidget {
   const MyPicklists({
     super.key,
+    required this.onCallFrontAvailable,
   });
+
+  final Function(dynamic Function()) onCallFrontAvailable;
 
   @override
   State<MyPicklists> createState() => _MyPicklistsState();
 }
 
 class _MyPicklistsState extends State<MyPicklists> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.onCallFrontAvailable(() {
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
