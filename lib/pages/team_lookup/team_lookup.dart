@@ -9,14 +9,14 @@ import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
 import '../../reusable/navigation_drawer.dart';
 
-class TeamLookup extends StatefulWidget {
-  const TeamLookup({super.key});
+class TeamLookupPage extends StatefulWidget {
+  const TeamLookupPage({super.key});
 
   @override
-  State<TeamLookup> createState() => _TeamLookupState();
+  State<TeamLookupPage> createState() => _TeamLookupPageState();
 }
 
-class _TeamLookupState extends State<TeamLookup> {
+class _TeamLookupPageState extends State<TeamLookupPage> {
   String teamFieldValue = "";
   TextEditingController? teamFieldController;
   int? teamNumberForAnalysis;
@@ -90,7 +90,10 @@ class _TeamLookupState extends State<TeamLookup> {
                     ),
                   ),
                 ),
-                const Divider(height: 1),
+                Divider(
+                  height: 1,
+                  color: Theme.of(context).colorScheme.outline,
+                ),
               ],
             ),
           ),
@@ -123,7 +126,11 @@ class _TeamLookupState extends State<TeamLookup> {
                   ],
                 ),
               ),
-        drawer: const NavigationDrawer(),
+        drawer: ((ModalRoute.of(context)!.settings.arguments
+                    as Map<String, dynamic>?)?['team'] as int?) ==
+                null
+            ? const GlobalNavigationDrawer()
+            : null,
       ),
     );
   }

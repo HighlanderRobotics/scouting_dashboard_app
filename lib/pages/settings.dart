@@ -1,19 +1,23 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/correct_passwords.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/password_protection.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Settings extends StatefulWidget {
-  const Settings({super.key});
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
 
   @override
-  State<Settings> createState() => _SettingsState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsPageState extends State<SettingsPage> {
   String? initialRole;
   String? initialTournament;
+  String? initialTournamentName;
   String? initialServerAuthority;
 
   Future<void> setInitialValues() async {
@@ -22,6 +26,7 @@ class _SettingsState extends State<Settings> {
     setState(() {
       initialRole = prefs.getString("role");
       initialTournament = prefs.getString("tournament");
+      initialTournamentName = prefs.getString("tournament_localized");
       initialServerAuthority = prefs.getString("serverAuthority");
     });
   }
@@ -37,7 +42,8 @@ class _SettingsState extends State<Settings> {
   Widget build(BuildContext context) {
     if (initialRole == null ||
         initialTournament == null ||
-        initialServerAuthority == null) {
+        initialServerAuthority == null ||
+        initialTournamentName == null) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -45,9 +51,11 @@ class _SettingsState extends State<Settings> {
       );
     } else {
       return LoadedSettings(
-          initialRole: initialRole!,
-          initialTournament: initialTournament!,
-          initialServerAuthority: initialServerAuthority!);
+        initialRole: initialRole!,
+        initialTournament: initialTournament!,
+        initialTournamentName: initialTournamentName!,
+        initialServerAuthority: initialServerAuthority!,
+      );
     }
   }
 }
@@ -57,11 +65,13 @@ class LoadedSettings extends StatefulWidget {
     Key? key,
     required this.initialRole,
     required this.initialTournament,
+    required this.initialTournamentName,
     required this.initialServerAuthority,
   }) : super(key: key);
 
   final String initialRole;
   final String initialTournament;
+  final String initialTournamentName;
   final String initialServerAuthority;
 
   @override
@@ -71,6 +81,7 @@ class LoadedSettings extends StatefulWidget {
 class _LoadedSettingsState extends State<LoadedSettings> {
   late String role = widget.initialRole;
   late String tournament = widget.initialTournament;
+  late String tournamentName = widget.initialTournamentName;
   late String serverAuthority = widget.initialServerAuthority;
   late final TextEditingController _serverAuthorityController =
       TextEditingController(text: serverAuthority);
@@ -102,6 +113,8 @@ class _LoadedSettingsState extends State<LoadedSettings> {
 
                     await prefs.setString("role", role);
                     await prefs.setString("tournament", tournament);
+                    await prefs.setString(
+                        "tournament_localized", tournamentName);
                     await prefs.setString("serverAuthority", serverAuthority);
 
                     const snackBar = SnackBar(
@@ -132,7 +145,10 @@ class _LoadedSettingsState extends State<LoadedSettings> {
               ),
               ListTile(
                 title: const Text("Analyst"),
-                leading: const Icon(Icons.insights),
+                leading: Icon(
+                  Icons.timeline,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 trailing: Radio(
                     value: "analyst",
                     activeColor: Theme.of(context).colorScheme.primary,
@@ -145,41 +161,66 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     })),
               ),
               ListTile(
-                title: const Text("Scouting Lead"),
-                leading: const Icon(Icons.supervisor_account),
+                title: const Text("8033 Analyst"),
+                leading: Icon(
+                  Icons.insights,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
                 trailing: Radio(
-                    value: "scouting_lead",
+                    value: "8033_analyst",
                     activeColor: Theme.of(context).colorScheme.primary,
                     groupValue: role,
                     onChanged: ((value) {
-                      setState(() {
-                        if (value == null) return;
-                        role = value;
+                      passwordProtected(context, teamAnalystCorrectPassword,
+                          () {
+                        setState(() {
+                          if (value == null) return;
+                          role = value;
+                        });
+                      });
+                    })),
+              ),
+              ListTile(
+                title: const Text("8033 Scouting Lead"),
+                leading: Icon(
+                  Icons.supervisor_account,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                trailing: Radio(
+                    value: "8033_scouting_lead",
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    groupValue: role,
+                    onChanged: ((value) {
+                      passwordProtected(
+                          context, teamScoutingLeadCorrectPassword, () {
+                        setState(() {
+                          if (value == null) return;
+                          role = value;
+                        });
                       });
                     })),
               ),
               Text(
-                "Both get access to processed scouting data. Scouting leads get additional tools for modifying the scout schedule and scanning QR codes.",
+                "If you're on another team checking out our data, use Analyst. 8033 Analysts also get access to all the data, but can publish picklists to each other and use mutable picklists. 8033 Scouting Leads can do all of this, and also can view and delete raw data, manage schedules, and edit data.",
                 style: Theme.of(context).textTheme.bodyMedium?.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onBackground)),
               ),
               const SizedBox(height: 40),
-              DropdownSearch(
-                popupProps: const PopupProps.menu(
-                  // showSelectedItems: true,
-                  fit: FlexFit.loose,
-                ),
-                selectedItem: getTournamentByKey(tournament),
-                dropdownDecoratorProps: const DropDownDecoratorProps(
-                  dropdownSearchDecoration:
-                      InputDecoration(labelText: "Tournament", filled: true),
-                ),
-                items: tournamentList,
+              TournamentKeyPicker(
                 onChanged: (value) {
                   setState(() {
                     tournament = value.key;
+                    tournamentName = value.localized;
                   });
                 },
+                initialValue: Tournament(
+                  widget.initialTournament,
+                  widget.initialTournamentName,
+                ),
+                decoration: const InputDecoration(
+                  labelText: "Tournament",
+                  filled: true,
+                ),
               ),
               const SizedBox(height: 20),
               TextField(
@@ -192,6 +233,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                       : "Invalid",
                 ),
                 keyboardType: TextInputType.url,
+                autocorrect: false,
                 onChanged: (value) {
                   setState(() {
                     serverAuthority = value;
@@ -221,8 +263,10 @@ class _LoadedSettingsState extends State<LoadedSettings> {
 
                                   await prefs.remove("role");
                                   await prefs.remove("tournament");
+                                  await prefs.remove("tournamentName");
                                   await prefs.remove("serverAuthority");
                                   await prefs.remove("onboardingCompleted");
+                                  await prefs.remove("picklists");
 
                                   Navigator.of(context).pushNamedAndRemoveUntil(
                                       "/loading", (route) => false);

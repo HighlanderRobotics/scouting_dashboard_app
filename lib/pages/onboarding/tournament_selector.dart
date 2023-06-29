@@ -1,19 +1,17 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../constants.dart';
-
-class TournamentSelector extends StatefulWidget {
-  const TournamentSelector({super.key});
+class TournamentSelectorPage extends StatefulWidget {
+  const TournamentSelectorPage({super.key});
 
   @override
-  State<TournamentSelector> createState() => _TournamentSelectorState();
+  State<TournamentSelectorPage> createState() => _TournamentSelectorPageState();
 }
 
-class _TournamentSelectorState extends State<TournamentSelector> {
+class _TournamentSelectorPageState extends State<TournamentSelectorPage> {
   Tournament? selectedTournament;
 
   @override
@@ -26,28 +24,22 @@ class _TournamentSelectorState extends State<TournamentSelector> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         const SizedBox(height: 20),
-        DropdownSearch(
-          popupProps: const PopupProps.menu(
-            // showSelectedItems: true,
-            fit: FlexFit.loose,
-          ),
-          dropdownDecoratorProps: const DropDownDecoratorProps(
-            dropdownSearchDecoration: InputDecoration(
-                labelText: "Tournament", border: OutlineInputBorder()),
-          ),
-          items: tournamentList,
-          onChanged: (value) {
-            setState(() {
-              selectedTournament = value;
-            });
-          },
-        ),
+        TournamentKeyPicker(
+            onChanged: (value) {
+              setState(() {
+                selectedTournament = value;
+              });
+            },
+            decoration: const InputDecoration(
+              border: OutlineInputBorder(),
+              label: Text("Tournament"),
+            )),
         const SizedBox(height: 50),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             const SizedBox(width: 10),
-            ElevatedButton(
+            FilledButton(
               onPressed: selectedTournament == null
                   ? null
                   : () async {
@@ -56,12 +48,16 @@ class _TournamentSelectorState extends State<TournamentSelector> {
 
                       await prefs.setString(
                           "tournament", selectedTournament!.key);
+                      await prefs.setString("tournament_localized",
+                          selectedTournament!.localized);
+
+                      await prefs.setBool("onboardingCompleted", true);
 
                       // ignore: use_build_context_synchronously
-                      Navigator.of(context)
-                          .pushNamed("/server_authority_setup");
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          "/match_schedule", (route) => false);
                     },
-              child: const Text("Next"),
+              child: const Text("Finish"),
             ),
           ],
         ),

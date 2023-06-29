@@ -1,9 +1,11 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Tournament {
   Tournament(this.key, this.localized);
@@ -55,4 +57,69 @@ bool areSchedulesEqual(ScoutSchedule schedule1, ScoutSchedule schedule2) {
   } on RangeError {
     return false;
   }
+}
+
+enum Penalty {
+  none,
+  yellowCard,
+  redCard,
+}
+
+extension PenaltyExtension on Penalty {
+  String get localizedDescription {
+    switch (this) {
+      case Penalty.none:
+        return "None";
+      case Penalty.yellowCard:
+        return "Yellow card";
+      case Penalty.redCard:
+        return "Red card";
+      default:
+        return "Unknown";
+    }
+  }
+}
+
+Future<Map<String, String?>> getScoutedStatuses() async {
+  final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(utf8.decode(
+          (await http.get(Uri.http(
+                  (await getServerAuthority())!, '/API/manager/isScouted', {
+    'tournamentKey':
+        (await SharedPreferences.getInstance()).getString('tournament'),
+  })))
+              .bodyBytes)) as List<dynamic>)
+      .cast();
+
+  Map<String, String?> isScoutedElegante = {};
+
+  for (var response in isScoutedResponse) {
+    isScoutedElegante[response['key']] = response['name'];
+  }
+
+  return isScoutedElegante;
+}
+
+class ScoringMethod {
+  const ScoringMethod(this.path, this.localizedName);
+
+  final String path;
+  final String localizedName;
+}
+
+extension ListSpaceBetweenExtension on List<Widget> {
+  List<Widget> withSpaceBetween({double? width, double? height}) => [
+        for (int i = 0; i < this.length; i++) ...[
+          if (i > 0) SizedBox(width: width, height: height),
+          this[i],
+        ],
+      ];
+}
+
+String minutesAndSeconds(Duration duration) =>
+    "${duration.inMinutes}:${(duration.inSeconds.remainder(60).toString().padLeft(2, '0'))}";
+
+extension NumListExtension on List<num> {
+  num sum() => isEmpty ? 0 : reduce((value, element) => value + element);
+
+  num average() => sum() / length;
 }

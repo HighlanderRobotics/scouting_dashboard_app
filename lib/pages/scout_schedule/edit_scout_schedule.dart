@@ -5,14 +5,14 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class EditScoutSchedule extends StatefulWidget {
-  const EditScoutSchedule({super.key});
+class EditScoutSchedulePage extends StatefulWidget {
+  const EditScoutSchedulePage({super.key});
 
   @override
-  State<EditScoutSchedule> createState() => _EditScoutScheduleState();
+  State<EditScoutSchedulePage> createState() => _EditScoutSchedulePageState();
 }
 
-class _EditScoutScheduleState extends State<EditScoutSchedule> {
+class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
   Future<void> setOldSchedule() async {
     oldSchedule = await getScoutSchedule();
 
@@ -56,22 +56,17 @@ class _EditScoutScheduleState extends State<EditScoutSchedule> {
                       : () async {
                           newSchedule!
                               .save((await getServerAuthority())!)
-                              .then((val) {
-                            const SnackBar snackBar = SnackBar(
-                              content: Text("Saved"),
+                              .then((response) {
+                            SnackBar snackBar = SnackBar(
+                              content: Text(response.statusCode == 200
+                                  ? "Saved"
+                                  : "Error saving: ${response.statusCode} ${response.reasonPhrase}"),
                               behavior: SnackBarBehavior.floating,
                             );
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
                             ScaffoldMessenger.of(context)
                                 .showSnackBar(snackBar);
                           });
                           Navigator.pop(context);
-
-                          const SnackBar snackBar = SnackBar(
-                            content: Text("Saving..."),
-                            behavior: SnackBarBehavior.floating,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(snackBar);
                         },
                   icon: const Icon(Icons.check),
                   color: Colors.green,

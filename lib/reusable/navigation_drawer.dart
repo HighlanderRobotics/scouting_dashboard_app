@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class NavigationDrawer extends StatelessWidget {
-  const NavigationDrawer({
+class GlobalNavigationDrawer extends StatelessWidget {
+  const GlobalNavigationDrawer({
     Key? key,
   }) : super(key: key);
 
   Future<String> getTournamentName() async {
     final prefs = await SharedPreferences.getInstance();
 
-    return getTournamentByKey(prefs.getString("tournament")!)!.localized;
+    return prefs.getString("tournament_localized")!;
   }
 
   @override
@@ -34,7 +34,9 @@ class NavigationDrawer extends StatelessWidget {
                       icon: const Icon(Icons.settings)),
                 ],
               ),
-              const Divider(),
+              Divider(
+                color: Theme.of(context).colorScheme.outline,
+              ),
               FutureBuilder(
                 builder: ((context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
@@ -45,7 +47,9 @@ class NavigationDrawer extends StatelessWidget {
                 }),
                 future: getTournamentName(),
               ),
-              const Divider(),
+              Divider(
+                color: Theme.of(context).colorScheme.outline,
+              ),
               const SectionHeader(title: "Scouting Lead"),
               DrawerDestination(
                 label: "Match Schedule",
@@ -57,17 +61,43 @@ class NavigationDrawer extends StatelessWidget {
                     ModalRoute.of(context)?.settings.name == "/match_schedule",
                 icon: Icons.today,
               ),
+              RoleExclusive(
+                roles: const ['8033_scouting_lead'],
+                child: DrawerDestination(
+                  label: "Scan QR Codes",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                      context,
+                      "/scan_qr_codes",
+                      (route) => false,
+                    );
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
+                  icon: Icons.qr_code_scanner,
+                ),
+              ),
               const SectionHeader(title: "Data Analysis"),
               DrawerDestination(
-                label: "Score Predictor",
+                label: "Match Predictor",
                 onTap: () {
                   Navigator.pushNamedAndRemoveUntil(
-                      context, "/score_predictor", (route) => false);
+                      context, "/match_predictor_opener", (route) => false);
                 },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/score_predictor",
+                isSelected: ModalRoute.of(context)?.settings.name ==
+                    "/match_predictor_opener",
                 icon: Icons.psychology,
               ),
+              // DrawerDestination(
+              //   label: "Match Suggestions",
+              //   onTap: () {
+              //     Navigator.pushNamedAndRemoveUntil(
+              //         context, "/match_suggestions_opener", (route) => false);
+              //   },
+              //   isSelected: ModalRoute.of(context)?.settings.name ==
+              //       "/match_suggestions_opener",
+              //   icon: Icons.assistant,
+              // ),
               DrawerDestination(
                 label: "Team Lookup",
                 onTap: () {
@@ -77,6 +107,26 @@ class NavigationDrawer extends StatelessWidget {
                 isSelected:
                     ModalRoute.of(context)?.settings.name == "/team_lookup",
                 icon: Icons.search,
+              ),
+              DrawerDestination(
+                label: "Picklist",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/picklists", (route) => false);
+                },
+                isSelected:
+                    ModalRoute.of(context)?.settings.name == "/picklists",
+                icon: Icons.format_list_numbered,
+              ),
+              DrawerDestination(
+                label: "My Alliance",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/my_alliance", (route) => false);
+                },
+                isSelected:
+                    ModalRoute.of(context)?.settings.name == "/my_alliance",
+                icon: Icons.group_work,
               ),
             ],
           ),

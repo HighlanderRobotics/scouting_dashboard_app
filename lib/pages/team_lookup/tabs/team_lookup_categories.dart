@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:skeletons/skeletons.dart';
 
 class TeamLookupCategoriesVizualization extends AnalysisVisualization {
   const TeamLookupCategoriesVizualization({
@@ -13,6 +15,27 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
   final TeamLookupCategoriesAnalysis function;
 
   @override
+  Widget loadingView() {
+    return PageBody(
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
+      child: SkeletonListView(
+        itemCount: metricCategories.length,
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 15),
+          child: SizedBox(
+            height: 117,
+            child: SkeletonAvatar(
+              style: SkeletonAvatarStyle(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return ScrollablePageBody(
       children: [
@@ -21,6 +44,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
               .map((category) => MetricCategory(
                     categoryName: category.localizedName,
                     metricTiles: category.metrics
+                        .where((metric) => metric.hideOverview == false)
                         .map(
                           (metric) => MetricTile(
                             value: (() {
@@ -35,13 +59,17 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                           ),
                         )
                         .toList(),
-                    onTap: () {
-                      Navigator.of(context)
-                          .pushNamed("/team_lookup_details", arguments: {
-                        'category': category,
-                        'team': function.team,
-                      });
-                    },
+                    onTap: category.metrics
+                            .where((metric) => !metric.hideDetails)
+                            .isEmpty
+                        ? null
+                        : () {
+                            Navigator.of(context)
+                                .pushNamed("/team_lookup_details", arguments: {
+                              'category': category,
+                              'team': function.team,
+                            });
+                          },
                   ))
               .toList(),
         ),

@@ -4,14 +4,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../constants.dart';
 
-class ServerAuthoritySetup extends StatefulWidget {
-  const ServerAuthoritySetup({super.key});
+class ServerAuthoritySelectorPage extends StatefulWidget {
+  const ServerAuthoritySelectorPage({super.key});
 
   @override
-  State<ServerAuthoritySetup> createState() => _ServerAuthoritySetupState();
+  State<ServerAuthoritySelectorPage> createState() =>
+      _ServerAuthoritySelectorPageState();
 }
 
-class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
+class _ServerAuthoritySelectorPageState
+    extends State<ServerAuthoritySelectorPage> {
   String serverAuthority = "";
 
   @override
@@ -51,7 +53,7 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              ElevatedButton.icon(
+              FilledButton.tonalIcon(
                 onPressed: () {
                   Navigator.of(context).pushNamed("/setup_code_scanner");
                 },
@@ -59,7 +61,7 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
                 label: const Text("Use QR code"),
               ),
               const SizedBox(width: 10),
-              ElevatedButton(
+              FilledButton(
                   onPressed: validServerAuthority.hasMatch(serverAuthority)
                       ? () async {
                           final SharedPreferences prefs =
@@ -68,14 +70,12 @@ class _ServerAuthoritySetupState extends State<ServerAuthoritySetup> {
                           await prefs.setString(
                               "serverAuthority", serverAuthority);
 
-                          await prefs.setBool("onboardingCompleted", true);
-
                           // ignore: use_build_context_synchronously
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                              "/match_schedule", (route) => false);
+                          Navigator.of(context)
+                              .pushNamed("/tournament_selector");
                         }
                       : null,
-                  child: const Text("Finish")),
+                  child: const Text("Next")),
             ],
           ),
         ],

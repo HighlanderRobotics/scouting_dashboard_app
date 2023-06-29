@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class InitialLoader extends StatefulWidget {
-  const InitialLoader({super.key});
+class InitialLoaderPage extends StatefulWidget {
+  const InitialLoaderPage({super.key});
 
   @override
-  State<InitialLoader> createState() => _InitialLoaderState();
+  State<InitialLoaderPage> createState() => _InitialLoaderPageState();
 }
 
-class _InitialLoaderState extends State<InitialLoader> {
+class _InitialLoaderPageState extends State<InitialLoaderPage> {
   void load() async {
     // if (kDebugMode) {
     //   Map<String, Object> values = <String, Object>{
@@ -23,6 +24,15 @@ class _InitialLoaderState extends State<InitialLoader> {
 
     if (prefs.getBool("onboardingCompleted") == true) {
       onboardingCompleted = true;
+    }
+
+    if (prefs.getString("tournament_localized") == null) {
+      onboardingCompleted = false;
+    }
+
+    if (prefs.getStringList('picklists') == null) {
+      await prefs.setStringList(
+          'picklists', defaultPicklists.map((e) => e.toJSON()).toList());
     }
 
     if (onboardingCompleted) {

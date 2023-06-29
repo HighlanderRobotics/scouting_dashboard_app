@@ -13,8 +13,8 @@ class TeamLookupBreakdownsAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http.get(
-        Uri.http((await getServerAuthority())!, "/API/analysis/breakdowns", {
+    var response = await http.get(Uri.http(
+        (await getServerAuthority())!, "/API/analysis/breakdownMetrics", {
       "team": team.toString(),
     }));
 

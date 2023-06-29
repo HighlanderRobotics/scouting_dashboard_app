@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class SetupCodeScanner extends StatefulWidget {
-  const SetupCodeScanner({super.key});
+class SetupCodeScannerPage extends StatefulWidget {
+  const SetupCodeScannerPage({super.key});
 
   @override
-  State<SetupCodeScanner> createState() => _SetupCodeScannerState();
+  State<SetupCodeScannerPage> createState() => _SetupCodeScannerPageState();
 }
 
-class _SetupCodeScannerState extends State<SetupCodeScanner> {
+class _SetupCodeScannerPageState extends State<SetupCodeScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text("Setup with QR Code")),
       body: ScannerBody(
-        onDetect: ((barcode, args) async {
-          if (barcode.rawValue == null) {
+        onDetect: ((barcodeCapture) async {
+          Barcode? barcode;
+          if (barcodeCapture.barcodes.isEmpty) {
+            barcode = null;
+          } else {
+            barcode = barcodeCapture.barcodes.first;
+          }
+
+          if (barcode == null) {
             const snackBar = SnackBar(
               content: Text("Failed to scan code"),
               behavior: SnackBarBehavior.floating,
@@ -52,8 +60,6 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
 
           await prefs.setString("serverAuthority", serverAuthority);
 
-          await prefs.setBool("onboardingCompleted", true);
-
           var snackBar = SnackBar(
             content: Text("Set server authority to $serverAuthority"),
             behavior: SnackBarBehavior.floating,
@@ -63,13 +69,16 @@ class _SetupCodeScannerState extends State<SetupCodeScanner> {
           ScaffoldMessenger.of(context).showSnackBar(snackBar);
 
           // ignore: use_build_context_synchronously
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil("/match_schedule", (route) => false);
+          Navigator.of(context).pushNamedAndRemoveUntil(
+              "/tournament_selector", (route) => false);
         }),
-        childBelow: Column(children: const [
-          SizedBox(height: 23),
-          Text("Ask your server manager for a setup code."),
-        ]),
+        childBelow: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            SizedBox(height: 23),
+            Text("Ask your server manager for a setup code."),
+          ],
+        ),
       ),
     );
   }

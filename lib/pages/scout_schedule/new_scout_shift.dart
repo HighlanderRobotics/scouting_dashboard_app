@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scout_name_selector.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class NewScoutShift extends StatefulWidget {
-  const NewScoutShift({super.key});
+class NewScoutShiftPage extends StatefulWidget {
+  const NewScoutShiftPage({super.key});
 
   @override
-  State<NewScoutShift> createState() => _NewScoutShiftState();
+  State<NewScoutShiftPage> createState() => _NewScoutShiftPageState();
 }
 
-class _NewScoutShiftState extends State<NewScoutShift> {
+class _NewScoutShiftPageState extends State<NewScoutShiftPage> {
   ScoutSchedule? schedule;
 
   TextEditingController? startController;

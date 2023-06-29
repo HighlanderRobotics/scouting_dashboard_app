@@ -4,11 +4,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 class RoleExclusive extends StatefulWidget {
   const RoleExclusive({
     super.key,
-    required this.role,
+    required this.roles,
     required this.child,
   });
 
-  final String role;
+  final List<String> roles;
   final Widget child;
 
   @override
@@ -16,7 +16,7 @@ class RoleExclusive extends StatefulWidget {
 }
 
 class _RoleExclusiveState extends State<RoleExclusive> {
-  late final String role = widget.role;
+  late final List<String> roles = widget.roles;
   late final Widget child = widget.child;
 
   bool showChild = false;
@@ -29,7 +29,7 @@ class _RoleExclusiveState extends State<RoleExclusive> {
     if (currentRole == null) return;
 
     setState(() {
-      showChild = currentRole == role;
+      showChild = roles.contains(currentRole);
     });
   }
 
