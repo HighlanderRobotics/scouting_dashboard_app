@@ -62,23 +62,31 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
     fetchedTournamentSchedule.matches
         .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
 
-    final ScheduleMatch fetchedLastScoutedMatch =
-        fetchedTournamentSchedule.matches.lastWhere((match) => [
-              fetchedIsScouted["${match.identity.toMediumKey()}_0"],
-              fetchedIsScouted["${match.identity.toMediumKey()}_1"],
-              fetchedIsScouted["${match.identity.toMediumKey()}_2"],
-              fetchedIsScouted["${match.identity.toMediumKey()}_3"],
-              fetchedIsScouted["${match.identity.toMediumKey()}_4"],
-              fetchedIsScouted["${match.identity.toMediumKey()}_5"],
-            ].any((e) => e != null));
+    ScheduleMatch? nextScheduleMatch;
 
-    final ScheduleMatch? nextScheduleMatch = fetchedTournamentSchedule.matches
-        .cast<ScheduleMatch?>()
-        .singleWhere(
-          (match) =>
-              match?.ordinalNumber == fetchedLastScoutedMatch.ordinalNumber + 1,
-          orElse: () => null,
-        );
+    try {
+      final ScheduleMatch fetchedLastScoutedMatch =
+          fetchedTournamentSchedule.matches.lastWhere((match) => [
+                fetchedIsScouted["${match.identity.toMediumKey()}_0"],
+                fetchedIsScouted["${match.identity.toMediumKey()}_1"],
+                fetchedIsScouted["${match.identity.toMediumKey()}_2"],
+                fetchedIsScouted["${match.identity.toMediumKey()}_3"],
+                fetchedIsScouted["${match.identity.toMediumKey()}_4"],
+                fetchedIsScouted["${match.identity.toMediumKey()}_5"],
+              ].any((e) => e != null));
+
+      nextScheduleMatch =
+          fetchedTournamentSchedule.matches.cast<ScheduleMatch?>().singleWhere(
+                (match) =>
+                    match?.ordinalNumber ==
+                    fetchedLastScoutedMatch.ordinalNumber + 1,
+                orElse: () => null,
+              );
+    } catch (error) {
+      print(error);
+
+      nextScheduleMatch = fetchedTournamentSchedule.matches.first;
+    }
 
     setState(() {
       if (nextScheduleMatch?.identity.toMediumKey() !=
