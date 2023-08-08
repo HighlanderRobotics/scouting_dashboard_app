@@ -281,24 +281,37 @@ class AnalysisOverview extends AnalysisVisualization {
               fit: FlexFit.tight,
               child: valueBox(
                 context,
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon((snapshot.data['difference'] as num).isNegative
-                        ? Icons.arrow_drop_down
-                        : Icons.arrow_drop_up),
-                    Text(
-                      analysisFunction.metric.valueVizualizationBuilder(
-                          (snapshot.data['difference'] as num).abs()),
-                      style: Theme.of(context).textTheme.headlineSmall!.merge(
-                            TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer),
+                analysisMap['difference'] == null
+                    ? Text(
+                        "--",
+                        style: Theme.of(context).textTheme.headlineSmall!.merge(
+                              TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer),
+                            ),
+                      )
+                    : Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon((snapshot.data['difference'] as num).isNegative
+                              ? Icons.arrow_drop_down
+                              : Icons.arrow_drop_up),
+                          Text(
+                            analysisFunction.metric.valueVizualizationBuilder(
+                                (snapshot.data['difference'] as num).abs()),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .merge(
+                                  TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer),
+                                ),
                           ),
-                    ),
-                  ],
-                ),
+                        ],
+                      ),
                 "Difference",
                 false,
               ),
