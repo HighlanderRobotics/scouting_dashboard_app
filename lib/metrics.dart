@@ -227,6 +227,15 @@ final List<MetricCategoryData> metricCategories = [
       hideDetails: true,
     ),
   ]),
+  MetricCategoryData("From Statbotics", [
+    CategoryMetric(
+      localizedName: "EPA",
+      abbreviatedLocalizedName: "EPA",
+      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
+      path: "normEpaRecent",
+      hideDetails: true,
+    ),
+  ])
 ];
 
 List<BreakdownData> breakdowns = [
