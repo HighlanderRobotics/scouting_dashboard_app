@@ -235,6 +235,13 @@ final List<MetricCategoryData> metricCategories = [
       path: "normEpaRecent",
       hideDetails: true,
     ),
+    CategoryMetric(
+      localizedName: "Winrate",
+      abbreviatedLocalizedName: "Winrate",
+      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
+      path: "fullWinrate",
+      hideDetails: true,
+    ),
   ])
 ];
 
