@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:chips_input/chips_input.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
@@ -647,29 +648,49 @@ class AllianceRow extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              InkWell(
-                onTap: () {
-                  Navigator.of(context).pushNamed("/team_lookup", arguments: {
-                    'team': item.team,
-                  });
-                },
-                child: Text(
-                  item.team.toString(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              if (item.scouted && (isScoutingLead ?? false))
-                IconButton(
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/raw_scout_report',
-                        arguments: <String, dynamic>{
-                          'longMatchKey': item.longMatchKey,
+              CupertinoContextMenu.builder(
+                enableHapticFeedback: true,
+                actions: [
+                  CupertinoContextMenuAction(
+                    child: const Text("Team lookup"),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context)
+                          .pushNamed("/team_lookup", arguments: {
+                        'team': item.team,
+                      });
+                    },
+                  ),
+                  if (item.scouted && (isScoutingLead ?? false))
+                    CupertinoContextMenuAction(
+                      child: const Text("Raw report data"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed('/raw_scout_report',
+                            arguments: <String, dynamic>{
+                              'longMatchKey': item.longMatchKey,
+                              'team': item.team,
+                            });
+                      },
+                    ),
+                ],
+                builder: (context, animation) {
+                  return GestureDetector(
+                      onTap: () {
+                        Navigator.of(context)
+                            .pushNamed("/team_lookup", arguments: {
                           'team': item.team,
                         });
-                  },
-                  icon: const Icon(Icons.data_object),
-                  visualDensity: VisualDensity.compact,
-                ),
+                      },
+                      child: Transform.scale(
+                        scale: (animation.value * 0.3) + 1,
+                        child: Text(
+                          item.team.toString(),
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                      ));
+                },
+              ),
             ],
           ),
           Text(
