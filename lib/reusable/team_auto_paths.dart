@@ -62,105 +62,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths> {
           ),
           valueBoxes(context),
           if (selectedPath!.chargeSuccessRate.hasAttempted)
-            ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              child: Row(children: [
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: selectedPath!.chargeSuccessRate.dockCount,
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primary,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            selectedPath!.chargeSuccessRate.dockCount
-                                .toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .merge(TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimary)),
-                          ),
-                          Text(
-                            "docks",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: selectedPath!.chargeSuccessRate.engageCount,
-                  child: Container(
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            selectedPath!.chargeSuccessRate.engageCount
-                                .toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .merge(TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onPrimaryContainer)),
-                          ),
-                          Text(
-                            "engages",
-                            style: TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  flex: selectedPath!.chargeSuccessRate.failCount,
-                  child: Container(
-                    color: Theme.of(context).colorScheme.error,
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            selectedPath!.chargeSuccessRate.failCount
-                                .toString(),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .merge(TextStyle(
-                                    color:
-                                        Theme.of(context).colorScheme.onError)),
-                          ),
-                          Text(
-                            "fails",
-                            style: TextStyle(
-                                color: Theme.of(context).colorScheme.onError),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ]),
-            ),
+            ChargeSuccessBreakdown(path: selectedPath),
           matchList(context),
         ]
       ].withSpaceBetween(height: 10),
@@ -256,6 +158,105 @@ class _TeamAutoPathsState extends State<TeamAutoPaths> {
         label: Text("Path"),
         filled: true,
       )),
+    );
+  }
+}
+
+class ChargeSuccessBreakdown extends StatelessWidget {
+  const ChargeSuccessBreakdown({
+    super.key,
+    required this.path,
+  });
+
+  final AutoPath? path;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
+      child: Row(children: [
+        Flexible(
+          fit: FlexFit.tight,
+          flex: path!.chargeSuccessRate.dockCount,
+          child: Container(
+            color: Theme.of(context).colorScheme.primary,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    path!.chargeSuccessRate.dockCount.toString(),
+                    style: Theme.of(context).textTheme.titleLarge!.merge(
+                        TextStyle(
+                            color: Theme.of(context).colorScheme.onPrimary)),
+                  ),
+                  Text(
+                    "docks",
+                    style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Flexible(
+          fit: FlexFit.tight,
+          flex: path!.chargeSuccessRate.engageCount,
+          child: Container(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    path!.chargeSuccessRate.engageCount.toString(),
+                    style: Theme.of(context).textTheme.titleLarge!.merge(
+                        TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer)),
+                  ),
+                  Text(
+                    "engages",
+                    style: TextStyle(
+                        color:
+                            Theme.of(context).colorScheme.onPrimaryContainer),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Flexible(
+          fit: FlexFit.tight,
+          flex: path!.chargeSuccessRate.failCount,
+          child: Container(
+            color: Theme.of(context).colorScheme.error,
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    path!.chargeSuccessRate.failCount.toString(),
+                    style: Theme.of(context).textTheme.titleLarge!.merge(
+                        TextStyle(
+                            color: Theme.of(context).colorScheme.onError)),
+                  ),
+                  Text(
+                    "fails",
+                    style:
+                        TextStyle(color: Theme.of(context).colorScheme.onError),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ]),
     );
   }
 }
