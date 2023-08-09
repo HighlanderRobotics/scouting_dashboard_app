@@ -31,6 +31,7 @@ import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
+import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 
 import 'pages/scout_schedule/edit_scout_shift.dart';
 
@@ -46,6 +47,7 @@ void main() async {
       '/tournament_selector': (context) => const TournamentSelectorPage(),
       '/match_schedule': (context) => const MatchSchedulePage(),
       '/raw_scout_report': (context) => const RawScoutReportPage(),
+      '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
       '/team_lookup_details': (context) => const TeamLookupDetailsPage(),
       '/team_lookup_breakdown_details': (context) =>

@@ -7,6 +7,7 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
@@ -661,6 +662,20 @@ class AllianceRow extends StatelessWidget {
                       });
                     },
                   ),
+                  if (item.scouted && item.longMatchKey != null)
+                    CupertinoContextMenuAction(
+                      child: const Text("Per-match metrics"),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed(
+                          '/team_per_match',
+                          arguments: TeamPerMatchArgs(
+                            longMatchKey: item.longMatchKey!,
+                            teamNumber: item.team,
+                          ),
+                        );
+                      },
+                    ),
                   if (item.scouted && (isScoutingLead ?? false))
                     CupertinoContextMenuAction(
                       child: const Text("Raw report data"),
