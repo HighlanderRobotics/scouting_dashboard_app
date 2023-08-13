@@ -4,12 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
-import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class PicklistsPage extends StatefulWidget {
   const PicklistsPage({super.key});
@@ -187,9 +188,12 @@ class _MyPicklistsState extends State<MyPicklists> {
 
 Future<List<ConfiguredPicklist>> getSharedPicklists() async {
   String authority = (await getServerAuthority())!;
+  final prefs = await SharedPreferences.getInstance();
 
   final response =
-      await http.get(Uri.http(authority, '/API/manager/getPicklists'));
+      await http.get(Uri.http(authority, '/API/manager/getPicklists', {
+    'team': prefs.getInt('team').toString(),
+  }));
 
   if (response.statusCode != 200) {
     throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
@@ -214,7 +218,7 @@ class SharedPicklists extends StatelessWidget {
       builder: (BuildContext context,
           AsyncSnapshot<List<ConfiguredPicklist>> snapshot) {
         if (snapshot.hasError) {
-          return Text("Error getting picklists: ${snapshot.error}");
+          return FriendlyErrorView(errorMessage: snapshot.error.toString());
         }
 
         if (snapshot.connectionState != ConnectionState.done) {
@@ -318,9 +322,12 @@ class SharedPicklists extends StatelessWidget {
 
 Future<List<MutablePicklist>> getMutablePicklists() async {
   final authority = (await getServerAuthority())!;
+  final prefs = await SharedPreferences.getInstance();
 
   final response =
-      await http.get(Uri.http(authority, '/API/manager/getMutablePicklists'));
+      await http.get(Uri.http(authority, '/API/manager/getMutablePicklists', {
+    'team': prefs.getInt('team').toString(),
+  }));
 
   if (response.statusCode != 200) {
     throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
@@ -347,28 +354,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        const RoleExclusive(
-          roles: ["analyst"],
-          child: Text("You don't have permission to access this."),
-        ),
-        RoleExclusive(
-          roles: const [
-            "8033_analyst",
-            "8033_scouting_lead",
-          ],
-          child: realListsWithPermission(),
-        ),
-        if (loading)
-          Column(
-            children: const [
-              LinearProgressIndicator(),
-            ],
-          ),
-      ],
-    );
+    return realListsWithPermission();
   }
 
   FutureBuilder<List<MutablePicklist>> realListsWithPermission() {
@@ -376,10 +362,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
         future: getMutablePicklists(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return PageBody(
-              child: Text(
-                  "Encountered an error while fetching picklists: ${snapshot.error}"),
-            );
+            return FriendlyErrorView(errorMessage: snapshot.error.toString());
           }
 
           if (snapshot.connectionState != ConnectionState.done) {

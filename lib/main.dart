@@ -7,9 +7,11 @@ import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
@@ -40,6 +42,8 @@ void main() async {
     initialRoute: "/loading",
     routes: {
       '/loading': (context) => const InitialLoaderPage(),
+      '/more_info_prompt': (context) => const MoreInfoPage(),
+      '/team_selector': (context) => const TeamSelectorPage(),
       '/role_selector': (context) => const RoleSelectorPage(),
       '/server_authority_setup': (context) =>
           const ServerAuthoritySelectorPage(),

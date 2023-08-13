@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/correct_passwords.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -19,6 +20,7 @@ class _SettingsPageState extends State<SettingsPage> {
   String? initialTournament;
   String? initialTournamentName;
   String? initialServerAuthority;
+  int? initialTeamNumber;
 
   Future<void> setInitialValues() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,6 +30,7 @@ class _SettingsPageState extends State<SettingsPage> {
       initialTournament = prefs.getString("tournament");
       initialTournamentName = prefs.getString("tournament_localized");
       initialServerAuthority = prefs.getString("serverAuthority");
+      initialTeamNumber = prefs.getInt("team");
     });
   }
 
@@ -43,7 +46,8 @@ class _SettingsPageState extends State<SettingsPage> {
     if (initialRole == null ||
         initialTournament == null ||
         initialServerAuthority == null ||
-        initialTournamentName == null) {
+        initialTournamentName == null ||
+        initialTeamNumber == null) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(),
@@ -55,6 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
         initialTournament: initialTournament!,
         initialTournamentName: initialTournamentName!,
         initialServerAuthority: initialServerAuthority!,
+        initialTeamNumber: initialTeamNumber!,
       );
     }
   }
@@ -67,12 +72,14 @@ class LoadedSettings extends StatefulWidget {
     required this.initialTournament,
     required this.initialTournamentName,
     required this.initialServerAuthority,
+    required this.initialTeamNumber,
   }) : super(key: key);
 
   final String initialRole;
   final String initialTournament;
   final String initialTournamentName;
   final String initialServerAuthority;
+  final int initialTeamNumber;
 
   @override
   State<LoadedSettings> createState() => _LoadedSettingsState();
@@ -85,15 +92,20 @@ class _LoadedSettingsState extends State<LoadedSettings> {
   late String serverAuthority = widget.initialServerAuthority;
   late final TextEditingController _serverAuthorityController =
       TextEditingController(text: serverAuthority);
+  late String teamNumber = widget.initialTeamNumber.toString();
+  late final TextEditingController _teamNumberController =
+      TextEditingController(text: teamNumber);
 
   bool getAllowSave() {
     // Check for changes
     if (role == widget.initialRole &&
         tournament == widget.initialTournament &&
-        serverAuthority == widget.initialServerAuthority) return false;
+        serverAuthority == widget.initialServerAuthority &&
+        teamNumber == widget.initialTeamNumber.toString()) return false;
 
     // Validate new values
     if (!validServerAuthority.hasMatch(serverAuthority)) return false;
+    if (int.tryParse(teamNumber) == null) return false;
 
     return true;
   }
@@ -116,6 +128,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                     await prefs.setString(
                         "tournament_localized", tournamentName);
                     await prefs.setString("serverAuthority", serverAuthority);
+                    await prefs.setInt("team", int.parse(teamNumber));
 
                     const snackBar = SnackBar(
                       content: Text("Saved changes"),
@@ -138,74 +151,80 @@ class _LoadedSettingsState extends State<LoadedSettings> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                "Role",
-                style: Theme.of(context).textTheme.labelLarge?.merge(TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground)),
-              ),
-              ListTile(
-                title: const Text("Analyst"),
-                leading: Icon(
-                  Icons.timeline,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+              if (widget.initialTeamNumber == 8033) ...[
+                Text(
+                  "Role",
+                  style: Theme.of(context).textTheme.labelLarge?.merge(
+                      TextStyle(
+                          color: Theme.of(context).colorScheme.onBackground)),
                 ),
-                trailing: Radio(
-                    value: "analyst",
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    groupValue: role,
-                    onChanged: ((value) {
-                      setState(() {
-                        if (value == null) return;
-                        role = value;
-                      });
-                    })),
-              ),
-              ListTile(
-                title: const Text("8033 Analyst"),
-                leading: Icon(
-                  Icons.insights,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-                trailing: Radio(
-                    value: "8033_analyst",
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    groupValue: role,
-                    onChanged: ((value) {
-                      passwordProtected(context, teamAnalystCorrectPassword,
-                          () {
+                const SizedBox(height: 5),
+                ListTile(
+                  title: const Text("Analyst"),
+                  leading: Icon(
+                    Icons.timeline,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  trailing: Radio(
+                      value: "analyst",
+                      activeColor: Theme.of(context).colorScheme.primary,
+                      groupValue: role,
+                      onChanged: ((value) {
                         setState(() {
                           if (value == null) return;
                           role = value;
                         });
-                      });
-                    })),
-              ),
-              ListTile(
-                title: const Text("8033 Scouting Lead"),
-                leading: Icon(
-                  Icons.supervisor_account,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      })),
                 ),
-                trailing: Radio(
-                    value: "8033_scouting_lead",
-                    activeColor: Theme.of(context).colorScheme.primary,
-                    groupValue: role,
-                    onChanged: ((value) {
-                      passwordProtected(
-                          context, teamScoutingLeadCorrectPassword, () {
-                        setState(() {
-                          if (value == null) return;
-                          role = value;
+                ListTile(
+                  title: const Text("8033 Scouting Lead"),
+                  leading: Icon(
+                    Icons.supervisor_account,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  trailing: Radio(
+                      value: "8033_scouting_lead",
+                      activeColor: Theme.of(context).colorScheme.primary,
+                      groupValue: role,
+                      onChanged: ((value) {
+                        passwordProtected(
+                            context, teamScoutingLeadCorrectPassword, () {
+                          setState(() {
+                            if (value == null) return;
+                            role = value;
+                          });
                         });
-                      });
-                    })),
+                      })),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  "Analysts get access to data and picklists. Scouting Leads have additional tools for ensuring the accuracy of data and managing scouters.",
+                  style: Theme.of(context).textTheme.bodyMedium?.merge(
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                ),
+                const SizedBox(height: 40),
+              ],
+              TextField(
+                controller: _teamNumberController,
+                decoration: InputDecoration(
+                  label: const Text("Team"),
+                  filled: true,
+                  errorText:
+                      int.tryParse(teamNumber) != null ? null : "Invalid",
+                ),
+                keyboardType: TextInputType.number,
+                autocorrect: false,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: (value) {
+                  setState(() {
+                    teamNumber = value;
+                  });
+                },
               ),
-              Text(
-                "If you're on another team checking out our data, use Analyst. 8033 Analysts also get access to all the data, but can publish picklists to each other and use mutable picklists. 8033 Scouting Leads can do all of this, and also can view and delete raw data, manage schedules, and edit data.",
-                style: Theme.of(context).textTheme.bodyMedium?.merge(TextStyle(
-                    color: Theme.of(context).colorScheme.onBackground)),
-              ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               TournamentKeyPicker(
                 onChanged: (value) {
                   setState(() {
@@ -261,12 +280,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                                   final prefs =
                                       await SharedPreferences.getInstance();
 
-                                  await prefs.remove("role");
-                                  await prefs.remove("tournament");
-                                  await prefs.remove("tournamentName");
-                                  await prefs.remove("serverAuthority");
-                                  await prefs.remove("onboardingCompleted");
-                                  await prefs.remove("picklists");
+                                  await prefs.clear();
 
                                   Navigator.of(context).pushNamedAndRemoveUntil(
                                       "/loading", (route) => false);

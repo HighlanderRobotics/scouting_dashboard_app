@@ -67,11 +67,13 @@ class ConfiguredPicklist {
 
   Future<void> upload() async {
     String authority = (await getServerAuthority())!;
+    final prefs = await SharedPreferences.getInstance();
 
     final response =
         await http.get(Uri.http(authority, '/API/manager/addPicklist', {
       'uuid': id,
       'name': title,
+      'team': prefs.getInt('team').toString(),
       ...(weights.asMap().map(
             (index, weight) =>
                 MapEntry<String, dynamic>(weight.path, weight.value.toString()),
@@ -184,6 +186,7 @@ class MutablePicklist {
 
   Future<void> upload() async {
     final authority = (await getServerAuthority())!;
+    final prefs = await SharedPreferences.getInstance();
 
     final response =
         await http.post(Uri.http(authority, '/API/manager/addMutablePicklist'),
@@ -191,6 +194,7 @@ class MutablePicklist {
               'uuid': uuid,
               'name': name,
               'teams': teams,
+              'team': prefs.getInt('team').toString(),
             }),
             headers: {
           'Content-Type': 'application/json',

@@ -17,51 +17,45 @@ class SharedPicklistPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(picklist.title),
         actions: [
-          RoleExclusive(
-            roles: const [
-              "8033_analyst",
-              "8033_scouting_lead",
-            ],
-            child: IconButton(
-              onPressed: () async {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                  behavior: SnackBarBehavior.floating,
-                  content: Text("Converting to mutable..."),
-                ));
+          IconButton(
+            onPressed: () async {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                behavior: SnackBarBehavior.floating,
+                content: Text("Converting to mutable..."),
+              ));
 
-                try {
-                  final mutablePicklist =
-                      await MutablePicklist.fromReactivePicklist(picklist);
+              try {
+                final mutablePicklist =
+                    await MutablePicklist.fromReactivePicklist(picklist);
 
-                  await mutablePicklist.upload();
-                } catch (error) {
-                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      behavior: SnackBarBehavior.floating,
-                      content: Text(
-                        "Error converting to mutable: ${error.toString()}",
-                        style: TextStyle(
-                            color:
-                                Theme.of(context).colorScheme.onErrorContainer),
-                      ),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.errorContainer,
-                    ),
-                  );
-                  return;
-                }
-
+                await mutablePicklist.upload();
+              } catch (error) {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
+                  SnackBar(
                     behavior: SnackBarBehavior.floating,
-                    content: Text("Successfully converted to mutable."),
+                    content: Text(
+                      "Error converting to mutable: ${error.toString()}",
+                      style: TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onErrorContainer),
+                    ),
+                    backgroundColor:
+                        Theme.of(context).colorScheme.errorContainer,
                   ),
                 );
-              },
-              icon: const Icon(Icons.swap_vert),
-            ),
+                return;
+              }
+
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  behavior: SnackBarBehavior.floating,
+                  content: Text("Successfully converted to mutable."),
+                ),
+              );
+            },
+            icon: const Icon(Icons.swap_vert),
           ),
           IconButton(
             onPressed: () {

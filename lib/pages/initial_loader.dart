@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitialLoaderPage extends StatefulWidget {
@@ -10,7 +12,7 @@ class InitialLoaderPage extends StatefulWidget {
 }
 
 class _InitialLoaderPageState extends State<InitialLoaderPage> {
-  void load() async {
+  void load(NavigatorState navigator) async {
     // if (kDebugMode) {
     //   Map<String, Object> values = <String, Object>{
     //     'onboardingCompleted': false,
@@ -35,20 +37,40 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
           'picklists', defaultPicklists.map((e) => e.toJSON()).toList());
     }
 
+    if (prefs.getString('role') == 'team_analyst') {
+      await prefs.setString('role', 'analyst');
+    }
+
     if (onboardingCompleted) {
-      // ignore: unnecessary_this
-      Navigator.of(this.context)
-          .pushNamedAndRemoveUntil("/match_schedule", (route) => false);
+      if (prefs.getInt('team') == null) {
+        navigator.pushNamedAndRemoveUntil(
+          "/more_info_prompt",
+          (route) => false,
+          arguments: MoreInfoArgs(onContinue: () {
+            navigator.pushNamed(
+              "/team_selector",
+              arguments: const TeamSelectorArgs(isOnboarding: false),
+            );
+          }),
+        );
+      } else {
+        navigator.pushNamedAndRemoveUntil("/match_schedule", (route) => false);
+      }
     } else {
       // ignore: unnecessary_this
-      Navigator.of(this.context)
-          .pushNamedAndRemoveUntil("/role_selector", (route) => false);
+      navigator.pushNamedAndRemoveUntil(
+        "/team_selector",
+        (route) => false,
+        arguments: const TeamSelectorArgs(
+          isOnboarding: true,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    load();
+    load(Navigator.of(context));
 
     return const Scaffold(
       body: Center(
