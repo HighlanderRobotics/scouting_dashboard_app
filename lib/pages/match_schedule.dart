@@ -624,7 +624,9 @@ class AllianceRow extends StatelessWidget {
         });
       },
       child: Container(
-        color: alliance == Alliance.red ? redAlliance : blueAlliance,
+        color: alliance == Alliance.red
+            ? Theme.of(context).colorScheme.redAlliance
+            : Theme.of(context).colorScheme.blueAlliance,
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Row(
@@ -713,8 +715,8 @@ class AllianceRow extends StatelessWidget {
             style: Theme.of(context).textTheme.labelSmall!.merge(
                   TextStyle(
                     color: alliance == Alliance.red
-                        ? onRedAlliance
-                        : onBlueAlliance,
+                        ? Theme.of(context).colorScheme.onRedAlliance
+                        : Theme.of(context).colorScheme.onBlueAlliance,
                   ),
                 ),
             textAlign: {
@@ -734,7 +736,7 @@ class AllianceRow extends StatelessWidget {
                         Icon(
                           Icons.error,
                           size: 20,
-                          color: warningText,
+                          color: Theme.of(context).colorScheme.warningText,
                         ),
                         Flexible(
                           child: Padding(
@@ -744,7 +746,10 @@ class AllianceRow extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .labelSmall!
-                                  .merge(TextStyle(color: warningText)),
+                                  .merge(TextStyle(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .warningText)),
                             ),
                           ),
                         ),

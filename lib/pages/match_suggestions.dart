@@ -138,7 +138,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: alliance == 'red' ? redAlliance : blueAlliance,
+              color: alliance == 'red'
+                  ? Theme.of(context).colorScheme.redAlliance
+                  : Theme.of(context).colorScheme.blueAlliance,
               padding: const EdgeInsets.all(10),
               child: const Text("Endgame"),
             ),
@@ -192,7 +194,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            color: alliance == 'red' ? redAlliance : blueAlliance,
+            color: alliance == 'red'
+                ? Theme.of(context).colorScheme.redAlliance
+                : Theme.of(context).colorScheme.blueAlliance,
             padding: const EdgeInsets.all(10),
             child: const Text("Teleop"),
           ),
@@ -260,7 +264,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: alliance == "red" ? redAlliance : blueAlliance,
+              color: alliance == "red"
+                  ? Theme.of(context).colorScheme.redAlliance
+                  : Theme.of(context).colorScheme.blueAlliance,
             ),
             padding: const EdgeInsets.all(10),
             child: const Text("Auto"),
@@ -289,7 +295,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
           ),
           Container(
             decoration: BoxDecoration(
-              color: alliance == "red" ? onRedAlliance : onBlueAlliance,
+              color: alliance == "red"
+                  ? Theme.of(context).colorScheme.onRedAlliance
+                  : Theme.of(context).colorScheme.onBlueAlliance,
             ),
             padding: const EdgeInsets.all(10),
             child: Row(
@@ -299,7 +307,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
                   "Auto points",
                   style: Theme.of(context).textTheme.labelLarge!.merge(
                         TextStyle(
-                          color: alliance == "red" ? redAlliance : blueAlliance,
+                          color: alliance == "red"
+                              ? Theme.of(context).colorScheme.redAlliance
+                              : Theme.of(context).colorScheme.blueAlliance,
                         ),
                       ),
                 ),
@@ -314,7 +324,9 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
                       .sum()),
                   style: Theme.of(context).textTheme.bodyMedium!.merge(
                         TextStyle(
-                          color: alliance == "red" ? redAlliance : blueAlliance,
+                          color: alliance == "red"
+                              ? Theme.of(context).colorScheme.redAlliance
+                              : Theme.of(context).colorScheme.blueAlliance,
                         ),
                       ),
                 ),

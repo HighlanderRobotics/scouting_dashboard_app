@@ -68,9 +68,24 @@ const darkColorScheme = ColorScheme(
   // scrim: Color(0xFF000000),
 );
 
-Color redAlliance = const Color(0xFF793F3F);
-Color onRedAlliance = const Color(0xFFD0A2A2);
-Color blueAlliance = const Color(0xFF364077);
-Color onBlueAlliance = const Color(0xFFA2A7D0);
+extension ColorSchemeExtension on ColorScheme {
+  Color get redAlliance => brightness == Brightness.light
+      ? const Color.fromARGB(255, 206, 140, 140)
+      : const Color(0xFF793F3F);
 
-Color warningText = const Color(0xFFE7EC00);
+  Color get blueAlliance => brightness == Brightness.light
+      ? const Color.fromARGB(255, 138, 146, 209)
+      : const Color(0xFF364077);
+
+  Color get onRedAlliance => brightness == Brightness.light
+      ? const Color.fromARGB(255, 107, 50, 50)
+      : const Color(0xFFD0A2A2);
+
+  Color get onBlueAlliance => brightness == Brightness.light
+      ? const Color.fromARGB(255, 43, 50, 92)
+      : const Color(0xFFA2A7D0);
+
+  Color get warningText => brightness == Brightness.light
+      ? const Color(0xFFE7EC00)
+      : const Color(0xFFE7EC00);
+}

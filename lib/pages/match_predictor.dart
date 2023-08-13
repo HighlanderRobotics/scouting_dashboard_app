@@ -179,7 +179,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                 }),
                             child: Container(
                               decoration: BoxDecoration(
-                                  color: [redAlliance, blueAlliance][alliance],
+                                  color: [
+                                    Theme.of(context).colorScheme.redAlliance,
+                                    Theme.of(context).colorScheme.blueAlliance
+                                  ][alliance],
                                   borderRadius: const BorderRadius.all(
                                       Radius.circular(10))),
                               child: Padding(
@@ -207,8 +210,12 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                       "Avg score",
                                       style: TextStyle(
                                         color: [
-                                          onRedAlliance,
-                                          onBlueAlliance
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .onRedAlliance,
+                                          Theme.of(context)
+                                              .colorScheme
+                                              .onBlueAlliance
                                         ][alliance],
                                       ),
                                     ),
@@ -233,7 +240,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       const SizedBox(height: 15),
       Container(
         decoration: BoxDecoration(
-          color: [redAlliance, blueAlliance][alliance],
+          color: [
+            Theme.of(context).colorScheme.redAlliance,
+            Theme.of(context).colorScheme.blueAlliance
+          ][alliance],
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Padding(
@@ -258,13 +268,22 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
         cargoStack(
           context,
           data['${allianceName}Alliance'],
-          backgroundColor: [onRedAlliance, onBlueAlliance][alliance],
-          foregroundColor: [redAlliance, blueAlliance][alliance],
+          backgroundColor: [
+            Theme.of(context).colorScheme.onRedAlliance,
+            Theme.of(context).colorScheme.onBlueAlliance
+          ][alliance],
+          foregroundColor: [
+            Theme.of(context).colorScheme.redAlliance,
+            Theme.of(context).colorScheme.blueAlliance
+          ][alliance],
         ),
       const SizedBox(height: 15),
       Container(
         decoration: BoxDecoration(
-          color: [onRedAlliance, onBlueAlliance][alliance],
+          color: [
+            Theme.of(context).colorScheme.onRedAlliance,
+            Theme.of(context).colorScheme.onBlueAlliance
+          ][alliance],
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         child: Padding(
@@ -274,7 +293,11 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             children: [
               Text(
                 "Links",
-                style: TextStyle(color: [redAlliance, blueAlliance][alliance]),
+                style: TextStyle(
+                    color: [
+                  Theme.of(context).colorScheme.redAlliance,
+                  Theme.of(context).colorScheme.blueAlliance
+                ][alliance]),
               ),
               Text(
                 data["${allianceName}Alliance"]['links'] == null
@@ -282,7 +305,11 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                     : numberVizualizationBuilder(
                         data["${allianceName}Alliance"]['links'],
                       ),
-                style: TextStyle(color: [redAlliance, blueAlliance][alliance]),
+                style: TextStyle(
+                    color: [
+                  Theme.of(context).colorScheme.redAlliance,
+                  Theme.of(context).colorScheme.blueAlliance
+                ][alliance]),
               ),
             ],
           ),
@@ -330,14 +357,17 @@ class WinningPrediction extends StatelessWidget {
                         fit: FlexFit.tight,
                         flex: (redWinning! * 100).round(),
                         child: Container(
-                          decoration: BoxDecoration(color: redAlliance),
+                          decoration: BoxDecoration(
+                              color: Theme.of(context).colorScheme.redAlliance),
                         ),
                       ),
                       Flexible(
                         fit: FlexFit.tight,
                         flex: (blueWinning! * 100).round(),
                         child: Container(
-                          decoration: BoxDecoration(color: blueAlliance),
+                          decoration: BoxDecoration(
+                              color:
+                                  Theme.of(context).colorScheme.blueAlliance),
                         ),
                       ),
                     ],
