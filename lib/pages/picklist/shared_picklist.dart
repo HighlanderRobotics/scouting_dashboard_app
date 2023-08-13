@@ -3,7 +3,6 @@ import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
-import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 
 class SharedPicklistPage extends StatelessWidget {
   const SharedPicklistPage({super.key});
