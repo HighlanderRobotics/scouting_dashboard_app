@@ -86,6 +86,6 @@ extension ColorSchemeExtension on ColorScheme {
       : const Color(0xFFA2A7D0);
 
   Color get warningText => brightness == Brightness.light
-      ? const Color(0xFFE7EC00)
+      ? Color.fromARGB(255, 223, 235, 97)
       : const Color(0xFFE7EC00);
 }
