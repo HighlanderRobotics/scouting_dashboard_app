@@ -4,7 +4,6 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
-import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:skeletons/skeletons.dart';
