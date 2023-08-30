@@ -1,11 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_breakdowns.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_categories.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_notes.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/team_trend.dart';
+
+import 'package:http/http.dart' as http;
 
 import '../../reusable/navigation_drawer.dart';
 
@@ -20,6 +26,31 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
   String teamFieldValue = "";
   TextEditingController? teamFieldController;
   int? teamNumberForAnalysis;
+  int? currentTrendTeam;
+  TeamTrend? trend;
+
+  Future<void> updateTrend() async {
+    final authority = (await getServerAuthority())!;
+    final team = teamNumberForAnalysis;
+
+    final response = await http.get(
+      Uri.http(
+        authority,
+        '/API/analysis/flag',
+        {'team': team.toString()},
+      ),
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          "${response.statusCode} ${response.reasonPhrase}: ${response.body}");
+    } else {
+      setState(() {
+        trend = TeamTrend.values[jsonDecode(response.body)[0]['result']];
+        currentTrendTeam = team;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,6 +69,8 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
           teamFieldValue = teamNumberFromRoute.toString();
           teamNumberForAnalysis = teamNumberFromRoute;
         });
+
+        updateTrend();
       }
     }
 
@@ -53,9 +86,22 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 19, 24, 8),
                   child: TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text("Team #"),
+                    decoration: InputDecoration(
+                      border: const OutlineInputBorder(),
+                      label: const Text("Team #"),
+                      suffixIcon: trend == null
+                          ? null
+                          : Icon(
+                              trend!.icon,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurface
+                                  .withAlpha(
+                                    currentTrendTeam == teamNumberForAnalysis
+                                        ? 220
+                                        : 127,
+                                  ),
+                            ),
                     ),
                     keyboardType: TextInputType.number,
                     onChanged: (value) {
@@ -65,6 +111,8 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                           teamNumberForAnalysis = int.parse(value);
                         }
                       });
+
+                      updateTrend();
                     },
                     controller: teamFieldController,
                   ),
