@@ -14,9 +14,9 @@ extension ColorCombinationExtension on ColorCombination {
       case ColorCombination.plain:
         return colorScheme.surfaceVariant;
       case ColorCombination.colored:
-        return colorScheme.primary;
-      case ColorCombination.emphasis:
         return colorScheme.primaryContainer;
+      case ColorCombination.emphasis:
+        return colorScheme.primary;
     }
   }
 
@@ -27,9 +27,9 @@ extension ColorCombinationExtension on ColorCombination {
       case ColorCombination.plain:
         return colorScheme.onSurfaceVariant;
       case ColorCombination.colored:
-        return colorScheme.onPrimary;
-      case ColorCombination.emphasis:
         return colorScheme.onPrimaryContainer;
+      case ColorCombination.emphasis:
+        return colorScheme.onPrimary;
     }
   }
 }

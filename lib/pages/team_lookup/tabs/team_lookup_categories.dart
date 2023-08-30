@@ -117,12 +117,12 @@ class MetricCategory extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(10)),
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.primaryContainer,
         ),
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: const BorderRadius.all(Radius.circular(10)),
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.primaryContainer,
           ),
           child: Padding(
             padding: const EdgeInsets.all(10),
@@ -138,7 +138,7 @@ class MetricCategory extends StatelessWidget {
                               TextStyle(
                                 color: Theme.of(context)
                                     .colorScheme
-                                    .onSurfaceVariant,
+                                    .onPrimaryContainer,
                               ),
                             ),
                       ),
@@ -156,7 +156,7 @@ class MetricCategory extends StatelessWidget {
                 if (onTap != null)
                   Icon(
                     Icons.navigate_next,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                   )
               ],
             ),

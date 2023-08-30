@@ -270,8 +270,8 @@ class TeamPerMatchVizualization extends StatelessWidget {
         cargoStack(
           context,
           analysis.cargoStackAnalysisMap,
-          backgroundColor: Theme.of(context).colorScheme.primary,
-          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+          foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
         ),
         if (analysis.notes.isNotEmpty) ...[
           headline(context, "Notes"),
@@ -286,23 +286,25 @@ class TeamPerMatchVizualization extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: analysis.notes
           .map((note) => EmphasizedContainer(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.primaryContainer,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Text(
                       note.author,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
                             fontWeight: FontWeight.w700,
                           ),
                     ),
                     Text(
                       note.body,
                       style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
                           ),
                     ),
                   ],
@@ -361,7 +363,7 @@ class TeamPerMatchVizualization extends StatelessWidget {
                     showDialog(context: context, builder: autoPathUsageDialog);
                   },
                   child: EmphasizedContainer(
-                    color: Theme.of(context).colorScheme.primary,
+                    color: Theme.of(context).colorScheme.primaryContainer,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -372,12 +374,14 @@ class TeamPerMatchVizualization extends StatelessWidget {
                               .textTheme
                               .bodyLarge!
                               .copyWith(
-                                  color:
-                                      Theme.of(context).colorScheme.onPrimary),
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer),
                         ),
                         Icon(
                           Icons.chevron_right,
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ],
                     ),

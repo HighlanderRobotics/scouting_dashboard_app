@@ -99,7 +99,7 @@ class Note extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
-        color: Theme.of(context).colorScheme.primary,
+        color: Theme.of(context).colorScheme.primaryContainer,
       ),
       child: Padding(
         padding: const EdgeInsets.all(15),
@@ -113,7 +113,8 @@ class Note extends StatelessWidget {
                   matchName,
                   style: Theme.of(context).textTheme.titleMedium!.merge(
                         TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer,
                         ),
                       ),
                 ),
@@ -131,7 +132,7 @@ class Note extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.edit_outlined),
-                    color: Theme.of(context).colorScheme.onPrimary,
+                    color: Theme.of(context).colorScheme.onPrimaryContainer,
                     visualDensity: VisualDensity.compact,
                   ),
                 ),
@@ -141,7 +142,7 @@ class Note extends StatelessWidget {
               noteBody,
               style: Theme.of(context).textTheme.bodyMedium!.merge(
                     TextStyle(
-                      color: Theme.of(context).colorScheme.onPrimary,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
                     ),
                   ),
             ),
