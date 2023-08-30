@@ -41,23 +41,6 @@ class _RoleSelectorPageState extends State<RoleSelectorPage> {
                 })),
           ),
           ListTile(
-            title: const Text("8033 Analyst"),
-            leading: Icon(Icons.insights,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
-            trailing: Radio(
-                value: "8033_analyst",
-                activeColor: Theme.of(context).colorScheme.primary,
-                groupValue: role,
-                onChanged: ((value) {
-                  passwordProtected(context, teamAnalystCorrectPassword, () {
-                    setState(() {
-                      if (value == null) return;
-                      role = value;
-                    });
-                  });
-                })),
-          ),
-          ListTile(
             title: const Text("8033 Scouting Lead"),
             leading: Icon(Icons.supervisor_account,
                 color: Theme.of(context).colorScheme.onSurfaceVariant),
