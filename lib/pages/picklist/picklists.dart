@@ -253,6 +253,9 @@ class SharedPicklists extends StatelessWidget {
                         ),
                         child: ListTile(
                           title: Text(picklist.title),
+                          subtitle: picklist.author == null
+                              ? null
+                              : Text(picklist.author!),
                           trailing: Icon(
                             Icons.arrow_right,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -406,6 +409,9 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                           ),
                           child: ListTile(
                             title: Text(picklist.name),
+                            subtitle: picklist.author == null
+                                ? null
+                                : Text(picklist.author!),
                             trailing: Icon(
                               Icons.arrow_right,
                               color: Theme.of(context).colorScheme.onSurface,

@@ -14,6 +14,7 @@ import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart'
 import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
@@ -44,6 +45,7 @@ void main() async {
       '/loading': (context) => const InitialLoaderPage(),
       '/more_info_prompt': (context) => const MoreInfoPage(),
       '/team_selector': (context) => const TeamSelectorPage(),
+      '/username_selector': (context) => const UsernameSelectorPage(),
       '/role_selector': (context) => const RoleSelectorPage(),
       '/server_authority_setup': (context) =>
           const ServerAuthoritySelectorPage(),

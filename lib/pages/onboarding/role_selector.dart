@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/correct_passwords.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
 import 'package:scouting_dashboard_app/reusable/password_protection.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -72,7 +73,10 @@ class _RoleSelectorPageState extends State<RoleSelectorPage> {
 
                   await prefs.setString("role", role);
 
-                  Navigator.of(context).pushNamed("/server_authority_setup");
+                  Navigator.of(context).pushNamed(
+                    "/username_selector",
+                    arguments: const UsernameSelectorArgs(isOnboarding: true),
+                  );
                 }),
                 child: const Text("Next"),
               ),

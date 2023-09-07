@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitialLoaderPage extends StatefulWidget {
@@ -42,7 +43,10 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
     }
 
     if (onboardingCompleted) {
-      if (prefs.getInt('team') == null) {
+      final teamIsSet = prefs.getInt('team') != null;
+      final usernameIsSet = prefs.getString('username') != null;
+
+      if (!teamIsSet) {
         navigator.pushNamedAndRemoveUntil(
           "/more_info_prompt",
           (route) => false,
@@ -50,6 +54,17 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
             navigator.pushNamed(
               "/team_selector",
               arguments: const TeamSelectorArgs(isOnboarding: false),
+            );
+          }),
+        );
+      } else if (!usernameIsSet) {
+        navigator.pushNamedAndRemoveUntil(
+          "/more_info_prompt",
+          (route) => false,
+          arguments: MoreInfoArgs(onContinue: () {
+            navigator.pushNamed(
+              "/username_selector",
+              arguments: const UsernameSelectorArgs(isOnboarding: false),
             );
           }),
         );

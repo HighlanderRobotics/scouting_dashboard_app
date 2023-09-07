@@ -1,33 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class TeamSelectorArgs {
-  const TeamSelectorArgs({
+class UsernameSelectorArgs {
+  const UsernameSelectorArgs({
     required this.isOnboarding,
   });
 
   final bool isOnboarding;
 }
 
-class TeamSelectorPage extends StatefulWidget {
-  const TeamSelectorPage({super.key});
+class UsernameSelectorPage extends StatefulWidget {
+  const UsernameSelectorPage({super.key});
 
   @override
-  State<TeamSelectorPage> createState() => _TeamSelectorPageState();
+  State<UsernameSelectorPage> createState() => _UsernameSelectorPageState();
 }
 
-class _TeamSelectorPageState extends State<TeamSelectorPage> {
-  String teamString = "";
+class _UsernameSelectorPageState extends State<UsernameSelectorPage> {
+  String username = "";
 
   @override
   Widget build(BuildContext context) {
     NavigatorState navigator = Navigator.of(context);
 
-    final TeamSelectorArgs args =
-        ModalRoute.of(context)!.settings.arguments as TeamSelectorArgs;
+    final UsernameSelectorArgs args =
+        ModalRoute.of(context)!.settings.arguments as UsernameSelectorArgs;
 
     return Scaffold(
       appBar:
@@ -35,46 +34,43 @@ class _TeamSelectorPageState extends State<TeamSelectorPage> {
       body: ScrollablePageBody(
         children: [
           Text(
-            "I am on...",
+            "Choose a name",
             style: Theme.of(context).textTheme.titleLarge,
           ),
           const SizedBox(height: 20),
           TextField(
             onChanged: (value) {
               setState(() {
-                teamString = value;
+                username = value;
               });
             },
-            keyboardType: TextInputType.number,
             decoration:
-                const InputDecoration(filled: true, label: Text("Team Number")),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                const InputDecoration(filled: true, label: Text("Username")),
+            maxLength: 50,
           ),
+          const SizedBox(height: 20),
+          const Text(
+              "Other members of your team will use this to identify you."),
           const SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               FilledButton(
-                onPressed: int.tryParse(teamString) == null
+                onPressed: username.isEmpty
                     ? null
                     : (() async {
                         final SharedPreferences prefs =
                             await SharedPreferences.getInstance();
 
-                        final teamNumber = int.parse(teamString);
+                        await prefs.setString("username", username);
 
-                        await prefs.setInt("team", teamNumber);
-
-                        if (teamNumber == 8033) {
-                          navigator.pushNamed('/role_selector');
+                        if (args.isOnboarding) {
+                          navigator.pushNamed("/server_authority_setup");
                         } else {
-                          await prefs.setString('role', 'analyst');
-                          navigator.pushNamed("/username_selector",
-                              arguments: UsernameSelectorArgs(
-                                  isOnboarding: args.isOnboarding));
+                          navigator.pushNamed('/match_schedule');
                         }
                       }),
-                child: const Text("Next"),
+                child: Text(args.isOnboarding ? "Next" : "Done"),
               ),
             ],
           ),

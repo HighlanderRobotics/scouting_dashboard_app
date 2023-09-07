@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NewPicklistPage extends StatefulWidget {
   const NewPicklistPage({super.key});
@@ -20,25 +21,35 @@ class _NewPicklistPageState extends State<NewPicklistPage> {
       appBar: AppBar(
         title: const Text("New Picklist"),
         actions: [
-          IconButton(
-            onPressed: picklist.title.isEmpty
-                ? null
-                : () async {
-                    await addPicklist(picklist);
+          FutureBuilder<SharedPreferences>(
+              future: SharedPreferences.getInstance(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  picklist.author = snapshot.data!.getString('username');
+                }
 
-                    (ModalRoute.of(context)!.settings.arguments
-                        as Map<String, dynamic>)['onCreate']();
+                return IconButton(
+                  onPressed: picklist.title.isEmpty ||
+                          snapshot.connectionState != ConnectionState.done
+                      ? null
+                      : () async {
+                          await addPicklist(picklist);
 
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                      content: Text("Created picklist"),
-                      behavior: SnackBarBehavior.floating,
-                    ));
+                          (ModalRoute.of(context)!.settings.arguments
+                              as Map<String, dynamic>)['onCreate']();
 
-                    Navigator.of(context).pop();
-                  },
-            icon: const Icon(Icons.check),
-            color: Colors.green,
-          )
+                          ScaffoldMessenger.of(context)
+                              .showSnackBar(const SnackBar(
+                            content: Text("Created picklist"),
+                            behavior: SnackBarBehavior.floating,
+                          ));
+
+                          Navigator.of(context).pop();
+                        },
+                  icon: const Icon(Icons.check),
+                  color: Colors.green,
+                );
+              })
         ],
       ),
       body: ScrollablePageBody(padding: EdgeInsets.zero, children: [
