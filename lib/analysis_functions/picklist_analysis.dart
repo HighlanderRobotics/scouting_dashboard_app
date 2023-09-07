@@ -27,6 +27,8 @@ class PicklistAnalysis extends AnalysisFunction {
     var response = await http.get(Uri.http(
         (await getServerAuthority())!, "/API/analysis/picklist", params));
 
+    print(response.body);
+
     return (jsonDecode(utf8.decode(response.bodyBytes))[0]['result']
         as List<dynamic>);
   }

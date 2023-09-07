@@ -30,18 +30,23 @@ class PicklistWeight {
 }
 
 class ConfiguredPicklist {
-  ConfiguredPicklist(this.title, this.weights, this.id);
+  ConfiguredPicklist(this.title, this.weights, this.id, {this.author});
 
   factory ConfiguredPicklist.autoUuid(
-    String title,
-    List<PicklistWeight> weights,
-  ) {
-    return ConfiguredPicklist(title, weights, (const Uuid()).v4());
+      String title, List<PicklistWeight> weights,
+      {String? author}) {
+    return ConfiguredPicklist(
+      title,
+      weights,
+      (const Uuid()).v4(),
+      author: author,
+    );
   }
 
   String title;
   List<PicklistWeight> weights;
   String id;
+  String? author;
 
   Future<List<int>> fetchTeamRankings() async {
     Map<String, dynamic> params = weights.asMap().map((key, value) => MapEntry(
@@ -78,6 +83,7 @@ class ConfiguredPicklist {
             (index, weight) =>
                 MapEntry<String, dynamic>(weight.path, weight.value.toString()),
           )),
+      if (author != null) 'userName': author,
     }));
 
     if (response.statusCode != 200) {
@@ -89,6 +95,7 @@ class ConfiguredPicklist {
         'title': title,
         'uuid': id,
         'weights': weights.map((e) => e.toMap()).toList(),
+        if (author != null) 'userName': author,
       });
 
   factory ConfiguredPicklist.fromJSON(String json) {
@@ -100,6 +107,7 @@ class ConfiguredPicklist {
           .map((e) => PicklistWeight.fromMap(e))
           .toList(),
       map['uuid'] ?? const Uuid().v4(),
+      author: map.containsKey('userName') ? map['userName'] : null,
     );
   }
 
@@ -116,12 +124,14 @@ class ConfiguredPicklist {
               ))
           .toList(),
       map['uuid'],
+      author: map.containsKey('userName') ? map['userName'] : null,
     );
   }
 
   factory ConfiguredPicklist.defaultWeights(
     String title, {
     Map<String, double> weights = const {},
+    String? author,
   }) {
     List<PicklistWeight> allWeights = picklistWeights
         .map((e) => weights.containsKey(e.path)
@@ -129,7 +139,7 @@ class ConfiguredPicklist {
             : e)
         .toList();
 
-    return ConfiguredPicklist.autoUuid(title, allWeights);
+    return ConfiguredPicklist.autoUuid(title, allWeights, author: author);
   }
 }
 
@@ -160,10 +170,12 @@ class MutablePicklist {
     required this.uuid,
     required this.name,
     required this.teams,
+    this.author,
   });
 
   String uuid;
   String name;
+  String? author;
   List<int> teams;
 
   static Future<MutablePicklist> fromReactivePicklist(
@@ -171,6 +183,7 @@ class MutablePicklist {
       MutablePicklist(
         uuid: reactivePicklist.id,
         name: reactivePicklist.title,
+        author: reactivePicklist.author,
         teams: await reactivePicklist.fetchTeamRankings(),
       );
 
@@ -180,6 +193,8 @@ class MutablePicklist {
     return MutablePicklist(
       uuid: decodedJSON['uuid'],
       name: decodedJSON['name'],
+      author:
+          decodedJSON.containsKey('userName') ? decodedJSON['userName'] : null,
       teams: decodedJSON['teams'],
     );
   }
@@ -194,6 +209,7 @@ class MutablePicklist {
               'uuid': uuid,
               'name': name,
               'teams': teams,
+              if (author != null) 'userName': author,
               'team': prefs.getInt('team').toString(),
             }),
             headers: {
