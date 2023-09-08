@@ -338,10 +338,10 @@ Future<List<MutablePicklist>> getMutablePicklists() async {
 
   return (jsonDecode(response.body) as List<dynamic>)
       .map((listMap) => MutablePicklist(
-            uuid: listMap['uuid'],
-            name: listMap['name'],
-            teams: listMap['teams'].cast<int>(),
-          ))
+          uuid: listMap['uuid'],
+          name: listMap['name'],
+          teams: listMap['teams'].cast<int>(),
+          author: listMap.containsKey('userName') ? listMap['userName'] : null))
       .toList();
 }
 
