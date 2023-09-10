@@ -66,7 +66,8 @@ class _UsernameSelectorPageState extends State<UsernameSelectorPage> {
                         if (args.isOnboarding) {
                           navigator.pushNamed("/server_authority_setup");
                         } else {
-                          navigator.pushNamed('/match_schedule');
+                          navigator.pushNamedAndRemoveUntil(
+                              '/match_schedule', (route) => false);
                         }
                       }),
                 child: Text(args.isOnboarding ? "Next" : "Done"),
