@@ -143,6 +143,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
     fetchTeamsInTournament();
   }
 
+  final scrollController = ScrollController();
+  final nextMatchKey = GlobalKey();
+
+  void jumpToNextMatch() {
+    Scrollable.ensureVisible(nextMatchKey.currentContext!);
+  }
+
   @override
   Widget build(BuildContext context) {
     List<ScheduleMatch>? filteredMatches;
@@ -247,26 +254,31 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         },
                       ),
                       const Spacer(),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            "Up next",
-                            style: Theme.of(context).textTheme.labelMedium,
-                          ),
-                          const SizedBox(height: 5),
-                          isDataFetched
-                              ? Text(
-                                  nextMatch?.getShortLocalizedDescription() ??
-                                      "No more",
-                                )
-                              : const SkeletonLine(
-                                  style: SkeletonLineStyle(
-                                    width: 50,
-                                    height: 20,
+                      GestureDetector(
+                        onTap: isDataFetched && nextMatch != null
+                            ? jumpToNextMatch
+                            : null,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              "Up next",
+                              style: Theme.of(context).textTheme.labelMedium,
+                            ),
+                            const SizedBox(height: 5),
+                            isDataFetched
+                                ? Text(
+                                    nextMatch?.getShortLocalizedDescription() ??
+                                        "No more",
+                                  )
+                                : const SkeletonLine(
+                                    style: SkeletonLineStyle(
+                                      width: 50,
+                                      height: 20,
+                                    ),
                                   ),
-                                ),
-                        ],
+                          ],
+                        ),
                       ),
                     ])
                   ],
@@ -299,12 +311,10 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                     }
                     return false;
                   },
-                  child: ListView.builder(
-                    addAutomaticKeepAlives: true,
-                    // itemExtent: 190,
-                    itemBuilder: (context, index) {
-                      ScheduleMatch match = filteredMatches![index];
-
+                  child: SingleChildScrollView(
+                    controller: scrollController,
+                    child: Column(
+                        children: filteredMatches!.map((match) {
                       List<String?> scouted = [
                         isScouted!["${match.identity.toMediumKey()}_0"],
                         isScouted!["${match.identity.toMediumKey()}_1"],
@@ -315,6 +325,10 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                       ];
 
                       return Padding(
+                        key: match.identity.toMediumKey() ==
+                                nextMatch?.toMediumKey()
+                            ? nextMatchKey
+                            : null,
                         padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
                         child: ClipRRect(
                           borderRadius:
@@ -482,8 +496,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                           ),
                         ),
                       );
-                    },
-                    itemCount: filteredMatches!.length,
+                    }).toList()),
                   ),
                 ),
               ),
