@@ -24,6 +24,7 @@ class _AnalysisVisualizationState extends State<AnalysisVisualization> {
 
   @override
   void initState() {
+    super.initState();
     widget.analysisFunction.getAnalysis().then((value) {
       setState(
         () {
