@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../analysis_functions/analysis.dart';
 
-abstract class AnalysisVisualization extends StatelessWidget {
+abstract class AnalysisVisualization extends StatefulWidget {
   const AnalysisVisualization({
     Key? key,
     required this.analysisFunction,
@@ -10,44 +10,65 @@ abstract class AnalysisVisualization extends StatelessWidget {
 
   final AnalysisFunction analysisFunction;
 
+  Widget loadingView() => const Center(child: CircularProgressIndicator());
+  Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
+
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: analysisFunction.getAnalysis(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return loadingView();
-          }
+  State<AnalysisVisualization> createState() => _AnalysisVisualizationState();
+}
 
-          if (snapshot.hasError) {
-            return Center(
-              child: IconButton(
-                icon: const Icon(Icons.sentiment_dissatisfied_outlined),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                            title: const Text("Error"),
-                            content: Text(snapshot.error.toString()),
-                            actions: [
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text("Dismiss"),
-                              ),
-                            ],
-                          ));
-                },
-              ),
-            );
-          }
+class _AnalysisVisualizationState extends State<AnalysisVisualization> {
+  dynamic analysis;
+  bool loaded = false;
+  Object? error;
 
-          return loadedData(context, snapshot);
-        });
+  @override
+  void initState() {
+    widget.analysisFunction.getAnalysis().then((value) {
+      setState(
+        () {
+          loaded = true;
+          analysis = AsyncSnapshot.withData(ConnectionState.done, value);
+        },
+      );
+    }).catchError((err) {
+      setState(() {
+        loaded = true;
+        error = err;
+      });
+    });
   }
 
-  Widget loadingView() => const Center(child: CircularProgressIndicator());
+  @override
+  Widget build(BuildContext context) {
+    if (!loaded) {
+      return widget.loadingView();
+    }
 
-  Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
+    if (error != null) {
+      return Center(
+        child: IconButton(
+          icon: const Icon(Icons.sentiment_dissatisfied_outlined),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: const Text("Error"),
+                      content: Text(error.toString()),
+                      actions: [
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("Dismiss"),
+                        ),
+                      ],
+                    ));
+          },
+        ),
+      );
+    }
+
+    return widget.loadedData(context, analysis);
+  }
 }
