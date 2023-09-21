@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
@@ -40,6 +43,13 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
 
     if (prefs.getString('role') == 'team_analyst') {
       await prefs.setString('role', 'analyst');
+    }
+
+    if (prefs.getStringList('picklist_flags') == null) {
+      await prefs.setStringList(
+        'picklist_flags',
+        defaultPicklistFlags.map((e) => jsonEncode(e.toJson())).toList(),
+      );
     }
 
     if (onboardingCompleted) {

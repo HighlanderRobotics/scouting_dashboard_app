@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -16,6 +19,8 @@ class MyPicklistPage extends StatefulWidget {
 }
 
 class _MyPicklistPageState extends State<MyPicklistPage> {
+  final picklistVisualizationKey = GlobalKey<AnalysisVisualizationState>();
+
   @override
   Widget build(BuildContext context) {
     ConfiguredPicklist picklist = (ModalRoute.of(context)!.settings.arguments
@@ -88,6 +93,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
         bottom: false,
         child: PicklistVisuzlization(
           analysisFunction: PicklistAnalysis(picklist: picklist),
+          key: picklistVisualizationKey,
         ),
       ),
     );
@@ -106,15 +112,31 @@ class PicklistVisuzlization extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
+    final result = snapshot.data['result'];
+    final flagConfigurations = snapshot.data['flags'];
+
     return ListView(
-      children: (snapshot.data as List<dynamic>)
+      children: (result as List<dynamic>)
           .map((teamData) => ListTile(
-                leading: tbaRankBadge(teamData['team']),
                 title: Text(teamData['team'].toString()),
                 contentPadding: const EdgeInsets.only(left: 16, right: 4),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    FlagRow(
+                      flagConfigurations,
+                      (teamData['flags'] as List<dynamic>)
+                          .asMap()
+                          .map(
+                            (k, value) => MapEntry(
+                              value['type'],
+                              value['result'],
+                            ),
+                          )
+                          .cast<String, dynamic>(),
+                      teamData['team'],
+                      onEdit: () => super.loadData(),
+                    ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)
@@ -141,7 +163,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                         });
                       },
                       icon: Icon(
-                        Icons.dashboard_outlined,
+                        Icons.arrow_right,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
@@ -149,6 +171,49 @@ class PicklistVisuzlization extends AnalysisVisualization {
                 ),
               ))
           .toList(),
+    );
+  }
+}
+
+class FlagRow extends StatelessWidget {
+  const FlagRow(this.flagConfigurations, this.data, this.team,
+      {this.onEdit, super.key});
+
+  final List<FlagConfiguration> flagConfigurations;
+  final Map<String, dynamic> data;
+  final int team;
+  final dynamic Function()? onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    int i = -1;
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).pushNamed(
+          '/edit_picklist_flags',
+          arguments: EditPicklistFlagsArgs(
+            initialFlags: flagConfigurations,
+            initialFlagValues: data,
+            team: team,
+            onChange: (data) {
+              if (onEdit != null) onEdit!();
+            },
+          ),
+        );
+      },
+      child: Row(
+        children: flagConfigurations
+            .map((flag) {
+              i += 1;
+
+              return Hero(
+                  tag: '$team-${flag.type.path}-$i',
+                  child: flag.getWidget(context, data[flag.type.path]));
+            })
+            .toList()
+            .withSpaceBetween(width: 10),
+      ),
     );
   }
 }

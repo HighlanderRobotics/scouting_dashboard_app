@@ -13,18 +13,27 @@ abstract class AnalysisVisualization extends StatefulWidget {
   Widget loadingView() => const Center(child: CircularProgressIndicator());
   Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
 
+  void loadData() {
+    final state = key as GlobalKey<AnalysisVisualizationState>;
+    state.currentState?.loadData();
+  }
+
   @override
-  State<AnalysisVisualization> createState() => _AnalysisVisualizationState();
+  State<AnalysisVisualization> createState() => AnalysisVisualizationState();
 }
 
-class _AnalysisVisualizationState extends State<AnalysisVisualization> {
+class AnalysisVisualizationState extends State<AnalysisVisualization> {
   dynamic analysis;
   bool loaded = false;
   Object? error;
 
-  @override
-  void initState() {
-    super.initState();
+  void loadData() {
+    setState(() {
+      analysis = null;
+      loaded = false;
+      error = null;
+    });
+
     widget.analysisFunction.getAnalysis().then((value) {
       setState(
         () {
@@ -38,6 +47,12 @@ class _AnalysisVisualizationState extends State<AnalysisVisualization> {
         error = err;
       });
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
   }
 
   @override

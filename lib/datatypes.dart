@@ -78,6 +78,19 @@ extension PenaltyExtension on Penalty {
         return "Unknown";
     }
   }
+
+  Color get color {
+    switch (this) {
+      case Penalty.none:
+        return Colors.green[700]!;
+      case Penalty.yellowCard:
+        return Colors.yellow[700]!;
+      case Penalty.redCard:
+        return Colors.red[700]!;
+      default:
+        return Colors.grey[700]!;
+    }
+  }
 }
 
 Future<Map<String, String?>> getScoutedStatuses() async {

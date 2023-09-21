@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
+import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
@@ -74,6 +75,7 @@ void main() async {
       '/scan_qr_codes': (context) => const ScoutReportScannerPage(),
       '/picklists': (context) => const PicklistsPage(),
       '/picklist': (context) => const MyPicklistPage(),
+      '/edit_picklist_flags': (context) => const EditPicklistFlagsPage(),
       '/new_picklist': (context) => const NewPicklistPage(),
       '/edit_picklist': (context) => const EditPicklistPage(),
       '/picklist_team_breakdown': (context) =>
