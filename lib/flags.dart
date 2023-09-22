@@ -119,6 +119,7 @@ final flags = <FlagType>[
           ))
       .metrics
       .where((e) => !e.hideOverview)
+      .where((e) => !e.hideFlag)
       .map((e) => FlagType.categoryMetric(e)),
 ];
 

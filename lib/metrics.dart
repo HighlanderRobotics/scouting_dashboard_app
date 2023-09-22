@@ -9,6 +9,7 @@ class CategoryMetric {
     required this.path,
     this.hideDetails = false,
     this.hideOverview = false,
+    this.hideFlag = false,
     this.max,
   });
 
@@ -16,6 +17,7 @@ class CategoryMetric {
   String localizedName;
   bool hideDetails;
   bool hideOverview;
+  bool hideFlag;
   double? max;
 
   String path;
@@ -186,6 +188,7 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: 'Penalties',
       valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
       path: 'pentalties',
+      hideFlag: true,
     ),
   ]),
   MetricCategoryData("Misc", [
