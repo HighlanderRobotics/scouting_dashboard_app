@@ -29,10 +29,12 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
     List<Map<String, dynamic>> unweightedBreakdown =
         routeArgs['unweighted'].cast<Map<String, dynamic>>();
 
+    unweightedBreakdown
+        .removeWhere((e) => e['result'] == 0 || e['result'] == null);
     unweightedBreakdown.sort((a, b) => b['result'].compareTo(a['result']));
 
+    breakdown.removeWhere((e) => e['result'] == 0 || e['result'] == null);
     breakdown.sort((a, b) => (b['result'] as num).compareTo(a['result']));
-    breakdown.removeWhere((e) => e['result'] == 0);
 
     return Scaffold(
       appBar: AppBar(
