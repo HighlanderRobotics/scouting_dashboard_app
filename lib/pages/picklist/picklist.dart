@@ -203,16 +203,30 @@ class FlagRow extends StatelessWidget {
         );
       },
       child: Row(
-        children: flagConfigurations
-            .map((flag) {
-              i += 1;
+        children: flagConfigurations.isEmpty
+            ? [
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(7),
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.add),
+                  ),
+                )
+              ]
+            : flagConfigurations
+                .map((flag) {
+                  i += 1;
 
-              return Hero(
-                  tag: '$team-${flag.type.path}-$i',
-                  child: flag.getWidget(context, data[flag.type.path]));
-            })
-            .toList()
-            .withSpaceBetween(width: 10),
+                  return Hero(
+                      tag: '$team-${flag.type.path}-$i',
+                      child: flag.getWidget(context, data[flag.type.path]));
+                })
+                .toList()
+                .withSpaceBetween(width: 10),
       ),
     );
   }
