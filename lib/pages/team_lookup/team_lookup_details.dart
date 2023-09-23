@@ -592,137 +592,152 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
               children: [
                 AspectRatio(
                   aspectRatio: 4 / 3,
-                  child: Padding(
-                    padding: const EdgeInsets.all(15),
-                    child: LayoutBuilder(builder: (context, constraints) {
-                      return ColorFiltered(
-                        colorFilter: loading
-                            ? const ColorFilter.matrix([
-                                0.2126,
-                                0.7152,
-                                0.0722,
-                                0,
-                                0,
-                                0.2126,
-                                0.7152,
-                                0.0722,
-                                0,
-                                0,
-                                0.2126,
-                                0.7152,
-                                0.0722,
-                                0,
-                                0,
-                                0,
-                                0,
-                                0,
-                                1,
-                                0,
-                              ])
-                            : const ColorFilter.mode(
-                                Colors.transparent,
-                                BlendMode.overlay,
-                              ),
-                        child: data != null &&
-                                data!.keys.every((key) => data![key] == null)
-                            ? Center(
-                                child: loading
-                                    ? const CircularProgressIndicator()
-                                    : Text(
-                                        "${widget.team} did not score during ${selectedMatch == null ? 'any matches' : selectedMatch!.getLocalizedDescription(includeTournament: false).toLowerCase()}."),
-                              )
-                            : PieChart(
-                                PieChartData(
-                                  sections: data == null
-                                      ? [
-                                          PieChartSectionData(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
-                                            radius: min(constraints.maxWidth,
-                                                    constraints.maxHeight) /
-                                                2,
-                                          ),
-                                        ]
-                                      : data!.keys
-                                          .map(
-                                            (e) => PieChartSectionData(
-                                              radius: min(constraints.maxWidth,
-                                                      constraints.maxHeight) /
-                                                  2,
-                                              title: (data![e]!.toDouble() *
-                                                          100)
-                                                      .round()
-                                                      .toString() +
-                                                  "%\n" +
-                                                  (scoringMethods.any(
-                                                          (f) => f.path == e)
-                                                      ? scoringMethods
-                                                          .firstWhere((f) =>
-                                                              f.path == e)
-                                                          .localizedName
-                                                      : e),
-                                              value: data![e]!.toDouble(),
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary,
-                                              titleStyle: TextStyle(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onPrimary,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          )
-                                          .toList(),
-                                  centerSpaceRadius: 0,
-                                  borderData: FlBorderData(show: false),
-                                ),
-                              ),
-                      );
-                    }),
-                  ),
+                  child: matchKeys!.isEmpty
+                      ? const Center(
+                          child: Text("No matches"),
+                        )
+                      : Padding(
+                          padding: const EdgeInsets.all(15),
+                          child: LayoutBuilder(builder: (context, constraints) {
+                            return ColorFiltered(
+                              colorFilter: loading
+                                  ? const ColorFilter.matrix([
+                                      0.2126,
+                                      0.7152,
+                                      0.0722,
+                                      0,
+                                      0,
+                                      0.2126,
+                                      0.7152,
+                                      0.0722,
+                                      0,
+                                      0,
+                                      0.2126,
+                                      0.7152,
+                                      0.0722,
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      0,
+                                      1,
+                                      0,
+                                    ])
+                                  : const ColorFilter.mode(
+                                      Colors.transparent,
+                                      BlendMode.overlay,
+                                    ),
+                              child: data != null &&
+                                      data!.keys
+                                          .every((key) => data![key] == null)
+                                  ? Center(
+                                      child: loading
+                                          ? const CircularProgressIndicator()
+                                          : Text(
+                                              "${widget.team} did not score during ${selectedMatch == null ? 'any matches' : selectedMatch!.getLocalizedDescription(includeTournament: false).toLowerCase()}."),
+                                    )
+                                  : PieChart(
+                                      PieChartData(
+                                        sections: data == null
+                                            ? [
+                                                PieChartSectionData(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .primary,
+                                                  radius: min(
+                                                          constraints.maxWidth,
+                                                          constraints
+                                                              .maxHeight) /
+                                                      2,
+                                                ),
+                                              ]
+                                            : data!.keys
+                                                .map(
+                                                  (e) => PieChartSectionData(
+                                                    radius: min(
+                                                            constraints
+                                                                .maxWidth,
+                                                            constraints
+                                                                .maxHeight) /
+                                                        2,
+                                                    title: (data![e]!
+                                                                    .toDouble() *
+                                                                100)
+                                                            .round()
+                                                            .toString() +
+                                                        "%\n" +
+                                                        (scoringMethods.any(
+                                                                (f) =>
+                                                                    f.path == e)
+                                                            ? scoringMethods
+                                                                .firstWhere(
+                                                                    (f) =>
+                                                                        f.path ==
+                                                                        e)
+                                                                .localizedName
+                                                            : e),
+                                                    value: data![e]!.toDouble(),
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    titleStyle: TextStyle(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary,
+                                                      fontSize: 10,
+                                                    ),
+                                                  ),
+                                                )
+                                                .toList(),
+                                        centerSpaceRadius: 0,
+                                        borderData: FlBorderData(show: false),
+                                      ),
+                                    ),
+                            );
+                          }),
+                        ),
                 ),
-                Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.scrim,
+                if (matchKeys!.isNotEmpty)
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.scrim,
+                    ),
+                    child: Slider(
+                      value: selectedMatch == null
+                          ? 0
+                          : matchKeys!.indexWhere((e) =>
+                                  GameMatchIdentity.fromLongKey(e).number ==
+                                      selectedMatch!.number &&
+                                  GameMatchIdentity.fromLongKey(e).type ==
+                                      selectedMatch!.type) +
+                              1,
+                      min: 0,
+                      max: matchKeys!.length.toDouble(),
+                      onChanged: (value) {
+                        HapticFeedback.selectionClick();
+
+                        if (value == 0) {
+                          setState(() {
+                            selectedMatch = null;
+
+                            loading = true;
+                          });
+                        } else {
+                          setState(() {
+                            selectedMatch = GameMatchIdentity.fromLongKey(
+                                matchKeys![value.toInt() - 1]);
+
+                            loading = true;
+                          });
+                        }
+                      },
+                      divisions: matchKeys!.length,
+                      label: selectedMatch == null
+                          ? "All"
+                          : selectedMatch!.getLocalizedDescription(
+                              includeTournament: false),
+                    ),
                   ),
-                  child: Slider(
-                    value: selectedMatch == null
-                        ? 0
-                        : matchKeys!.indexWhere((e) =>
-                                GameMatchIdentity.fromLongKey(e).number ==
-                                    selectedMatch!.number &&
-                                GameMatchIdentity.fromLongKey(e).type ==
-                                    selectedMatch!.type) +
-                            1,
-                    min: 0,
-                    max: matchKeys!.length.toDouble(),
-                    onChanged: (value) {
-                      HapticFeedback.selectionClick();
-
-                      if (value == 0) {
-                        setState(() {
-                          selectedMatch = null;
-
-                          loading = true;
-                        });
-                      } else {
-                        setState(() {
-                          selectedMatch = GameMatchIdentity.fromLongKey(
-                              matchKeys![value.toInt() - 1]);
-
-                          loading = true;
-                        });
-                      }
-                    },
-                    divisions: matchKeys!.length,
-                    label: selectedMatch == null
-                        ? "All"
-                        : selectedMatch!
-                            .getLocalizedDescription(includeTournament: false),
-                  ),
-                ),
               ],
             ),
           ),
