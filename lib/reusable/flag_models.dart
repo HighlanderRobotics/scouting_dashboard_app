@@ -1,10 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
+import 'package:http/http.dart' as http;
 
 class FlagType {
   const FlagType(
@@ -207,5 +209,62 @@ class FlagTemplate extends StatelessWidget {
             : child,
       ),
     );
+  }
+}
+
+class NetworkFlag extends StatefulWidget {
+  const NetworkFlag({
+    super.key,
+    required this.team,
+    required this.flag,
+  });
+
+  final int team;
+  final FlagConfiguration flag;
+
+  @override
+  State<NetworkFlag> createState() => _NetworkFlagState();
+}
+
+class _NetworkFlagState extends State<NetworkFlag> {
+  dynamic data;
+  bool loaded = false;
+  int? loadingTeam;
+
+  Future<void> load() async {
+    setState(() {
+      loaded = false;
+      loadingTeam = widget.team;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final authority = (await getServerAuthority())!;
+    final response = await http.get(Uri.http(authority, '/API/analysis/flag', {
+      'types': jsonEncode([widget.flag.type.path]),
+      'team': widget.team.toString(),
+      'tournamentKey': prefs.getString('tournament'),
+    }));
+
+    if (response.statusCode != 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "Error fetching ${widget.flag.type.readableName}: ${response.statusCode} ${response.reasonPhrase}: ${response.body}",
+          ),
+        ),
+      );
+    }
+
+    setState(() {
+      loaded = true;
+      data = jsonDecode(response.body)[0]['result'][0]['result'];
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (loadingTeam != widget.team) load();
+
+    return loaded ? widget.flag.getWidget(context, data) : const SkeletonFlag();
   }
 }

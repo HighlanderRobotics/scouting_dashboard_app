@@ -16,7 +16,7 @@ class InitialLoaderPage extends StatefulWidget {
 }
 
 class _InitialLoaderPageState extends State<InitialLoaderPage> {
-  void load(NavigatorState navigator) async {
+  Future<void> load(NavigatorState navigator) async {
     // if (kDebugMode) {
     //   Map<String, Object> values = <String, Object>{
     //     'onboardingCompleted': false,
@@ -49,6 +49,13 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
       await prefs.setStringList(
         'picklist_flags',
         defaultPicklistFlags.map((e) => jsonEncode(e.toJson())).toList(),
+      );
+    }
+
+    if (prefs.getString('team_lookup_flag') == null) {
+      await prefs.setString(
+        'team_lookup_flag',
+        jsonEncode(defaultTeamLookupFlag.toJson()),
       );
     }
 

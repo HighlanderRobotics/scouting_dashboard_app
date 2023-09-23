@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
+import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_breakdowns.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_categories.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_notes.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../reusable/navigation_drawer.dart';
 
@@ -20,6 +25,8 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
   String teamFieldValue = "";
   TextEditingController? teamFieldController;
   int? teamNumberForAnalysis;
+
+  int flagChangeCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -52,21 +59,48 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 19, 24, 8),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                      label: Text("Team #"),
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (value) {
-                      setState(() {
-                        teamFieldValue = value;
-                        if (int.tryParse(value) != null) {
-                          teamNumberForAnalysis = int.parse(value);
-                        }
-                      });
-                    },
-                    controller: teamFieldController,
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      TextField(
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          label: Text("Team #"),
+                        ),
+                        keyboardType: TextInputType.number,
+                        onChanged: (value) {
+                          setState(() {
+                            teamFieldValue = value;
+                            if (int.tryParse(value) != null) {
+                              teamNumberForAnalysis = int.parse(value);
+                            }
+                          });
+                        },
+                        controller: teamFieldController,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushNamed(
+                              '/edit_team_lookup_flag',
+                              arguments: EditTeamLookupFlagArgs(
+                                team: int.tryParse(teamFieldValue) ?? 8033,
+                                onChange: (newFlag) {
+                                  setState(() {
+                                    flagChangeCount += 1;
+                                  });
+                                },
+                              ),
+                            );
+                          },
+                          child: TeamLookupFlag(
+                            team: teamFieldValue,
+                            key: Key('flag-$flagChangeCount'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 TabBar(
@@ -133,6 +167,48 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
             : null,
       ),
     );
+  }
+}
+
+class TeamLookupFlag extends StatefulWidget {
+  const TeamLookupFlag({
+    super.key,
+    required this.team,
+  });
+
+  final String team;
+
+  @override
+  State<TeamLookupFlag> createState() => _TeamLookupFlagState();
+}
+
+class _TeamLookupFlagState extends State<TeamLookupFlag> {
+  SharedPreferences? prefs;
+  String? loadingTeam;
+
+  Future<void> load() async {
+    loadingTeam = widget.team;
+
+    final sp = await SharedPreferences.getInstance();
+    setState(() {
+      prefs = sp;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (loadingTeam != widget.team) load();
+
+    return prefs == null || int.tryParse(widget.team) == null
+        ? Container()
+        : NetworkFlag(
+            team: int.parse(widget.team),
+            flag: FlagConfiguration.fromJson(
+              jsonDecode(
+                prefs!.getString('team_lookup_flag')!,
+              ),
+            ),
+          );
   }
 }
 

@@ -126,3 +126,6 @@ final flags = <FlagType>[
 final defaultPicklistFlags = <FlagConfiguration>[
   FlagConfiguration.start(FlagType.byPath('ranking')),
 ];
+
+final defaultTeamLookupFlag =
+    FlagConfiguration.start(FlagType.byPath('ranking'));
