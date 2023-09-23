@@ -294,9 +294,14 @@ class AnalysisOverview extends AnalysisVisualization {
                     : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon((snapshot.data['difference'] as num).isNegative
-                              ? Icons.arrow_drop_down
-                              : Icons.arrow_drop_up),
+                          Icon(
+                            (snapshot.data['difference'] as num).isNegative
+                                ? Icons.arrow_drop_down
+                                : Icons.arrow_drop_up,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
                           Text(
                             analysisFunction.metric.valueVizualizationBuilder(
                                 (snapshot.data['difference'] as num).abs()),
