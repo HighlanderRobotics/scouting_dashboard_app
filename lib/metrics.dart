@@ -227,19 +227,19 @@ final List<MetricCategoryData> metricCategories = [
       hideDetails: true,
     ),
   ]),
-  MetricCategoryData("From Statbotics", [
+  MetricCategoryData("Expected Points Added", [
     CategoryMetric(
-      localizedName: "EPA",
-      abbreviatedLocalizedName: "EPA",
+      localizedName: "Lovat",
+      abbreviatedLocalizedName: "Lovat",
       valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
-      path: "normEpaRecent",
+      path: "ourEPA",
       hideDetails: true,
     ),
     CategoryMetric(
-      localizedName: "Winrate",
-      abbreviatedLocalizedName: "Winrate",
+      localizedName: "Statbotics",
+      abbreviatedLocalizedName: "Statbotics",
       valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
-      path: "fullWinrate",
+      path: "statboticsEPA",
       hideDetails: true,
     ),
   ])
