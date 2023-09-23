@@ -51,8 +51,15 @@ class FlagType {
           FlagTemplate(
         foregroundColor: foregroundColor,
         backgroundColor: backgroundColor,
-        child: Text(
-          metric.valueVizualizationBuilder(data),
+        child: Padding(
+          padding: const EdgeInsets.all(2),
+          child: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: Text(
+              metric.valueVizualizationBuilder(data),
+              maxLines: 1,
+            ),
+          ),
         ),
       ),
     );
