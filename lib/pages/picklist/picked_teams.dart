@@ -61,6 +61,7 @@ class _MarkPickedTeamDialogState extends State<MarkPickedTeamDialog> {
     return AlertDialog(
       title: const Text("Mark team as picked"),
       content: TextField(
+        autofocus: true,
         onChanged: (value) => setState(() {
           fieldValue = value;
         }),
