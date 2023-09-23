@@ -38,6 +38,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   bool isDataFetched = false;
   bool? isScoutingLead;
 
+  bool fabVisible = false;
+
   Future<void> checkRole() async {
     final prefs = await SharedPreferences.getInstance();
     final role = prefs.getString("role");
@@ -292,6 +294,22 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           ),
         ),
       ),
+      floatingActionButton: !fabVisible
+          ? null
+          : FloatingActionButton(
+              child: const Icon(Icons.arrow_upward),
+              onPressed: () {
+                setState(() {
+                  fabVisible = false;
+                });
+
+                scrollController.animateTo(
+                  0,
+                  duration: const Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                );
+              },
+            ),
       body: PageBody(
         bottom: false,
         padding: EdgeInsets.zero,
@@ -309,6 +327,24 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         !focusScope.hasPrimaryFocus) {
                       FocusManager.instance.primaryFocus?.unfocus();
                     }
+
+                    if (notification.dragDetails != null) {
+                      if (notification.dragDetails!.delta.dy > 0 &&
+                          scrollController.offset > 50 &&
+                          !fabVisible) {
+                        setState(() {
+                          fabVisible = true;
+                        });
+                      }
+
+                      if (notification.dragDetails!.delta.dy < 0 &&
+                          fabVisible) {
+                        setState(() {
+                          fabVisible = false;
+                        });
+                      }
+                    }
+
                     return false;
                   },
                   child: SingleChildScrollView(
