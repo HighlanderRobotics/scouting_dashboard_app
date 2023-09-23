@@ -405,8 +405,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_0",
                                         team: match.teams[0],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[0],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[0],
                                         warnings: getWarnings(
                                           scouted,
                                           0,
@@ -419,8 +424,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_1",
                                         team: match.teams[1],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[1],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[1],
                                         warnings: getWarnings(
                                           scouted,
                                           1,
@@ -433,8 +443,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_2",
                                         team: match.teams[2],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[2],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[2],
                                         warnings: getWarnings(
                                           scouted,
                                           2,
@@ -453,8 +468,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_3",
                                         team: match.teams[3],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[3],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[3],
                                         warnings: getWarnings(
                                           scouted,
                                           3,
@@ -467,8 +487,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_4",
                                         team: match.teams[4],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[4],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[4],
                                         warnings: getWarnings(
                                           scouted,
                                           4,
@@ -481,8 +506,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                                         longMatchKey:
                                             "${match.identity.toMediumKey()}_5",
                                         team: match.teams[5],
-                                        scout: scoutSchedule!.getScoutsForMatch(
-                                            match.ordinalNumber)[5],
+                                        scout: scoutSchedule!
+                                                .getScoutsForMatch(
+                                                    match.ordinalNumber)
+                                                .isEmpty
+                                            ? null
+                                            : scoutSchedule!.getScoutsForMatch(
+                                                match.ordinalNumber)[5],
                                         warnings: getWarnings(
                                           scouted,
                                           5,
@@ -559,7 +589,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       if (scouted.any((scout) => scout != null) && scouted[scoutIndex] == null)
         "Must scan",
       if (scouted[scoutIndex] != null &&
-          matchScheduleScouts[scoutIndex] != scouted[scoutIndex])
+          (matchScheduleScouts.isEmpty ||
+              matchScheduleScouts[scoutIndex] != scouted[scoutIndex]))
         "By ${scouted[scoutIndex]}",
     ];
   }
@@ -602,14 +633,14 @@ class SkeletonMatches extends StatelessWidget {
 class AllianceRowItem {
   const AllianceRowItem({
     required this.team,
-    required this.scout,
+    this.scout,
     this.warnings = const [],
     this.longMatchKey,
     required this.scouted,
   });
 
   final int team;
-  final String scout;
+  final String? scout;
   final List<String> warnings;
   final String? longMatchKey;
   final bool scouted;
@@ -723,21 +754,22 @@ class AllianceRow extends StatelessWidget {
               ),
             ],
           ),
-          Text(
-            item.scout,
-            style: Theme.of(context).textTheme.labelSmall!.merge(
-                  TextStyle(
-                    color: alliance == Alliance.red
-                        ? Theme.of(context).colorScheme.onRedAlliance
-                        : Theme.of(context).colorScheme.onBlueAlliance,
+          if (item.scout != null)
+            Text(
+              item.scout!,
+              style: Theme.of(context).textTheme.labelSmall!.merge(
+                    TextStyle(
+                      color: alliance == Alliance.red
+                          ? Theme.of(context).colorScheme.onRedAlliance
+                          : Theme.of(context).colorScheme.onBlueAlliance,
+                    ),
                   ),
-                ),
-            textAlign: {
-              CrossAxisAlignment.start: TextAlign.start,
-              CrossAxisAlignment.center: TextAlign.center,
-              CrossAxisAlignment.end: TextAlign.end,
-            }[alignment],
-          ),
+              textAlign: {
+                CrossAxisAlignment.start: TextAlign.start,
+                CrossAxisAlignment.center: TextAlign.center,
+                CrossAxisAlignment.end: TextAlign.end,
+              }[alignment],
+            ),
           LayoutBuilder(builder: (context, constraints) {
             return Column(
               crossAxisAlignment: alignment,

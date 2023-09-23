@@ -307,7 +307,10 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
                 children: List.generate(6, (index) => index)
                     .map(
                       (i) => ScoutStatus(
-                        name: nextMatchStatus[i] ?? nextMatchPlannedScouts[i],
+                        name: nextMatchStatus[i] ??
+                            (nextMatchPlannedScouts.isEmpty
+                                ? null
+                                : nextMatchPlannedScouts[i]),
                         scanned: nextMatchStatus[i] != null,
                         dataCollection: reportData[i],
                       ),
@@ -325,13 +328,13 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
 class ScoutStatus extends StatelessWidget {
   const ScoutStatus({
     Key? key,
-    required this.name,
+    this.name,
     required this.scanned,
     required this.dataCollection,
   }) : super(key: key);
 
   final bool scanned;
-  final String name;
+  final String? name;
   final QRDataCollection dataCollection;
 
   @override
@@ -339,14 +342,16 @@ class ScoutStatus extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(children: [
-        scanned
-            ? const Icon(Icons.check_box)
-            : dataCollection.data.isEmpty
-                ? const Icon(Icons.check_box_outline_blank)
-                : Text(
-                    "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
+        name == null
+            ? const Text('--')
+            : scanned
+                ? const Icon(Icons.check_box)
+                : dataCollection.data.isEmpty
+                    ? const Icon(Icons.check_box_outline_blank)
+                    : Text(
+                        "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
         const SizedBox(width: 5),
-        Text(name),
+        Text(name ?? 'No scouter in schedule'),
       ]),
     );
   }
