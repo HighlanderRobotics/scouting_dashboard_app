@@ -353,7 +353,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       ScrollUpdateNotification notification) async {
     if (notification.dragDetails != null) {
       if (notification.dragDetails!.delta.dy > 0 &&
-          scrollController.offset > 500 &&
+          scrollController.offset > 1000 &&
           !fabVisible) {
         setState(() {
           fabVisible = true;
@@ -361,6 +361,12 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       }
 
       if (notification.dragDetails!.delta.dy < 0 && fabVisible) {
+        setState(() {
+          fabVisible = false;
+        });
+      }
+
+      if (scrollController.offset < 1000 && fabVisible) {
         setState(() {
           fabVisible = false;
         });
