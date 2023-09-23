@@ -57,6 +57,8 @@ class ConfiguredPicklist {
     params['tournamentKey'] =
         (await SharedPreferences.getInstance()).getString('tournament');
 
+    params['flags'] = '[]';
+
     final response = await http.get(Uri.http(
         (await getServerAuthority())!, "/API/analysis/picklist", params));
 
