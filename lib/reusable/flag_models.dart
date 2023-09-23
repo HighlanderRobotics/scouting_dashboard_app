@@ -144,7 +144,6 @@ class SkeletonFlag extends StatelessWidget {
         width: 40,
       ),
     );
-    ;
   }
 }
 

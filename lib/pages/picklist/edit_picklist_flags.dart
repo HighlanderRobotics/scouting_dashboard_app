@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
