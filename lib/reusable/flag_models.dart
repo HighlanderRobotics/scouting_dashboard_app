@@ -265,6 +265,8 @@ class _NetworkFlagState extends State<NetworkFlag> {
   Widget build(BuildContext context) {
     if (loadingTeam != widget.team) load();
 
-    return loaded ? widget.flag.getWidget(context, data) : const SkeletonFlag();
+    if (!loaded) return const SkeletonFlag();
+    if (data == null) return Container();
+    return widget.flag.getWidget(context, data);
   }
 }
