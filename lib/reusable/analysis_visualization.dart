@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../analysis_functions/analysis.dart';
 
-abstract class AnalysisVisualization extends StatelessWidget {
+abstract class AnalysisVisualization extends StatefulWidget {
   const AnalysisVisualization({
     Key? key,
     required this.analysisFunction,
@@ -10,44 +10,81 @@ abstract class AnalysisVisualization extends StatelessWidget {
 
   final AnalysisFunction analysisFunction;
 
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: analysisFunction.getAnalysis(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return loadingView();
-          }
+  Widget loadingView() => const Center(child: CircularProgressIndicator());
+  Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
 
-          if (snapshot.hasError) {
-            return Center(
-              child: IconButton(
-                icon: const Icon(Icons.sentiment_dissatisfied_outlined),
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                            title: const Text("Error"),
-                            content: Text(snapshot.error.toString()),
-                            actions: [
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text("Dismiss"),
-                              ),
-                            ],
-                          ));
-                },
-              ),
-            );
-          }
-
-          return loadedData(context, snapshot);
-        });
+  void loadData() {
+    final state = key as GlobalKey<AnalysisVisualizationState>;
+    state.currentState?.loadData();
   }
 
-  Widget loadingView() => const Center(child: CircularProgressIndicator());
+  @override
+  State<AnalysisVisualization> createState() => AnalysisVisualizationState();
+}
 
-  Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
+class AnalysisVisualizationState extends State<AnalysisVisualization> {
+  dynamic analysis;
+  bool loaded = false;
+  Object? error;
+
+  void loadData() {
+    setState(() {
+      analysis = null;
+      loaded = false;
+      error = null;
+    });
+
+    widget.analysisFunction.getAnalysis().then((value) {
+      setState(
+        () {
+          loaded = true;
+          analysis = AsyncSnapshot.withData(ConnectionState.done, value);
+        },
+      );
+    }).catchError((err) {
+      setState(() {
+        loaded = true;
+        error = err;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!loaded) {
+      return widget.loadingView();
+    }
+
+    if (error != null) {
+      return Center(
+        child: IconButton(
+          icon: const Icon(Icons.sentiment_dissatisfied_outlined),
+          onPressed: () {
+            showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                      title: const Text("Error"),
+                      content: Text(error.toString()),
+                      actions: [
+                        FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text("Dismiss"),
+                        ),
+                      ],
+                    ));
+          },
+        ),
+      );
+    }
+
+    return widget.loadedData(context, analysis);
+  }
 }

@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
+import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
@@ -31,6 +32,7 @@ import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.
 import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/scout_schedule_qr.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
+import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
@@ -55,6 +57,7 @@ void main() async {
       '/raw_scout_report': (context) => const RawScoutReportPage(),
       '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
+      '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),
       '/team_lookup_details': (context) => const TeamLookupDetailsPage(),
       '/team_lookup_breakdown_details': (context) =>
           const TeamLookupBreakdownDetailsPage(),
@@ -74,6 +77,7 @@ void main() async {
       '/scan_qr_codes': (context) => const ScoutReportScannerPage(),
       '/picklists': (context) => const PicklistsPage(),
       '/picklist': (context) => const MyPicklistPage(),
+      '/edit_picklist_flags': (context) => const EditPicklistFlagsPage(),
       '/new_picklist': (context) => const NewPicklistPage(),
       '/edit_picklist': (context) => const EditPicklistPage(),
       '/picklist_team_breakdown': (context) =>
