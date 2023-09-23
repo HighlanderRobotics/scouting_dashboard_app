@@ -72,7 +72,10 @@ class _DisplayScoutScheduleQRPageState
             const SizedBox(height: 20),
             Container(
               decoration: BoxDecoration(
-                color: schedule.getVersionColor(),
+                color: HSLColor.fromColor(schedule.getVersionColor())
+                    .withSaturation(0.3)
+                    .withLightness(0.5)
+                    .toColor(),
                 borderRadius: const BorderRadius.all(Radius.circular(5)),
               ),
               child: Padding(
@@ -82,15 +85,34 @@ class _DisplayScoutScheduleQRPageState
                     TextSpan(
                       text:
                           "If scouts have the latest version of the schedule, their home page will be this color. If not, they should scan this QR code by tapping the ",
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color:
+                                HSLColor.fromColor(schedule.getVersionColor())
+                                    .withSaturation(0.5)
+                                    .withLightness(0.12)
+                                    .toColor(),
+                          ),
                     ),
-                    const WidgetSpan(
-                        child: Icon(Icons.settings),
-                        alignment: PlaceholderAlignment.middle),
+                    WidgetSpan(
+                      child: Icon(
+                        Icons.settings,
+                        color: HSLColor.fromColor(schedule.getVersionColor())
+                            .withSaturation(0.5)
+                            .withLightness(0.12)
+                            .toColor(),
+                      ),
+                      alignment: PlaceholderAlignment.middle,
+                    ),
                     TextSpan(
                       text:
                           " in the top right of their home screen, then tapping the \"Scan Scouter Schedule QR Code\" button.",
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color:
+                                HSLColor.fromColor(schedule.getVersionColor())
+                                    .withSaturation(0.5)
+                                    .withLightness(0.12)
+                                    .toColor(),
+                          ),
                     ),
                   ]))),
             ),
@@ -102,8 +124,9 @@ class _DisplayScoutScheduleQRPageState
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const WidgetSpan(
-                  child: Icon(Icons.qr_code),
-                  alignment: PlaceholderAlignment.middle),
+                child: Icon(Icons.qr_code),
+                alignment: PlaceholderAlignment.middle,
+              ),
               TextSpan(
                 text: " at the top right of the match schedule.",
                 style: Theme.of(context).textTheme.bodyMedium,
