@@ -14,6 +14,7 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
   const TeamLookupNotesVizualization({
     super.key,
     required this.function,
+    super.updateIncrement,
   }) : super(analysisFunction: function);
 
   final TeamLookupNotesAnalysis function;

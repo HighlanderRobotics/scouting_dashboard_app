@@ -10,6 +10,7 @@ class TeamLookupBreakdownsVizualization extends AnalysisVisualization {
   const TeamLookupBreakdownsVizualization({
     super.key,
     required this.function,
+    super.updateIncrement,
   }) : super(analysisFunction: function);
 
   final TeamLookupBreakdownsAnalysis function;

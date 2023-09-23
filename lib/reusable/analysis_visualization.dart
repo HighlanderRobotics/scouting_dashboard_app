@@ -6,9 +6,11 @@ abstract class AnalysisVisualization extends StatefulWidget {
   const AnalysisVisualization({
     Key? key,
     required this.analysisFunction,
+    this.updateIncrement = 0,
   }) : super(key: key);
 
   final AnalysisFunction analysisFunction;
+  final int updateIncrement;
 
   Widget loadingView() => const Center(child: CircularProgressIndicator());
   Widget loadedData(BuildContext context, AsyncSnapshot<dynamic> snapshot);
@@ -26,8 +28,11 @@ class AnalysisVisualizationState extends State<AnalysisVisualization> {
   dynamic analysis;
   bool loaded = false;
   Object? error;
+  int? displayedIncrement;
 
   void loadData() {
+    final targetIncrement = widget.updateIncrement;
+
     setState(() {
       analysis = null;
       loaded = false;
@@ -38,25 +43,24 @@ class AnalysisVisualizationState extends State<AnalysisVisualization> {
       setState(
         () {
           loaded = true;
+          displayedIncrement = targetIncrement;
           analysis = AsyncSnapshot.withData(ConnectionState.done, value);
         },
       );
     }).catchError((err) {
       setState(() {
         loaded = true;
+        displayedIncrement = targetIncrement;
         error = err;
       });
     });
   }
 
   @override
-  void initState() {
-    super.initState();
-    loadData();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (displayedIncrement != widget.updateIncrement) {
+      loadData();
+    }
     if (!loaded) {
       return widget.loadingView();
     }

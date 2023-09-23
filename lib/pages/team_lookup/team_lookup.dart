@@ -27,6 +27,7 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
   int? teamNumberForAnalysis;
 
   int flagChangeCount = 0;
+  int updateIncrement = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +75,7 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                             if (int.tryParse(value) != null) {
                               teamNumberForAnalysis = int.parse(value);
                             }
+                            updateIncrement++;
                           });
                         },
                         controller: teamFieldController,
@@ -143,16 +145,19 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                 child: TabBarView(
                   children: [
                     TeamLookupCategoriesVizualization(
+                      updateIncrement: updateIncrement,
                       function: TeamLookupCategoriesAnalysis(
                         team: teamNumberForAnalysis!,
                       ),
                     ),
                     TeamLookupBreakdownsVizualization(
+                      updateIncrement: updateIncrement,
                       function: TeamLookupBreakdownsAnalysis(
                         team: teamNumberForAnalysis!,
                       ),
                     ),
                     TeamLookupNotesVizualization(
+                      updateIncrement: updateIncrement,
                       function: TeamLookupNotesAnalysis(
                         team: teamNumberForAnalysis!,
                       ),

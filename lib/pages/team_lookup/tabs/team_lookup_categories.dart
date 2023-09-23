@@ -10,6 +10,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
   const TeamLookupCategoriesVizualization({
     super.key,
     required this.function,
+    super.updateIncrement,
   }) : super(analysisFunction: function);
 
   final TeamLookupCategoriesAnalysis function;
