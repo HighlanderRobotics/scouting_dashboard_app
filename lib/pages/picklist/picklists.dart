@@ -496,8 +496,33 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                   .hideCurrentSnackBar();
 
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(const SnackBar(
-                                content: Text("Successfully deleted"),
+                                  .showSnackBar(SnackBar(
+                                content: const Text("Successfully deleted"),
+                                action: SnackBarAction(
+                                    label: "Undo",
+                                    onPressed: () async {
+                                      try {
+                                        await picklist.upload();
+                                        setState(() {});
+                                      } catch (error) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              error.toString(),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onErrorContainer),
+                                            ),
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .errorContainer,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }),
                                 behavior: SnackBarBehavior.floating,
                               ));
                             } catch (error) {
