@@ -86,13 +86,28 @@ class FlagConfiguration {
   double hue;
 
   Widget getWidget(BuildContext context, dynamic data) {
-    return type.visualizationBuilder(
-      context,
-      data,
-      HSLColor.fromAHSL(1, hue, 1, 0.15).toColor(),
-      HSLColor.fromAHSL(1, hue, 0.6, 0.7).toColor(),
-    );
+    Widget output;
+
+    try {
+      output = type.visualizationBuilder(
+        context,
+        data,
+        foregroundColor,
+        backgroundColor,
+      );
+    } catch (error) {
+      output = FlagTemplate(
+        foregroundColor: foregroundColor,
+        backgroundColor: backgroundColor,
+        icon: Icons.error,
+      );
+    }
+
+    return output;
   }
+
+  Color get foregroundColor => HSLColor.fromAHSL(1, hue, 1, 0.15).toColor();
+  Color get backgroundColor => HSLColor.fromAHSL(1, hue, 0.6, 0.7).toColor();
 
   Map<String, dynamic> toJson() => {
         'type': type.path,
@@ -272,7 +287,13 @@ class _NetworkFlagState extends State<NetworkFlag> {
     if (loadingTeam != widget.team) load();
 
     if (!loaded) return const SkeletonFlag();
-    if (data == null) return Container();
+    if (data == null) {
+      return FlagTemplate(
+        foregroundColor: widget.flag.foregroundColor,
+        backgroundColor: widget.flag.backgroundColor,
+        child: const Text("-"),
+      );
+    }
     return widget.flag.getWidget(context, data);
   }
 }
