@@ -35,7 +35,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                 ],
               ),
               Divider(
-                color: Theme.of(context).colorScheme.outline,
+                color: Theme.of(context).colorScheme.surfaceVariant,
               ),
               FutureBuilder(
                 builder: ((context, snapshot) {
@@ -48,7 +48,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                 future: getTournamentName(),
               ),
               Divider(
-                color: Theme.of(context).colorScheme.outline,
+                color: Theme.of(context).colorScheme.surfaceVariant,
               ),
               const SectionHeader(title: "Data & Utilities"),
               DrawerDestination(
