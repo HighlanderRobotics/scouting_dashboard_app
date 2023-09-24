@@ -172,6 +172,39 @@ class _MyPicklistsState extends State<MyPicklists> {
                             picklists.remove(picklist);
 
                             await setPicklists(picklists);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Deleted "${picklist.title}"'),
+                                behavior: SnackBarBehavior.floating,
+                                action: SnackBarAction(
+                                    label: "Undo",
+                                    onPressed: () async {
+                                      try {
+                                        picklists.add(picklist);
+                                        await setPicklists(picklists);
+                                        setState(() {});
+                                      } catch (error) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              error.toString(),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onErrorContainer),
+                                            ),
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .errorContainer,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }),
+                              ),
+                            );
                           },
                         ),
                         Divider(
