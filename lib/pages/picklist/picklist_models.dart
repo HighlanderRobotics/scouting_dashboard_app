@@ -9,7 +9,7 @@ class PicklistWeight {
   PicklistWeight(
     this.path,
     this.localizedName, {
-    this.value = 0.5,
+    this.value = 0,
   });
 
   String path;
