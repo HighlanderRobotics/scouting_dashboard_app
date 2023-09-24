@@ -137,6 +137,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                   fit: FlexFit.loose,
                   showSearchBox: true,
                   searchFieldProps: const TextFieldProps(
+                    autofocus: true,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       label: Text("Search"),

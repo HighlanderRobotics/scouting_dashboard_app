@@ -39,6 +39,7 @@ class _UsernameSelectorPageState extends State<UsernameSelectorPage> {
           ),
           const SizedBox(height: 20),
           TextField(
+            autofocus: true,
             onChanged: (value) {
               setState(() {
                 username = value;

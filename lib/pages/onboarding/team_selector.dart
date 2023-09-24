@@ -40,6 +40,7 @@ class _TeamSelectorPageState extends State<TeamSelectorPage> {
           ),
           const SizedBox(height: 20),
           TextField(
+            autofocus: true,
             onChanged: (value) {
               setState(() {
                 teamString = value;

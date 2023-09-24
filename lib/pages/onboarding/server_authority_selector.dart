@@ -23,6 +23,7 @@ class _ServerAuthoritySelectorPageState
       body: ScrollablePageBody(
         children: [
           TextField(
+            autofocus: true,
             decoration: const InputDecoration(
               filled: true,
               label: Text("Server Authority"),

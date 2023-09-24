@@ -46,6 +46,7 @@ class _PasswordPromptDialogState extends State<PasswordPromptDialog> {
     return AlertDialog(
       title: const Text("Password required"),
       content: TextField(
+        autofocus: true,
         onChanged: (value) {
           setState(() {
             inputValue = value;
