@@ -22,6 +22,8 @@ class EditTeamLookupFlagPage extends StatefulWidget {
 
 class _EditTeamLookupFlagStatePage extends State<EditTeamLookupFlagPage> {
   FlagConfiguration? selectedFlag;
+  String filterText = "";
+  List<FlagType> displayedFlags = List.from(flags);
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -57,23 +59,50 @@ class _EditTeamLookupFlagStatePage extends State<EditTeamLookupFlagPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Team Tags"),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(85),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: TextField(
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                label: Text("Search"),
+                prefixIcon: Icon(Icons.search),
+              ),
+              onChanged: (value) {
+                final newFlags = flags
+                    .where((flag) =>
+                        flag.readableName.contains(value) ||
+                        flag.description.contains(value))
+                    .toList();
+
+                setState(() {
+                  filterText = value;
+                  displayedFlags = newFlags;
+                });
+              },
+            ),
+          ),
+        ),
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
         bottom: false,
         child: ListView.builder(
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
           itemBuilder: (context, index) => ListTile(
             leading: NetworkFlag(
+              key: Key('flagtile-${displayedFlags[index].path}'),
               team: args.team,
-              flag: FlagConfiguration.start(flags[index]),
+              flag: FlagConfiguration.start(displayedFlags[index]),
             ),
-            title: Text(flags[index].readableName),
-            subtitle: Text(flags[index].description),
-            trailing: selectedFlag?.type.path == flags[index].path
+            title: Text(displayedFlags[index].readableName),
+            subtitle: Text(displayedFlags[index].description),
+            trailing: selectedFlag?.type.path == displayedFlags[index].path
                 ? const Icon(Icons.check)
                 : null,
             onTap: () async {
-              final flag = FlagConfiguration.start(flags[index]);
+              final flag = FlagConfiguration.start(displayedFlags[index]);
 
               await setFlag(flag);
               args.onChange(flag);
@@ -81,7 +110,7 @@ class _EditTeamLookupFlagStatePage extends State<EditTeamLookupFlagPage> {
               Navigator.of(context).pop();
             },
           ),
-          itemCount: flags.length,
+          itemCount: displayedFlags.length,
         ),
       ),
     );
