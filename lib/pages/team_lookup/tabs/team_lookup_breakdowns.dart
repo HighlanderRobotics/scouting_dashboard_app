@@ -108,33 +108,50 @@ class Breakdown extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: const BorderRadius.all(Radius.circular(6)),
-                    child: Row(
-                        children: dataIdentity.segments
-                            .map((BreakdownSegmentData segmentData) {
-                      int analyzedSegmentValue = data
-                          .cast()[dataIdentity.path]!
-                          .cast()[segmentData.path]!;
+                  dataIdentity.segments
+                          .where((segmentData) =>
+                              data
+                                  .cast()[dataIdentity.path]!
+                                  .cast()[segmentData.path]! !=
+                              0)
+                          .isEmpty
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: Theme.of(context).colorScheme.background,
+                          ),
+                          height: 64,
+                          child: const Center(child: Text("None recorded")),
+                        )
+                      : ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(6)),
+                          child: Row(
+                              children: dataIdentity.segments
+                                  .where((segmentData) =>
+                                      data
+                                          .cast()[dataIdentity.path]!
+                                          .cast()[segmentData.path]! !=
+                                      0)
+                                  .map((BreakdownSegmentData segmentData) {
+                            int analyzedSegmentValue = data
+                                .cast()[dataIdentity.path]!
+                                .cast()[segmentData.path]!;
 
-                      if (analyzedSegmentValue == 0) {
-                        return Container();
-                      }
-
-                      return segment(
-                        context,
-                        analyzedSegmentValue == 1
-                            ? segmentData.localizedNameSingular
-                            : (segmentData.localizedNamePlural ??
-                                segmentData.localizedNameSingular),
-                        analyzedSegmentValue,
-                        (dataIdentity.segments.indexOf(segmentData) /
-                                    dataIdentity.segments.length) *
-                                0.7 +
-                            0.3,
-                      );
-                    }).toList()),
-                  ),
+                            return segment(
+                              context,
+                              analyzedSegmentValue == 1
+                                  ? segmentData.localizedNameSingular
+                                  : (segmentData.localizedNamePlural ??
+                                      segmentData.localizedNameSingular),
+                              analyzedSegmentValue,
+                              (dataIdentity.segments.indexOf(segmentData) /
+                                          dataIdentity.segments.length) *
+                                      0.7 +
+                                  0.3,
+                            );
+                          }).toList()),
+                        ),
                 ],
               ),
             ),
