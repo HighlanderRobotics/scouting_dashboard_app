@@ -491,6 +491,15 @@ class _MutablePicklistsState extends State<MutablePicklists> {
 
                             try {
                               await picklist.delete();
+
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
+
+                              ScaffoldMessenger.of(context)
+                                  .showSnackBar(const SnackBar(
+                                content: Text("Successfully deleted"),
+                                behavior: SnackBarBehavior.floating,
+                              ));
                             } catch (error) {
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();
@@ -513,14 +522,6 @@ class _MutablePicklistsState extends State<MutablePicklists> {
 
                               return;
                             }
-
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
-                              content: Text("Successfully deleted"),
-                              behavior: SnackBarBehavior.floating,
-                            ));
                           },
                         ),
                         Divider(
