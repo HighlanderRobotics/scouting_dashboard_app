@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
@@ -33,6 +34,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   ScoutSchedule? scoutSchedule;
   Map<String, String?>? isScouted;
 
+  String? initialError;
+
   List<Map<String, dynamic>>? teamsInTournament;
 
   bool isDataFetched = false;
@@ -50,14 +53,24 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   }
 
   Future<void> fetchData() async {
-    final outputs = await Future.wait([
-      TournamentSchedule.fromServer(
-        (await getServerAuthority())!,
-        (await SharedPreferences.getInstance()).getString('tournament')!,
-      ),
-      getScoutSchedule(),
-      getScoutedStatuses(),
-    ]);
+    List<dynamic> outputs = [];
+    try {
+      outputs = await Future.wait(
+        [
+          TournamentSchedule.fromServer(
+            (await getServerAuthority())!,
+            (await SharedPreferences.getInstance()).getString('tournament')!,
+          ),
+          getScoutSchedule(),
+          getScoutedStatuses(),
+        ],
+        eagerError: true,
+      );
+    } catch (error) {
+      setState(() {
+        initialError = error.toString();
+      });
+    }
 
     final fetchedTournamentSchedule = outputs[0] as TournamentSchedule;
     final fetchedScoutSchedule = outputs[1] as ScoutSchedule;
@@ -313,34 +326,44 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       body: PageBody(
         bottom: false,
         padding: EdgeInsets.zero,
-        child: (tournamentSchedule == null ||
-                scoutSchedule == null ||
-                isScouted == null)
-            ? const SkeletonMatches()
-            : NotificationListener<ScrollUpdateNotification>(
-                onNotification: (notification) {
-                  final FocusScopeNode focusScope = FocusScope.of(context);
-                  if (notification.dragDetails != null &&
-                      focusScope.hasFocus &&
-                      !focusScope.hasPrimaryFocus) {
-                    FocusManager.instance.primaryFocus?.unfocus();
-                  }
-
-                  updateFabVisibility(notification);
-
-                  return false;
+        child: initialError != null
+            ? FriendlyErrorView(
+                errorMessage: initialError,
+                onRetry: () {
+                  setState(() {
+                    initialError = null;
+                  });
+                  fetchData();
                 },
-                child: Matches(
-                  onRefresh: () => fetchData(),
-                  isScouted: isScouted,
-                  scrollController: scrollController,
-                  filteredMatches: filteredMatches,
-                  nextMatch: nextMatch,
-                  nextMatchKey: nextMatchKey,
-                  isScoutingLead: isScoutingLead,
-                  scoutSchedule: scoutSchedule,
-                ),
-              ),
+              )
+            : (tournamentSchedule == null ||
+                    scoutSchedule == null ||
+                    isScouted == null)
+                ? const SkeletonMatches()
+                : NotificationListener<ScrollUpdateNotification>(
+                    onNotification: (notification) {
+                      final FocusScopeNode focusScope = FocusScope.of(context);
+                      if (notification.dragDetails != null &&
+                          focusScope.hasFocus &&
+                          !focusScope.hasPrimaryFocus) {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                      }
+
+                      updateFabVisibility(notification);
+
+                      return false;
+                    },
+                    child: Matches(
+                      onRefresh: () => fetchData(),
+                      isScouted: isScouted,
+                      scrollController: scrollController,
+                      filteredMatches: filteredMatches,
+                      nextMatch: nextMatch,
+                      nextMatchKey: nextMatchKey,
+                      isScoutingLead: isScoutingLead,
+                      scoutSchedule: scoutSchedule,
+                    ),
+                  ),
       ),
       drawer: const GlobalNavigationDrawer(),
     );
