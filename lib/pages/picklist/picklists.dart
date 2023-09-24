@@ -206,11 +206,16 @@ Future<List<ConfiguredPicklist>> getSharedPicklists() async {
       .toList();
 }
 
-class SharedPicklists extends StatelessWidget {
+class SharedPicklists extends StatefulWidget {
   const SharedPicklists({
     super.key,
   });
 
+  @override
+  State<SharedPicklists> createState() => _SharedPicklistsState();
+}
+
+class _SharedPicklistsState extends State<SharedPicklists> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
@@ -285,7 +290,33 @@ class SharedPicklists extends StatelessWidget {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
-                                    'Successfully deleted picklist "${picklist.title}"'),
+                                  'Successfully deleted picklist "${picklist.title}"',
+                                ),
+                                action: SnackBarAction(
+                                    label: "Undo",
+                                    onPressed: () async {
+                                      try {
+                                        await picklist.upload();
+                                        setState(() {});
+                                      } catch (error) {
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              error.toString(),
+                                              style: TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onErrorContainer),
+                                            ),
+                                            backgroundColor: Theme.of(context)
+                                                .colorScheme
+                                                .errorContainer,
+                                            behavior: SnackBarBehavior.floating,
+                                          ),
+                                        );
+                                      }
+                                    }),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
