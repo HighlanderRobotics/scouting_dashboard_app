@@ -6,6 +6,7 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -277,6 +278,12 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
             ),
           };
         })(), builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return FriendlyErrorView(
+              errorMessage: snapshot.error.toString(),
+            );
+          }
+
           if (snapshot.connectionState != ConnectionState.done) {
             return const Center(
               child: CircularProgressIndicator(),
