@@ -112,10 +112,10 @@ class _MyPicklistsState extends State<MyPicklists> {
           }
 
           if (snapshot.connectionState != ConnectionState.done) {
-            return PageBody(
+            return const PageBody(
               padding: EdgeInsets.zero,
               child: Column(
-                children: const [
+                children: [
                   LinearProgressIndicator(),
                 ],
               ),
@@ -140,10 +140,10 @@ class _MyPicklistsState extends State<MyPicklists> {
                           direction: DismissDirection.endToStart,
                           background: Container(
                             color: Colors.red[900],
-                            child: Center(
+                            child: const Center(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
-                                children: const [
+                                children: [
                                   Icon(Icons.delete),
                                   SizedBox(width: 30),
                                 ],
@@ -222,7 +222,7 @@ class SharedPicklists extends StatelessWidget {
         }
 
         if (snapshot.connectionState != ConnectionState.done) {
-          return Column(children: const [LinearProgressIndicator()]);
+          return const Column(children: [LinearProgressIndicator()]);
         }
 
         return ScrollablePageBody(
@@ -241,10 +241,10 @@ class SharedPicklists extends StatelessWidget {
                         direction: DismissDirection.endToStart,
                         background: Container(
                           color: Colors.red[900],
-                          child: Center(
+                          child: const Center(
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
-                              children: const [
+                              children: [
                                 Icon(Icons.delete),
                                 SizedBox(width: 30),
                               ],
@@ -369,10 +369,10 @@ class _MutablePicklistsState extends State<MutablePicklists> {
           }
 
           if (snapshot.connectionState != ConnectionState.done) {
-            return PageBody(
+            return const PageBody(
               padding: EdgeInsets.zero,
               child: Column(
-                children: const [
+                children: [
                   LinearProgressIndicator(),
                 ],
               ),
@@ -397,10 +397,10 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                           direction: DismissDirection.endToStart,
                           background: Container(
                             color: Colors.red[900],
-                            child: Center(
+                            child: const Center(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
-                                children: const [
+                                children: [
                                   Icon(Icons.delete),
                                   SizedBox(width: 30),
                                 ],
