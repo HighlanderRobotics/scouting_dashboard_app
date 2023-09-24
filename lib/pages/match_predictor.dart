@@ -122,6 +122,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                 return Scaffold(
                   appBar: AppBar(title: const Text("Match Predictor")),
                   body: SafeArea(
+                    bottom: false,
                     child: ListView(children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
