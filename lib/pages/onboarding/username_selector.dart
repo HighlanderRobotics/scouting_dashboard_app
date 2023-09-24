@@ -75,7 +75,7 @@ class _UsernameSelectorPageState extends State<UsernameSelectorPage> {
                         await setPicklists(newPicklists);
 
                         if (args.isOnboarding) {
-                          navigator.pushNamed("/server_authority_setup");
+                          navigator.pushNamed("/tournament_selector");
                         } else {
                           navigator.pushNamedAndRemoveUntil(
                               '/match_schedule', (route) => false);

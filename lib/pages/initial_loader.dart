@@ -45,6 +45,10 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
       await prefs.setString('role', 'analyst');
     }
 
+    if (prefs.getString('serverAuthority') == null) {
+      await prefs.setString('serverAuthority', '157.131.22.135:25565');
+    }
+
     if (prefs.getStringList('picklist_flags') == null) {
       await prefs.setStringList(
         'picklist_flags',
