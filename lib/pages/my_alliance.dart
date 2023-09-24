@@ -67,15 +67,21 @@ class _AllianceOpenerPageState extends State<AllianceOpenerPage> {
                     int.tryParse(field2Val) == null ||
                     int.tryParse(field3Val) == null
                 ? null
-                : () => {
-                      Navigator.of(context).pushNamed('/alliance', arguments: {
-                        'teams': [
-                          int.parse(field1Val),
-                          int.parse(field2Val),
-                          int.parse(field3Val),
-                        ]
-                      })
-                    },
+                : () {
+                    FocusScopeNode focusScope = FocusScope.of(context);
+
+                    if (focusScope.hasFocus && !focusScope.hasPrimaryFocus) {
+                      FocusManager.instance.primaryFocus?.unfocus();
+                    }
+
+                    Navigator.of(context).pushNamed('/alliance', arguments: {
+                      'teams': [
+                        int.parse(field1Val),
+                        int.parse(field2Val),
+                        int.parse(field3Val),
+                      ]
+                    });
+                  },
             child: const Text("View"))
       ]),
       drawer: const GlobalNavigationDrawer(),
