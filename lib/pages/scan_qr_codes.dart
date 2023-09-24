@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:skeletons/skeletons.dart';
 import 'package:soundpool/soundpool.dart';
 
 class ScoutReportScannerPage extends StatefulWidget {
@@ -193,140 +195,176 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
             })();
           }
         },
-        childBelow: FutureBuilder(future: (() async {
-          final responses = await Future.wait([
-            getScoutedStatuses(),
-            TournamentSchedule.fromServer(
-              (await getServerAuthority())!,
-              (await SharedPreferences.getInstance())
-                  .getString(("tournament"))!,
-            ),
-            getScoutSchedule(),
-          ]);
+        childBelow: SizedBox(
+          height: 280,
+          child: FutureBuilder(future: (() async {
+            final responses = await Future.wait([
+              getScoutedStatuses(),
+              TournamentSchedule.fromServer(
+                (await getServerAuthority())!,
+                (await SharedPreferences.getInstance())
+                    .getString(("tournament"))!,
+              ),
+              getScoutSchedule(),
+            ]);
 
-          Map<String, String?> isScoutedAll =
-              responses[0] as Map<String, String?>;
-          TournamentSchedule tournamentSchedule =
-              responses[1] as TournamentSchedule;
-          ScoutSchedule scoutSchedule = responses[2] as ScoutSchedule;
+            Map<String, String?> isScoutedAll =
+                responses[0] as Map<String, String?>;
+            TournamentSchedule tournamentSchedule =
+                responses[1] as TournamentSchedule;
+            ScoutSchedule scoutSchedule = responses[2] as ScoutSchedule;
 
-          tournamentSchedule.matches
-              .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+            tournamentSchedule.matches
+                .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
 
-          late final ScheduleMatch nextUnscoutedMatch;
-          late final List<String?> nextUnscoutedMatchStatus;
-          late final List<String> nextUnscoutedMatchPlannedScouts;
+            late final ScheduleMatch nextUnscoutedMatch;
+            late final List<String?> nextUnscoutedMatchStatus;
+            late final List<String> nextUnscoutedMatchPlannedScouts;
 
-          for (var match in tournamentSchedule.matches) {
-            var currentMatchStatus = [
-              "${match.identity.toMediumKey()}_0",
-              "${match.identity.toMediumKey()}_1",
-              "${match.identity.toMediumKey()}_2",
-              "${match.identity.toMediumKey()}_3",
-              "${match.identity.toMediumKey()}_4",
-              "${match.identity.toMediumKey()}_5",
-            ];
+            for (var match in tournamentSchedule.matches) {
+              var currentMatchStatus = [
+                "${match.identity.toMediumKey()}_0",
+                "${match.identity.toMediumKey()}_1",
+                "${match.identity.toMediumKey()}_2",
+                "${match.identity.toMediumKey()}_3",
+                "${match.identity.toMediumKey()}_4",
+                "${match.identity.toMediumKey()}_5",
+              ];
 
-            if (mostRecentMatchShortKey == null
-                ? currentMatchStatus
-                        .any((element) => isScoutedAll[element] == null) &&
-                    !tournamentSchedule.matches
-                        .skip(tournamentSchedule.matches.indexOf(match) + 1)
-                        .any((element) {
-                      final otherMatchStatuses = [
-                        "${element.identity.toMediumKey()}_0",
-                        "${element.identity.toMediumKey()}_1",
-                        "${element.identity.toMediumKey()}_2",
-                        "${element.identity.toMediumKey()}_3",
-                        "${element.identity.toMediumKey()}_4",
-                        "${element.identity.toMediumKey()}_5",
-                      ];
+              if (mostRecentMatchShortKey == null
+                  ? currentMatchStatus
+                          .any((element) => isScoutedAll[element] == null) &&
+                      !tournamentSchedule.matches
+                          .skip(tournamentSchedule.matches.indexOf(match) + 1)
+                          .any((element) {
+                        final otherMatchStatuses = [
+                          "${element.identity.toMediumKey()}_0",
+                          "${element.identity.toMediumKey()}_1",
+                          "${element.identity.toMediumKey()}_2",
+                          "${element.identity.toMediumKey()}_3",
+                          "${element.identity.toMediumKey()}_4",
+                          "${element.identity.toMediumKey()}_5",
+                        ];
 
-                      return otherMatchStatuses
-                          .any((element) => isScoutedAll[element] != null);
-                    })
-                : "${match.identity.type.shortName}${match.identity.number}" ==
-                    mostRecentMatchShortKey) {
-              nextUnscoutedMatch = match;
-              nextUnscoutedMatchStatus =
-                  currentMatchStatus.map((e) => isScoutedAll[e]).toList();
+                        return otherMatchStatuses
+                            .any((element) => isScoutedAll[element] != null);
+                      })
+                  : "${match.identity.type.shortName}${match.identity.number}" ==
+                      mostRecentMatchShortKey) {
+                nextUnscoutedMatch = match;
+                nextUnscoutedMatchStatus =
+                    currentMatchStatus.map((e) => isScoutedAll[e]).toList();
 
-              nextUnscoutedMatchPlannedScouts = scoutSchedule.getScoutsForMatch(
-                match.ordinalNumber,
-              );
+                nextUnscoutedMatchPlannedScouts =
+                    scoutSchedule.getScoutsForMatch(
+                  match.ordinalNumber,
+                );
 
-              return {
-                'nextMatch': nextUnscoutedMatch,
-                'nextMatchStatus': nextUnscoutedMatchStatus,
-                'nextMatchPlannedScouts': nextUnscoutedMatchPlannedScouts,
-              };
+                return {
+                  'nextMatch': nextUnscoutedMatch,
+                  'nextMatchStatus': nextUnscoutedMatchStatus,
+                  'nextMatchPlannedScouts': nextUnscoutedMatchPlannedScouts,
+                };
+              }
             }
-          }
 
-          return {
-            'nextMatch': tournamentSchedule.matches.last,
-            'nextMatchStatus': [
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_0",
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_1",
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_2",
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_3",
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_4",
-              "${tournamentSchedule.matches.last.identity.toMediumKey()}_5"
-            ].map((e) => isScoutedAll[e]).toList(),
-            'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
-              tournamentSchedule.matches.last.ordinalNumber,
-            ),
-          };
-        })(), builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return FriendlyErrorView(
-              errorMessage: snapshot.error.toString(),
-            );
-          }
-
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-
-          ScheduleMatch nextMatch =
-              snapshot.data!['nextMatch'] as ScheduleMatch;
-          List<String?> nextMatchStatus =
-              snapshot.data!['nextMatchStatus'] as List<String?>;
-          List<String> nextMatchPlannedScouts =
-              snapshot.data!['nextMatchPlannedScouts'] as List<String>;
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  nextMatch.identity
-                      .getLocalizedDescription(includeTournament: false),
-                  style: Theme.of(context).textTheme.titleMedium,
+            return {
+              'nextMatch': tournamentSchedule.matches.last,
+              'nextMatchStatus': [
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_0",
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_1",
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_2",
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_3",
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_4",
+                "${tournamentSchedule.matches.last.identity.toMediumKey()}_5"
+              ].map((e) => isScoutedAll[e]).toList(),
+              'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
+                tournamentSchedule.matches.last.ordinalNumber,
+              ),
+            };
+          })(), builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Container(
+                child: FriendlyErrorView(
+                  errorMessage: snapshot.error.toString(),
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: List.generate(6, (index) => index)
-                    .map(
-                      (i) => ScoutStatus(
-                        name: nextMatchStatus[i] ??
-                            (nextMatchPlannedScouts.isEmpty
-                                ? null
-                                : nextMatchPlannedScouts[i]),
-                        scanned: nextMatchStatus[i] != null,
-                        dataCollection: reportData[i],
-                      ),
-                    )
-                    .toList(),
-              ),
-            ],
-          );
-        }),
+              );
+            }
+
+            if (snapshot.connectionState != ConnectionState.done) {
+              return Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: SkeletonLine(
+                      style: SkeletonLineStyle(width: 90, height: 25),
+                    ),
+                  ),
+                  Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: List.generate(6, (index) => index)
+                          .map(
+                            (i) => Row(
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.all(9),
+                                  child: SkeletonAvatar(
+                                    style: SkeletonAvatarStyle(
+                                        height: 21, width: 21),
+                                  ),
+                                ),
+                                SkeletonLine(
+                                  style: SkeletonLineStyle(
+                                    height: 15,
+                                    width: Random(i).nextInt(100) + 60,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          .toList()),
+                ],
+              );
+            }
+
+            ScheduleMatch nextMatch =
+                snapshot.data!['nextMatch'] as ScheduleMatch;
+            List<String?> nextMatchStatus =
+                snapshot.data!['nextMatchStatus'] as List<String?>;
+            List<String> nextMatchPlannedScouts =
+                snapshot.data!['nextMatchPlannedScouts'] as List<String>;
+
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    nextMatch.identity
+                        .getLocalizedDescription(includeTournament: false),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: List.generate(6, (index) => index)
+                      .map(
+                        (i) => ScoutStatus(
+                          name: nextMatchStatus[i] ??
+                              (nextMatchPlannedScouts.isEmpty
+                                  ? null
+                                  : nextMatchPlannedScouts[i]),
+                          scanned: nextMatchStatus[i] != null,
+                          dataCollection: reportData[i],
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            );
+          }),
+        ),
       ),
     );
   }
