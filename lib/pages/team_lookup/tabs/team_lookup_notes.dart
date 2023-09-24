@@ -22,6 +22,7 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
   @override
   Widget loadingView() {
     return PageBody(
+      bottom: false,
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
       child: SkeletonListView(
         itemBuilder: (context, index) => Padding(

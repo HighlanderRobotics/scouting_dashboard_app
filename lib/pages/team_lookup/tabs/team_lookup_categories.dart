@@ -18,6 +18,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
   @override
   Widget loadingView() {
     return PageBody(
+      bottom: false,
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
       child: SkeletonListView(
         itemCount: metricCategories.length,
