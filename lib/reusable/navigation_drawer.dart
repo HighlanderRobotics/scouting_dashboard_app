@@ -26,7 +26,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const SectionHeader(title: "8033 Scouting Dashboard"),
+                  const SectionHeader(title: "Lovat Dashboard"),
                   IconButton(
                       onPressed: () {
                         Navigator.of(context).popAndPushNamed("/settings");
