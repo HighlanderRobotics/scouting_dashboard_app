@@ -157,9 +157,15 @@ class AnalysisOverview extends AnalysisVisualization {
                   padding: const EdgeInsets.all(10),
                   child: Column(children: [
                     gridRow(context, analysisMap, 'three', 'Top'),
-                    const Divider(height: 21),
+                    Divider(
+                      height: 21,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                     gridRow(context, analysisMap, 'two', 'Middle'),
-                    const Divider(height: 21),
+                    Divider(
+                      height: 21,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
                     gridRow(context, analysisMap, 'one', 'Hybrid'),
                   ]),
                 ),
