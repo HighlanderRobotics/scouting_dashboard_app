@@ -42,24 +42,42 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    return ScrollablePageBody(
-      children: [
-        if ((snapshot.data as List).isEmpty) const Text("No notes"),
-        if ((snapshot.data as List).isNotEmpty)
-          NotesList(
-            notes: ((snapshot.data as List).cast<Map<String, dynamic>>())
-                .where((note) => note['notes'] != null && note['notes'] != "")
-                .map((note) => Note(
-                      matchName: GameMatchIdentity.fromLongKey(note['matchKey'])
-                          .getLocalizedDescription(includeTournament: false),
-                      noteBody: note['notes'],
-                      uuid: note['uuid'],
-                    ))
-                .toList()
-                .cast<Note>(),
-          ),
-      ],
-    );
+    return (snapshot.data as List).isEmpty
+        ? SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 100),
+                Image.asset(
+                  'assets/images/no-notes-${Theme.of(context).brightness.name}.png',
+                  width: 250,
+                ),
+                Text(
+                  "No notes on ${function.team}",
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+              ],
+            ),
+          )
+        : ScrollablePageBody(
+            children: [
+              NotesList(
+                notes: ((snapshot.data as List).cast<Map<String, dynamic>>())
+                    .where(
+                        (note) => note['notes'] != null && note['notes'] != "")
+                    .map((note) => Note(
+                          matchName:
+                              GameMatchIdentity.fromLongKey(note['matchKey'])
+                                  .getLocalizedDescription(
+                                      includeTournament: false),
+                          noteBody: note['notes'],
+                          uuid: note['uuid'],
+                        ))
+                    .toList()
+                    .cast<Note>(),
+              ),
+            ],
+          );
   }
 }
 
