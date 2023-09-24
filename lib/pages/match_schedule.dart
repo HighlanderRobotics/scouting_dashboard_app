@@ -301,7 +301,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
               ),
               Divider(
                 height: 1,
-                color: Theme.of(context).colorScheme.outline,
+                color: Theme.of(context).colorScheme.surfaceVariant,
               ),
             ],
           ),
