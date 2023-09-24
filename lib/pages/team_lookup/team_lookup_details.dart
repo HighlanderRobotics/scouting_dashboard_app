@@ -68,7 +68,6 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
                     ),
                   ),
                 ),
-                const Divider(height: 1),
               ],
             ),
           ),

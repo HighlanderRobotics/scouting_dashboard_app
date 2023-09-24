@@ -126,10 +126,6 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                     ),
                   ),
                 ),
-                Divider(
-                  height: 1,
-                  color: Theme.of(context).colorScheme.outline,
-                ),
               ],
             ),
           ),
