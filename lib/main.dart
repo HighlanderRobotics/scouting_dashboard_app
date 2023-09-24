@@ -30,7 +30,7 @@ import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
-import 'package:scouting_dashboard_app/pages/scout_schedule/scout_schedule_qr.dart';
+import 'package:scouting_dashboard_app/pages/display_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
@@ -61,7 +61,7 @@ void main() async {
       '/team_lookup_details': (context) => const TeamLookupDetailsPage(),
       '/team_lookup_breakdown_details': (context) =>
           const TeamLookupBreakdownDetailsPage(),
-      '/scout_schedule_qr': (context) => const DisplayScoutScheduleQRPage(),
+      '/display_qr_codes': (context) => const DisplayQRCodesPage(),
       '/edit_scout_schedule': (context) => const EditScoutSchedulePage(),
       '/edit_scout_shift': (context) => const EditScoutShiftPage(),
       '/new_scout_shift': (context) => const NewScoutShiftPage(),

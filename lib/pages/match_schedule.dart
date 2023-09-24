@@ -213,7 +213,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           if (isScoutingLead ?? false)
             IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed("/scout_schedule_qr");
+                Navigator.of(context).pushNamed("/display_qr_codes");
               },
               icon: const Icon(Icons.qr_code),
             ),
