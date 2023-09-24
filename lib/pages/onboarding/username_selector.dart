@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -62,6 +63,15 @@ class _UsernameSelectorPageState extends State<UsernameSelectorPage> {
                             await SharedPreferences.getInstance();
 
                         await prefs.setString("username", username);
+
+                        // Set picklists to use this name
+                        final picklists = await getPicklists();
+                        final newPicklists = picklists.map((picklist) {
+                          picklist.author = username;
+                          return picklist;
+                        }).toList();
+
+                        await setPicklists(newPicklists);
 
                         if (args.isOnboarding) {
                           navigator.pushNamed("/server_authority_setup");
