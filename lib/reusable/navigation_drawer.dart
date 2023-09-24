@@ -50,7 +50,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
               Divider(
                 color: Theme.of(context).colorScheme.outline,
               ),
-              const SectionHeader(title: "Scouting Lead"),
+              const SectionHeader(title: "Data & Utilities"),
               DrawerDestination(
                 label: "Match Schedule",
                 onTap: () {
@@ -77,27 +77,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                   icon: Icons.qr_code_scanner,
                 ),
               ),
-              const SectionHeader(title: "Data Analysis"),
-              DrawerDestination(
-                label: "Match Predictor",
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/match_predictor_opener", (route) => false);
-                },
-                isSelected: ModalRoute.of(context)?.settings.name ==
-                    "/match_predictor_opener",
-                icon: Icons.psychology,
-              ),
-              // DrawerDestination(
-              //   label: "Match Suggestions",
-              //   onTap: () {
-              //     Navigator.pushNamedAndRemoveUntil(
-              //         context, "/match_suggestions_opener", (route) => false);
-              //   },
-              //   isSelected: ModalRoute.of(context)?.settings.name ==
-              //       "/match_suggestions_opener",
-              //   icon: Icons.assistant,
-              // ),
+              const SectionHeader(title: "Analysis & Strategy"),
               DrawerDestination(
                 label: "Team Lookup",
                 onTap: () {
@@ -118,6 +98,26 @@ class GlobalNavigationDrawer extends StatelessWidget {
                     ModalRoute.of(context)?.settings.name == "/picklists",
                 icon: Icons.format_list_numbered,
               ),
+              DrawerDestination(
+                label: "Match Predictor",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                      context, "/match_predictor_opener", (route) => false);
+                },
+                isSelected: ModalRoute.of(context)?.settings.name ==
+                    "/match_predictor_opener",
+                icon: Icons.psychology,
+              ),
+              // DrawerDestination(
+              //   label: "Match Suggestions",
+              //   onTap: () {
+              //     Navigator.pushNamedAndRemoveUntil(
+              //         context, "/match_suggestions_opener", (route) => false);
+              //   },
+              //   isSelected: ModalRoute.of(context)?.settings.name ==
+              //       "/match_suggestions_opener",
+              //   icon: Icons.assistant,
+              // ),
               DrawerDestination(
                 label: "My Alliance",
                 onTap: () {
