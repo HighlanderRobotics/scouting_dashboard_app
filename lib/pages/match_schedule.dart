@@ -35,6 +35,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   Map<String, String?>? isScouted;
 
   String? initialError;
+  String? noScheduleTournament;
 
   List<Map<String, dynamic>>? teamsInTournament;
 
@@ -64,59 +65,67 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           getScoutSchedule(),
           getScoutedStatuses(),
         ],
-        eagerError: true,
       );
+
+      final fetchedTournamentSchedule = outputs[0] as TournamentSchedule;
+      final fetchedScoutSchedule = outputs[1] as ScoutSchedule;
+      final fetchedIsScouted = outputs[2] as Map<String, String?>;
+
+      fetchedTournamentSchedule.matches
+          .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+
+      ScheduleMatch? nextScheduleMatch;
+
+      try {
+        final ScheduleMatch fetchedLastScoutedMatch =
+            fetchedTournamentSchedule.matches.lastWhere((match) => [
+                  fetchedIsScouted["${match.identity.toMediumKey()}_0"],
+                  fetchedIsScouted["${match.identity.toMediumKey()}_1"],
+                  fetchedIsScouted["${match.identity.toMediumKey()}_2"],
+                  fetchedIsScouted["${match.identity.toMediumKey()}_3"],
+                  fetchedIsScouted["${match.identity.toMediumKey()}_4"],
+                  fetchedIsScouted["${match.identity.toMediumKey()}_5"],
+                ].any((e) => e != null));
+
+        nextScheduleMatch = fetchedTournamentSchedule.matches
+            .cast<ScheduleMatch?>()
+            .singleWhere(
+              (match) =>
+                  match?.ordinalNumber ==
+                  fetchedLastScoutedMatch.ordinalNumber + 1,
+              orElse: () => null,
+            );
+      } catch (error) {
+        print(error);
+
+        nextScheduleMatch = fetchedTournamentSchedule.matches.first;
+      }
+
+      setState(() {
+        if (nextScheduleMatch?.identity.toMediumKey() !=
+            nextMatch?.toMediumKey()) {
+          nextMatch = nextScheduleMatch?.identity;
+        }
+
+        tournamentSchedule = fetchedTournamentSchedule;
+        scoutSchedule = fetchedScoutSchedule;
+        isScouted = fetchedIsScouted;
+
+        isDataFetched = true;
+      });
     } catch (error) {
+      final prefs = await SharedPreferences.getInstance();
+
+      if (error == "No matches found for ${prefs.getString('tournament')}") {
+        setState(() {
+          noScheduleTournament = prefs.getString('tournament_localized');
+        });
+      }
+
       setState(() {
         initialError = error.toString();
       });
     }
-
-    final fetchedTournamentSchedule = outputs[0] as TournamentSchedule;
-    final fetchedScoutSchedule = outputs[1] as ScoutSchedule;
-    final fetchedIsScouted = outputs[2] as Map<String, String?>;
-
-    fetchedTournamentSchedule.matches
-        .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
-
-    ScheduleMatch? nextScheduleMatch;
-
-    try {
-      final ScheduleMatch fetchedLastScoutedMatch =
-          fetchedTournamentSchedule.matches.lastWhere((match) => [
-                fetchedIsScouted["${match.identity.toMediumKey()}_0"],
-                fetchedIsScouted["${match.identity.toMediumKey()}_1"],
-                fetchedIsScouted["${match.identity.toMediumKey()}_2"],
-                fetchedIsScouted["${match.identity.toMediumKey()}_3"],
-                fetchedIsScouted["${match.identity.toMediumKey()}_4"],
-                fetchedIsScouted["${match.identity.toMediumKey()}_5"],
-              ].any((e) => e != null));
-
-      nextScheduleMatch =
-          fetchedTournamentSchedule.matches.cast<ScheduleMatch?>().singleWhere(
-                (match) =>
-                    match?.ordinalNumber ==
-                    fetchedLastScoutedMatch.ordinalNumber + 1,
-                orElse: () => null,
-              );
-    } catch (error) {
-      print(error);
-
-      nextScheduleMatch = fetchedTournamentSchedule.matches.first;
-    }
-
-    setState(() {
-      if (nextScheduleMatch?.identity.toMediumKey() !=
-          nextMatch?.toMediumKey()) {
-        nextMatch = nextScheduleMatch?.identity;
-      }
-
-      tournamentSchedule = fetchedTournamentSchedule;
-      scoutSchedule = fetchedScoutSchedule;
-      isScouted = fetchedIsScouted;
-
-      isDataFetched = true;
-    });
   }
 
   Future<void> fetchTeamsInTournament() async {
@@ -326,44 +335,47 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       body: PageBody(
         bottom: false,
         padding: EdgeInsets.zero,
-        child: initialError != null
-            ? FriendlyErrorView(
-                errorMessage: initialError,
-                onRetry: () {
-                  setState(() {
-                    initialError = null;
-                  });
-                  fetchData();
-                },
-              )
-            : (tournamentSchedule == null ||
-                    scoutSchedule == null ||
-                    isScouted == null)
-                ? const SkeletonMatches()
-                : NotificationListener<ScrollUpdateNotification>(
-                    onNotification: (notification) {
-                      final FocusScopeNode focusScope = FocusScope.of(context);
-                      if (notification.dragDetails != null &&
-                          focusScope.hasFocus &&
-                          !focusScope.hasPrimaryFocus) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      }
-
-                      updateFabVisibility(notification);
-
-                      return false;
+        child: noScheduleTournament != null
+            ? NoScheduleMessage(noScheduleTournament!)
+            : initialError != null
+                ? FriendlyErrorView(
+                    errorMessage: initialError,
+                    onRetry: () {
+                      setState(() {
+                        initialError = null;
+                      });
+                      fetchData();
                     },
-                    child: Matches(
-                      onRefresh: () => fetchData(),
-                      isScouted: isScouted,
-                      scrollController: scrollController,
-                      filteredMatches: filteredMatches,
-                      nextMatch: nextMatch,
-                      nextMatchKey: nextMatchKey,
-                      isScoutingLead: isScoutingLead,
-                      scoutSchedule: scoutSchedule,
-                    ),
-                  ),
+                  )
+                : (tournamentSchedule == null ||
+                        scoutSchedule == null ||
+                        isScouted == null)
+                    ? const SkeletonMatches()
+                    : NotificationListener<ScrollUpdateNotification>(
+                        onNotification: (notification) {
+                          final FocusScopeNode focusScope =
+                              FocusScope.of(context);
+                          if (notification.dragDetails != null &&
+                              focusScope.hasFocus &&
+                              !focusScope.hasPrimaryFocus) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                          }
+
+                          updateFabVisibility(notification);
+
+                          return false;
+                        },
+                        child: Matches(
+                          onRefresh: () => fetchData(),
+                          isScouted: isScouted,
+                          scrollController: scrollController,
+                          filteredMatches: filteredMatches,
+                          nextMatch: nextMatch,
+                          nextMatchKey: nextMatchKey,
+                          isScoutingLead: isScoutingLead,
+                          scoutSchedule: scoutSchedule,
+                        ),
+                      ),
       ),
       drawer: const GlobalNavigationDrawer(),
     );
@@ -928,5 +940,30 @@ class _MatchesState extends State<Matches> {
               matchScheduleScouts[scoutIndex] != scouted[scoutIndex]))
         "By ${scouted[scoutIndex]}",
     ];
+  }
+}
+
+class NoScheduleMessage extends StatelessWidget {
+  const NoScheduleMessage(this.tournament, {super.key});
+
+  final String tournament;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(30),
+      child: Column(
+        children: [
+          Text(
+            'Schedule not yet available for $tournament',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Text(
+            "If you have the correct tournament selected, we're still waiting for the match schedule to be posted on The Blue Alliance. If it is already, check back soon. We'll have it up as soon as we can.",
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
+        ].withSpaceBetween(height: 10),
+      ),
+    );
   }
 }
