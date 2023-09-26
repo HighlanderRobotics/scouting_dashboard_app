@@ -61,7 +61,7 @@ class _RoleSelectorPageState extends State<RoleSelectorPage> {
           ),
           const SizedBox(height: 20),
           const Text(
-              "If you're on another team checking out our data, use Analyst. 8033 Analysts also get access to all the data, but can publish picklists to each other and use mutable picklists. 8033 Scouting Leads can do all of this, and also can view and delete raw data, manage schedules, and edit data."),
+              "Analysts get access to data and picklists. Scouting Leads have additional tools for ensuring the accuracy of data and managing scouters."),
           const SizedBox(height: 50),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
