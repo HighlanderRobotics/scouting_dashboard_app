@@ -89,7 +89,7 @@ void main() async {
     },
     theme: ThemeData(
       useMaterial3: true,
-      colorScheme: lightColorScheme,
+      colorScheme: darkColorScheme,
     ),
     darkTheme: ThemeData(
       useMaterial3: true,
