@@ -2,5 +2,6 @@
     "diffEditor.codeLens": true,
     "editor.tabCompletion": "on",
     "discord.enabled": true,
-    "cmake.configureOnOpen": false
+    "cmake.configureOnOpen": false,
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
