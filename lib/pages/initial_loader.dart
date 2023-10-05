@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/flags.dart';
@@ -7,6 +8,7 @@ import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 
 class InitialLoaderPage extends StatefulWidget {
   const InitialLoaderPage({super.key});
@@ -61,6 +63,23 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
         'team_lookup_flag',
         jsonEncode(defaultTeamLookupFlag.toJson()),
       );
+    }
+
+    if (!kDebugMode) {
+      try {
+        final response =
+            await http.get(Uri.http(prefs.getString('serverAuthority')!));
+
+        if (response.statusCode != 200) {
+          Navigator.of(context)
+              .pushNamedAndRemoveUntil('/preview_over', (route) => false);
+          return;
+        }
+      } catch (e) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/preview_over', (route) => false);
+        return;
+      }
     }
 
     if (onboardingCompleted) {

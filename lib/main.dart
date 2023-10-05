@@ -25,6 +25,7 @@ import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/picklist/view_picklist_weights.dart';
+import 'package:scouting_dashboard_app/pages/preview_over.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
@@ -53,6 +54,7 @@ void main() async {
           const ServerAuthoritySelectorPage(),
       '/setup_code_scanner': (context) => const SetupCodeScannerPage(),
       '/tournament_selector': (context) => const TournamentSelectorPage(),
+      '/preview_over': (context) => const PreviewOverPage(),
       '/match_schedule': (context) => const MatchSchedulePage(),
       '/raw_scout_report': (context) => const RawScoutReportPage(),
       '/team_per_match': (context) => const TeamPerMatchPage(),
