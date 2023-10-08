@@ -270,7 +270,7 @@ List<BreakdownData> breakdowns = [
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Engage",
-        localizedNamePlural: "engages",
+        localizedNamePlural: "Engages",
         path: "engaged",
       ),
       BreakdownSegmentData(
