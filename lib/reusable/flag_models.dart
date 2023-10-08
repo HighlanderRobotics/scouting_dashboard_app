@@ -45,7 +45,7 @@ class FlagType {
       metric.path,
       readableName: metric.localizedName,
       description:
-          '${metric.localizedName} metric from ${category.localizedName}',
+          '${metric.localizedName} metric from ${category.localizedName.toLowerCase()} category',
       defaultHue: 1,
       visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
           FlagTemplate(
