@@ -120,12 +120,31 @@ class AlllianceAutoPaths extends StatefulWidget {
   State<AlllianceAutoPaths> createState() => _AlllianceAutoPathsState();
 }
 
-class _AlllianceAutoPathsState extends State<AlllianceAutoPaths> {
+class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
+    with TickerProviderStateMixin {
   List<AutoPath?> selectedPaths = [
     null,
     null,
     null,
   ];
+
+  late final AnimationController controller;
+  late final AnimationController playPauseController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 15),
+    );
+
+    playPauseController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 200),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -135,157 +154,179 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths> {
         color: Theme.of(context).colorScheme.surfaceVariant,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
+      child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, w) {
+            return Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: widget.data['teams']
-                      .map((e) => Column(
-                            children: [
-                              InkWell(
-                                onTap: () {
-                                  Navigator.of(context).pushNamed(
-                                      "/auto_path_selector",
-                                      arguments: <String, dynamic>{
-                                        'team': e['team'],
-                                        'autoPaths':
-                                            (e['paths'] as List<dynamic>)
-                                                .map((path) =>
-                                                    AutoPath.fromMap(path))
-                                                .toList(),
-                                        'currentPath': selectedPaths[
-                                            widget.data['teams'].indexOf(e)],
-                                        'onSubmit': (AutoPath newPath) {
-                                          setState(() {
-                                            selectedPaths[widget.data['teams']
-                                                .indexOf(e)] = newPath;
-                                          });
-                                        }
-                                      });
-                                },
-                                child: Row(children: [
-                                  SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.all(
-                                            Radius.circular(10)),
-                                        color: autoPathColors[
-                                            widget.data['teams'].indexOf(e)],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Text(
-                                    e['team'],
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelMedium!
-                                        .merge(
-                                          TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onSurfaceVariant,
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(10, 10, 10, 3),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: widget.data['teams']
+                            .map((e) => Column(
+                                  children: [
+                                    InkWell(
+                                      onTap: () {
+                                        Navigator.of(context).pushNamed(
+                                            "/auto_path_selector",
+                                            arguments: <String, dynamic>{
+                                              'team': e['team'],
+                                              'autoPaths': (e['paths']
+                                                      as List<dynamic>)
+                                                  .map((path) =>
+                                                      AutoPath.fromMap(path))
+                                                  .toList(),
+                                              'currentPath': selectedPaths[
+                                                  widget.data['teams']
+                                                      .indexOf(e)],
+                                              'onSubmit': (AutoPath? newPath) {
+                                                setState(() {
+                                                  selectedPaths[widget
+                                                      .data['teams']
+                                                      .indexOf(e)] = newPath;
+                                                });
+                                              }
+                                            });
+                                      },
+                                      child: Row(children: [
+                                        SizedBox(
+                                          height: 20,
+                                          width: 20,
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  const BorderRadius.all(
+                                                      Radius.circular(10)),
+                                              color: autoPathColors[widget
+                                                  .data['teams']
+                                                  .indexOf(e)],
+                                            ),
                                           ),
                                         ),
-                                  ),
-                                ]),
-                              ),
-                              const SizedBox(height: 7),
-                              Text(
-                                "Score",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .labelMedium!
-                                    .merge(TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant)),
-                              ),
-                              Text(
-                                selectedPaths[
-                                            widget.data['teams'].indexOf(e)] ==
-                                        null
-                                    ? "--"
-                                    : selectedPaths[
-                                            widget.data['teams'].indexOf(e)]!
-                                        .scores
-                                        .join(", "),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyLarge!
-                                    .merge(
-                                      TextStyle(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .onSurfaceVariant,
-                                      ),
+                                        const SizedBox(width: 5),
+                                        Text(
+                                          e['team'],
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelMedium!
+                                              .merge(
+                                                TextStyle(
+                                                  color: Theme.of(context)
+                                                      .colorScheme
+                                                      .onSurfaceVariant,
+                                                ),
+                                              ),
+                                        ),
+                                      ]),
                                     ),
-                              ),
-                            ],
-                          ))
-                      .toList()
-                      .cast<Widget>(),
-                ),
-                const SizedBox(height: 10),
-                AutoPathField(
-                  paths: selectedPaths
-                      .where((e) => e != null)
-                      .map((path) => AutoPathWidget(
-                            autoPath: path!,
-                            teamColor:
-                                autoPathColors[selectedPaths.indexOf(path)],
-                          ))
-                      .toList(),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(15),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "Total auto score",
-                    style: Theme.of(context).textTheme.labelLarge!.merge(
-                        TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer)),
-                  ),
-                  Text(
-                    selectedPaths.any((element) => element != null)
-                        ? selectedPaths
-                            .where((path) => path != null)
-                            .map((path) =>
-                                path!.scores.toList().cast<num>().average())
+                                    const SizedBox(height: 7),
+                                    Text(
+                                      "Score",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .labelMedium!
+                                          .merge(TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant)),
+                                    ),
+                                    Text(
+                                      selectedPaths[widget.data['teams']
+                                                  .indexOf(e)] ==
+                                              null
+                                          ? "--"
+                                          : numberVizualizationBuilder(
+                                              selectedPaths[widget.data['teams']
+                                                      .indexOf(e)]!
+                                                  .scores
+                                                  .cast<num>()
+                                                  .average()),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyLarge!
+                                          .merge(
+                                            TextStyle(
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onSurfaceVariant,
+                                            ),
+                                          ),
+                                    ),
+                                  ],
+                                ))
                             .toList()
-                            .cast<num>()
-                            .sum()
-                            .toString()
-                        : "--",
-                    style: Theme.of(context).textTheme.bodyMedium!.merge(
-                          TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          ),
+                            .cast<Widget>(),
+                      ),
+                      const SizedBox(height: 10),
+                      AutoPathField(
+                        paths: selectedPaths
+                            .where((e) => e != null)
+                            .map((path) => AutoPathWidget(
+                                  animationProgress: controller.value == 0
+                                      ? null
+                                      : Duration(
+                                          milliseconds:
+                                              (controller.value * 15 * 1000)
+                                                  .round()),
+                                  autoPath: path!,
+                                  teamColor: autoPathColors[
+                                      selectedPaths.indexOf(path)],
+                                ))
+                            .toList(),
+                      ),
+                      AnimatedAutoPathControls(
+                        controller: controller,
+                        playPauseController: playPauseController,
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Total auto score",
+                          style: Theme.of(context).textTheme.labelLarge!.merge(
+                              TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer)),
                         ),
-                  )
-                ],
-              ),
-            ),
-          )
-        ],
-      ),
+                        Text(
+                          selectedPaths.any((element) => element != null)
+                              ? selectedPaths
+                                  .where((path) => path != null)
+                                  .map((path) => path!.scores
+                                      .toList()
+                                      .cast<num>()
+                                      .average())
+                                  .toList()
+                                  .cast<num>()
+                                  .sum()
+                                  .toString()
+                              : "--",
+                          style: Theme.of(context).textTheme.bodyMedium!.merge(
+                                TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                                ),
+                              ),
+                        )
+                      ],
+                    ),
+                  ),
+                )
+              ],
+            );
+          }),
     );
   }
 }

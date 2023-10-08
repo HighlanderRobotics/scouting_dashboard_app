@@ -21,7 +21,7 @@ class _AutoPathSelectorPageState extends State<AutoPathSelectorPage> {
 
     String team = routeArgs['team'];
     List<AutoPath> autoPaths = routeArgs['autoPaths'];
-    dynamic Function(AutoPath) callback = routeArgs['onSubmit'];
+    dynamic Function(AutoPath?) callback = routeArgs['onSubmit'];
     AutoPath? initialSelection = routeArgs['currentPath'];
 
     if (initialized == false) {
@@ -36,12 +36,10 @@ class _AutoPathSelectorPageState extends State<AutoPathSelectorPage> {
         title: Text("$team's Auto Paths"),
         actions: [
           IconButton(
-            onPressed: selectedPath == null
-                ? null
-                : () {
-                    callback(selectedPath!);
-                    Navigator.of(context).pop();
-                  },
+            onPressed: () {
+              callback(selectedPath);
+              Navigator.of(context).pop();
+            },
             icon: const Icon(Icons.check),
             color: Colors.green,
           ),

@@ -5,10 +5,12 @@ class EmphasizedContainer extends StatelessWidget {
     super.key,
     required this.child,
     this.color,
+    this.padding = const EdgeInsets.all(10),
   });
 
   final Widget child;
   final Color? color;
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class EmphasizedContainer extends StatelessWidget {
         color: color ?? Theme.of(context).colorScheme.surfaceVariant,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: padding,
         child: child,
       ),
     );
