@@ -71,14 +71,15 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
             await http.get(Uri.http(prefs.getString('serverAuthority')!));
 
         if (response.statusCode != 200) {
-          Navigator.of(context)
-              .pushNamedAndRemoveUntil('/preview_over', (route) => false);
+          navigator.pushNamedAndRemoveUntil('/preview_over', (route) => false);
           return;
         }
-      } catch (e) {
-        Navigator.of(context)
-            .pushNamedAndRemoveUntil('/preview_over', (route) => false);
-        return;
+      } catch (err) {
+        if (err.toString().contains('Failed host lookup') ||
+            err.toString().contains('Connection refused')) {
+          navigator.pushNamedAndRemoveUntil('/preview_over', (route) => false);
+          return;
+        }
       }
     }
 
@@ -112,7 +113,6 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
         navigator.pushNamedAndRemoveUntil("/match_schedule", (route) => false);
       }
     } else {
-      // ignore: unnecessary_this
       navigator.pushNamedAndRemoveUntil(
         "/team_selector",
         (route) => false,
