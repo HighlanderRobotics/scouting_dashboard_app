@@ -50,7 +50,7 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
                 TabBar(
                   tabs: metricsToShow
                       .map((metric) => Tab(
-                            text: metric.localizedName,
+                            text: metric.abbreviatedLocalizedName,
                           ))
                       .toList(),
                   labelColor: Theme.of(context).colorScheme.primary,
