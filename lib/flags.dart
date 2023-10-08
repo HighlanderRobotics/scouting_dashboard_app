@@ -84,7 +84,7 @@ final flags = <FlagType>[
   FlagType(
     'pentalties',
     readableName: "Penalties",
-    description: 'Placeholder description',
+    description: 'Card color the team has received',
     defaultHue: 30,
     disableHue: true,
     visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
