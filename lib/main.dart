@@ -92,10 +92,29 @@ void main() async {
     theme: ThemeData(
       useMaterial3: true,
       colorScheme: darkColorScheme,
-    ),
-    darkTheme: ThemeData(
-      useMaterial3: true,
-      colorScheme: darkColorScheme,
+      fontFamily: 'Heebo',
+      textTheme: const TextTheme(
+          labelLarge: TextStyle(
+        fontSize: 16,
+      )),
+      buttonTheme: ButtonThemeData(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: ButtonStyle(
+          shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+          ),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ButtonStyle(
+          shape: MaterialStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+          ),
+        ),
+      ),
     ),
   ));
 }

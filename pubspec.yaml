@@ -111,6 +111,9 @@ flutter:
     - family: monospace
       fonts:
         - asset: assets/fonts/RobotoMono-Regular.ttf
+    - family: Heebo
+      fonts:
+        - asset: assets/fonts/Heebo-VariableFont_wght.ttf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
