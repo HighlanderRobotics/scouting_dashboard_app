@@ -65,24 +65,6 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
       );
     }
 
-    if (!kDebugMode) {
-      try {
-        final response =
-            await http.get(Uri.http(prefs.getString('serverAuthority')!));
-
-        if (response.statusCode != 200) {
-          navigator.pushNamedAndRemoveUntil('/preview_over', (route) => false);
-          return;
-        }
-      } catch (err) {
-        if (err.toString().contains('Failed host lookup') ||
-            err.toString().contains('Connection refused')) {
-          navigator.pushNamedAndRemoveUntil('/preview_over', (route) => false);
-          return;
-        }
-      }
-    }
-
     if (onboardingCompleted) {
       final teamIsSet = prefs.getInt('team') != null;
       final usernameIsSet = prefs.getString('username') != null;
