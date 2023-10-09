@@ -133,7 +133,7 @@ class ScouterScheduleQRTab extends StatelessWidget {
 
         return ScrollablePageBody(children: [
           Text(
-            "Without an internet connection, scouts should scan this QR code to ensure they have the latest version of the scout schedule.",
+            "Without an internet connection, scouts should scan this QR code to ensure they have the latest version of the scout schedule, which is version ${schedule.version}.",
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 20),
