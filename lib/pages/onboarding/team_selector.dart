@@ -66,14 +66,7 @@ class _TeamSelectorPageState extends State<TeamSelectorPage> {
 
                         await prefs.setInt("team", teamNumber);
 
-                        if (teamNumber == 8033) {
-                          navigator.pushNamed('/role_selector');
-                        } else {
-                          await prefs.setString('role', 'analyst');
-                          navigator.pushNamed("/username_selector",
-                              arguments: UsernameSelectorArgs(
-                                  isOnboarding: args.isOnboarding));
-                        }
+                        navigator.pushNamed('/role_selector');
                       }),
                 child: const Text("Next"),
               ),

@@ -151,62 +151,59 @@ class _LoadedSettingsState extends State<LoadedSettings> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (widget.initialTeamNumber == 8033) ...[
-                Text(
-                  "Role",
-                  style: Theme.of(context).textTheme.labelLarge?.merge(
-                      TextStyle(
-                          color: Theme.of(context).colorScheme.onBackground)),
+              Text(
+                "Role",
+                style: Theme.of(context).textTheme.labelLarge?.merge(TextStyle(
+                    color: Theme.of(context).colorScheme.onBackground)),
+              ),
+              const SizedBox(height: 5),
+              ListTile(
+                title: const Text("Analyst"),
+                leading: Icon(
+                  Icons.timeline,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
-                const SizedBox(height: 5),
-                ListTile(
-                  title: const Text("Analyst"),
-                  leading: Icon(
-                    Icons.timeline,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  trailing: Radio(
-                      value: "analyst",
-                      activeColor: Theme.of(context).colorScheme.primary,
-                      groupValue: role,
-                      onChanged: ((value) {
+                trailing: Radio(
+                    value: "analyst",
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    groupValue: role,
+                    onChanged: ((value) {
+                      setState(() {
+                        if (value == null) return;
+                        role = value;
+                      });
+                    })),
+              ),
+              ListTile(
+                title: const Text("Scouting Lead"),
+                leading: Icon(
+                  Icons.supervisor_account,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                trailing: Radio(
+                    value: "8033_scouting_lead",
+                    activeColor: Theme.of(context).colorScheme.primary,
+                    groupValue: role,
+                    onChanged: ((value) {
+                      passwordProtected(
+                          context, teamScoutingLeadCorrectPassword, () {
                         setState(() {
                           if (value == null) return;
                           role = value;
                         });
-                      })),
-                ),
-                ListTile(
-                  title: const Text("Scouting Lead"),
-                  leading: Icon(
-                    Icons.supervisor_account,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  trailing: Radio(
-                      value: "8033_scouting_lead",
-                      activeColor: Theme.of(context).colorScheme.primary,
-                      groupValue: role,
-                      onChanged: ((value) {
-                        passwordProtected(
-                            context, teamScoutingLeadCorrectPassword, () {
-                          setState(() {
-                            if (value == null) return;
-                            role = value;
-                          });
-                        });
-                      })),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  "Analysts get access to data and picklists. Scouting Leads have additional tools for ensuring the accuracy of data and managing scouters.",
-                  style: Theme.of(context).textTheme.bodyMedium?.merge(
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      });
+                    })),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                "Analysts get access to data and picklists. Scouting Leads have additional tools for ensuring the accuracy of data and managing scouters.",
+                style: Theme.of(context).textTheme.bodyMedium?.merge(
+                      TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                ),
-                const SizedBox(height: 40),
-              ],
+                    ),
+              ),
+              const SizedBox(height: 40),
               TextField(
                 controller: _teamNumberController,
                 decoration: InputDecoration(
