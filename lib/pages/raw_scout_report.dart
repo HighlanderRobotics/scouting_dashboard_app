@@ -90,11 +90,14 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
               title: Text(
                 "Scout Report: $team in ${matchIdentity.getShortLocalizedDescription()}",
               ),
-              bottom: const TabBar(tabs: [
-                Text("Fields"),
-                Text("Timeline"),
-                Text("Raw"),
-              ]),
+              bottom: const TabBar(
+                labelPadding: EdgeInsets.symmetric(vertical: 11),
+                tabs: [
+                  Text("Fields"),
+                  Text("Timeline"),
+                  Text("Raw"),
+                ],
+              ),
               actions: [
                 IconButton(
                   onPressed: () {

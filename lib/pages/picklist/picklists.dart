@@ -39,11 +39,14 @@ class _PicklistsPageState extends State<PicklistsPage> {
         return Scaffold(
           appBar: AppBar(
             title: const Text("Picklists"),
-            bottom: const TabBar(tabs: [
-              Text("Mine"),
-              Text("Shared"),
-              Text("Mutable"),
-            ]),
+            bottom: const TabBar(
+              labelPadding: EdgeInsets.symmetric(vertical: 11),
+              tabs: [
+                Text("Mine"),
+                Text("Shared"),
+                Text("Mutable"),
+              ],
+            ),
           ),
           body: TabBarView(
             children: [
