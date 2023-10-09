@@ -177,7 +177,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                       })),
                 ),
                 ListTile(
-                  title: const Text("8033 Scouting Lead"),
+                  title: const Text("Scouting Lead"),
                   leading: Icon(
                     Icons.supervisor_account,
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
