@@ -172,8 +172,8 @@ class ScouterScheduleQRTab extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: HSLColor.fromColor(schedule.getVersionColor())
-                  .withSaturation(0.3)
-                  .withLightness(0.5)
+                  .withSaturation(0.5)
+                  .withLightness(0.2)
                   .toColor(),
               borderRadius: const BorderRadius.all(Radius.circular(5)),
             ),
@@ -186,8 +186,8 @@ class ScouterScheduleQRTab extends StatelessWidget {
                         "If scouts have the latest version of the schedule, their home page will be this color. If not, they should scan this QR code by tapping the ",
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: HSLColor.fromColor(schedule.getVersionColor())
-                              .withSaturation(0.5)
-                              .withLightness(0.12)
+                              .withSaturation(1)
+                              .withLightness(0.7)
                               .toColor(),
                         ),
                   ),
@@ -195,8 +195,8 @@ class ScouterScheduleQRTab extends StatelessWidget {
                     child: Icon(
                       Icons.settings,
                       color: HSLColor.fromColor(schedule.getVersionColor())
-                          .withSaturation(0.5)
-                          .withLightness(0.12)
+                          .withSaturation(1)
+                          .withLightness(0.7)
                           .toColor(),
                     ),
                     alignment: PlaceholderAlignment.middle,
@@ -206,8 +206,8 @@ class ScouterScheduleQRTab extends StatelessWidget {
                         " in the top right of their home screen, then tapping the \"Scan Scouter Schedule QR Code\" button.",
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                           color: HSLColor.fromColor(schedule.getVersionColor())
-                              .withSaturation(0.5)
-                              .withLightness(0.12)
+                              .withSaturation(1)
+                              .withLightness(0.7)
                               .toColor(),
                         ),
                   ),
