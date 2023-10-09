@@ -84,7 +84,7 @@ extension PenaltyExtension on Penalty {
       case Penalty.none:
         return Colors.green[700]!;
       case Penalty.yellowCard:
-        return Colors.yellow[700]!;
+        return Color.fromARGB(255, 230, 251, 45);
       case Penalty.redCard:
         return Colors.red[700]!;
       default:
