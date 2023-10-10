@@ -610,6 +610,88 @@ class AllianceRow extends StatelessWidget {
                       ));
                 },
               ),
+              if (item.warnings.isNotEmpty)
+                InkWell(
+                  onTap: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      5,
+                                      5,
+                                      0,
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.error,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
+                                        const Spacer(),
+                                        IconButton(
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                          icon: const Icon(Icons.close),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                      20,
+                                      0,
+                                      20,
+                                      20,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          "Issues with ${item.scout}'s data for ${GameMatchIdentity.fromLongKey(item.longMatchKey!).getShortLocalizedDescription()}",
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleLarge!
+                                              .copyWith(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onSurfaceVariant,
+                                              ),
+                                        ),
+                                        const SizedBox(height: 5),
+                                        ...(item.warnings
+                                            .map((warning) => Text(
+                                                  '• $warning',
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyLarge,
+                                                ))
+                                            .toList()),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ));
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    child: Icon(
+                      Icons.error,
+                      color: Theme.of(context).colorScheme.warningText,
+                      size: 24,
+                    ),
+                  ),
+                )
             ],
           ),
           if (item.scout != null)
@@ -622,44 +704,41 @@ class AllianceRow extends StatelessWidget {
                           : Theme.of(context).colorScheme.onBlueAlliance,
                     ),
                   ),
-              textAlign: {
-                CrossAxisAlignment.start: TextAlign.start,
-                CrossAxisAlignment.center: TextAlign.center,
-                CrossAxisAlignment.end: TextAlign.end,
-              }[alignment],
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          Column(
-            crossAxisAlignment: alignment,
-            children: item.warnings
-                .map(
-                  (warning) => Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.error,
-                        size: 20,
-                        color: Theme.of(context).colorScheme.warningText,
-                      ),
-                      Flexible(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(2, 2, 0, 0),
-                          child: Text(
-                            warning,
-                            style: Theme.of(context)
-                                .textTheme
-                                .labelSmall!
-                                .merge(TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .warningText)),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-                .toList(),
-          )
+          // Column(
+          //   crossAxisAlignment: alignment,
+          //   children: item.warnings
+          //       .map(
+          //         (warning) => Row(
+          //           crossAxisAlignment: CrossAxisAlignment.start,
+          //           children: [
+          //             Icon(
+          //               Icons.error,
+          //               size: 20,
+          //               color: Theme.of(context).colorScheme.warningText,
+          //             ),
+          //             Flexible(
+          //               child: Padding(
+          //                 padding: const EdgeInsets.fromLTRB(2, 2, 0, 0),
+          //                 child: Text(
+          //                   warning,
+          //                   style: Theme.of(context)
+          //                       .textTheme
+          //                       .labelSmall!
+          //                       .merge(TextStyle(
+          //                           color: Theme.of(context)
+          //                               .colorScheme
+          //                               .warningText)),
+          //                 ),
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       )
+          //       .toList(),
+          // )
         ],
       ),
     );
