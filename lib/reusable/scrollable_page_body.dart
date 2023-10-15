@@ -1,25 +1,27 @@
 import 'package:flutter/material.dart';
 
-class ScrollablePageBody extends StatefulWidget {
+class ScrollablePageBody extends StatelessWidget {
   const ScrollablePageBody({
     super.key,
     required this.children,
     this.padding = const EdgeInsets.fromLTRB(24, 16, 24, 16),
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.onDrag,
   });
   final List<Widget> children;
   final EdgeInsets padding;
+  final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
-  @override
-  State<ScrollablePageBody> createState() => _ScrollablePageBodyState();
-}
-
-class _ScrollablePageBodyState extends State<ScrollablePageBody> {
   @override
   Widget build(BuildContext context) {
     return Container(
       color: Theme.of(context).colorScheme.background,
       child: NotificationListener<ScrollUpdateNotification>(
         onNotification: (notification) {
+          if (keyboardDismissBehavior ==
+              ScrollViewKeyboardDismissBehavior.manual) {
+            return false;
+          }
+
           final FocusScopeNode focusScope = FocusScope.of(context);
           if (notification.dragDetails != null &&
               focusScope.hasFocus &&
@@ -31,7 +33,7 @@ class _ScrollablePageBodyState extends State<ScrollablePageBody> {
         child: SingleChildScrollView(
             child: SafeArea(
           child: Padding(
-            padding: widget.padding,
+            padding: padding,
             child: LayoutBuilder(builder: (context, constraints) {
               return Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -44,7 +46,7 @@ class _ScrollablePageBodyState extends State<ScrollablePageBody> {
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: widget.children,
+                      children: children,
                     ),
                   ),
                 ],

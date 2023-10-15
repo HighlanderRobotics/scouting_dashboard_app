@@ -1032,13 +1032,14 @@ class NoScheduleMessage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(30),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'Schedule not yet available for $tournament',
+            'No matches for $tournament',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           Text(
-            "If you have the correct tournament selected, we're still waiting for the match schedule to be posted on The Blue Alliance. If it is already, check back soon. We'll have it up as soon as we can.",
+            "If it's on The Blue Alliance and the schedule has been posted, someone will need to add them to Lovat automatically. If it's a custom tournament, someone will need to manually add the matches.",
             style: Theme.of(context).textTheme.bodyMedium,
           )
         ].withSpaceBetween(height: 10),

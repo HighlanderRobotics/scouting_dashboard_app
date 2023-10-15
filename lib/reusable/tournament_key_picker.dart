@@ -6,6 +6,9 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/pages/custom_tournament.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 
 class TournamentKeyPicker extends StatefulWidget {
@@ -26,12 +29,18 @@ class TournamentKeyPicker extends StatefulWidget {
 
 class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
   List<Tournament> tournaments = [];
+  bool isScoutingLead = false;
   bool hasError = false;
 
   bool initialized = false;
   Tournament? selectedItem;
 
   Future<void> getTournaments() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isScoutingLead = prefs.getString('role') == 'scouting_lead';
+    });
+
     late final http.Response response;
 
     try {
@@ -134,10 +143,61 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                     backgroundColor:
                         Theme.of(context).colorScheme.surfaceVariant,
                   ),
+                  emptyBuilder: (context, searchEntry) {
+                    return SingleChildScrollView(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              "Your query doesn't match any tournaments on The\u{00A0}Blue\u{00A0}Alliance.",
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              "If you're at a tournament that doesn't publish a match schedule to FIRST or The\u{00A0}Blue\u{00A0}Alliance, ${isScoutingLead ? 'you' : 'a scouting lead'} can add a custom tournament.",
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
+                            const SizedBox(height: 20),
+                            if (isScoutingLead)
+                              FilledButton(
+                                onPressed: () {
+                                  final thisRoute = ModalRoute.of(context);
+
+                                  Navigator.of(context).pushWidget(
+                                    CustomTournamentPage(
+                                      initialName: searchEntry,
+                                      tournaments: tournaments,
+                                      onCreate: (value) {
+                                        getTournaments();
+
+                                        setState(() {
+                                          selectedItem = value;
+                                        });
+                                        widget.onChanged(value);
+
+                                        Navigator.of(context).pop();
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  );
+                                },
+                                child: const Text("Create one"),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
                   fit: FlexFit.loose,
                   showSearchBox: true,
                   searchFieldProps: const TextFieldProps(
                     autofocus: true,
+                    textCapitalization: TextCapitalization.words,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(),
                       label: Text("Search"),
