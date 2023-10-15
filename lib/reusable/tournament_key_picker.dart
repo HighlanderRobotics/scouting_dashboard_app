@@ -38,7 +38,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
   Future<void> getTournaments() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      isScoutingLead = prefs.getString('role') == 'scouting_lead';
+      isScoutingLead = prefs.getString('role') == '8033_scouting_lead';
     });
 
     late final http.Response response;
