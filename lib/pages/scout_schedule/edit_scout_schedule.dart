@@ -106,10 +106,10 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                       direction: DismissDirection.endToStart,
                       background: Container(
                         color: Colors.red[900],
-                        child: Center(
+                        child: const Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.end,
-                            children: const [
+                            children: [
                               Icon(Icons.delete),
                               SizedBox(width: 30),
                             ],
