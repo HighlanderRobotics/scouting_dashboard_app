@@ -16,7 +16,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+      elevation: 0,
       child: Padding(
         padding: const EdgeInsets.all(12.0),
         child: SafeArea(
