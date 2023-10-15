@@ -69,6 +69,7 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                           Navigator.pop(context);
                         },
                   icon: const Icon(Icons.check),
+                  tooltip: "Save changes",
                   color: Colors.green,
                 )
               ],
@@ -147,6 +148,7 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                   'setParentState': setState,
                 });
               },
+              tooltip: "New shift",
               child: const Icon(Icons.add),
             ),
           );

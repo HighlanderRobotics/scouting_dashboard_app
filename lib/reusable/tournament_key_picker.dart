@@ -216,6 +216,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                           child: IconButton(
                             onPressed: () => Navigator.of(context).pop(),
                             icon: const Icon(Icons.expand_more),
+                            tooltip: "Close",
                             visualDensity: VisualDensity.comfortable,
                           ),
                         )

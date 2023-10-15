@@ -118,6 +118,7 @@ class _LoadedSettingsState extends State<LoadedSettings> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
+            tooltip: "Save changes",
             color: Colors.green,
             onPressed: getAllowSave()
                 ? () async {

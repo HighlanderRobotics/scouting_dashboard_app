@@ -79,6 +79,7 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
               );
             },
             icon: const Icon(Icons.format_strikethrough),
+            tooltip: "Mark a team as picked",
           ),
           IconButton(
             onPressed: () {
@@ -90,6 +91,7 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
               });
             },
             icon: const Icon(Icons.rule),
+            tooltip: "View picked teams",
           ),
         ],
       ),

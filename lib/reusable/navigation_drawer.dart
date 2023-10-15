@@ -28,10 +28,12 @@ class GlobalNavigationDrawer extends StatelessWidget {
                 children: [
                   const SectionHeader(title: "Lovat Dashboard"),
                   IconButton(
-                      onPressed: () {
-                        Navigator.of(context).popAndPushNamed("/settings");
-                      },
-                      icon: const Icon(Icons.settings)),
+                    onPressed: () {
+                      Navigator.of(context).popAndPushNamed("/settings");
+                    },
+                    icon: const Icon(Icons.settings),
+                    tooltip: "Settings",
+                  ),
                 ],
               ),
               Divider(

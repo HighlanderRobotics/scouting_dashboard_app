@@ -47,6 +47,7 @@ class _NewPicklistPageState extends State<NewPicklistPage> {
                           Navigator.of(context).pop();
                         },
                   icon: const Icon(Icons.check),
+                  tooltip: "Create",
                   color: Colors.green,
                 );
               })

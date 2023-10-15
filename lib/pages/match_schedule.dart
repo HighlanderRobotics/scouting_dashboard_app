@@ -225,6 +225,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                 Navigator.of(context).pushNamed("/display_qr_codes");
               },
               icon: const Icon(Icons.qr_code),
+              tooltip: "Display QR codes",
             ),
         ],
         bottom: PreferredSize(
@@ -319,7 +320,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       floatingActionButton: !fabVisible
           ? null
           : FloatingActionButton(
-              child: const Icon(Icons.arrow_upward),
+              tooltip: "Jump to top",
               onPressed: () {
                 setState(() {
                   fabVisible = false;
@@ -331,6 +332,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                   curve: Curves.easeInOut,
                 );
               },
+              child: const Icon(Icons.arrow_upward),
             ),
       body: PageBody(
         bottom: false,
@@ -640,6 +642,7 @@ class AllianceRow extends StatelessWidget {
                                             Navigator.of(context).pop();
                                           },
                                           icon: const Icon(Icons.close),
+                                          tooltip: "Close",
                                         ),
                                       ],
                                     ),
@@ -863,6 +866,7 @@ class _MatchesState extends State<Matches> {
                               );
                             },
                             icon: const Icon(Icons.psychology),
+                            tooltip: "Match Predictor",
                           ),
                           // IconButton(
                           //   onPressed: () {

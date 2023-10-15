@@ -70,6 +70,7 @@ class _PicklistsPageState extends State<PicklistsPage> {
                           }
                         });
                   },
+                  tooltip: "New picklist",
                   child: const Icon(Icons.add),
                 )
               : null,

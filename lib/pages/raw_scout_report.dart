@@ -188,6 +188,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                             ));
                   },
                   icon: const Icon(Icons.delete),
+                  tooltip: "Delete data",
                 ),
               ],
             ),

@@ -931,6 +931,7 @@ class AnimatedAutoPathControls extends StatelessWidget {
             icon: AnimatedIcons.play_pause,
             progress: playPauseController,
           ),
+          tooltip: playPauseController.value > 0.5 ? 'Pause' : 'Play',
         ),
         Expanded(
           child: Slider(

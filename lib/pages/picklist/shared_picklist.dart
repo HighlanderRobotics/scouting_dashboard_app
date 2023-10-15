@@ -55,6 +55,7 @@ class SharedPicklistPage extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.swap_vert),
+            tooltip: "Convert to mutable picklist",
           ),
           IconButton(
             onPressed: () {
@@ -64,6 +65,7 @@ class SharedPicklistPage extends StatelessWidget {
               });
             },
             icon: const Icon(Icons.balance),
+            tooltip: "View picklist weights",
           ),
         ],
       ),

@@ -152,6 +152,7 @@ class Note extends StatelessWidget {
                       );
                     },
                     icon: const Icon(Icons.edit_outlined),
+                    tooltip: "Edit note",
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
                     visualDensity: VisualDensity.compact,
                   ),

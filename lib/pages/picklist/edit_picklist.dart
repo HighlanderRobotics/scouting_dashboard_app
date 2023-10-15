@@ -37,6 +37,7 @@ class _EditPicklistPageState extends State<EditPicklistPage> {
               Navigator.of(context).pop();
             },
             icon: const Icon(Icons.check),
+            tooltip: "Save changes",
             color: Colors.green,
           ),
         ],

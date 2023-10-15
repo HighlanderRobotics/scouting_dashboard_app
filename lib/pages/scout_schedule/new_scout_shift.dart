@@ -57,6 +57,7 @@ class _NewScoutShiftPageState extends State<NewScoutShiftPage> {
                   }
                 : null,
             icon: const Icon(Icons.check),
+            tooltip: "Save shift",
             color: Colors.green,
           )
         ],

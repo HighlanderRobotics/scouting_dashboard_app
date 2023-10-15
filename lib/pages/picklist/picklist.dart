@@ -72,6 +72,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
               }
             },
             icon: const Icon(Icons.upload),
+            tooltip: "Share picklist with your team",
           ),
           IconButton(
             onPressed: () {
@@ -85,6 +86,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
               });
             },
             icon: const Icon(Icons.edit_outlined),
+            tooltip: "Edit picklist",
           )
         ],
       ),
@@ -154,6 +156,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                         Icons.balance,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                      tooltip: "View ${teamData['team']}'s z-scores",
                     ),
                     IconButton(
                       onPressed: () {
@@ -166,6 +169,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                         Icons.arrow_right,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
+                      tooltip: "Open team lookup for ${teamData['team']}",
                     ),
                   ],
                 ),

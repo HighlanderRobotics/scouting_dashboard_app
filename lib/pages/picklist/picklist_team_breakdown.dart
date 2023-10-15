@@ -45,12 +45,17 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
               weighted = !weighted;
             }),
             icon: Icon(weighted ? Icons.fitness_center : Icons.balance),
+            tooltip: weighted
+                ? 'Show unweighted z-scores'
+                : 'Show weighted z-scores',
           ),
           IconButton(
             onPressed: () => setState(() {
               useSameHeights = !useSameHeights;
             }),
             icon: Icon(useSameHeights ? Icons.expand : Icons.compress),
+            tooltip:
+                useSameHeights ? 'Size regions by value' : 'Use same sizes',
           ),
         ],
       ),

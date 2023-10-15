@@ -69,6 +69,7 @@ class AnalysisVisualizationState extends State<AnalysisVisualization> {
       return Center(
         child: IconButton(
           icon: const Icon(Icons.sentiment_dissatisfied_outlined),
+          tooltip: "Show error details",
           onPressed: () {
             showDialog(
                 context: context,

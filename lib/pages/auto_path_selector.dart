@@ -42,6 +42,7 @@ class _AutoPathSelectorPageState extends State<AutoPathSelectorPage> {
             },
             icon: const Icon(Icons.check),
             color: Colors.green,
+            tooltip: "Use this path",
           ),
         ],
       ),

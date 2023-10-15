@@ -55,6 +55,7 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
               setState(() {});
             },
             icon: const Icon(Icons.refresh),
+            tooltip: "Refresh",
           ),
         ],
       ),
