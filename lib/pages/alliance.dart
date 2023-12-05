@@ -30,7 +30,10 @@ class _AlliancePageState extends State<AlliancePage> {
 }
 
 class AllianceVizualization extends AnalysisVisualization {
-  AllianceVizualization({required AllianceAnalysis super.analysisFunction});
+  const AllianceVizualization({
+    super.key,
+    required AllianceAnalysis super.analysisFunction,
+  });
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
@@ -254,7 +253,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.arrow_back),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () {
               setState(() {
                 phase = OnboardingPagePhase.teamSelection;

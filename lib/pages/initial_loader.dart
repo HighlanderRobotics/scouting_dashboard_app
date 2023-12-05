@@ -1,13 +1,7 @@
-import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
-import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class InitialLoaderPage extends StatefulWidget {
   const InitialLoaderPage({super.key});

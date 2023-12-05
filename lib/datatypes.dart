@@ -84,7 +84,7 @@ extension PenaltyExtension on Penalty {
       case Penalty.none:
         return Colors.green[700]!;
       case Penalty.yellowCard:
-        return Color.fromARGB(255, 230, 251, 45);
+        return const Color.fromARGB(255, 230, 251, 45);
       case Penalty.redCard:
         return Colors.red[700]!;
       default:
@@ -121,7 +121,7 @@ class ScoringMethod {
 
 extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withSpaceBetween({double? width, double? height}) => [
-        for (int i = 0; i < this.length; i++) ...[
+        for (int i = 0; i < length; i++) ...[
           if (i > 0) SizedBox(width: width, height: height),
           this[i],
         ],

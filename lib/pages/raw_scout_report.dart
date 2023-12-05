@@ -51,9 +51,9 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                 ? ScrollablePageBody(children: [
                     Text("Encountered an error: ${snapshot.error}"),
                   ])
-                : PageBody(
+                : const PageBody(
                     child: Column(
-                    children: const [
+                    children: [
                       LinearProgressIndicator(),
                     ],
                   )),
@@ -170,7 +170,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
 
                                     Navigator.of(context).pop();
                                   },
-                                  child: const Text("Delete it"),
                                   style: ButtonStyle(
                                     backgroundColor:
                                         MaterialStateColor.resolveWith(
@@ -183,6 +182,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                                           Theme.of(context).colorScheme.onError,
                                     ),
                                   ),
+                                  child: const Text("Delete it"),
                                 ),
                               ],
                             ));
