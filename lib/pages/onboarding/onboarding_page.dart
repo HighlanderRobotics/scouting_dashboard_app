@@ -149,6 +149,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
               onBoardingCompleted();
             },
           ),
+          OnboardingPagePhase.otherUserRegistering: OtherUserRegisteringPage(
+            onBack: () =>
+                setState(() => phase = OnboardingPagePhase.teamSelection),
+          ),
         }[phase] ??
         Center(child: Text("Error: Unknown phase $phase"));
   }
@@ -199,6 +203,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
         });
       } else if (status == RegistrationStatus.registeredOnTeam) {
         toSettingsOnboarding();
+      } else if (status == RegistrationStatus.pending) {
+        setState(() {
+          phase = OnboardingPagePhase.otherUserRegistering;
+        });
       } else {
         debugPrint("Unknown registration status: $status");
         setState(() {
@@ -1866,6 +1874,42 @@ class _AtTournamentPageState extends State<AtTournamentPage> {
                   textAlign: TextAlign.center,
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OtherUserRegisteringPage extends StatelessWidget {
+  const OtherUserRegisteringPage({super.key, this.onBack});
+
+  final dynamic Function()? onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Spacer(),
+            Text(
+              "Another user is registering",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              "Another user is currently registering this team. Please wait for them to finish.",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const Spacer(),
+            FilledButton(
+              onPressed: () {
+                onBack?.call();
+              },
+              child: const Text("Back"),
+            ),
           ],
         ),
       ),
