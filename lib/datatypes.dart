@@ -15,6 +15,13 @@ class Tournament {
 
   @override
   String toString() => localized;
+
+  factory Tournament.fromJson(Map<String, dynamic> json) {
+    return Tournament(
+      json['key'],
+      "${(json['date'] as String).split('-')[0]} ${json['name']}",
+    );
+  }
 }
 
 Future<ScoutSchedule> getScoutSchedule() async {

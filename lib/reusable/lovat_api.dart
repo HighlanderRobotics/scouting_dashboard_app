@@ -4,6 +4,7 @@ import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
@@ -124,6 +125,36 @@ class LovatAPI {
     return PartialTeamList(teams: teams, total: json['count']);
   }
 
+  Future<PartialTournamentList> getTournaments({
+    int? take,
+    int? skip,
+    String filter = '',
+  }) async {
+    final response = await get(
+      '/v1/manager/tournaments',
+      query: {
+        if (take != null) 'take': take.toString(),
+        if (skip != null) 'skip': skip.toString(),
+        'filter': filter,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      throw Exception('Failed to get tournaments');
+    }
+
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+    final tournamentJson = json['tournaments'] as List<dynamic>;
+
+    final tournaments =
+        tournamentJson.map((e) => Tournament.fromJson(e)).toList();
+
+    return PartialTournamentList(
+      tournaments: tournaments,
+      total: json['count'],
+    );
+  }
+
   Future<void> setUsername(String username) async {
     final response = await post(
       '/v1/manager/onboarding/username',
@@ -233,6 +264,28 @@ class LovatAPI {
       throw Exception('Failed to set source teams');
     }
   }
+
+  Future<void> setSourceTournamentKeys(
+    List<String> tournamentKeys,
+  ) async {
+    final response = await post(
+      '/v1/manager/settings/tournamentsource',
+      body: {
+        'tournaments': tournamentKeys,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to set source tournaments');
+    }
+  }
+
+  Future<void> setSourceTournaments(
+    List<Tournament> tournaments,
+  ) async {
+    await setSourceTournamentKeys(tournaments.map((e) => e.key).toList());
+  }
 }
 
 class PartialTeamList {
@@ -242,6 +295,16 @@ class PartialTeamList {
   });
 
   final List<Team> teams;
+  final int total;
+}
+
+class PartialTournamentList {
+  const PartialTournamentList({
+    required this.tournaments,
+    required this.total,
+  });
+
+  final List<Tournament> tournaments;
   final int total;
 }
 

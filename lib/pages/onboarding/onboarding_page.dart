@@ -138,6 +138,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
               });
             },
           ),
+          OnboardingPagePhase.tournamentSettings: TournamentSettingsPage(
+            onSubmit: () {
+              onBoardingCompleted();
+            },
+          ),
         }[phase] ??
         Center(child: Text("Error: Unknown phase $phase"));
   }
@@ -1456,6 +1461,226 @@ class _TeamCodePageState extends State<TeamCodePage> {
               ],
             ),
           ].withSpaceBetween(height: 14),
+        ),
+      ),
+    );
+  }
+}
+
+// The user chooses between sourcing data from all tournaments or can select specific tournaments
+class TournamentSettingsPage extends StatefulWidget {
+  const TournamentSettingsPage({
+    super.key,
+    this.onSubmit,
+  });
+
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<TournamentSettingsPage> createState() => _TournamentSettingsPageState();
+}
+
+class _TournamentSettingsPageState extends State<TournamentSettingsPage> {
+  List<Tournament>? tournaments;
+  List<Tournament>? filteredTournaments;
+  List<Tournament> selectedTournaments = [];
+  String? error;
+  bool submitLoading = false;
+  String filterText = '';
+
+  void fetchTournaments() async {
+    try {
+      final tournamentList = await lovatAPI.getTournaments();
+
+      setState(() {
+        tournaments = tournamentList.tournaments;
+        filterTournaments(filterText);
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        error = "Error fetching tournaments";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTournaments();
+  }
+
+  void filterTournaments(String value) async {
+    final newFilteredTournaments = tournaments
+        ?.where((tournament) =>
+            tournament.localized.toLowerCase().contains(value.toLowerCase()))
+        .toList();
+
+    setState(() {
+      filteredTournaments = newFilteredTournaments;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        padding: EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                  child: Column(children: [
+                    Text(
+                      "Source tournaments",
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const Text("Which tournaments should we source data from?"),
+                    const SizedBox(height: 14),
+                    TextField(
+                      onChanged: (text) {
+                        filterTournaments(text);
+                        setState(() {
+                          filterText = text;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        filled: true,
+                        labelText: "Search",
+                      ),
+                      autofocus: true,
+                    )
+                  ]),
+                ),
+                if (filteredTournaments == null) ...[
+                  Expanded(child: SkeletonListView()),
+                ] else ...[
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredTournaments!.length,
+                      itemBuilder: (context, index) {
+                        final tournament = filteredTournaments![index];
+
+                        return ListTile(
+                            title: Text(tournament.localized),
+                            trailing: Checkbox(
+                              value: selectedTournaments.contains(tournament),
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedTournaments.add(tournament);
+                                  } else {
+                                    selectedTournaments.remove(tournament);
+                                  }
+                                });
+                              },
+                            ),
+                            onTap: () => {
+                                  setState(() {
+                                    if (selectedTournaments
+                                        .contains(tournament)) {
+                                      selectedTournaments.remove(tournament);
+                                    } else {
+                                      selectedTournaments.add(tournament);
+                                    }
+                                  })
+                                });
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (error != null) ...[
+                    Text(
+                      error!,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  if (selectedTournaments.isNotEmpty)
+                    FilledButton(
+                      onPressed: selectedTournaments.isEmpty || submitLoading
+                          ? null
+                          : () async {
+                              try {
+                                setState(() {
+                                  submitLoading = true;
+                                  error = null;
+                                });
+
+                                await lovatAPI
+                                    .setSourceTournaments(selectedTournaments);
+
+                                await widget.onSubmit?.call();
+                              } catch (e) {
+                                setState(() {
+                                  error = "Error setting source tournaments";
+                                });
+                              } finally {
+                                setState(() {
+                                  submitLoading = false;
+                                });
+                              }
+                            },
+                      child: submitLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            )
+                          : const Text("Next"),
+                    ),
+                  if (selectedTournaments.isEmpty && tournaments != null)
+                    FilledButton(
+                      onPressed: submitLoading
+                          ? null
+                          : () async {
+                              try {
+                                setState(() {
+                                  submitLoading = true;
+                                  error = null;
+                                });
+
+                                await lovatAPI.setSourceTournaments(
+                                  tournaments!,
+                                );
+
+                                await widget.onSubmit?.call();
+                              } catch (e) {
+                                setState(() {
+                                  error = "Error setting source tournaments";
+                                });
+                              } finally {
+                                setState(() {
+                                  submitLoading = false;
+                                });
+                              }
+                            },
+                      child: submitLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 3),
+                            )
+                          : const Text("Use all"),
+                    ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
