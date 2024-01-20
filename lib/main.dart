@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/pages/match_suggestions.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
@@ -31,6 +32,7 @@ import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
+import 'package:scouting_dashboard_app/reusable/models/team.dart';
 
 import 'pages/scout_schedule/edit_scout_shift.dart';
 
@@ -73,6 +75,11 @@ void main() async {
       '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
       '/mutable_picklist': (context) => const MutablePicklistPage(),
       '/picked_teams': (context) => const PickedTeamsPage(),
+      '/specific_source_teams': (context) => SpecificSourceTeamPage(
+            onSubmit: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .onSubmit,
+          ),
     },
     theme: ThemeData(
       useMaterial3: true,

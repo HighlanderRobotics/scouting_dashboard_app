@@ -9,6 +9,8 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,14 +28,24 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> init() async {
     try {
-      await auth0.credentialsManager.clearCredentials();
       final credentials = await auth0.credentialsManager.credentials();
 
-      setState(() {
-        phase = OnboardingPagePhase.username;
-      });
+      final profile = await lovatAPI.getUserProfile();
+
+      if (profile.team != null) {
+        toRegistrationStatusView(profile.team!);
+      } else {
+        setState(() {
+          phase = OnboardingPagePhase.teamSelection;
+        });
+      }
     } on CredentialsManagerException catch (e) {
       if (e.code == "NO_CREDENTIALS") {
+        setState(() {
+          phase = OnboardingPagePhase.welcome;
+        });
+      } else if (e.code == "NO_REFRESH_TOKEN") {
+        debugPrint("No refresh token");
         setState(() {
           phase = OnboardingPagePhase.welcome;
         });
@@ -118,53 +130,69 @@ class _OnboardingPageState extends State<OnboardingPage> {
             }),
             onSubmit: () => toRegistrationStatusView(team!),
           ),
+          OnboardingPagePhase.teamDataSettings: SourceTeamSettingsPage(
+            team: team,
+            onSubmit: () {
+              setState(() {
+                phase = OnboardingPagePhase.tournamentSettings;
+              });
+            },
+          ),
         }[phase] ??
         Center(child: Text("Error: Unknown phase $phase"));
   }
 
-  Future<void> toRegistrationStatusView(Team t) async {
+  Future<void> toRegistrationStatusView(Team? t) async {
     setState(() {
       team = t;
       phase = OnboardingPagePhase.loading;
     });
 
     try {
-      final status = await lovatAPI.getRegistrationStatus(t.number);
+      final profile = await lovatAPI.getUserProfile();
+      final teamNumber = t?.number ?? profile.team?.number;
+      final status = teamNumber == null
+          ? null
+          : await lovatAPI.getRegistrationStatus(
+              teamNumber); // The status of the team, not the user
 
-      switch (status) {
-        case RegistrationStatus.notStarted:
-          setState(() {
-            phase = OnboardingPagePhase.registerTeamChoice;
-          });
-          break;
-        case RegistrationStatus.pending:
-          setState(() {
-            phase = OnboardingPagePhase.otherUserRegistering;
-          });
-          break;
-        case RegistrationStatus.pendingEmailVerification:
-          setState(() {
-            phase = OnboardingPagePhase.emailVerification;
-          });
-          break;
-        case RegistrationStatus.pendingTeamWebsite:
-          setState(() {
-            phase = OnboardingPagePhase.teamWebsite;
-          });
-          break;
-        case RegistrationStatus.pendingTeamVerification:
-          setState(() {
-            phase = OnboardingPagePhase.teamVerification;
-          });
-          break;
-        case RegistrationStatus.registeredNotOnTeam:
-          setState(() {
-            phase = OnboardingPagePhase.teamCode;
-          });
-          break;
-        case RegistrationStatus.registeredOnTeam:
-          toSettingsOnboarding();
-          break;
+      final isUsernameSet = profile.username != null;
+
+      if (!isUsernameSet) {
+        setState(() {
+          phase = OnboardingPagePhase.username;
+        });
+      } else if (status == null) {
+        setState(() {
+          phase = OnboardingPagePhase.teamSelection;
+        });
+      } else if (status == RegistrationStatus.notStarted) {
+        setState(() {
+          phase = OnboardingPagePhase.registerTeamChoice;
+        });
+      } else if (status == RegistrationStatus.registeredNotOnTeam) {
+        setState(() {
+          phase = OnboardingPagePhase.teamCode;
+        });
+      } else if (status == RegistrationStatus.pendingEmailVerification) {
+        setState(() {
+          phase = OnboardingPagePhase.emailVerification;
+        });
+      } else if (status == RegistrationStatus.pendingTeamWebsite) {
+        setState(() {
+          phase = OnboardingPagePhase.teamWebsite;
+        });
+      } else if (status == RegistrationStatus.pendingTeamVerification) {
+        setState(() {
+          phase = OnboardingPagePhase.teamVerification;
+        });
+      } else if (status == RegistrationStatus.registeredOnTeam) {
+        toSettingsOnboarding();
+      } else {
+        debugPrint("Unknown registration status: $status");
+        setState(() {
+          phase = OnboardingPagePhase.error;
+        });
       }
     } catch (e) {
       debugPrint(e.toString());
@@ -229,9 +257,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
       debugPrint((await auth0.credentialsManager.credentials()).accessToken);
 
-      setState(() {
-        phase = OnboardingPagePhase.username;
-      });
+      toRegistrationStatusView(null);
     } catch (e) {
       debugPrint(e.toString());
 
@@ -241,12 +267,20 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void toSettingsOnboarding() {
-    // TODO: Implement settings onboarding
+  void onBoardingCompleted() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt("onboardingVersion", 1);
+
     Navigator.of(context).pushNamedAndRemoveUntil(
       '/match_schedule',
       (route) => false,
     );
+  }
+
+  void toSettingsOnboarding() {
+    setState(() {
+      phase = OnboardingPagePhase.teamDataSettings;
+    });
   }
 
   Widget registerTeamChoicePage() {
@@ -312,6 +346,457 @@ class LoadingPage extends StatelessWidget {
         child: Center(
           child: CircularProgressIndicator(),
         ),
+      ),
+    );
+  }
+}
+
+class SourceTeamSettingsPage extends StatefulWidget {
+  const SourceTeamSettingsPage({
+    super.key,
+    this.team,
+    this.onSubmit,
+  });
+
+  final Team? team;
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<SourceTeamSettingsPage> createState() => _SourceTeamSettingsPageState();
+}
+
+class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
+  SourceTeamSettingsMode? mode;
+  List<Team>? teams;
+
+  bool loading = false;
+  String? error;
+
+  bool get isValid => mode != null;
+
+  Future<void> submit() async {
+    setState(() {
+      error = null;
+    });
+
+    if (mode == SourceTeamSettingsMode.specificTeams) {
+      Navigator.of(context).pushNamed(
+        '/specific_source_teams',
+        arguments: SpecificSourceTeamsArguments(
+          onSubmit: (teams) async {
+            setState(() {
+              this.teams = teams;
+            });
+
+            try {
+              setState(() {
+                loading = true;
+              });
+
+              await lovatAPI.setSourceTeams(
+                SourceTeamSettingsMode.specificTeams,
+                teams: teams.map((e) => e.number).toList(),
+              );
+
+              widget.onSubmit?.call();
+              Navigator.of(context).popUntil((a) => a.isFirst);
+            } catch (e) {
+              debugPrint(e.toString());
+              setState(() {
+                error = "Error setting source teams";
+              });
+            } finally {
+              setState(() {
+                loading = false;
+              });
+            }
+          },
+        ),
+      );
+    } else {
+      try {
+        setState(() {
+          loading = true;
+        });
+
+        await lovatAPI.setSourceTeams(mode!);
+
+        widget.onSubmit?.call();
+      } catch (e) {
+        debugPrint(e.toString());
+        setState(() {
+          error = "Error setting source teams";
+        });
+      } finally {
+        setState(() {
+          loading = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Where should we source your data?",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            const SizedBox(height: 10),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: SourceTeamSettingsMode.values
+                  .where((element) =>
+                      widget.team != null ||
+                      element != SourceTeamSettingsMode.thisTeam)
+                  .map(
+                    (option) =>
+                        option.widget(context, widget.team, mode == option, () {
+                      setState(() {
+                        mode = option;
+                      });
+                    }),
+                  )
+                  .toList()
+                  .withSpaceBetween(height: 20),
+            ),
+            const Spacer(),
+            if (error != null) ...[
+              Text(
+                error!,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+            ],
+            FilledButton(
+              onPressed: isValid && !loading ? submit : null,
+              child: loading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    )
+                  : const Text("Next"),
+            ),
+          ].withSpaceBetween(height: 14),
+        ),
+      ),
+    );
+  }
+}
+
+class SpecificSourceTeamsArguments {
+  const SpecificSourceTeamsArguments({
+    required this.onSubmit,
+  });
+
+  final dynamic Function(List<Team> teams) onSubmit;
+}
+
+class SpecificSourceTeamPage extends StatefulWidget {
+  const SpecificSourceTeamPage({
+    super.key,
+    this.onSubmit,
+  });
+
+  final dynamic Function(List<Team> teams)? onSubmit;
+
+  @override
+  State<SpecificSourceTeamPage> createState() => _SpecificSourceTeamPageState();
+}
+
+class _SpecificSourceTeamPageState extends State<SpecificSourceTeamPage> {
+  List<Team>? teams;
+  List<Team>? filteredTeams;
+  List<Team> selectedTeams = [];
+  String? error;
+  bool submitLoading = false;
+  String filterText = '';
+
+  void fetchTeams() async {
+    try {
+      final teamList = await lovatAPI.getTeams();
+
+      setState(() {
+        teams = teamList.teams;
+        filterTeams(filterText);
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        error = "Error fetching teams";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTeams();
+  }
+
+  void filterTeams(String value) async {
+    final newFilteredTeams = teams?.where((element) {
+      return element.name.toLowerCase().contains(value.toLowerCase()) ||
+          element.number.toString().contains(value);
+    }).toList();
+
+    setState(() {
+      filteredTeams = newFilteredTeams;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        padding: EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Choose teams",
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                      TextField(
+                        onChanged: (text) {
+                          filterTeams(text);
+                          setState(() {
+                            filterText = text;
+                          });
+                        },
+                        decoration: const InputDecoration(
+                          filled: true,
+                          labelText: "Search",
+                        ),
+                        autofocus: true,
+                      )
+                    ].withSpaceBetween(height: 14),
+                  ),
+                ),
+                if (filteredTeams == null) ...[
+                  Expanded(child: SkeletonListView()),
+                ] else ...[
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredTeams!.length,
+                      itemBuilder: (context, index) {
+                        final team = filteredTeams![index];
+
+                        return ListTile(
+                            title: Text(team.name),
+                            subtitle: Text(team.number.toString()),
+                            trailing: Checkbox(
+                              value: selectedTeams.contains(team),
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    selectedTeams.add(team);
+                                  } else {
+                                    selectedTeams.remove(team);
+                                  }
+                                });
+                              },
+                            ),
+                            onTap: () => {
+                                  setState(() {
+                                    if (selectedTeams.contains(team)) {
+                                      selectedTeams.remove(team);
+                                    } else {
+                                      selectedTeams.add(team);
+                                    }
+                                  })
+                                });
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (error != null) ...[
+                    Text(
+                      error!,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  FilledButton(
+                    onPressed: selectedTeams.isEmpty || submitLoading
+                        ? null
+                        : () async {
+                            try {
+                              setState(() {
+                                submitLoading = true;
+                                error = null;
+                              });
+                              await widget.onSubmit?.call(selectedTeams);
+                            } catch (e) {
+                              setState(() {
+                                error = "Error setting source teams";
+                              });
+                            } finally {
+                              setState(() {
+                                submitLoading = false;
+                              });
+                            }
+                          },
+                    child: submitLoading
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 3),
+                          )
+                        : const Text("Next"),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum SourceTeamSettingsMode {
+  thisTeam,
+  allTeams,
+  specificTeams,
+}
+
+extension SourceTeamSettingsModeExtension on SourceTeamSettingsMode {
+  String get identifier {
+    switch (this) {
+      case SourceTeamSettingsMode.thisTeam:
+        return "THIS_TEAM";
+      case SourceTeamSettingsMode.allTeams:
+        return "ALL_TEAMS";
+      case SourceTeamSettingsMode.specificTeams:
+        return "SPECIFIC_TEAMS";
+    }
+  }
+
+  String description(Team? team) {
+    switch (this) {
+      case SourceTeamSettingsMode.thisTeam:
+        return "Collected only by ${team?.number ?? 'your team'}";
+      case SourceTeamSettingsMode.allTeams:
+        return "Collected by any team";
+      case SourceTeamSettingsMode.specificTeams:
+        return "Choose specific teams";
+    }
+  }
+
+  String get imagePrefix {
+    switch (this) {
+      case SourceTeamSettingsMode.thisTeam:
+        return "only_team_";
+      case SourceTeamSettingsMode.allTeams:
+        return "any_team_";
+      case SourceTeamSettingsMode.specificTeams:
+        return "specific_teams_";
+    }
+  }
+
+  String imagePath(bool selected) {
+    return "assets/images/$imagePrefix${selected ? 'selected' : 'default'}.png";
+  }
+
+  Widget widget(
+    BuildContext context,
+    Team? team,
+    bool selected,
+    dynamic Function() onPressed,
+  ) {
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      decoration: BoxDecoration(
+        color: selected
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(7),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.primary,
+          width: 1,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: AnimatedCrossFade(
+              firstChild: Image.asset(imagePath(true)),
+              secondChild: Image.asset(imagePath(false)),
+              crossFadeState: selected
+                  ? CrossFadeState.showFirst
+                  : CrossFadeState.showSecond,
+              duration: const Duration(
+                milliseconds: 250,
+              ), // TODO: Check if this looks good in release mode
+            ),
+          ),
+          Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              onTap: onPressed,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Opacity(
+                      opacity: 0,
+                      child: Image.asset(
+                        imagePath(selected),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 7,
+                    ),
+                    child: Text(
+                      description(team),
+                      style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                            color: selected
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                          ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -782,26 +1267,26 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
           return skeletonTeamTile();
         }
       });
+}
 
-  SkeletonListTile skeletonTeamTile() {
-    return SkeletonListTile(
-      hasLeading: false,
-      hasSubtitle: true,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10,
-      ),
-      titleStyle: const SkeletonLineStyle(
-        randomLength: true,
-        maxLength: 200,
-        minLength: 50,
-        height: 22,
-      ),
-      subtitleStyle: const SkeletonLineStyle(
-        width: 50,
-        height: 16,
-      ),
-    );
-  }
+SkeletonListTile skeletonTeamTile() {
+  return SkeletonListTile(
+    hasLeading: false,
+    hasSubtitle: true,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 10,
+    ),
+    titleStyle: const SkeletonLineStyle(
+      randomLength: true,
+      maxLength: 200,
+      minLength: 50,
+      height: 22,
+    ),
+    subtitleStyle: const SkeletonLineStyle(
+      width: 50,
+      height: 16,
+    ),
+  );
 }
 
 class TeamCodePage extends StatefulWidget {
@@ -989,5 +1474,7 @@ enum OnboardingPagePhase {
   teamVerification,
   teamCode,
   otherUserRegistering,
+  teamDataSettings,
+  tournamentSettings,
   error,
 }

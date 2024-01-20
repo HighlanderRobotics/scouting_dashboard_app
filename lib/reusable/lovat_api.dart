@@ -4,7 +4,10 @@ import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
+import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LovatAPI {
   const LovatAPI(this.baseUrl);
@@ -14,14 +17,30 @@ class LovatAPI {
   Future<String?> getAccessToken() async {
     try {
       final credentials = await auth0.credentialsManager.credentials();
-      return credentials.accessToken;
+
+      if (credentials.expiresAt.isBefore(DateTime.now())) {
+        if (credentials.refreshToken == null) {
+          return (await auth0.webAuthentication().login()).accessToken;
+        }
+
+        final newCredentials = await auth0.api
+            .renewCredentials(refreshToken: credentials.accessToken);
+
+        await auth0.credentialsManager.storeCredentials(newCredentials);
+
+        return newCredentials.accessToken;
+      } else {
+        return credentials.accessToken;
+      }
     } on CredentialsManagerException {
-      return null;
+      return (await auth0.webAuthentication().login()).accessToken;
     }
   }
 
   Future<http.Response?> get(String path, {Map<String, String>? query}) async {
     final token = await getAccessToken();
+
+    debugPrint(token);
 
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
@@ -80,15 +99,15 @@ class LovatAPI {
 
   // Specific endpoints
   Future<PartialTeamList> getTeams({
-    int take = 10,
-    int skip = 0,
+    int? take,
+    int? skip,
     String filter = '',
   }) async {
     final response = await get(
-      '/manager/teams',
+      '/v1/manager/teams',
       query: {
-        'take': take.toString(),
-        'skip': skip.toString(),
+        if (take != null) 'take': take.toString(),
+        if (skip != null) 'skip': skip.toString(),
         'filter': filter,
       },
     );
@@ -107,7 +126,7 @@ class LovatAPI {
 
   Future<void> setUsername(String username) async {
     final response = await post(
-      '/manager/onboarding/username',
+      '/v1/manager/onboarding/username',
       body: {
         'username': username,
       },
@@ -121,19 +140,39 @@ class LovatAPI {
 
   Future<RegistrationStatus> getRegistrationStatus(int teamNumber) async {
     final response = await get(
-      '/manager/registeredteams/$teamNumber/registrationstatus',
+      '/v1/manager/registeredteams/$teamNumber/registrationstatus',
     );
 
     if (response?.statusCode != 200) {
       throw Exception('Failed to get registration status');
     }
 
-    return RegistrationStatusExtension.fromString(response!.body);
+    final prefs = await SharedPreferences.getInstance();
+
+    final registrationStatus =
+        RegistrationStatusExtension.fromString(response!.body);
+
+    prefs.setString('cachedRegistrationStatus', registrationStatus.toString());
+
+    return registrationStatus;
+  }
+
+  Future<RegistrationStatus> getCachedRegistrationStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final cachedRegistrationStatus =
+        prefs.getString('cachedRegistrationStatus');
+
+    if (cachedRegistrationStatus == null) {
+      return RegistrationStatus.notStarted;
+    }
+
+    return RegistrationStatusExtension.fromString(cachedRegistrationStatus);
   }
 
   Future<void> registerTeam(int teamNumber, String email) async {
     final response = await post(
-      '/manager/onboarding/team',
+      '/v1/manager/onboarding/team',
       body: {
         'email': email,
         'number': teamNumber,
@@ -148,7 +187,7 @@ class LovatAPI {
 
   Future<bool> joinTeamByCode(int teamNumber, String code) async {
     final response = await post(
-      '/manager/onboarding/teamcode',
+      '/v1/manager/onboarding/teamcode',
       query: {
         'code': code,
         'team': teamNumber.toString(),
@@ -162,6 +201,36 @@ class LovatAPI {
     } else {
       debugPrint(response?.body ?? '');
       throw Exception('Failed to join team');
+    }
+  }
+
+  Future<LovatUserProfile> getUserProfile() async {
+    final response = await get('/v1/manager/profile');
+
+    if (response?.statusCode != 200) {
+      throw Exception('Failed to get user profile');
+    }
+
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+    return LovatUserProfile.fromJson(json);
+  }
+
+  Future<void> setSourceTeams(
+    SourceTeamSettingsMode mode, {
+    List<int>? teams,
+  }) async {
+    final response = await post(
+      '/v1/manager/settings/teamsource',
+      body: {
+        'mode': mode.identifier,
+        'teams': teams,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to set source teams');
     }
   }
 }
@@ -238,5 +307,7 @@ extension RegistrationStatusExtension on RegistrationStatus {
 }
 
 const lovatAPI = LovatAPI(
-  kDebugMode ? "http://macbook-pro.local:3000" : "https://api.lovat.app",
+  kDebugMode
+      ? "https://curly-space-trout-g6r64pwwj5xcwx97-3000.preview.app.github.dev"
+      : "https://api.lovat.app",
 );
