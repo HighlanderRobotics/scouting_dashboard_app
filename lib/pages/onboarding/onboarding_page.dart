@@ -1120,8 +1120,44 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                     : const Text("I've verified the email"),
               ),
               TextButton(
-                onPressed: () {},
-                child: const Text("Resend email"),
+                onPressed: () async {
+                  final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                  try {
+                    setState(() {
+                      resentEmailLoading = true;
+                      errorText = null;
+                    });
+
+                    await lovatAPI.resendVerificationEmail();
+
+                    scaffoldMessenger.showSnackBar(
+                      const SnackBar(
+                        content: Text("Email resent"),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } on LovatAPIException catch (e) {
+                    setState(() {
+                      errorText = e.toString();
+                    });
+                  } catch (e) {
+                    setState(() {
+                      errorText = "Error resending email";
+                    });
+                  } finally {
+                    setState(() {
+                      resentEmailLoading = false;
+                    });
+                  }
+                },
+                child: resentEmailLoading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 3),
+                      )
+                    : const Text("Resend email"),
               ),
             ],
           ),
