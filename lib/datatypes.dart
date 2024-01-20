@@ -22,6 +22,24 @@ class Tournament {
       "${(json['date'] as String).split('-')[0]} ${json['name']}",
     );
   }
+
+  Future<void> storeAsCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('tournament', key);
+    await prefs.setString('tournamentName', localized);
+  }
+
+  static Future<Tournament?> getCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = prefs.getString('tournament');
+    final name = prefs.getString('tournamentName');
+
+    if (key == null || name == null) {
+      return null;
+    }
+
+    return Tournament(key, name);
+  }
 }
 
 Future<ScoutSchedule> getScoutSchedule() async {

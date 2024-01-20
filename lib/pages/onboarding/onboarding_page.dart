@@ -140,6 +140,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           OnboardingPagePhase.tournamentSettings: TournamentSettingsPage(
             onSubmit: () {
+              setState(() {
+                phase = OnboardingPagePhase.atTournament;
+              });
+            },
+          ),
+          OnboardingPagePhase.atTournament: AtTournamentPage(
+            onSubmit: () {
               onBoardingCompleted();
             },
           ),
@@ -1687,6 +1694,150 @@ class _TournamentSettingsPageState extends State<TournamentSettingsPage> {
   }
 }
 
+class AtTournamentPage extends StatefulWidget {
+  const AtTournamentPage({
+    super.key,
+    this.onSubmit,
+  });
+
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<AtTournamentPage> createState() => _AtTournamentPageState();
+}
+
+class _AtTournamentPageState extends State<AtTournamentPage> {
+  List<Tournament>? tournaments;
+  List<Tournament>? filteredTournaments;
+  bool submitLoading = false;
+  String filterText = '';
+  String? error;
+
+  void fetchTournaments() async {
+    try {
+      final tournamentList = await lovatAPI.getTournaments();
+
+      setState(() {
+        tournaments = tournamentList.tournaments;
+        filterTournaments(filterText);
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        error = "Error fetching tournaments";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchTournaments();
+  }
+
+  void filterTournaments(String value) async {
+    final newFilteredTournaments = tournaments
+        ?.where((tournament) =>
+            tournament.localized.toLowerCase().contains(value.toLowerCase()))
+        .toList();
+
+    setState(() {
+      filteredTournaments = newFilteredTournaments;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        padding: EdgeInsets.zero,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16).copyWith(bottom: 0),
+                  child: Column(children: [
+                    Text(
+                      "At tournament",
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                    const Text("Which tournament are you at?"),
+                    const SizedBox(height: 14),
+                    TextField(
+                      onChanged: (text) {
+                        filterTournaments(text);
+                        setState(() {
+                          filterText = text;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        filled: true,
+                        labelText: "Search",
+                      ),
+                      autofocus: true,
+                    )
+                  ]),
+                ),
+                if (filteredTournaments == null) ...[
+                  Expanded(child: SkeletonListView()),
+                ] else ...[
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: filteredTournaments!.length,
+                      itemBuilder: (context, index) {
+                        final tournament = filteredTournaments![index];
+
+                        return ListTile(
+                            title: Text(tournament.localized),
+                            trailing: const Icon(Icons.chevron_right),
+                            onTap: () async {
+                              if (submitLoading) return;
+
+                              setState(() {
+                                error = '';
+                              });
+
+                              try {
+                                setState(() {
+                                  submitLoading = true;
+                                });
+
+                                await tournament.storeAsCurrent();
+
+                                widget.onSubmit?.call();
+                              } catch (e) {
+                                setState(() {
+                                  error = "Error setting tournament";
+                                  submitLoading = false;
+                                });
+                              }
+                            });
+                      },
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            if (error != null)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  error!,
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 enum OnboardingPagePhase {
   welcome,
   loading,
@@ -1701,5 +1852,6 @@ enum OnboardingPagePhase {
   otherUserRegistering,
   teamDataSettings,
   tournamentSettings,
+  atTournament,
   error,
 }
