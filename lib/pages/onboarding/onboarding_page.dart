@@ -9,7 +9,6 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
-import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 import 'package:url_launcher/url_launcher.dart';
