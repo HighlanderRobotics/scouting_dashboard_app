@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
@@ -122,3 +123,8 @@ Future<String?> getServerAuthority() async {
 
   return prefs.getString("serverAuthority");
 }
+
+final auth0 = kDebugMode
+    ? Auth0('lovat.us.auth0.com', 'PaUUK4Sjmcdy5oueW7geI2rgMfuWd1G4')
+    : Auth0('lovat.us.auth0.com',
+        'PaUUK4Sjmcdy5oueW7geI2rgMfuWd1G4'); // TODO: Change this to the production Auth0 client ID when we're ready to deploy

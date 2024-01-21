@@ -87,15 +87,15 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                               blueWinning: snapshot.data['blueWinning'],
                             ),
                           ),
-                          TabBar(tabs: [
+                          const TabBar(tabs: [
                             Column(
-                              children: const [
+                              children: [
                                 Text("Red"),
                                 SizedBox(height: 7),
                               ],
                             ),
                             Column(
-                              children: const [
+                              children: [
                                 Text("Blue"),
                                 SizedBox(height: 7),
                               ],

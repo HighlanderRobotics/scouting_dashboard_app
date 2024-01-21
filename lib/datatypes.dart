@@ -15,6 +15,31 @@ class Tournament {
 
   @override
   String toString() => localized;
+
+  factory Tournament.fromJson(Map<String, dynamic> json) {
+    return Tournament(
+      json['key'],
+      "${(json['date'] as String).split('-')[0]} ${json['name']}",
+    );
+  }
+
+  Future<void> storeAsCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('tournament', key);
+    await prefs.setString('tournamentName', localized);
+  }
+
+  static Future<Tournament?> getCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = prefs.getString('tournament');
+    final name = prefs.getString('tournamentName');
+
+    if (key == null || name == null) {
+      return null;
+    }
+
+    return Tournament(key, name);
+  }
 }
 
 Future<ScoutSchedule> getScoutSchedule() async {
@@ -84,7 +109,7 @@ extension PenaltyExtension on Penalty {
       case Penalty.none:
         return Colors.green[700]!;
       case Penalty.yellowCard:
-        return Color.fromARGB(255, 230, 251, 45);
+        return const Color.fromARGB(255, 230, 251, 45);
       case Penalty.redCard:
         return Colors.red[700]!;
       default:
@@ -121,7 +146,7 @@ class ScoringMethod {
 
 extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withSpaceBetween({double? width, double? height}) => [
-        for (int i = 0; i < this.length; i++) ...[
+        for (int i = 0; i < length; i++) ...[
           if (i > 0) SizedBox(width: width, height: height),
           this[i],
         ],

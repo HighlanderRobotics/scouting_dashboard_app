@@ -26,11 +26,11 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
 
     setState(() {
-      initialRole = prefs.getString("role");
-      initialTournament = prefs.getString("tournament");
-      initialTournamentName = prefs.getString("tournament_localized");
-      initialServerAuthority = prefs.getString("serverAuthority");
-      initialTeamNumber = prefs.getInt("team");
+      initialRole = "scouting_lead";
+      initialTournament = "2022cc";
+      initialTournamentName = "2022 Chezy Champs";
+      initialServerAuthority = "localhost:3000";
+      initialTeamNumber = 8033;
     });
   }
 
@@ -279,6 +279,8 @@ class _LoadedSettingsState extends State<LoadedSettings> {
                                       await SharedPreferences.getInstance();
 
                                   await prefs.clear();
+                                  await auth0.credentialsManager
+                                      .clearCredentials();
 
                                   Navigator.of(context).pushNamedAndRemoveUntil(
                                       "/loading", (route) => false);

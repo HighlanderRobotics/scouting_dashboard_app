@@ -133,6 +133,7 @@ class AnalysisOverview extends AnalysisVisualization {
     required this.analysisFunction,
   }) : super(analysisFunction: analysisFunction);
 
+  @override
   final TeamMetricDetailsAnalysis analysisFunction;
 
   @override
@@ -665,13 +666,10 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
                                                             constraints
                                                                 .maxHeight) /
                                                         2,
-                                                    title: (data![e]!
+                                                    title: "${(data![e]!
                                                                     .toDouble() *
                                                                 100)
-                                                            .round()
-                                                            .toString() +
-                                                        "%\n" +
-                                                        (scoringMethods.any(
+                                                            .round()}%\n${scoringMethods.any(
                                                                 (f) =>
                                                                     f.path == e)
                                                             ? scoringMethods
@@ -680,7 +678,7 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
                                                                         f.path ==
                                                                         e)
                                                                 .localizedName
-                                                            : e),
+                                                            : e}",
                                                     value: data![e]!.toDouble(),
                                                     color: Theme.of(context)
                                                         .colorScheme

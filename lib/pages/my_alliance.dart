@@ -18,7 +18,7 @@ class _AllianceOpenerPageState extends State<AllianceOpenerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("My Alliance")),
+      appBar: AppBar(title: const Text("My Alliance")),
       body: ScrollablePageBody(children: [
         TextField(
           decoration: const InputDecoration(

@@ -102,10 +102,10 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
             }
 
             if (snapshot.connectionState != ConnectionState.done) {
-              return PageBody(
+              return const PageBody(
                 padding: EdgeInsets.zero,
                 child: Column(
-                  children: const [
+                  children: [
                     LinearProgressIndicator(),
                   ],
                 ),
