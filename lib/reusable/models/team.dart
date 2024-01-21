@@ -19,6 +19,6 @@ class Team {
         'number': number,
       };
 
-  Future<RegistrationStatus> getRegistrationStatus() =>
+  Future<RegistrationStatusResponse> getRegistrationStatus() =>
       lovatAPI.getRegistrationStatus(number);
 }

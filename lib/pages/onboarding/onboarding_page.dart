@@ -153,6 +153,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
             onBack: () =>
                 setState(() => phase = OnboardingPagePhase.teamSelection),
           ),
+          OnboardingPagePhase.teamWebsite: TeamWebsitePage(
+            onSubmit: () => toRegistrationStatusView(team!),
+          ),
+          OnboardingPagePhase.teamVerification: TeamVerificationPage(
+            teamEmail: teamEmail,
+          ),
         }[phase] ??
         Center(child: Text("Error: Unknown phase $phase"));
   }
@@ -166,7 +172,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     try {
       final profile = await lovatAPI.getUserProfile();
       final teamNumber = t?.number ?? profile.team?.number;
-      final status = teamNumber == null
+      final registrationStatus = teamNumber == null
           ? null
           : await lovatAPI.getRegistrationStatus(
               teamNumber); // The status of the team, not the user
@@ -177,38 +183,44 @@ class _OnboardingPageState extends State<OnboardingPage> {
         setState(() {
           phase = OnboardingPagePhase.username;
         });
-      } else if (status == null) {
+      } else if (registrationStatus == null) {
         setState(() {
           phase = OnboardingPagePhase.teamSelection;
         });
-      } else if (status == RegistrationStatus.notStarted) {
+      } else if (registrationStatus.status == RegistrationStatus.notStarted) {
         setState(() {
           phase = OnboardingPagePhase.registerTeamChoice;
         });
-      } else if (status == RegistrationStatus.registeredNotOnTeam) {
+      } else if (registrationStatus.status ==
+          RegistrationStatus.registeredNotOnTeam) {
         setState(() {
           phase = OnboardingPagePhase.teamCode;
         });
-      } else if (status == RegistrationStatus.pendingEmailVerification) {
+      } else if (registrationStatus.status ==
+          RegistrationStatus.pendingEmailVerification) {
         setState(() {
           phase = OnboardingPagePhase.emailVerification;
         });
-      } else if (status == RegistrationStatus.pendingTeamWebsite) {
+      } else if (registrationStatus.status ==
+          RegistrationStatus.pendingTeamWebsite) {
         setState(() {
           phase = OnboardingPagePhase.teamWebsite;
         });
-      } else if (status == RegistrationStatus.pendingTeamVerification) {
+      } else if (registrationStatus.status ==
+          RegistrationStatus.pendingTeamVerification) {
         setState(() {
           phase = OnboardingPagePhase.teamVerification;
+          teamEmail = registrationStatus.teamEmail;
         });
-      } else if (status == RegistrationStatus.registeredOnTeam) {
+      } else if (registrationStatus.status ==
+          RegistrationStatus.registeredOnTeam) {
         toSettingsOnboarding();
-      } else if (status == RegistrationStatus.pending) {
+      } else if (registrationStatus.status == RegistrationStatus.pending) {
         setState(() {
           phase = OnboardingPagePhase.otherUserRegistering;
         });
       } else {
-        debugPrint("Unknown registration status: $status");
+        debugPrint("Unknown registration status: $registrationStatus");
         setState(() {
           phase = OnboardingPagePhase.error;
         });
@@ -1910,6 +1922,138 @@ class OtherUserRegisteringPage extends StatelessWidget {
               },
               child: const Text("Back"),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TeamWebsitePage extends StatefulWidget {
+  const TeamWebsitePage({
+    super.key,
+    this.onSubmit,
+  });
+
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<TeamWebsitePage> createState() => _TeamWebsitePageState();
+}
+
+class _TeamWebsitePageState extends State<TeamWebsitePage> {
+  String website = '';
+  String? error;
+  bool loading = false;
+
+  Future<void> submit() async {
+    setState(() {
+      error = null;
+    });
+
+    try {
+      setState(() {
+        loading = true;
+      });
+
+      await lovatAPI.setTeamWebsite(website);
+
+      widget.onSubmit?.call();
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() {
+        error = "Error setting website";
+      });
+    } finally {
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Enter your team's website",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+            TextField(
+              onChanged: (value) {
+                setState(() {
+                  website = value;
+                  error = null;
+                });
+              },
+              decoration: InputDecoration(
+                filled: true,
+                label: const Text("Website"),
+                errorText: error,
+                helperText: "We'll use this to verify your team.",
+              ),
+              autofocus: true,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.next,
+              onSubmitted: (value) {
+                if (website.isNotEmpty) {
+                  submit();
+                } else {
+                  setState(() {
+                    error = "Please enter a website";
+                  });
+                }
+              },
+              textCapitalization: TextCapitalization.none,
+            ),
+            const SizedBox(height: 10),
+            FilledButton(
+              onPressed: website.isEmpty || loading ? null : submit,
+              child: loading
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 3),
+                    )
+                  : const Text("Next"),
+            ),
+          ].withSpaceBetween(height: 14),
+        ),
+      ),
+    );
+  }
+}
+
+class TeamVerificationPage extends StatelessWidget {
+  const TeamVerificationPage({super.key, this.teamEmail});
+
+  final String? teamEmail;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: PageBody(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Image.asset("assets/images/awaiting_verification.png"),
+            const SizedBox(height: 14),
+            Text(
+              "Awaiting verification",
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 7),
+            Text(
+              "Please wait while we verify your team. We'll send updates to $teamEmail. If we don't verify you soon, get help at https://lovat.app/support/.",
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyMedium!
+                  .copyWith(color: const Color(0xFFB8B8B8)),
+            )
           ],
         ),
       ),

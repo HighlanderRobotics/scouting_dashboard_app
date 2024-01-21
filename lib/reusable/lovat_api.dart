@@ -169,7 +169,8 @@ class LovatAPI {
     }
   }
 
-  Future<RegistrationStatus> getRegistrationStatus(int teamNumber) async {
+  Future<RegistrationStatusResponse> getRegistrationStatus(
+      int teamNumber) async {
     final response = await get(
       '/v1/manager/registeredteams/$teamNumber/registrationstatus',
     );
@@ -180,12 +181,14 @@ class LovatAPI {
 
     final prefs = await SharedPreferences.getInstance();
 
-    final registrationStatus =
-        RegistrationStatusExtension.fromString(response!.body);
+    final registrationStatusResponse = RegistrationStatusResponse(
+      jsonDecode(response!.body) as Map<String, dynamic>,
+    );
 
-    prefs.setString('cachedRegistrationStatus', registrationStatus.toString());
+    prefs.setString('cachedRegistrationStatus',
+        registrationStatusResponse.status.toString());
 
-    return registrationStatus;
+    return registrationStatusResponse;
   }
 
   Future<RegistrationStatus> getCachedRegistrationStatus() async {
@@ -301,6 +304,20 @@ class LovatAPI {
     debugPrint(response?.body ?? '');
     throw const LovatAPIException('Failed to resend verification email');
   }
+
+  Future<void> setTeamWebsite(String website) async {
+    final response = await post(
+      '/v1/manager/onboarding/teamwebsite',
+      body: {
+        'website': website,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to set team website');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -374,6 +391,8 @@ extension RegistrationStatusExtension on RegistrationStatus {
         return RegistrationStatus.registeredOnTeam;
       case 'REGISTERED_OFF_TEAM':
         return RegistrationStatus.registeredNotOnTeam;
+      case 'PENDING_WEBSITE':
+        return RegistrationStatus.pendingTeamWebsite;
       default:
         throw Exception('Invalid registration status: $status');
     }
@@ -393,8 +412,21 @@ extension RegistrationStatusExtension on RegistrationStatus {
       ].contains(this);
 }
 
+class RegistrationStatusResponse {
+  const RegistrationStatusResponse(this.data);
+
+  final Map<String, dynamic> data;
+
+  RegistrationStatus get status =>
+      RegistrationStatusExtension.fromString(data['status']);
+
+  String? get teamEmail => status == RegistrationStatus.pendingTeamVerification
+      ? data['teamEmail']
+      : null;
+}
+
 const lovatAPI = LovatAPI(
   kDebugMode
-      ? "https://curly-space-trout-g6r64pwwj5xcwx97-3000.preview.app.github.dev"
+      ? "https://lovat-server-staging.up.railway.app"
       : "https://api.lovat.app",
 );
