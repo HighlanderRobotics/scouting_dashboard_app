@@ -15,16 +15,22 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
     final navigator = Navigator.of(context);
 
     final prefs = await SharedPreferences.getInstance();
+    final onboardingVersion = prefs.getInt('onboardingVersion');
 
-    navigator.pushReplacement(
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) =>
-            const OnboardingPage(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            child,
-        transitionDuration: Duration.zero,
-      ),
-    );
+    if (onboardingVersion == null || onboardingVersion < 1) {
+      navigator.pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const OnboardingPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              child,
+          transitionDuration: Duration.zero,
+        ),
+      );
+      return;
+    }
+
+    navigator.pushReplacementNamed('/match_schedule');
   }
 
   @override
