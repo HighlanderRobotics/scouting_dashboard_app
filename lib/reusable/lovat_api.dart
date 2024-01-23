@@ -343,6 +343,15 @@ class LovatAPI {
       throw Exception('Failed to set team website');
     }
   }
+
+  Future<void> deleteAccount() async {
+    final response = await delete('/v1/manager/user');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to delete account');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {

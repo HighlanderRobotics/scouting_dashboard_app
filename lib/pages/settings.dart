@@ -251,39 +251,10 @@ class ResetAppButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text("Delete configuration?"),
-                  content: const Text(
-                      "If you continue, you will erase all the data this app has saved and reset it to how it came when you first installed it."),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("Cancel"),
-                    ),
-                    ElevatedButton(
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-
-                        await prefs.clear();
-                        await auth0.credentialsManager.clearCredentials();
-
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            "/loading", (route) => false);
-                      },
-                      style: ButtonStyle(
-                        elevation: MaterialStateProperty.all(0),
-                        backgroundColor: MaterialStateProperty.resolveWith(
-                            (states) => Theme.of(context).colorScheme.error),
-                        foregroundColor: MaterialStateProperty.resolveWith(
-                            (states) => Theme.of(context).colorScheme.onError),
-                      ),
-                      child: const Text("Delete"),
-                    ),
-                  ],
-                ));
+          context: context,
+          builder: (context) => const DeleteConfigurationDialog(),
+          barrierDismissible: false,
+        );
       },
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.resolveWith(
@@ -292,6 +263,106 @@ class ResetAppButton extends StatelessWidget {
             (states) => Theme.of(context).colorScheme.onError),
       ),
       child: const Text("Reset app and delete settings"),
+    );
+  }
+}
+
+class DeleteConfigurationDialog extends StatefulWidget {
+  const DeleteConfigurationDialog({
+    super.key,
+  });
+
+  @override
+  State<DeleteConfigurationDialog> createState() =>
+      _DeleteConfigurationDialogState();
+}
+
+class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
+  bool willDeleteAccount = false;
+  bool loading = false;
+  String? errorMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Delete configuration?"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text(
+              "If you continue, you will erase all the data this app has saved and reset it to how it came when you first installed it. If you so choose, you can also delete your account."),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Checkbox(
+                value: willDeleteAccount,
+                onChanged: (value) {
+                  setState(() {
+                    willDeleteAccount = value!;
+                  });
+                },
+              ),
+              const Text("Delete my account"),
+            ],
+          ),
+          if (errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: MediumErrorMessage(message: errorMessage),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: loading
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
+          child: const Text("Cancel"),
+        ),
+        ElevatedButton(
+          onPressed: loading
+              ? null
+              : () async {
+                  setState(() {
+                    loading = true;
+                    errorMessage = null;
+                  });
+
+                  try {
+                    if (willDeleteAccount) {
+                      await lovatAPI.deleteAccount();
+                    }
+
+                    final prefs = await SharedPreferences.getInstance();
+
+                    await prefs.clear();
+                    await auth0.credentialsManager.clearCredentials();
+
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil("/loading", (route) => false);
+                  } catch (e) {
+                    setState(() {
+                      errorMessage = "Failed to delete configuration";
+                    });
+                    return;
+                  } finally {
+                    setState(() {
+                      loading = false;
+                    });
+                  }
+                },
+          style: ButtonStyle(
+            elevation: MaterialStateProperty.all(0),
+            backgroundColor: MaterialStateProperty.resolveWith(
+                (states) => Theme.of(context).colorScheme.error),
+            foregroundColor: MaterialStateProperty.resolveWith(
+                (states) => Theme.of(context).colorScheme.onError),
+          ),
+          child: const Text("Delete"),
+        ),
+      ],
     );
   }
 }
