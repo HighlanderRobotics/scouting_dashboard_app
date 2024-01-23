@@ -79,6 +79,12 @@ void main() async {
             onSubmit: (ModalRoute.of(context)!.settings.arguments
                     as SpecificSourceTeamsArguments)
                 .onSubmit,
+            initialTeams: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .initialTeams,
+            submitText: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .submitText,
           ),
     },
     theme: ThemeData(

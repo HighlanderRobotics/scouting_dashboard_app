@@ -31,8 +31,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
       final profile = await lovatAPI.getUserProfile();
 
-      if (profile.team != null) {
-        toRegistrationStatusView(profile.team!);
+      if (profile.teamNumber != null) {
+        toRegistrationStatusView(null);
       } else {
         setState(() {
           phase = OnboardingPagePhase.teamSelection;
@@ -171,7 +171,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     try {
       final profile = await lovatAPI.getUserProfile();
-      final teamNumber = t?.number ?? profile.team?.number;
+      t = t ??
+          (await lovatAPI.getTeams())
+              .teams
+              .firstWhere((element) => element.number == profile.teamNumber);
+      setState(() {
+        team = t;
+      });
+      final teamNumber = t?.number ?? profile.teamNumber;
       final registrationStatus = teamNumber == null
           ? null
           : await lovatAPI.getRegistrationStatus(
@@ -526,18 +533,26 @@ class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
 class SpecificSourceTeamsArguments {
   const SpecificSourceTeamsArguments({
     required this.onSubmit,
+    this.initialTeams,
+    this.submitText,
   });
 
   final dynamic Function(List<Team> teams) onSubmit;
+  final List<int>? initialTeams;
+  final String? submitText;
 }
 
 class SpecificSourceTeamPage extends StatefulWidget {
   const SpecificSourceTeamPage({
     super.key,
     this.onSubmit,
+    this.initialTeams,
+    this.submitText,
   });
 
   final dynamic Function(List<Team> teams)? onSubmit;
+  final List<int>? initialTeams;
+  final String? submitText;
 
   @override
   State<SpecificSourceTeamPage> createState() => _SpecificSourceTeamPageState();
@@ -554,6 +569,11 @@ class _SpecificSourceTeamPageState extends State<SpecificSourceTeamPage> {
   void fetchTeams() async {
     try {
       final teamList = await lovatAPI.getTeams();
+
+      selectedTeams = widget.initialTeams?.map((e) {
+            return teamList.teams.firstWhere((element) => element.number == e);
+          }).toList() ??
+          [];
 
       setState(() {
         teams = teamList.teams;
@@ -699,7 +719,7 @@ class _SpecificSourceTeamPageState extends State<SpecificSourceTeamPage> {
                             width: 20,
                             child: CircularProgressIndicator(strokeWidth: 3),
                           )
-                        : const Text("Next"),
+                        : Text(widget.submitText ?? "Next"),
                   ),
                 ],
               ),
@@ -726,6 +746,19 @@ extension SourceTeamSettingsModeExtension on SourceTeamSettingsMode {
         return "ALL_TEAMS";
       case SourceTeamSettingsMode.specificTeams:
         return "SPECIFIC_TEAMS";
+    }
+  }
+
+  static SourceTeamSettingsMode fromIdentifier(String identifier) {
+    switch (identifier) {
+      case "THIS_TEAM":
+        return SourceTeamSettingsMode.thisTeam;
+      case "ALL_TEAMS":
+        return SourceTeamSettingsMode.allTeams;
+      case "SPECIFIC_TEAMS":
+        return SourceTeamSettingsMode.specificTeams;
+      default:
+        throw ArgumentError("Unknown identifier $identifier");
     }
   }
 

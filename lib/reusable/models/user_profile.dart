@@ -1,21 +1,25 @@
-import 'package:scouting_dashboard_app/reusable/models/team.dart';
+import 'dart:convert';
+
+import 'package:flutter/widgets.dart';
 
 class LovatUserProfile {
   const LovatUserProfile({
     required this.email,
     this.username,
-    this.team,
+    this.teamNumber,
   });
 
   final String email;
   final String? username;
-  final Team? team;
+  final int? teamNumber;
 
   factory LovatUserProfile.fromJson(Map<String, dynamic> json) {
+    debugPrint(jsonEncode(json));
+
     return LovatUserProfile(
       email: json['email'],
       username: json['username'],
-      team: json['team'] != null ? Team.fromJson(json['team']) : null,
+      teamNumber: json['teamNumber'],
     );
   }
 
@@ -23,7 +27,7 @@ class LovatUserProfile {
     return {
       'email': email,
       'username': username,
-      'team': team?.toJson(),
+      'team': teamNumber,
     };
   }
 }

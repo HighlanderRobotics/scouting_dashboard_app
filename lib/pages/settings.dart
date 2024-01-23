@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skeletons/skeletons.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -17,17 +21,222 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text("Settings"),
       ),
-      body: const ScrollablePageBody(
+      body: ScrollablePageBody(
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(height: 40),
-              ResetAppButton(),
+              Text(
+                "Use data from teams",
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 7),
+              const TeamSourceSelector(),
+              const SizedBox(height: 40),
+              const ResetAppButton(),
             ],
           ),
         ],
       ),
+    );
+  }
+}
+
+class TeamSourceSelector extends StatefulWidget {
+  const TeamSourceSelector({super.key});
+
+  @override
+  State<TeamSourceSelector> createState() => _TeamSourceSelectorState();
+}
+
+class _TeamSourceSelectorState extends State<TeamSourceSelector> {
+  SourceTeamSettingsMode? mode;
+  List<int>? teams;
+  int? thisTeamNumber;
+  bool thisTeamLoaded = false;
+
+  bool get isLoading => mode == null || !thisTeamLoaded;
+  String? errorMesssage;
+
+  Future<void> load() async {
+    try {
+      final sourceTeamSettings = await lovatAPI.getSourceTeamSettings();
+
+      debugPrint("${sourceTeamSettings.mode} ${sourceTeamSettings.teams}");
+
+      setState(() {
+        mode = sourceTeamSettings.mode;
+        teams = sourceTeamSettings.teams;
+      });
+    } catch (e) {
+      setState(() {
+        errorMesssage = "Failed to load source teams";
+      });
+    }
+
+    try {
+      final profile = await lovatAPI.getUserProfile();
+      final thisTeamNumber = profile.teamNumber;
+      debugPrint(
+          "${profile.username}, ${profile.email}, ${profile.teamNumber}");
+
+      setState(() {
+        this.thisTeamNumber = thisTeamNumber;
+        thisTeamLoaded = true;
+      });
+    } catch (e) {
+      setState(() {
+        errorMesssage = "Failed to load profile";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    debugPrint("thisTeam: $thisTeamNumber");
+    if (isLoading && errorMesssage == null) {
+      return const SkeletonAvatar(
+        style: SkeletonAvatarStyle(
+          width: 200,
+          height: 48,
+          borderRadius: BorderRadius.all(Radius.circular(50)),
+        ),
+      );
+    }
+
+    if (isLoading && errorMesssage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(50),
+        ),
+        height: 48,
+        child: Center(
+          child: MediumErrorMessage(message: errorMesssage),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SegmentedButton<SourceTeamSettingsMode>(
+          segments: [
+            if (thisTeamNumber != null)
+              ButtonSegment(
+                value: SourceTeamSettingsMode.thisTeam,
+                label: Text(thisTeamNumber.toString()),
+              ),
+            const ButtonSegment(
+              value: SourceTeamSettingsMode.allTeams,
+              label: Text("All"),
+            ),
+            ButtonSegment(
+              value: SourceTeamSettingsMode.specificTeams,
+              label: Text(
+                teams == null
+                    ? "Choose..."
+                    : "${teams!.length} team${teams!.length == 1 ? "" : "s"}",
+              ),
+            ),
+          ],
+          multiSelectionEnabled: false,
+          emptySelectionAllowed: true,
+          selected: {mode!},
+          onSelectionChanged: (newMode) {
+            final tappedMode = newMode.firstOrNull ?? mode;
+
+            if (tappedMode != SourceTeamSettingsMode.specificTeams) {
+              setState(() {
+                mode = null;
+                teams = null;
+              });
+
+              (() async {
+                try {
+                  await lovatAPI.setSourceTeams(tappedMode!);
+                  await load();
+                } catch (e) {
+                  setState(() {
+                    errorMesssage = "Failed to save source team settings";
+                  });
+                }
+              })();
+            } else {
+              Navigator.of(context).pushNamed(
+                "/specific_source_teams",
+                arguments: SpecificSourceTeamsArguments(
+                  initialTeams: teams,
+                  submitText: "Save",
+                  onSubmit: (teams) async {
+                    final teamNumbers = teams.map((e) => e.number).toList();
+                    final navigator = Navigator.of(context);
+
+                    setState(() {
+                      mode = SourceTeamSettingsMode.specificTeams;
+                      this.teams = teamNumbers;
+                    });
+
+                    try {
+                      await lovatAPI.setSourceTeams(
+                        SourceTeamSettingsMode.specificTeams,
+                        teams: teamNumbers,
+                      );
+                      await load();
+                      navigator.popUntil(
+                        (route) => route.settings.name == "/settings",
+                      );
+                    } catch (e) {
+                      setState(() {
+                        errorMesssage = "Failed to save source team settings";
+                      });
+                    }
+                  },
+                ),
+              );
+            }
+          },
+        ),
+        if (errorMesssage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: MediumErrorMessage(message: errorMesssage),
+          ),
+      ],
+    );
+  }
+}
+
+class MediumErrorMessage extends StatelessWidget {
+  const MediumErrorMessage({
+    super.key,
+    required this.message,
+  });
+
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          Icons.error,
+          color: Theme.of(context).colorScheme.error,
+        ),
+        Text(
+          message!,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.error,
+          ),
+        ),
+      ].withSpaceBetween(width: 5),
     );
   }
 }
