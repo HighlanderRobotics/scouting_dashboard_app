@@ -4,6 +4,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 
@@ -32,6 +33,13 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 7),
               const TeamSourceSelector(),
+              const SizedBox(height: 28),
+              const TournamentKeyPicker(
+                decoration: InputDecoration(
+                  filled: true,
+                  labelText: "At tournament",
+                ),
+              ),
               const SizedBox(height: 40),
               const ResetAppButton(),
             ],
