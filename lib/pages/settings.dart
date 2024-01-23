@@ -76,9 +76,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
 
     try {
       final profile = await lovatAPI.getUserProfile();
-      final thisTeamNumber = profile.teamNumber;
-      debugPrint(
-          "${profile.username}, ${profile.email}, ${profile.teamNumber}");
+      final thisTeamNumber = profile.team?.number;
 
       setState(() {
         this.thisTeamNumber = thisTeamNumber;

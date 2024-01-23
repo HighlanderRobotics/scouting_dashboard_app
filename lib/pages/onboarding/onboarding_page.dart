@@ -31,7 +31,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
       final profile = await lovatAPI.getUserProfile();
 
-      if (profile.teamNumber != null) {
+      if (profile.team != null) {
         toRegistrationStatusView(null);
       } else {
         setState(() {
@@ -171,14 +171,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
     try {
       final profile = await lovatAPI.getUserProfile();
-      t = t ??
-          (await lovatAPI.getTeams())
-              .teams
-              .firstWhere((element) => element.number == profile.teamNumber);
+      t = t ?? profile.team;
       setState(() {
         team = t;
       });
-      final teamNumber = t?.number ?? profile.teamNumber;
+      final teamNumber = t?.number ?? profile.team?.number;
       final registrationStatus = teamNumber == null
           ? null
           : await lovatAPI.getRegistrationStatus(

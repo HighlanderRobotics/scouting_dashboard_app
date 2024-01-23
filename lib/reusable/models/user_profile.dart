@@ -1,17 +1,18 @@
 import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
+import 'package:scouting_dashboard_app/reusable/models/team.dart';
 
 class LovatUserProfile {
   const LovatUserProfile({
     required this.email,
     this.username,
-    this.teamNumber,
+    this.team,
   });
 
   final String email;
   final String? username;
-  final int? teamNumber;
+  final Team? team;
 
   factory LovatUserProfile.fromJson(Map<String, dynamic> json) {
     debugPrint(jsonEncode(json));
@@ -19,7 +20,7 @@ class LovatUserProfile {
     return LovatUserProfile(
       email: json['email'],
       username: json['username'],
-      teamNumber: json['teamNumber'],
+      team: json.containsKey('team') ? Team.fromJson(json['team']) : null,
     );
   }
 
@@ -27,7 +28,7 @@ class LovatUserProfile {
     return {
       'email': email,
       'username': username,
-      'team': teamNumber,
+      'team': team?.toJson(),
     };
   }
 }

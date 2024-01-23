@@ -10,8 +10,8 @@ class Team {
   final int number;
 
   factory Team.fromJson(Map<String, dynamic> json) => Team(
-        name: json['name'] as String,
-        number: json['number'] as int,
+        name: json['team']['name'] as String,
+        number: json['team']['number'] as int,
       );
 
   Map<String, dynamic> toJson() => {
