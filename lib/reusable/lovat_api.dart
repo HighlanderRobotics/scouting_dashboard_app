@@ -9,6 +9,7 @@ import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
 
 class LovatAPI {
   const LovatAPI(this.baseUrl);
@@ -391,6 +392,21 @@ class LovatAPI {
       debugPrint(response?.body ?? '');
       throw Exception('Failed to promote analyst');
     }
+  }
+
+  Future<String?> getTeamCode() async {
+    final response = await get('/v1/manager/code', query: {
+      'uuid': const Uuid().v4(),
+    });
+
+    if (response?.statusCode == 403) return null;
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get team code');
+    }
+
+    return response!.body;
   }
 }
 
