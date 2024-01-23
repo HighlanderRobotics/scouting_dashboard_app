@@ -1,27 +1,17 @@
-import 'dart:convert';
-
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 
-import 'package:http/http.dart' as http;
-import 'package:scouting_dashboard_app/pages/custom_tournament.dart';
-import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:skeletons/skeletons.dart';
 
 class TournamentKeyPicker extends StatefulWidget {
   const TournamentKeyPicker({
     super.key,
     this.decoration,
-    required this.onChanged,
-    this.initialValue,
   });
 
   final InputDecoration? decoration;
-  final dynamic Function(Tournament) onChanged;
-  final Tournament? initialValue;
 
   @override
   State<TournamentKeyPicker> createState() => _TournamentKeyPickerState();
@@ -36,16 +26,14 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
   Tournament? selectedItem;
 
   Future<void> getTournaments() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isScoutingLead = prefs.getString('role') == '8033_scouting_lead';
-    });
-
-    late final http.Response response;
+    late final List<Tournament> tournaments;
 
     try {
-      response = await http.get(Uri.http(
-          (await getServerAuthority())!, '/API/manager/getTournaments'));
+      tournaments = (await lovatAPI.getTournaments()).tournaments;
+
+      setState(() {
+        this.tournaments = tournaments;
+      });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
@@ -64,11 +52,25 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
 
       return;
     }
+  }
 
-    if (response.statusCode != 200) {
+  Future<void> setInitialTournament() async {
+    try {
+      final current = await Tournament.getCurrent();
+
+      if (current != null) {
+        setState(() {
+          selectedItem = current;
+        });
+      }
+
+      setState(() {
+        initialized = true;
+      });
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(
-          "Error getting tournaments: ${response.statusCode} ${response.reasonPhrase} ${response.body}",
+          "Error getting current tournament: $error",
           style: TextStyle(
             color: Theme.of(context).colorScheme.onErrorContainer,
           ),
@@ -80,37 +82,35 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
       setState(() {
         hasError = true;
       });
+    }
+  }
 
+  @override
+  void initState() {
+    super.initState();
+
+    setInitialTournament();
+    getTournaments();
+  }
+
+  Future<void> handleChange(Tournament? tournament) async {
+    if (tournament == null) {
       return;
     }
 
-    List<Map<String, dynamic>> responseList =
-        jsonDecode(response.body).cast<Map<String, dynamic>>();
+    await tournament.storeAsCurrent();
 
     setState(() {
-      tournaments = responseList
-          .map((e) => Tournament(e['key'],
-              "${RegExp("^\\d+").stringMatch(e['key'] as String)!} ${e['name']}"))
-          .toList();
+      selectedItem = tournament;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (tournaments.isEmpty && !hasError) getTournaments();
-
-    if (!initialized) {
-      setState(() {
-        selectedItem = widget.initialValue;
-
-        initialized = true;
-      });
-    }
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        (tournaments.isEmpty && !hasError)
+        ((tournaments.isEmpty || !initialized) && !hasError)
             ? LayoutBuilder(builder: (context, constraints) {
                 return SkeletonAvatar(
                   style: SkeletonAvatarStyle(
@@ -125,12 +125,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                 );
               })
             : DropdownSearch<Tournament>(
-                onChanged: (value) {
-                  setState(() {
-                    selectedItem = value;
-                  });
-                  widget.onChanged(value!);
-                },
+                onChanged: handleChange,
                 itemAsString: (item) => item.localized,
                 items: tournaments,
                 dropdownDecoratorProps: DropDownDecoratorProps(
@@ -143,56 +138,6 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                     backgroundColor:
                         Theme.of(context).colorScheme.surfaceVariant,
                   ),
-                  emptyBuilder: (context, searchEntry) {
-                    return SingleChildScrollView(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 12,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              "Your query doesn't match any tournaments on The\u{00A0}Blue\u{00A0}Alliance.",
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              "If you're at a tournament that doesn't publish a match schedule to FIRST or The\u{00A0}Blue\u{00A0}Alliance, ${isScoutingLead ? 'you' : 'a scouting lead'} can add a custom tournament.",
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                            const SizedBox(height: 20),
-                            if (isScoutingLead)
-                              FilledButton(
-                                onPressed: () {
-                                  final thisRoute = ModalRoute.of(context);
-
-                                  Navigator.of(context).pushWidget(
-                                    CustomTournamentPage(
-                                      initialName: searchEntry,
-                                      tournaments: tournaments,
-                                      onCreate: (value) {
-                                        getTournaments();
-
-                                        setState(() {
-                                          selectedItem = value;
-                                        });
-                                        widget.onChanged(value);
-
-                                        Navigator.of(context).pop();
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  );
-                                },
-                                child: const Text("Create one"),
-                              ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
                   fit: FlexFit.loose,
                   showSearchBox: true,
                   searchFieldProps: const TextFieldProps(
@@ -233,7 +178,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                 showDialog(
                     context: context,
                     builder: (context) => ManualTournamentInputDialog(
-                          onSubmit: widget.onChanged,
+                          onSubmit: handleChange,
                         ));
               },
               child: const Text("Enter manually")),
