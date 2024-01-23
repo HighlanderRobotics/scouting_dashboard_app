@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +35,13 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 7),
               const TeamSourceSelector(),
+              const SizedBox(height: 28),
+              Text(
+                "Use data from tournaments",
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
+              const SizedBox(height: 7),
+              const TournamentSourceSelector(),
               const SizedBox(height: 28),
               const TournamentKeyPicker(
                 decoration: InputDecoration(
@@ -215,6 +224,338 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
             child: MediumErrorMessage(message: errorMesssage),
           ),
       ],
+    );
+  }
+}
+
+// Instead of a button group, it has a container that displays the current value ("2023 Chezy Champs" or "18 tournaments") with a button to change it (new page)
+class TournamentSourceSelector extends StatefulWidget {
+  const TournamentSourceSelector({super.key});
+
+  @override
+  State<TournamentSourceSelector> createState() =>
+      _TournamentSourceSelectorState();
+}
+
+class _TournamentSourceSelectorState extends State<TournamentSourceSelector> {
+  List<Tournament>? tournaments;
+  List<String>? selectedTournamentKeys;
+  List<Tournament>? get selectedTournaments => tournaments
+      ?.where(
+        (element) => selectedTournamentKeys!.contains(element.key),
+      )
+      .toList();
+
+  String? errorMessage;
+
+  String? get currentTournamentText {
+    if (selectedTournaments == null) return null;
+
+    if (selectedTournaments!.isEmpty) return "None";
+
+    if (selectedTournaments!.length == 1) {
+      return selectedTournaments!.first.localized;
+    }
+
+    return "${selectedTournaments!.length} tournaments";
+  }
+
+  bool get isLoading => tournaments == null || selectedTournamentKeys == null;
+
+  Future<void> load() async {
+    try {
+      final partialTournaments = await lovatAPI.getTournaments();
+
+      setState(() {
+        tournaments = partialTournaments.tournaments;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load tournaments";
+      });
+    }
+
+    try {
+      final selectedTournamentKeys = await lovatAPI.getSourceTournamentKeys();
+
+      setState(() {
+        this.selectedTournamentKeys = selectedTournamentKeys;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load selected tournaments";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading && errorMessage == null) {
+      return const SkeletonAvatar(
+        style: SkeletonAvatarStyle(
+          height: 60,
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+      );
+    }
+
+    if (isLoading && errorMessage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        height: 60,
+        child: Center(
+          child: MediumErrorMessage(message: errorMessage),
+        ),
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceVariant,
+        borderRadius: BorderRadius.circular(4),
+      ),
+      height: 60,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Flexible(
+              child: Text(
+                currentTournamentText!,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pushWidget(
+                  TournamentSourceSelectorSettingsPage(
+                    onSubmit: () async {
+                      await load();
+                    },
+                  ),
+                );
+              },
+              child: const Text("Change"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// List of tournaments, select multiple, search, select all/deselect all, submit
+class TournamentSourceSelectorSettingsPage extends StatefulWidget {
+  const TournamentSourceSelectorSettingsPage({
+    super.key,
+    this.onSubmit,
+  });
+
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<TournamentSourceSelectorSettingsPage> createState() =>
+      _TournamentSourceSelectorSettingsPageState();
+}
+
+class _TournamentSourceSelectorSettingsPageState
+    extends State<TournamentSourceSelectorSettingsPage> {
+  List<Tournament>? tournaments;
+  List<String>? selectedTournamentKeys;
+
+  String? errorMessage;
+
+  bool get isLoading => tournaments == null || selectedTournamentKeys == null;
+
+  bool isSubmitLoading = false;
+
+  String filterText = "";
+  List<Tournament>? get filteredTournaments => tournaments
+      ?.where((element) =>
+          element.localized.toLowerCase().contains(filterText.toLowerCase()))
+      .toList();
+
+  Future<void> load() async {
+    try {
+      final partialTournaments = await lovatAPI.getTournaments();
+
+      setState(() {
+        tournaments = partialTournaments.tournaments;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load tournaments";
+      });
+    }
+
+    try {
+      final selectedTournamentKeys = await lovatAPI.getSourceTournamentKeys();
+
+      setState(() {
+        this.selectedTournamentKeys = selectedTournamentKeys;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load selected tournaments";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  void onSelectionChanged(List<String> newSelectedTournamentKeys) {
+    setState(() {
+      selectedTournamentKeys = newSelectedTournamentKeys;
+    });
+  }
+
+  void selectAll() {
+    setState(() {
+      selectedTournamentKeys = tournaments!.map((e) => e.key).toList();
+    });
+  }
+
+  bool get isAllSelected =>
+      selectedTournamentKeys?.length == tournaments?.length;
+
+  void deselectAll() {
+    setState(() {
+      selectedTournamentKeys = [];
+    });
+  }
+
+  Future<void> onSubmit() async {
+    setState(() {
+      isSubmitLoading = true;
+    });
+
+    try {
+      await lovatAPI.setSourceTournamentKeys(selectedTournamentKeys!);
+      widget.onSubmit?.call();
+      Navigator.of(context).pop();
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to save source tournament settings";
+      });
+    } finally {
+      setState(() {
+        isSubmitLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget body;
+
+    if (isLoading && errorMessage == null) {
+      body = SkeletonListView(
+        itemBuilder: (context, index) => SkeletonListTile(),
+      );
+    } else if (isLoading && errorMessage != null) {
+      body = FriendlyErrorView(errorMessage: errorMessage, onRetry: load);
+    } else {
+      body = ListView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        children: [
+          if (filteredTournaments!.isEmpty)
+            const Padding(
+              padding: EdgeInsets.all(12),
+              child: Text("No tournaments"),
+            )
+          else
+            for (final tournament in filteredTournaments!)
+              CheckboxListTile(
+                value: selectedTournamentKeys!.contains(tournament.key),
+                onChanged: (value) {
+                  if (value!) {
+                    setState(() {
+                      selectedTournamentKeys!.add(tournament.key);
+                    });
+                  } else {
+                    setState(() {
+                      selectedTournamentKeys!.remove(tournament.key);
+                    });
+                  }
+                },
+                title: Text(tournament.localized),
+              ),
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+          title: const Text("Select tournaments"),
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(80),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        filterText = value;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      filled: true,
+                      labelText: "Search",
+                    ),
+                  ),
+                ),
+                if (isSubmitLoading) const LinearProgressIndicator(),
+              ],
+            ),
+          )),
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          Expanded(child: body),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: SafeArea(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: isSubmitLoading || isLoading
+                        ? null
+                        : isAllSelected
+                            ? deselectAll
+                            : selectAll,
+                    child: Text(isAllSelected ? "Deselect all" : "Select all"),
+                  ),
+                  FilledButton(
+                    onPressed: isSubmitLoading || isLoading ? null : onSubmit,
+                    child: const Text("Save"),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
