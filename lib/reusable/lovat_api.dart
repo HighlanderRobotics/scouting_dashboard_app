@@ -362,6 +362,36 @@ class LovatAPI {
       throw Exception('Failed to delete account');
     }
   }
+
+  Future<List<Analyst>?> getAnalysts() async {
+    final response = await get('/v1/manager/analysts');
+
+    if ([403, 404].contains(response?.statusCode)) {
+      return null;
+    }
+
+    if (response?.statusCode != 200) {
+      throw Exception('Failed to get analysts');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => Analyst.fromJson(e)).toList();
+  }
+
+  Future<void> promoteAnalyst(String id) async {
+    final response = await post(
+      '/v1/manager/upgradeuser',
+      body: {
+        'user': id,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to promote analyst');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -480,6 +510,34 @@ class SourceTeamSettingsResponse {
   List<int>? get teams => mode == SourceTeamSettingsMode.specificTeams
       ? (data['teams'] as List<dynamic>).cast<int>()
       : null;
+}
+
+class Analyst {
+  const Analyst({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+
+  final String id;
+  final String name;
+  final String email;
+
+  factory Analyst.fromJson(Map<String, dynamic> json) => Analyst(
+        id: json['id'] as String,
+        name: json['username'] as String,
+        email: json['email'] as String,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'username': name,
+        'email': email,
+      };
+
+  Future<void> promote() async {
+    await lovatAPI.promoteAnalyst(id);
+  }
 }
 
 const lovatAPI = LovatAPI(

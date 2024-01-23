@@ -49,6 +49,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   labelText: "At tournament",
                 ),
               ),
+              const AnalystsBox(),
               const SizedBox(height: 40),
               const ResetAppButton(),
             ],
@@ -556,6 +557,238 @@ class _TournamentSourceSelectorSettingsPageState
           ),
         ],
       ),
+    );
+  }
+}
+
+class AnalystsBox extends StatefulWidget {
+  const AnalystsBox({super.key});
+
+  @override
+  State<AnalystsBox> createState() => _AnalystsBoxState();
+}
+
+class _AnalystsBoxState extends State<AnalystsBox> {
+  List<Analyst>? analysts;
+  bool loaded = false;
+  String? errorMessage;
+
+  Future<void> load() async {
+    try {
+      final analysts = await lovatAPI.getAnalysts();
+
+      setState(() {
+        this.analysts = analysts;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load analysts";
+      });
+    } finally {
+      setState(() {
+        loaded = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  String? get currentAnalystsText {
+    if (analysts == null) return null;
+
+    if (analysts!.isEmpty) return "Nobody to promote";
+
+    if (analysts!.length == 1) {
+      return analysts!.first.name;
+    }
+
+    return "${analysts!.length} analysts";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!loaded && errorMessage == null) {
+      return const SkeletonAvatar(
+        style: SkeletonAvatarStyle(
+          width: 200,
+          height: 60,
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+        ),
+      );
+    }
+
+    if (!loaded && errorMessage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceVariant,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        height: 60,
+        child: Center(
+          child: MediumErrorMessage(message: errorMessage),
+        ),
+      );
+    }
+
+    if (loaded && analysts == null) {
+      return Container();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 28),
+        Text(
+          "Promote analysts",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: 7),
+        Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    currentAnalystsText!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pushWidget(AnalystPromotionPage(
+                      onSubmit: () {
+                        load();
+                      },
+                    ));
+                  },
+                  child: const Text("Manage"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: MediumErrorMessage(message: errorMessage),
+          ),
+      ],
+    );
+  }
+}
+
+class AnalystPromotionPage extends StatefulWidget {
+  const AnalystPromotionPage({super.key, this.onSubmit});
+
+  final dynamic Function()? onSubmit;
+
+  @override
+  State<AnalystPromotionPage> createState() => _AnalystPromotionPageState();
+}
+
+class _AnalystPromotionPageState extends State<AnalystPromotionPage> {
+  List<Analyst>? analysts;
+  String? errorMessage;
+  bool submitting = false;
+
+  Future<void> load() async {
+    try {
+      final analysts = await lovatAPI.getAnalysts();
+
+      setState(() {
+        this.analysts = analysts;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load analysts";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget body;
+
+    if (analysts == null && errorMessage == null) {
+      body = SkeletonListView(
+        itemBuilder: (context, index) => SkeletonListTile(),
+      );
+    } else if (analysts == null && errorMessage != null) {
+      body = FriendlyErrorView(errorMessage: errorMessage, onRetry: load);
+    } else if (analysts!.isEmpty) {
+      body = const Padding(
+        padding: EdgeInsets.all(12),
+        child: Center(
+          child: Text("No analysts to promote"),
+        ),
+      );
+    } else {
+      body = ListView(
+        children: [
+          for (final analyst in analysts!)
+            ListTile(
+              title: Text(analyst.name),
+              subtitle: Text(analyst.email),
+              trailing: ElevatedButton(
+                onPressed: () async {
+                  setState(() {
+                    submitting = true;
+                    errorMessage = null;
+                  });
+
+                  try {
+                    await analyst.promote();
+                    await load();
+                    widget.onSubmit?.call();
+                  } catch (e) {
+                    setState(() {
+                      errorMessage = "Failed to promote analyst";
+                    });
+                  } finally {
+                    setState(() {
+                      submitting = false;
+                    });
+                  }
+                },
+                child: const Text("Promote"),
+              ),
+            )
+        ],
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Promote analysts"),
+        bottom: submitting
+            ? const PreferredSize(
+                preferredSize: Size.fromHeight(5),
+                child: LinearProgressIndicator(),
+              )
+            : null,
+      ),
+      body: body,
     );
   }
 }
