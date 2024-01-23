@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
@@ -23,6 +24,9 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Settings"),
+        actions: [
+          CodeViewerButton(),
+        ],
       ),
       body: ScrollablePageBody(
         children: [
@@ -943,6 +947,123 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
           child: const Text("Delete"),
         ),
       ],
+    );
+  }
+}
+
+class CodeViewerButton extends StatefulWidget {
+  const CodeViewerButton({super.key});
+
+  @override
+  State<CodeViewerButton> createState() => _CodeViewerButtonState();
+}
+
+class _CodeViewerButtonState extends State<CodeViewerButton> {
+  String? code;
+
+  Future<void> load() async {
+    try {
+      final code = await lovatAPI.getTeamCode();
+
+      setState(() {
+        this.code = code;
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(
+          "Error getting team code: $e",
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onErrorContainer,
+          ),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (code == null) {
+      return const SizedBox();
+    }
+
+    return IconButton(
+      onPressed: () {
+        Navigator.of(context).pushWidget(
+          CodeViewerPage(
+            code: code!,
+          ),
+        );
+      },
+      icon: const Icon(Icons.pin),
+      tooltip: "View team code",
+    );
+  }
+}
+
+class CodeViewerPage extends StatelessWidget {
+  const CodeViewerPage({super.key, required this.code});
+
+  final String code;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Team code"),
+      ),
+      body: ScrollablePageBody(children: [
+        Column(children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    code,
+                    style: Theme.of(context).textTheme.displayMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant),
+                  ),
+                  const SizedBox(width: 7),
+                  IconButton(
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: code));
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Copied to clipboard"),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.copy),
+                    tooltip: "Copy to clipboard",
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    iconSize: 28,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text(
+            "Share this code with your team members to allow them to join.",
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+        ]),
+      ]),
     );
   }
 }
