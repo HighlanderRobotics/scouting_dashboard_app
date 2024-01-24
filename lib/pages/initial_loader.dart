@@ -13,8 +13,16 @@ class InitialLoaderPage extends StatefulWidget {
 class _InitialLoaderPageState extends State<InitialLoaderPage> {
   Future<void> load(NavigatorState navigator) async {
     final navigator = Navigator.of(context);
-
     final prefs = await SharedPreferences.getInstance();
+
+    // Set default picklists if they don't exist
+    if (!prefs.containsKey('picklists')) {
+      prefs.setStringList(
+        'picklists',
+        defaultPicklists.map((e) => e.toJSON()).toList(),
+      );
+    }
+
     final onboardingVersion = prefs.getInt('onboardingVersion');
 
     if (onboardingVersion == null || onboardingVersion < 1) {

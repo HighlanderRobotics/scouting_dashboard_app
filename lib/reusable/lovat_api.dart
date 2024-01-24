@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -408,6 +409,31 @@ class LovatAPI {
 
     return response!.body;
   }
+
+  Future<Map<String, List<dynamic>>> getPicklistAnalysis(
+    List<String> flags,
+    List<PicklistWeight> weights,
+  ) async {
+    final response = await post(
+      '/v1/analysis/picklist',
+      body: {
+        'flags': flags,
+        'weights': weights.map((e) => e.toMap()).toList(),
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get picklist analysis');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return {
+      'result': json[0]['result'] as List<dynamic>,
+      'flags': json[0]['flags'] as List<dynamic>,
+    };
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -556,8 +582,4 @@ class Analyst {
   }
 }
 
-const lovatAPI = LovatAPI(
-  kDebugMode
-      ? "https://lovat-server-staging.up.railway.app"
-      : "https://api.lovat.app",
-);
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");

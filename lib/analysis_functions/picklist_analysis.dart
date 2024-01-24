@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
 
 class PicklistAnalysis extends AnalysisFunction {
@@ -25,8 +25,7 @@ class PicklistAnalysis extends AnalysisFunction {
 
     final flags = await getPicklistFlags();
 
-    params['tournamentKey'] =
-        (await SharedPreferences.getInstance()).getString('tournament');
+    params['tournamentKey'] = (await Tournament.getCurrent())?.key;
 
     params['flags'] = jsonEncode(flags.map((e) => e.type.path).toList());
 
