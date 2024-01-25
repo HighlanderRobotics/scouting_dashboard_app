@@ -414,11 +414,16 @@ class LovatAPI {
     List<String> flags,
     List<PicklistWeight> weights,
   ) async {
-    final response = await post(
+    final tournament = await Tournament.getCurrent();
+
+    final response = await get(
       '/v1/analysis/picklist',
-      body: {
-        'flags': flags,
-        'weights': weights.map((e) => e.toMap()).toList(),
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+        'flags': jsonEncode(flags),
+        ...Map.fromEntries(
+          weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+        ),
       },
     );
 
@@ -427,11 +432,11 @@ class LovatAPI {
       throw Exception('Failed to get picklist analysis');
     }
 
-    final json = jsonDecode(response!.body) as List<dynamic>;
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
 
     return {
-      'result': json[0]['result'] as List<dynamic>,
-      'flags': json[0]['flags'] as List<dynamic>,
+      'result': json['teams'] as List<dynamic>,
+      'flags': json['flags'] as List<dynamic>? ?? [],
     };
   }
 }

@@ -125,20 +125,6 @@ class PicklistVisuzlization extends AnalysisVisualization {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    FlagRow(
-                      flagConfigurations,
-                      (teamData['flags'] as List<dynamic>)
-                          .asMap()
-                          .map(
-                            (k, value) => MapEntry(
-                              value['type'],
-                              value['result'],
-                            ),
-                          )
-                          .cast<String, dynamic>(),
-                      teamData['team'],
-                      onEdit: () => super.loadData(),
-                    ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)

@@ -40,6 +40,7 @@ final List<PicklistWeight> picklistWeights = [
   PicklistWeight("teleopPoints", "Teleop points"),
   PicklistWeight("trapScores", "Trap scores"),
   PicklistWeight("feeds", "Feeds"),
+  PicklistWeight("cooperation", "Cooperation"),
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
