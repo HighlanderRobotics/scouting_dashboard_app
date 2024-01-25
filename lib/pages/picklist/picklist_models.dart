@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
@@ -73,24 +74,7 @@ class ConfiguredPicklist {
   }
 
   Future<void> upload() async {
-    String authority = (await getServerAuthority())!;
-    final prefs = await SharedPreferences.getInstance();
-
-    final response =
-        await http.get(Uri.http(authority, '/API/manager/addPicklist', {
-      'uuid': id,
-      'name': title,
-      'team': prefs.getInt('team').toString(),
-      ...(weights.asMap().map(
-            (index, weight) =>
-                MapEntry<String, dynamic>(weight.path, weight.value.toString()),
-          )),
-      if (author != null) 'userName': author,
-    }));
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-    }
+    await lovatAPI.sharePicklist(this);
   }
 
   String toJSON() => jsonEncode({
