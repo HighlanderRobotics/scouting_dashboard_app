@@ -535,7 +535,7 @@ class _TournamentSourceSelectorSettingsPageState
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          Expanded(child: body),
+          body,
           Padding(
             padding: const EdgeInsets.all(12),
             child: SafeArea(
