@@ -23,6 +23,11 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
       );
     }
 
+    // Set default picklist flags if they don't exist
+    if (!prefs.containsKey('picklist_flags')) {
+      prefs.setStringList('picklistFlags', []);
+    }
+
     final onboardingVersion = prefs.getInt('onboardingVersion');
 
     if (onboardingVersion == null || onboardingVersion < 1) {
