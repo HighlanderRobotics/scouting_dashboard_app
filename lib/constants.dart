@@ -29,21 +29,18 @@ const List<ScoringMethod> scoringMethods = [
 // Picklists
 
 final List<PicklistWeight> picklistWeights = [
-  PicklistWeight('avgTotal', 'Average total'),
-  PicklistWeight('defenseScore', 'Defense score'),
-  PicklistWeight('driverAbility', 'Driver ability'),
-  PicklistWeight('teleopScore', 'Teleop score'),
-  PicklistWeight('coneOneScore', 'Cones L1'),
-  PicklistWeight('coneTwoScore', 'Cones L2'),
-  PicklistWeight('coneThreeScore', 'Cones L3'),
-  PicklistWeight('cubeOneScore', 'Cubes L1'),
-  PicklistWeight('cubeTwoScore', 'Cubes L2'),
-  PicklistWeight('cubeThreeScore', 'Cubes L3'),
-  PicklistWeight('feedCone', 'Cone feeder'),
-  PicklistWeight('feedCube', 'Cube feeder'),
-  PicklistWeight('autoCargo', 'Auto cargo'),
-  PicklistWeight('autoClimb', 'Auto climb'),
-  PicklistWeight('teleopClimb', 'Teleop climb'),
+  PicklistWeight("totalPoints", "Total points"),
+  PicklistWeight("defense", "Defense"),
+  PicklistWeight("pickUps", "Pickups"),
+  PicklistWeight("stage", "Stage"),
+  PicklistWeight("autoPoints", "Auto points"),
+  PicklistWeight("driverAbility", "Driver ability"),
+  PicklistWeight("speakerScores", "Speaker scores"),
+  PicklistWeight("ampScores", "Amp scores"),
+  PicklistWeight("teleopPoints", "Teleop points"),
+  PicklistWeight("trapScores", "Trap scores"),
+  PicklistWeight("feeds", "Feeds"),
+  PicklistWeight("cooperation", "Cooperation"),
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
@@ -51,7 +48,7 @@ List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
     "Average total",
     picklistWeights
         .map((weight) => PicklistWeight(weight.path, weight.localizedName,
-            value: weight.path == 'avgTotal' ? 1 : 0))
+            value: weight.path == 'totalPoints' ? 1 : 0))
         .toList(),
   ),
 ];

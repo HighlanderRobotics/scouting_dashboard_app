@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -408,6 +409,36 @@ class LovatAPI {
 
     return response!.body;
   }
+
+  Future<Map<String, List<dynamic>>> getPicklistAnalysis(
+    List<String> flags,
+    List<PicklistWeight> weights,
+  ) async {
+    final tournament = await Tournament.getCurrent();
+
+    final response = await get(
+      '/v1/analysis/picklist',
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+        'flags': jsonEncode(flags),
+        ...Map.fromEntries(
+          weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+        ),
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get picklist analysis');
+    }
+
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+    return {
+      'result': json['teams'] as List<dynamic>,
+      'flags': json['flags'] as List<dynamic>? ?? [],
+    };
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -556,8 +587,4 @@ class Analyst {
   }
 }
 
-const lovatAPI = LovatAPI(
-  kDebugMode
-      ? "https://lovat-server-staging.up.railway.app"
-      : "https://api.lovat.app",
-);
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
