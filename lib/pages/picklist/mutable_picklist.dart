@@ -28,20 +28,11 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
     });
   }
 
-  Future<void> refreshFlagConfigurations() async {
-    final configs = await getPicklistFlags();
-
-    setState(() {
-      flagConfigurations = configs;
-    });
-  }
-
   @override
   void initState() {
     super.initState();
 
     refreshPickedTeams();
-    refreshFlagConfigurations();
   }
 
   @override
