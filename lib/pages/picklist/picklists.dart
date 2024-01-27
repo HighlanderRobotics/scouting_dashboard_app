@@ -301,7 +301,8 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               ),
                             );
 
-                            deleteSharedPicklist(picklist.id);
+                            await lovatAPI
+                                .deleteSharedPicklistById(picklist.id);
 
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -551,18 +552,5 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                 .toList(),
           );
         });
-  }
-}
-
-Future<void> deleteSharedPicklist(String uuid) async {
-  String authority = (await getServerAuthority())!;
-
-  final response =
-      await http.get(Uri.http(authority, '/API/manager/deletePicklist', {
-    'uuid': uuid,
-  }));
-
-  if (response.statusCode != 200) {
-    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
   }
 }

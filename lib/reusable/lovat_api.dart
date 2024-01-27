@@ -497,6 +497,15 @@ class LovatAPI {
 
     return ConfiguredPicklist.fromServerJSON(response!.body);
   }
+
+  Future<void> deleteSharedPicklistById(String id) async {
+    final response = await delete('/v1/manager/picklists/$id');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to delete shared picklist');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
