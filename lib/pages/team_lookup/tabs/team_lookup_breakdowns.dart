@@ -88,10 +88,8 @@ class Breakdown extends StatelessWidget {
                       ),
                 ),
                 const SizedBox(height: 10),
-                dataIdentity.segments
-                        .where((segmentData) =>
-                            (data[dataIdentity.path]?[segmentData.path]) != 0)
-                        .isEmpty
+                data[dataIdentity.path] == null ||
+                        data[dataIdentity.path]!.isEmpty
                     ? Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(6),
