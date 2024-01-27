@@ -80,12 +80,14 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Avg auto",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "autopoints",
+      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Average teleop",
       abbreviatedLocalizedName: "Avg teleop",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "teleoppoints",
+      hideDetails: true,
     ),
   ]),
   MetricCategoryData("Notes", [
@@ -94,30 +96,35 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Amp",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "ampscores",
+      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Speaker scores",
       abbreviatedLocalizedName: "Speaker",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "speakerscores",
+      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Feeds",
       abbreviatedLocalizedName: "Feeds",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "feeds",
+      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Pickups",
       abbreviatedLocalizedName: "Pickups",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "pickups",
+      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Drops",
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "drops",
+      hideDetails: true,
     ),
   ]),
   MetricCategoryData("Other", [
@@ -126,6 +133,7 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Driver ability",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "driverability",
+      hideDetails: true,
     ),
   ]),
 ];
