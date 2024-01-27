@@ -141,53 +141,70 @@ final List<MetricCategoryData> metricCategories = [
 List<BreakdownData> breakdowns = [
   BreakdownData(
     localizedName: "Role",
-    path: "role",
+    path: "robotRole",
     segments: [
-      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
-      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
       BreakdownSegmentData(localizedNameSingular: "Offense", path: "offense"),
+      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
+      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
       BreakdownSegmentData(localizedNameSingular: "Immobile", path: "immobile"),
     ],
   ),
   BreakdownData(
-    localizedName: "Charge station teleop",
-    path: "climber",
+    localizedName: "Pick-up",
+    path: "pickUp",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Dock",
-        localizedNamePlural: "Docks",
-        path: "docked",
+        localizedNameSingular: "Ground",
+        path: "ground",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Engage",
-        localizedNamePlural: "Engages",
-        path: "engaged",
+        localizedNameSingular: "Chute",
+        path: "chute",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Fail",
-        localizedNamePlural: "Fails",
-        path: "failed",
+        localizedNameSingular: "Both",
+        path: "both",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Charge station auto",
-    path: "climberAuto",
+    localizedName: "High note",
+    path: "highNote",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Dock",
-        localizedNamePlural: "Docks",
-        path: "docked",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Engage",
-        localizedNamePlural: "Engages",
-        path: "engaged",
+        localizedNameSingular: "Successful",
+        path: "successful",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Fail",
-        localizedNamePlural: "Fails",
         path: "failed",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Not attempted",
+        path: "not_attempted",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Stage",
+    path: "stage",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Nothing",
+        path: "nothing",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Park",
+        localizedNamePlural: "park",
+        path: "failed",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Onstage",
+        path: "onstage",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Onstage & Harmony",
+        path: "onstage_harmony",
       ),
     ],
   ),
