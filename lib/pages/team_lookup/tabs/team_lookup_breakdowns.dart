@@ -110,10 +110,7 @@ class Breakdown extends StatelessWidget {
                   const SizedBox(height: 10),
                   dataIdentity.segments
                           .where((segmentData) =>
-                              data
-                                  .cast()[dataIdentity.path]!
-                                  .cast()[segmentData.path]! !=
-                              0)
+                              (data[dataIdentity.path]?[segmentData.path]) != 0)
                           .isEmpty
                       ? Container(
                           decoration: BoxDecoration(
@@ -129,14 +126,15 @@ class Breakdown extends StatelessWidget {
                           child: Row(
                               children: dataIdentity.segments
                                   .where((segmentData) =>
-                                      data
-                                          .cast()[dataIdentity.path]!
-                                          .cast()[segmentData.path]! !=
+                                      (data.cast()[dataIdentity.path]
+                                              [segmentData.path] ??
+                                          0) !=
                                       0)
                                   .map((BreakdownSegmentData segmentData) {
-                            int analyzedSegmentValue = data
-                                .cast()[dataIdentity.path]!
-                                .cast()[segmentData.path]!;
+                            double analyzedSegmentValue =
+                                data[dataIdentity.path]?[segmentData.path]
+                                        ?.toDouble() ??
+                                    0;
 
                             return segment(
                               context,
@@ -163,9 +161,9 @@ class Breakdown extends StatelessWidget {
   }
 
   Flexible segment(
-      BuildContext context, String name, int value, double colorFactor) {
+      BuildContext context, String name, double value, double colorFactor) {
     return Flexible(
-      flex: value,
+      flex: (value * 1000).round(),
       fit: FlexFit.tight,
       child: Container(
         // color: Theme.of(context).colorScheme.primary,
@@ -180,7 +178,7 @@ class Breakdown extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                value.toString(),
+                "${(value * 100).round()}%",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               Text(
