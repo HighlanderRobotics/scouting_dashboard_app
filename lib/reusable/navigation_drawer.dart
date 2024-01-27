@@ -63,21 +63,18 @@ class GlobalNavigationDrawer extends StatelessWidget {
                     ModalRoute.of(context)?.settings.name == "/match_schedule",
                 icon: Icons.today,
               ),
-              RoleExclusive(
-                roles: const ['8033_scouting_lead'],
-                child: DrawerDestination(
-                  label: "Scan QR Codes",
-                  onTap: () {
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      "/scan_qr_codes",
-                      (route) => false,
-                    );
-                  },
-                  isSelected:
-                      ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
-                  icon: Icons.qr_code_scanner,
-                ),
+              DrawerDestination(
+                label: "Scan QR Codes",
+                onTap: () {
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    "/scan_qr_codes",
+                    (route) => false,
+                  );
+                },
+                isSelected:
+                    ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
+                icon: Icons.qr_code_scanner,
               ),
               const SectionHeader(title: "Analysis & Strategy"),
               DrawerDestination(
