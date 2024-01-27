@@ -387,7 +387,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
           return ScrollablePageBody(
             padding: EdgeInsets.zero,
             children: picklistsMeta
-                .map((picklist) => Column(
+                .map((picklistMeta) => Column(
                       children: [
                         Dismissible(
                           onUpdate: (details) {
@@ -411,10 +411,10 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                             ),
                           ),
                           child: ListTile(
-                            title: Text(picklist.name),
-                            subtitle: picklist.author == null
+                            title: Text(picklistMeta.name),
+                            subtitle: picklistMeta.author == null
                                 ? null
-                                : Text(picklist.author!),
+                                : Text(picklistMeta.author!),
                             trailing: Icon(
                               Icons.arrow_right,
                               color: Theme.of(context).colorScheme.onSurface,
@@ -428,10 +428,8 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                 Navigator.of(context).pushNamed(
                                     '/mutable_picklist',
                                     arguments: <String, dynamic>{
-                                      'picklist': (await lovatAPI
-                                              .getMutablePicklists())
-                                          .firstWhere(
-                                              (e) => e.uuid == picklist.uuid),
+                                      'picklist':
+                                          await picklistMeta.getPicklist(),
                                       'callback': () => setState(() {}),
                                     });
                               } catch (error) {

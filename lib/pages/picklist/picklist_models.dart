@@ -193,7 +193,7 @@ class MutablePicklist {
       name: decodedJSON['name'],
       author:
           decodedJSON.containsKey('userName') ? decodedJSON['userName'] : null,
-      teams: decodedJSON['teams'],
+      teams: decodedJSON['teams'].cast<int>(),
     );
   }
 
@@ -246,7 +246,7 @@ class MutablePicklistMeta {
     );
   }
 
-  // Future<MutablePicklist> getPicklist() async {
-  //   return await lovatAPI.getMutablePicklistById(uuid);
-  // }
+  Future<MutablePicklist> getPicklist() async {
+    return await lovatAPI.getMutablePicklistById(uuid);
+  }
 }

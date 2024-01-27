@@ -158,23 +158,6 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          if (flagConfigurations != null)
-                            MutablePicklistFlagRow(
-                              onLoad: (data) {
-                                setState(() {
-                                  flagData[team] = data;
-                                });
-                              },
-                              flagConfigurations: flagConfigurations!,
-                              flagData: flagData,
-                              team: team,
-                              onEdit: () {
-                                refreshFlagConfigurations();
-                                setState(() {
-                                  flagData = {};
-                                });
-                              },
-                            ),
                           Icon(
                             Icons.arrow_right,
                             color:
@@ -195,69 +178,6 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
               .toList(),
         ),
       ),
-    );
-  }
-}
-
-class MutablePicklistFlagRow extends StatefulWidget {
-  const MutablePicklistFlagRow({
-    super.key,
-    required this.flagData,
-    required this.team,
-    required this.flagConfigurations,
-    required this.onLoad,
-    required this.onEdit,
-  });
-
-  final Map<int, Map<String, dynamic>> flagData;
-  final int team;
-  final List<FlagConfiguration> flagConfigurations;
-  final dynamic Function(Map<String, dynamic> data) onLoad;
-  final dynamic Function() onEdit;
-
-  @override
-  State<MutablePicklistFlagRow> createState() => _MutablePicklistFlagRowState();
-}
-
-class _MutablePicklistFlagRowState extends State<MutablePicklistFlagRow> {
-  Future<void> loadData() async {
-    final authority = (await getServerAuthority())!;
-    final prefs = await SharedPreferences.getInstance();
-    final tournamentKey = prefs.getString('tournament');
-
-    final response = await http.get(Uri.http(authority, '/API/analysis/flag', {
-      'types': jsonEncode(
-          widget.flagConfigurations.map((e) => e.type.path).toList()),
-      'team': widget.team.toString(),
-      'tournamentKey': tournamentKey,
-    }));
-
-    widget.onLoad(
-      (jsonDecode(response.body)[0]['result'] as List)
-          .asMap()
-          .map((key, value) => MapEntry(value['type'], value['result'])),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (!widget.flagData.containsKey(widget.team)) {
-      loadData();
-
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        children: widget.flagConfigurations
-            .map((e) => const SkeletonFlag())
-            .toList()
-            .withSpaceBetween(width: 10),
-      );
-    }
-
-    return FlagRow(
-      widget.flagConfigurations,
-      widget.flagData[widget.team]!,
-      widget.team,
-      onEdit: widget.onEdit,
     );
   }
 }
