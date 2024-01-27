@@ -461,7 +461,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                             ));
 
                             try {
-                              // await picklist.delete(); TODO: Implement this
+                              await picklistMeta.delete();
 
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();

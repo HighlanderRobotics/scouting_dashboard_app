@@ -249,4 +249,8 @@ class MutablePicklistMeta {
   Future<MutablePicklist> getPicklist() async {
     return await lovatAPI.getMutablePicklistById(uuid);
   }
+
+  Future<void> delete() async {
+    await lovatAPI.deleteMutablePicklistById(uuid);
+  }
 }

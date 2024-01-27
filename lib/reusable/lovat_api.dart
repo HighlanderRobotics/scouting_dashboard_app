@@ -546,6 +546,15 @@ class LovatAPI {
 
     return MutablePicklist.fromJSON(response!.body);
   }
+
+  Future<void> deleteMutablePicklistById(String id) async {
+    final response = await delete('/v1/manager/mutablepicklists/$id');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to delete mutable picklist');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
