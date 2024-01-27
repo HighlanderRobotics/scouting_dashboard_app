@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
@@ -72,7 +73,10 @@ void main() async {
       '/picklist_team_breakdown': (context) =>
           const PicklistTeamBreakdownPage(),
       '/shared_picklist': (context) => const SharedPicklistPage(),
-      '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
+      '/view_picklist_weights': (context) => ViewPicklistWeightsPage(
+            picklistMeta: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['picklistMeta'],
+          ),
       '/mutable_picklist': (context) => const MutablePicklistPage(),
       '/picked_teams': (context) => const PickedTeamsPage(),
       '/specific_source_teams': (context) => SpecificSourceTeamPage(

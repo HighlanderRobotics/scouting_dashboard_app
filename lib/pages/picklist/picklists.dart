@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
@@ -223,26 +224,6 @@ class _MyPicklistsState extends State<MyPicklists> {
   }
 }
 
-Future<List<ConfiguredPicklist>> getSharedPicklists() async {
-  String authority = (await getServerAuthority())!;
-  final prefs = await SharedPreferences.getInstance();
-
-  final response =
-      await http.get(Uri.http(authority, '/API/manager/getPicklists', {
-    'team': prefs.getInt('team').toString(),
-  }));
-
-  if (response.statusCode != 200) {
-    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-  }
-
-  List<dynamic> parsedResponse = jsonDecode(response.body);
-
-  return parsedResponse
-      .map((e) => ConfiguredPicklist.fromServerJSON(jsonEncode(e)))
-      .toList();
-}
-
 class SharedPicklists extends StatefulWidget {
   const SharedPicklists({
     super.key,
@@ -255,10 +236,10 @@ class SharedPicklists extends StatefulWidget {
 class _SharedPicklistsState extends State<SharedPicklists> {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getSharedPicklists(),
+    return FutureBuilder<List<ConfiguredPicklistMeta>>(
+      future: lovatAPI.getSharedPicklists(),
       builder: (BuildContext context,
-          AsyncSnapshot<List<ConfiguredPicklist>> snapshot) {
+          AsyncSnapshot<List<ConfiguredPicklistMeta>> snapshot) {
         if (snapshot.hasError) {
           return FriendlyErrorView(errorMessage: snapshot.error.toString());
         }
@@ -320,7 +301,8 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               ),
                             );
 
-                            deleteSharedPicklist(picklist.id);
+                            await lovatAPI
+                                .deleteSharedPicklistById(picklist.id);
 
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
@@ -329,31 +311,6 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                                 content: Text(
                                   'Successfully deleted picklist "${picklist.title}"',
                                 ),
-                                action: SnackBarAction(
-                                    label: "Undo",
-                                    onPressed: () async {
-                                      try {
-                                        await picklist.upload();
-                                        setState(() {});
-                                      } catch (error) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              error.toString(),
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onErrorContainer),
-                                            ),
-                                            backgroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .errorContainer,
-                                            behavior: SnackBarBehavior.floating,
-                                          ),
-                                        );
-                                      }
-                                    }),
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
@@ -595,18 +552,5 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                 .toList(),
           );
         });
-  }
-}
-
-Future<void> deleteSharedPicklist(String uuid) async {
-  String authority = (await getServerAuthority())!;
-
-  final response =
-      await http.get(Uri.http(authority, '/API/manager/deletePicklist', {
-    'uuid': uuid,
-  }));
-
-  if (response.statusCode != 200) {
-    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
   }
 }

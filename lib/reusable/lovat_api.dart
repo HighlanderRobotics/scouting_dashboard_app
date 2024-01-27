@@ -449,6 +449,63 @@ class LovatAPI {
       'flags': json['flags'] as List<dynamic>? ?? [],
     };
   }
+
+  Future<void> sharePicklist(
+    ConfiguredPicklist picklist,
+  ) async {
+    // POST /v1/manager/picklists
+    final response = await post(
+      '/v1/manager/picklists',
+      body: {
+        'name': picklist.title,
+        ...Map.fromEntries(
+          picklist.weights.map((e) => MapEntry(e.path, e.value)),
+        ),
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to share picklist');
+    }
+  }
+
+  Future<List<ConfiguredPicklistMeta>> getSharedPicklists() async {
+    final response = await get('/v1/manager/picklists');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get shared picklists');
+    }
+
+    List<dynamic> parsedResponse = jsonDecode(response!.body);
+
+    debugPrint(parsedResponse.toString());
+
+    return parsedResponse
+        .map((e) => ConfiguredPicklistMeta.fromJson(e))
+        .toList();
+  }
+
+  Future<ConfiguredPicklist> getSharedPicklistById(String id) async {
+    final response = await get('/v1/manager/picklists/$id');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get shared picklist');
+    }
+
+    return ConfiguredPicklist.fromServerJSON(response!.body);
+  }
+
+  Future<void> deleteSharedPicklistById(String id) async {
+    final response = await delete('/v1/manager/picklists/$id');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to delete shared picklist');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
