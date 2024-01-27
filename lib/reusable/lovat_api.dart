@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -607,6 +608,21 @@ class LovatAPI {
 
     return json;
   }
+
+  Future<List<Note>> getNotesByTeamNumber(
+    int teamNumber,
+  ) async {
+    final response = await get('/v1/analysis/notes/team/$teamNumber');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get notes');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => Note.fromJson(e)).toList();
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -753,6 +769,24 @@ class Analyst {
   Future<void> promote() async {
     await lovatAPI.promoteAnalyst(id);
   }
+}
+
+class Note {
+  const Note({
+    required this.body,
+    required this.matchIdentity,
+    this.author,
+  });
+
+  final String body;
+  final GameMatchIdentity matchIdentity;
+  final String? author;
+
+  factory Note.fromJson(Map<String, dynamic> json) => Note(
+        body: json['notes'],
+        matchIdentity: GameMatchIdentity.fromLongKey(json['match']),
+        author: json['scouterName'],
+      );
 }
 
 const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");

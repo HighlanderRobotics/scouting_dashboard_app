@@ -1,8 +1,5 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
-import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 
 class TeamLookupNotesAnalysis extends AnalysisFunction {
   TeamLookupNotesAnalysis({
@@ -12,12 +9,7 @@ class TeamLookupNotesAnalysis extends AnalysisFunction {
   int team;
 
   @override
-  Future getOnlineAnalysis() async {
-    var response = await http
-        .get(Uri.http((await getServerAuthority())!, "/API/analysis/notes", {
-      "team": team.toString(),
-    }));
-
-    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result'];
+  Future<List<Note>> getOnlineAnalysis() async {
+    return await lovatAPI.getNotesByTeamNumber(team);
   }
 }
