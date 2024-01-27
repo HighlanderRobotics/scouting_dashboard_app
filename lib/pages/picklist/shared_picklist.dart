@@ -25,10 +25,12 @@ class SharedPicklistPage extends StatelessWidget {
               ));
 
               try {
-                // final mutablePicklist =
-                //     await MutablePicklist.fromReactivePicklist(picklist);
+                final picklist = await picklistMeta.getPicklist();
 
-                // await mutablePicklist.upload();
+                final mutablePicklist =
+                    await MutablePicklist.fromReactivePicklist(picklist);
+
+                await mutablePicklist.upload();
               } catch (error) {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
                 ScaffoldMessenger.of(context).showSnackBar(

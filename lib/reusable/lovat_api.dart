@@ -506,6 +506,22 @@ class LovatAPI {
       throw Exception('Failed to delete shared picklist');
     }
   }
+
+  Future<void> createMutablePicklist(MutablePicklist picklist) async {
+    final response = await post(
+      '/v1/manager/mutablepicklists',
+      body: {
+        'uuid': picklist.uuid,
+        'name': picklist.name,
+        'teams': picklist.teams,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to create mutable picklist');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -50,25 +51,13 @@ class ConfiguredPicklist {
   String? author;
 
   Future<List<int>> fetchTeamRankings() async {
-    Map<String, dynamic> params = weights.asMap().map((key, value) => MapEntry(
-          value.path,
-          value.value.toString(),
-        ));
+    final analysis = await lovatAPI.getPicklistAnalysis([], weights);
 
-    params['tournamentKey'] =
-        (await SharedPreferences.getInstance()).getString('tournament');
-
-    params['flags'] = '[]';
-
-    final response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/analysis/picklist", params));
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+    if (analysis['result'] == null) {
+      throw const LovatAPIException("Failed to fetch team rankings.");
     }
 
-    return (jsonDecode(utf8.decode(response.bodyBytes))[0]['result']
-            as List<dynamic>)
+    return (analysis['result'] as List<dynamic>)
         .map((e) => e['team'] as int)
         .toList();
   }
@@ -209,25 +198,7 @@ class MutablePicklist {
   }
 
   Future<void> upload() async {
-    final authority = (await getServerAuthority())!;
-    final prefs = await SharedPreferences.getInstance();
-
-    final response =
-        await http.post(Uri.http(authority, '/API/manager/addMutablePicklist'),
-            body: jsonEncode({
-              'uuid': uuid,
-              'name': name,
-              'teams': teams,
-              if (author != null) 'userName': author,
-              'team': prefs.getInt('team').toString(),
-            }),
-            headers: {
-          'Content-Type': 'application/json',
-        });
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-    }
+    await lovatAPI.createMutablePicklist(this);
   }
 
   Future<void> delete() async {
