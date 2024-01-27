@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 
 class TeamLookupCategoriesAnalysis extends AnalysisFunction {
   TeamLookupCategoriesAnalysis({
@@ -13,11 +14,6 @@ class TeamLookupCategoriesAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/analysis/categoryMetrics", {
-      "team": team.toString(),
-    }));
-
-    return jsonDecode(utf8.decode(response.bodyBytes))[0]['result']['metrics'];
+    return await lovatAPI.getCategoryMetricsByTeamNumber(team);
   }
 }

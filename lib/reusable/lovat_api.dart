@@ -573,6 +573,23 @@ class LovatAPI {
       throw Exception('Failed to update mutable picklist');
     }
   }
+
+  Future<Map<String, dynamic>> getCategoryMetricsByTeamNumber(
+    int teamNumber,
+  ) async {
+    final response = await get(
+      '/v1/analysis/category/team/$teamNumber',
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get category metrics');
+    }
+
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+    return json;
+  }
 }
 
 class LovatAPIException implements Exception {
