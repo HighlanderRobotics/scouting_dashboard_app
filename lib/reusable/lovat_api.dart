@@ -508,12 +508,15 @@ class LovatAPI {
   }
 
   Future<void> createMutablePicklist(MutablePicklist picklist) async {
+    final tournament = await Tournament.getCurrent();
+
     final response = await post(
       '/v1/manager/mutablepicklists',
       body: {
         'uuid': picklist.uuid,
         'name': picklist.name,
         'teams': picklist.teams,
+        'tournamentKey': tournament?.key,
       },
     );
 
