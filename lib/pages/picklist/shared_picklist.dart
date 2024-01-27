@@ -62,7 +62,7 @@ class SharedPicklistPage extends StatelessWidget {
             onPressed: () {
               Navigator.of(context)
                   .pushNamed('/view_picklist_weights', arguments: {
-                // 'picklist': picklist,
+                'picklistMeta': picklistMeta,
               });
             },
             icon: const Icon(Icons.balance),
