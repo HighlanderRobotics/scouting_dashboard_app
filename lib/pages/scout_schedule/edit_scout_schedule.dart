@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 class EditScoutSchedulePage extends StatefulWidget {
@@ -14,8 +13,6 @@ class EditScoutSchedulePage extends StatefulWidget {
 
 class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
   Future<void> setOldSchedule() async {
-    oldSchedule = await getScoutSchedule();
-
     setState(() {
       newSchedule = oldSchedule!.copy();
     });
@@ -46,34 +43,7 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
             ),
           )
         : Scaffold(
-            appBar: AppBar(
-              title: const Text("Edit Scout Schedule"),
-              actions: [
-                IconButton(
-                  onPressed: areSchedulesEqual(oldSchedule!, newSchedule!) ||
-                          newSchedule!.validate() != null
-                      ? null
-                      : () async {
-                          newSchedule!
-                              .save((await getServerAuthority())!)
-                              .then((response) {
-                            SnackBar snackBar = SnackBar(
-                              content: Text(response.statusCode == 200
-                                  ? "Saved"
-                                  : "Error saving: ${response.statusCode} ${response.reasonPhrase}"),
-                              behavior: SnackBarBehavior.floating,
-                            );
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(snackBar);
-                          });
-                          Navigator.pop(context);
-                        },
-                  icon: const Icon(Icons.check),
-                  tooltip: "Save changes",
-                  color: Colors.green,
-                )
-              ],
-            ),
+            appBar: AppBar(title: const Text("Edit Scout Schedule")),
             body: ScrollablePageBody(
               padding: EdgeInsets.zero,
               children: [
@@ -118,7 +88,7 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                       ),
                       child: ListTile(
                         title: Text("Matches ${shift.start} to ${shift.end}"),
-                        subtitle: Text(shift.scouts.join(", ")),
+                        subtitle: Text(shift.allScoutsList),
                         trailing: const Icon(Icons.arrow_right),
                         onTap: () {
                           Navigator.of(context).pushNamed(

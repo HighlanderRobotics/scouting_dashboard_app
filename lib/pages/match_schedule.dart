@@ -63,7 +63,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
             (await getServerAuthority())!,
             (await SharedPreferences.getInstance()).getString('tournament')!,
           ),
-          getScoutSchedule(),
+          // getScoutSchedule(),
           getScoutedStatuses(),
         ],
       );
@@ -891,52 +891,19 @@ class _MatchesState extends State<Matches> {
                             scouted: scouted[0] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_0",
                             team: match.teams[0],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[0],
-                            warnings: getWarnings(
-                              scouted,
-                              0,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 0, []),
                           ),
                           AllianceRowItem(
                             scouted: scouted[1] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_1",
                             team: match.teams[1],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[1],
-                            warnings: getWarnings(
-                              scouted,
-                              1,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 1, []),
                           ),
                           AllianceRowItem(
                             scouted: scouted[2] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_2",
                             team: match.teams[2],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[2],
-                            warnings: getWarnings(
-                              scouted,
-                              2,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 2, []),
                           ),
                         ],
                       ),
@@ -948,52 +915,19 @@ class _MatchesState extends State<Matches> {
                             scouted: scouted[3] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_3",
                             team: match.teams[3],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[3],
-                            warnings: getWarnings(
-                              scouted,
-                              3,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 3, []),
                           ),
                           AllianceRowItem(
                             scouted: scouted[4] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_4",
                             team: match.teams[4],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[4],
-                            warnings: getWarnings(
-                              scouted,
-                              4,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 4, []),
                           ),
                           AllianceRowItem(
                             scouted: scouted[5] != null,
                             longMatchKey: "${match.identity.toMediumKey()}_5",
                             team: match.teams[5],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[5],
-                            warnings: getWarnings(
-                              scouted,
-                              5,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            warnings: getWarnings(scouted, 5, []),
                           ),
                         ],
                       ),

@@ -206,7 +206,6 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
                 (await SharedPreferences.getInstance())
                     .getString(("tournament"))!,
               ),
-              getScoutSchedule(),
             ]);
 
             Map<String, String?> isScoutedAll =
@@ -256,15 +255,15 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
                 nextUnscoutedMatchStatus =
                     currentMatchStatus.map((e) => isScoutedAll[e]).toList();
 
-                nextUnscoutedMatchPlannedScouts =
-                    scoutSchedule.getScoutsForMatch(
-                  match.ordinalNumber,
-                );
+                // nextUnscoutedMatchPlannedScouts =
+                //     scoutSchedule.getScoutsForMatch(
+                //   match.ordinalNumber,
+                // );
 
                 return {
                   'nextMatch': nextUnscoutedMatch,
                   'nextMatchStatus': nextUnscoutedMatchStatus,
-                  'nextMatchPlannedScouts': nextUnscoutedMatchPlannedScouts,
+                  // 'nextMatchPlannedScouts': nextUnscoutedMatchPlannedScouts,
                 };
               }
             }
@@ -279,9 +278,9 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
                 "${tournamentSchedule.matches.last.identity.toMediumKey()}_4",
                 "${tournamentSchedule.matches.last.identity.toMediumKey()}_5"
               ].map((e) => isScoutedAll[e]).toList(),
-              'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
-                tournamentSchedule.matches.last.ordinalNumber,
-              ),
+              // 'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
+              //   tournamentSchedule.matches.last.ordinalNumber,
+              // ),
             };
           })(), builder: (context, snapshot) {
             if (snapshot.hasError) {

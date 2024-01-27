@@ -15,7 +15,6 @@ import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/new_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
-import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
@@ -25,7 +24,6 @@ import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
-import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
 import 'package:scouting_dashboard_app/pages/display_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
@@ -33,9 +31,6 @@ import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
-import 'package:scouting_dashboard_app/reusable/models/team.dart';
-
-import 'pages/scout_schedule/edit_scout_shift.dart';
 
 void main() async {
   runApp(MaterialApp(
@@ -53,8 +48,6 @@ void main() async {
           const TeamLookupBreakdownDetailsPage(),
       '/display_qr_codes': (context) => const DisplayQRCodesPage(),
       '/edit_scout_schedule': (context) => const EditScoutSchedulePage(),
-      '/edit_scout_shift': (context) => const EditScoutShiftPage(),
-      '/new_scout_shift': (context) => const NewScoutShiftPage(),
       '/match_predictor': (context) => const MatchPredictorPage(),
       '/match_predictor_opener': (context) => const MatchPredictorOpenerPage(),
       '/match_suggestions': (context) => const MatchSuggestionsPage(),
