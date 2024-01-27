@@ -623,6 +623,26 @@ class LovatAPI {
 
     return json.map((e) => Note.fromJson(e)).toList();
   }
+
+  Future<ScoutSchedule> getScouterSchedule() async {
+    final tournament = await Tournament.getCurrent();
+
+    if (tournament == null) {
+      throw Exception('No tournament selected');
+    }
+
+    final response =
+        await get('/v1/manager/tournament/${tournament.key}/scoutershifts');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get scouter schedule');
+    }
+
+    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+    return ScoutSchedule.fromJson(json);
+  }
 }
 
 class LovatAPIException implements Exception {
