@@ -17,13 +17,23 @@ class LovatAPI {
 
   final String baseUrl;
 
+  Future<Credentials> login() async {
+    final newCredentials = await auth0.webAuthentication().login(
+          audience: "https://api.lovat.app",
+        );
+
+    await auth0.credentialsManager.storeCredentials(newCredentials);
+
+    return newCredentials;
+  }
+
   Future<String?> getAccessToken() async {
     try {
       final credentials = await auth0.credentialsManager.credentials();
 
       if (credentials.expiresAt.isBefore(DateTime.now())) {
         if (credentials.refreshToken == null) {
-          return (await auth0.webAuthentication().login()).accessToken;
+          return (await login()).accessToken;
         }
 
         final newCredentials = await auth0.api
@@ -36,7 +46,7 @@ class LovatAPI {
         return credentials.accessToken;
       }
     } on CredentialsManagerException {
-      return (await auth0.webAuthentication().login()).accessToken;
+      return (await login()).accessToken;
     }
   }
 
