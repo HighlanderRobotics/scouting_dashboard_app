@@ -127,6 +127,29 @@ class ConfiguredPicklist {
 
     return ConfiguredPicklist.autoUuid(title, allWeights, author: author);
   }
+
+  ConfiguredPicklistMeta get meta =>
+      ConfiguredPicklistMeta(title, id, author: author);
+}
+
+class ConfiguredPicklistMeta {
+  const ConfiguredPicklistMeta(this.title, this.id, {this.author});
+
+  final String title;
+  final String id;
+  final String? author;
+
+  factory ConfiguredPicklistMeta.fromJson(Map<String, dynamic> json) {
+    return ConfiguredPicklistMeta(
+      json['name'],
+      json['uuid'],
+      author: json['author']['username'],
+    );
+  }
+
+  Future<ConfiguredPicklist> getPicklist() async {
+    return await lovatAPI.getSharedPicklistById(id);
+  }
 }
 
 Future<List<ConfiguredPicklist>> getPicklists() async {

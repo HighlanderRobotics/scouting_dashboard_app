@@ -469,6 +469,34 @@ class LovatAPI {
       throw Exception('Failed to share picklist');
     }
   }
+
+  Future<List<ConfiguredPicklistMeta>> getSharedPicklists() async {
+    final response = await get('/v1/manager/picklists');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get shared picklists');
+    }
+
+    List<dynamic> parsedResponse = jsonDecode(response!.body);
+
+    debugPrint(parsedResponse.toString());
+
+    return parsedResponse
+        .map((e) => ConfiguredPicklistMeta.fromJson(e))
+        .toList();
+  }
+
+  Future<ConfiguredPicklist> getSharedPicklistById(String id) async {
+    final response = await get('/v1/manager/picklists/$id');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get shared picklist');
+    }
+
+    return ConfiguredPicklist.fromServerJSON(response!.body);
+  }
 }
 
 class LovatAPIException implements Exception {
