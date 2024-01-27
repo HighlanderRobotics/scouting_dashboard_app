@@ -9,6 +9,8 @@ import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
@@ -45,11 +47,10 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   bool fabVisible = false;
 
   Future<void> checkRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    final role = prefs.getString("role");
+    final profile = await lovatAPI.getUserProfile();
 
     setState(() {
-      isScoutingLead = role == "8033_scouting_lead";
+      isScoutingLead = profile.role == UserRole.scoutingLead;
     });
   }
 
