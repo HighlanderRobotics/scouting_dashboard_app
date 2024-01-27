@@ -809,4 +809,6 @@ class Note {
       );
 }
 
-const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
+// const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
+const lovatAPI = LovatAPI(
+    "https://curly-space-trout-g6r64pwwj5xcwx97-3000.preview.app.github.dev");

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:skeletons/skeletons.dart';
 
 class EditScoutSchedulePage extends StatefulWidget {
   const EditScoutSchedulePage({super.key});
@@ -12,115 +11,48 @@ class EditScoutSchedulePage extends StatefulWidget {
 }
 
 class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
-  Future<void> setOldSchedule() async {
+  ScoutSchedule? scoutSchedule;
+
+  Future<void> fetchData() async {
+    final scoutSchedule = await lovatAPI.getScouterSchedule();
+    debugPrint(scoutSchedule.shifts.toString());
     setState(() {
-      newSchedule = oldSchedule!.copy();
+      this.scoutSchedule = scoutSchedule;
     });
   }
-
-  late final ScoutSchedule? oldSchedule;
 
   @override
   void initState() {
     super.initState();
-
-    setOldSchedule();
+    fetchData();
   }
-
-  ScoutSchedule? newSchedule;
 
   @override
   Widget build(BuildContext context) {
-    return newSchedule == null
-        ? Scaffold(
-            appBar: AppBar(title: const Text("Edit Scout Schedule")),
-            body: const ScrollablePageBody(
-              children: [
-                Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ],
-            ),
-          )
-        : Scaffold(
-            appBar: AppBar(title: const Text("Edit Scout Schedule")),
-            body: ScrollablePageBody(
-              padding: EdgeInsets.zero,
-              children: [
-                if (newSchedule!.validate() != null)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Text(
-                      newSchedule!.validate()!,
-                      style: Theme.of(context).textTheme.titleLarge!.merge(
-                            TextStyle(
-                              color: Theme.of(context).colorScheme.error,
-                            ),
-                          ),
-                    ),
-                  ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const ClampingScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final shift = newSchedule!.shifts[index];
+    Widget body;
 
-                    return Dismissible(
-                      onUpdate: (details) {
-                        if ((details.reached && !details.previousReached) ||
-                            (!details.reached && details.previousReached)) {
-                          HapticFeedback.lightImpact();
-                        }
-                      },
-                      key: GlobalKey(),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        color: Colors.red[900],
-                        child: const Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Icon(Icons.delete),
-                              SizedBox(width: 30),
-                            ],
-                          ),
-                        ),
-                      ),
-                      child: ListTile(
-                        title: Text("Matches ${shift.start} to ${shift.end}"),
-                        subtitle: Text(shift.allScoutsList),
-                        trailing: const Icon(Icons.arrow_right),
-                        onTap: () {
-                          Navigator.of(context).pushNamed(
-                            "/edit_scout_shift",
-                            arguments: {
-                              'shift': shift,
-                              'setParentState': setState,
-                            },
-                          );
-                        },
-                      ),
-                      onDismissed: (direction) {
-                        setState(() {
-                          newSchedule!.shifts.removeAt(index);
-                        });
-                      },
-                    );
-                  },
-                  itemCount: newSchedule!.shifts.length,
-                ),
-              ],
-            ),
-            floatingActionButton: FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed("/new_scout_shift", arguments: {
-                  'schedule': newSchedule,
-                  'setParentState': setState,
-                });
-              },
-              tooltip: "New shift",
-              child: const Icon(Icons.add),
-            ),
+    if (scoutSchedule == null) {
+      body = SkeletonListView(
+        itemBuilder: (context, index) => SkeletonListTile(),
+      );
+    } else {
+      body = ListView.builder(
+        itemBuilder: (context, index) {
+          final shift = scoutSchedule!.shifts[index];
+          return ListTile(
+            title: Text("${shift.start} to ${shift.end}"),
+            subtitle: Text(shift.allScoutsList),
           );
+        },
+        itemCount: scoutSchedule!.shifts.length,
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Edit Scout Schedule"),
+      ),
+      body: body,
+    );
   }
 }
