@@ -348,28 +348,6 @@ class _SharedPicklistsState extends State<SharedPicklists> {
   }
 }
 
-Future<List<MutablePicklist>> getMutablePicklists() async {
-  final authority = (await getServerAuthority())!;
-  final prefs = await SharedPreferences.getInstance();
-
-  final response =
-      await http.get(Uri.http(authority, '/API/manager/getMutablePicklists', {
-    'team': prefs.getInt('team').toString(),
-  }));
-
-  if (response.statusCode != 200) {
-    throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-  }
-
-  return (jsonDecode(response.body) as List<dynamic>)
-      .map((listMap) => MutablePicklist(
-          uuid: listMap['uuid'],
-          name: listMap['name'],
-          teams: listMap['teams'].cast<int>(),
-          author: listMap.containsKey('userName') ? listMap['userName'] : null))
-      .toList();
-}
-
 class MutablePicklists extends StatefulWidget {
   const MutablePicklists({super.key});
 
@@ -385,9 +363,9 @@ class _MutablePicklistsState extends State<MutablePicklists> {
     return realListsWithPermission();
   }
 
-  FutureBuilder<List<MutablePicklist>> realListsWithPermission() {
-    return FutureBuilder(
-        future: getMutablePicklists(),
+  FutureBuilder<List<MutablePicklistMeta>> realListsWithPermission() {
+    return FutureBuilder<List<MutablePicklistMeta>>(
+        future: lovatAPI.getMutablePicklists(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return FriendlyErrorView(errorMessage: snapshot.error.toString());
@@ -404,11 +382,11 @@ class _MutablePicklistsState extends State<MutablePicklists> {
             );
           }
 
-          List<MutablePicklist> picklists = snapshot.data!;
+          List<MutablePicklistMeta> picklistsMeta = snapshot.data!;
 
           return ScrollablePageBody(
             padding: EdgeInsets.zero,
-            children: picklists
+            children: picklistsMeta
                 .map((picklist) => Column(
                       children: [
                         Dismissible(
@@ -450,7 +428,8 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                 Navigator.of(context).pushNamed(
                                     '/mutable_picklist',
                                     arguments: <String, dynamic>{
-                                      'picklist': (await getMutablePicklists())
+                                      'picklist': (await lovatAPI
+                                              .getMutablePicklists())
                                           .firstWhere(
                                               (e) => e.uuid == picklist.uuid),
                                       'callback': () => setState(() {}),
@@ -484,39 +463,14 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                             ));
 
                             try {
-                              await picklist.delete();
+                              // await picklist.delete(); TODO: Implement this
 
                               ScaffoldMessenger.of(context)
                                   .hideCurrentSnackBar();
 
                               ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
-                                content: const Text("Successfully deleted"),
-                                action: SnackBarAction(
-                                    label: "Undo",
-                                    onPressed: () async {
-                                      try {
-                                        await picklist.upload();
-                                        setState(() {});
-                                      } catch (error) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              error.toString(),
-                                              style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onErrorContainer),
-                                            ),
-                                            backgroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .errorContainer,
-                                            behavior: SnackBarBehavior.floating,
-                                          ),
-                                        );
-                                      }
-                                    }),
+                                  .showSnackBar(const SnackBar(
+                                content: Text("Successfully deleted"),
                                 behavior: SnackBarBehavior.floating,
                               ));
                             } catch (error) {

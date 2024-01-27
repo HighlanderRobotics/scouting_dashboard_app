@@ -219,4 +219,34 @@ class MutablePicklist {
       throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
     }
   }
+
+  MutablePicklistMeta get meta =>
+      MutablePicklistMeta(uuid: uuid, name: name, author: author);
+}
+
+class MutablePicklistMeta {
+  MutablePicklistMeta({
+    required this.uuid,
+    required this.name,
+    this.author,
+    this.tournamentKey,
+  });
+
+  String uuid;
+  String name;
+  String? author;
+  String? tournamentKey;
+
+  factory MutablePicklistMeta.fromJson(Map<String, dynamic> json) {
+    return MutablePicklistMeta(
+      uuid: json['uuid'],
+      name: json['name'],
+      author: json['author']['username'],
+      tournamentKey: json['tournamentKey'],
+    );
+  }
+
+  // Future<MutablePicklist> getPicklist() async {
+  //   return await lovatAPI.getMutablePicklistById(uuid);
+  // }
 }

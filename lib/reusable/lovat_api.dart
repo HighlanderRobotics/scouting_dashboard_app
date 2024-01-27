@@ -522,6 +522,19 @@ class LovatAPI {
       throw Exception('Failed to create mutable picklist');
     }
   }
+
+  Future<List<MutablePicklistMeta>> getMutablePicklists() async {
+    final response = await get('/v1/manager/mutablepicklists');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get mutable picklists');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => MutablePicklistMeta.fromJson(e)).toList();
+  }
 }
 
 class LovatAPIException implements Exception {
