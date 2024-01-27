@@ -222,6 +222,10 @@ class MutablePicklist {
 
   MutablePicklistMeta get meta =>
       MutablePicklistMeta(uuid: uuid, name: name, author: author);
+
+  Future<void> update() async {
+    await lovatAPI.updateMutablePicklist(this);
+  }
 }
 
 class MutablePicklistMeta {

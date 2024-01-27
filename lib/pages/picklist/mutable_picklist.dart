@@ -106,7 +106,7 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
             );
 
             try {
-              await newPicklist.upload();
+              await newPicklist.update();
             } catch (error) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

@@ -555,6 +555,21 @@ class LovatAPI {
       throw Exception('Failed to delete mutable picklist');
     }
   }
+
+  Future<void> updateMutablePicklist(MutablePicklist picklist) async {
+    final response = await put(
+      '/v1/manager/mutablepicklists/${picklist.uuid}',
+      body: {
+        'name': picklist.name,
+        'teams': picklist.teams,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to update mutable picklist');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
