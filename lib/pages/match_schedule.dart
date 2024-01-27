@@ -220,14 +220,6 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
               },
               icon: const Icon(Icons.edit_outlined),
             ),
-          if (isScoutingLead ?? false)
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed("/display_qr_codes");
-              },
-              icon: const Icon(Icons.qr_code),
-              tooltip: "Display QR codes",
-            ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(177),
