@@ -317,7 +317,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             controller: endFieldController,
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 1",
+            label: "Red 1",
             scouts: shift!.team1,
             allScouts: allScouts!,
             onChanged: (newValue) {
@@ -327,7 +327,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             },
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 2",
+            label: "Red 2",
             scouts: shift!.team2,
             allScouts: allScouts!,
             onChanged: (newValue) {
@@ -337,7 +337,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             },
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 3",
+            label: "Red 3",
             scouts: shift!.team3,
             allScouts: allScouts!,
             onChanged: (newValue) {
@@ -347,7 +347,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             },
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 4",
+            label: "Blue 1",
             scouts: shift!.team4,
             allScouts: allScouts!,
             onChanged: (newValue) {
@@ -357,7 +357,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             },
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 5",
+            label: "Blue 2",
             scouts: shift!.team5,
             allScouts: allScouts!,
             onChanged: (newValue) {
@@ -367,7 +367,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
             },
           ),
           ScheduleShiftTeamScouts(
-            label: "Team 6",
+            label: "Blue 3",
             scouts: shift!.team6,
             allScouts: allScouts!,
             onChanged: (newValue) {
