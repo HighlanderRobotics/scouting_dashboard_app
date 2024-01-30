@@ -1837,6 +1837,7 @@ class _AtTournamentPageState extends State<AtTournamentPage> {
       body: PageBody(
         padding: EdgeInsets.zero,
         child: Stack(
+          alignment: Alignment.bottomCenter,
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -1905,17 +1906,33 @@ class _AtTournamentPageState extends State<AtTournamentPage> {
                 ],
               ],
             ),
-            if (error != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  error!,
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                  textAlign: TextAlign.center,
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (error != null)
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      error!,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: FilledButton.tonal(
+                    onPressed: () async {
+                      await Tournament.clearCurrent();
+                      widget.onSubmit?.call();
+                    },
+                    child: const Text("I'm not at a tournament"),
+                  ),
                 ),
-              ),
+              ],
+            ),
           ],
         ),
       ),
