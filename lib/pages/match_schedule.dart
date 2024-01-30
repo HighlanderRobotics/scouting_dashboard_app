@@ -43,6 +43,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
   bool isDataFetched = false;
   bool? isScoutingLead;
+  Tournament? currentTournament;
 
   bool fabVisible = false;
 
@@ -51,6 +52,14 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
     setState(() {
       isScoutingLead = profile.role == UserRole.scoutingLead;
+    });
+  }
+
+  Future<void> checkTournament() async {
+    final current = await Tournament.getCurrent();
+
+    setState(() {
+      currentTournament = current;
     });
   }
 
@@ -165,6 +174,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
     fetchData();
     checkRole();
+    checkTournament();
     fetchTeamsInTournament();
   }
 
@@ -213,7 +223,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       appBar: AppBar(
         title: const Text("Match Schedule"),
         actions: [
-          if (isScoutingLead ?? false)
+          if ((isScoutingLead ?? false) && currentTournament != null)
             IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/edit_scout_schedule");
