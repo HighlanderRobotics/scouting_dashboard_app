@@ -70,7 +70,6 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Avg total",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "totalpoints",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Average auto",
@@ -84,7 +83,6 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Avg teleop",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "teleoppoints",
-      hideDetails: true,
     ),
   ]),
   MetricCategoryData("Note scoring", [
@@ -93,21 +91,18 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Amp",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "ampscores",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Speaker scores",
       abbreviatedLocalizedName: "Speaker",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "speakerscores",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Feeds",
       abbreviatedLocalizedName: "Feeds",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "feeds",
-      hideDetails: true,
     ),
   ]),
   MetricCategoryData("Note interactions", [
@@ -116,14 +111,12 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Pickups",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "pickups",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Drops",
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "drops",
-      hideDetails: true,
     ),
   ]),
   MetricCategoryData("Other", [
@@ -132,7 +125,6 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Driver ability",
       valueVizualizationBuilder: ((rating) => "$rating/5"),
       path: "driverability",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Defense",

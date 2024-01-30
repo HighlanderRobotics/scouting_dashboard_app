@@ -721,6 +721,19 @@ class LovatAPI {
       throw Exception('Failed to create scouter schedule shift');
     }
   }
+
+  Future<Map<String, dynamic>> getMetricDetails(
+      int teamNumber, String metricPath) async {
+    final response =
+        await get('/v1/analysis/metric/$metricPath/team/$teamNumber');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get metric details');
+    }
+
+    return jsonDecode(response!.body);
+  }
 }
 
 class LovatAPIException implements Exception {
