@@ -195,7 +195,7 @@ class ManualTournamentInputDialog extends StatefulWidget {
     required this.onSubmit,
   });
 
-  final dynamic Function(Tournament) onSubmit;
+  final dynamic Function(Tournament?) onSubmit;
 
   @override
   State<ManualTournamentInputDialog> createState() =>
@@ -239,6 +239,14 @@ class _ManualTournamentInputDialogState
                       : "Must include the year, i.e. 2023cafr"),
             ),
             const SizedBox(height: 60),
+            FilledButton.tonal(
+              onPressed: () {
+                widget.onSubmit(null);
+                Navigator.of(context).pop();
+              },
+              child: const Text("I'm not at a tournament"),
+            ),
+            const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
