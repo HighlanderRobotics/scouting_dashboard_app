@@ -202,14 +202,14 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Driver ability",
       abbreviatedLocalizedName: "Driver ability",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      valueVizualizationBuilder: ((rating) => "$rating/5"),
       path: "driverability",
       hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Defense",
       abbreviatedLocalizedName: "Defense",
-      valueVizualizationBuilder: ((rating) => "$rating/5"),
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "defense",
       hideDetails: true,
     ),
