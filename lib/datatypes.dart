@@ -38,6 +38,12 @@ class Tournament {
 
     return Tournament(key, name);
   }
+
+  static Future<void> clearCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('tournament');
+    await prefs.remove('tournament_localized');
+  }
 }
 
 Future<List<String>> getScoutNames() async {

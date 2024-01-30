@@ -95,10 +95,10 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
 
   Future<void> handleChange(Tournament? tournament) async {
     if (tournament == null) {
-      return;
+      await Tournament.clearCurrent();
+    } else {
+      await tournament.storeAsCurrent();
     }
-
-    await tournament.storeAsCurrent();
 
     setState(() {
       selectedItem = tournament;
@@ -132,6 +132,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                   dropdownSearchDecoration: widget.decoration,
                 ),
                 selectedItem: selectedItem,
+                clearButtonProps: const ClearButtonProps(isVisible: true),
                 popupProps: PopupProps.modalBottomSheet(
                   constraints: const BoxConstraints.expand(),
                   modalBottomSheetProps: ModalBottomSheetProps(
