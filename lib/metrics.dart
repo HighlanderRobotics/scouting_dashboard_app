@@ -1,6 +1,3 @@
-import 'package:duration/duration.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-
 class CategoryMetric {
   CategoryMetric({
     required this.localizedName,
@@ -66,6 +63,78 @@ String numberVizualizationBuilder(num? num) {
       : num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
 }
 
+// final List<MetricCategoryData> metricCategories = [
+//   MetricCategoryData("Score", [
+//     CategoryMetric(
+//       localizedName: "Average total",
+//       abbreviatedLocalizedName: "Avg total",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "totalpoints",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Average auto",
+//       abbreviatedLocalizedName: "Avg auto",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "autopoints",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Average teleop",
+//       abbreviatedLocalizedName: "Avg teleop",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "teleoppoints",
+//       hideDetails: true,
+//     ),
+//   ]),
+//   MetricCategoryData("Notes", [
+//     CategoryMetric(
+//       localizedName: "Amp scores",
+//       abbreviatedLocalizedName: "Amp",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "ampscores",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Speaker scores",
+//       abbreviatedLocalizedName: "Speaker",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "speakerscores",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Feeds",
+//       abbreviatedLocalizedName: "Feeds",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "feeds",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Pickups",
+//       abbreviatedLocalizedName: "Pickups",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "pickups",
+//       hideDetails: true,
+//     ),
+//     CategoryMetric(
+//       localizedName: "Drops",
+//       abbreviatedLocalizedName: "Drops",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "drops",
+//       hideDetails: true,
+//     ),
+//   ]),
+//   MetricCategoryData("Other", [
+//     CategoryMetric(
+//       localizedName: "Driver ability",
+//       abbreviatedLocalizedName: "Driver ability",
+//       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+//       path: "driverability",
+//       hideDetails: true,
+//     ),
+//   ]),
+// ];
+
 final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Score", [
     CategoryMetric(
@@ -90,7 +159,7 @@ final List<MetricCategoryData> metricCategories = [
       hideDetails: true,
     ),
   ]),
-  MetricCategoryData("Notes", [
+  MetricCategoryData("Note scoring", [
     CategoryMetric(
       localizedName: "Amp scores",
       abbreviatedLocalizedName: "Amp",
@@ -112,6 +181,8 @@ final List<MetricCategoryData> metricCategories = [
       path: "feeds",
       hideDetails: true,
     ),
+  ]),
+  MetricCategoryData("Note interactions", [
     CategoryMetric(
       localizedName: "Pickups",
       abbreviatedLocalizedName: "Pickups",
@@ -133,6 +204,13 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Driver ability",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "driverability",
+      hideDetails: true,
+    ),
+    CategoryMetric(
+      localizedName: "Defense",
+      abbreviatedLocalizedName: "Defense",
+      valueVizualizationBuilder: ((rating) => "$rating/5"),
+      path: "defense",
       hideDetails: true,
     ),
   ]),
