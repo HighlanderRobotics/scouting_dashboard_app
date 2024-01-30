@@ -7,10 +7,10 @@ class GlobalNavigationDrawer extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  Future<String> getTournamentName() async {
+  Future<String?> getTournamentName() async {
     final prefs = await SharedPreferences.getInstance();
 
-    return prefs.getString("tournament_localized")!;
+    return prefs.getString("tournament_localized");
   }
 
   @override
@@ -42,7 +42,8 @@ class GlobalNavigationDrawer extends StatelessWidget {
               FutureBuilder(
                 builder: ((context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return SectionHeader(title: snapshot.data!);
+                    return SectionHeader(
+                        title: snapshot.data ?? "No tournament selected");
                   }
 
                   return const SectionHeader(title: "--");
