@@ -13,18 +13,7 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Scan QR Codes"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {});
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: "Refresh",
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text("Scan QR Codes")),
       drawer: const GlobalNavigationDrawer(),
       body: ScannerBody(
         onDetect: (p0) => {},
