@@ -76,7 +76,6 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Avg auto",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "autopoints",
-      hideDetails: true,
     ),
     CategoryMetric(
       localizedName: "Average teleop",

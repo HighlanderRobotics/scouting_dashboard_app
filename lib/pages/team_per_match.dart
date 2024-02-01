@@ -430,15 +430,6 @@ class TeamPerMatchVizualization extends StatelessWidget {
             EmphasizedContainer(
               child: Text(path.scores.join(', ')),
             ),
-            if (path.chargeSuccessRate.hasAttempted) ...[
-              Text(
-                "Charge station",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-              ChargeSuccessBreakdown(path: path)
-            ],
           ].withSpaceBetween(height: 10),
         ),
       ),
