@@ -1,19 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
-import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/scanner_body.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
-import 'package:skeletons/skeletons.dart';
-import 'package:soundpool/soundpool.dart';
 
 class ScoutReportScannerPage extends StatefulWidget {
   const ScoutReportScannerPage({super.key});
@@ -22,382 +15,262 @@ class ScoutReportScannerPage extends StatefulWidget {
   State<ScoutReportScannerPage> createState() => _ScoutReportScannerPageState();
 }
 
-class QRDataCollection {
-  QRDataCollection({
-    required this.data,
-    this.totalPageCount,
-  });
-
-  List<Map<String, dynamic>> data;
-  int? totalPageCount;
-}
-
 class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
-  List<QRDataCollection> reportData = [
-    QRDataCollection(data: []),
-    QRDataCollection(data: []),
-    QRDataCollection(data: []),
-    QRDataCollection(data: []),
-    QRDataCollection(data: []),
-    QRDataCollection(data: []),
-  ];
+  ChunkedScoutReport? report;
+  bool uploading = false;
+  String? previousCodeValue;
 
-  String? mostRecentMatchShortKey;
+  Future<void> errorHaptics() async {
+    await HapticFeedback.heavyImpact();
+    await sleep(const Duration(milliseconds: 500));
+    await HapticFeedback.lightImpact();
+    await sleep(const Duration(milliseconds: 100));
+    await HapticFeedback.lightImpact();
+    await sleep(const Duration(milliseconds: 100));
+    await HapticFeedback.lightImpact();
+    await sleep(const Duration(milliseconds: 100));
+    await HapticFeedback.lightImpact();
+    await sleep(const Duration(milliseconds: 100));
+  }
+
+  void showError(BuildContext context, String message) {
+    errorHaptics();
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
+  void showErrorAcrossAsync(
+      ScaffoldMessengerState scaffoldMessenger, String message) {
+    errorHaptics();
+    scaffoldMessenger.showSnackBar(SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
 
   @override
   Widget build(BuildContext context) {
+    Widget indicator;
+
+    indicator = const Placeholder();
+
+    if (report == null) {
+      indicator = Center(
+        child: Text(
+          "Scan QR codes from Lovat Collection",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
+    if (report?.isComplete == true) {
+      final json = jsonDecode(report!.data) as Map<String, dynamic>;
+      final teamNumber = json['teamNumber'] as int;
+      final matchType = MatchType.values[json['matchType'] as int];
+      final matchNumber = json['matchNumber'] as int;
+
+      final localizedMatch = GameMatchIdentity(matchType, matchNumber, "")
+          .getLocalizedDescription(includeTournament: false);
+
+      indicator = Center(
+        child: Text(
+          "Data on $teamNumber in $localizedMatch",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
+    if (report?.isComplete == false) {
+      indicator = Center(
+        child: Text(
+          "Scanned ${report!.chunks.length} of ${report!.totalChunks} codes",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Scan QR Codes"),
-        actions: [
-          IconButton(
-            onPressed: () {
-              setState(() {});
-            },
-            icon: const Icon(Icons.refresh),
-            tooltip: "Refresh",
-          ),
-        ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
       ),
       drawer: const GlobalNavigationDrawer(),
       body: ScannerBody(
-        onDetect: (barcodeCapture) {
-          Barcode? code;
-          if (barcodeCapture.barcodes.isEmpty) {
-            code = null;
-          } else {
-            code = barcodeCapture.barcodes.first;
-          }
+          onDetect: (data) {
+            if (uploading) return;
 
-          if (code == null || code.rawValue == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Something went wrong.")));
-          }
+            final barcode =
+                data.barcodes.isNotEmpty ? data.barcodes.first : null;
+            if (barcode?.rawValue == null) {
+              return;
+            }
 
-          print(code!.rawValue);
+            if (previousCodeValue == barcode?.rawValue) {
+              return;
+            }
 
-          Map<String, dynamic> parsedData = jsonDecode(code.rawValue!);
+            previousCodeValue = barcode?.rawValue;
 
-          if (reportData[parsedData['scouterId']].data.any((datum) =>
-              datum['uuid'] == parsedData['uuid'] &&
-              datum['currentPage'] == parsedData['currentPage'])) {
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text("Code already scaned"),
-              behavior: SnackBarBehavior.floating,
-            ));
+            HapticFeedback.mediumImpact();
 
-            (() async {
-              Soundpool pool = Soundpool.fromOptions(
-                options:
-                    const SoundpoolOptions(streamType: StreamType.notification),
-              );
+            final chunk = ReportChunk(encodedData: barcode!.rawValue!);
 
-              int soundId = await rootBundle
-                  .load("assets/sounds/fail.mp3")
-                  .then((ByteData soundData) {
-                return pool.load(soundData);
+            if (report == null) {
+              setState(() {
+                report = ChunkedScoutReport(chunks: [chunk]);
               });
-
-              HapticFeedback.heavyImpact();
-
-              await pool.play(soundId);
-            })();
-
-            return;
-          }
-
-          setState(() {
-            reportData[parsedData['scouterId']].data.add(parsedData);
-            reportData[parsedData['scouterId']].totalPageCount =
-                parsedData['totalPages'];
-          });
-
-          if (reportData[parsedData['scouterId']].data.length !=
-              reportData[parsedData['scouterId']].totalPageCount) {
-            (() async {
-              Soundpool pool = Soundpool.fromOptions(
-                options:
-                    const SoundpoolOptions(streamType: StreamType.notification),
-              );
-
-              int soundId = await rootBundle
-                  .load("assets/sounds/success.mp3")
-                  .then((ByteData soundData) {
-                return pool.load(soundData);
-              });
-
-              HapticFeedback.heavyImpact();
-
-              await pool.play(soundId);
-            })();
-          } else {
-            (() async {
-              Soundpool pool = Soundpool.fromOptions(
-                options:
-                    const SoundpoolOptions(streamType: StreamType.notification),
-              );
-
-              int soundId = await rootBundle
-                  .load("assets/sounds/great_success.mp3")
-                  .then((ByteData soundData) {
-                return pool.load(soundData);
-              });
-
-              HapticFeedback.heavyImpact();
-
-              await pool.play(soundId);
-
-              reportData[parsedData['scouterId']].data.sort(((a, b) =>
-                  (a['currentPage'] as int)
-                      .compareTo(b['currentPage'] as int)));
-
-              String fullJSON = reportData[parsedData['scouterId']]
-                  .data
-                  .map((e) => e['data'])
-                  .join();
-
-              Map<String, dynamic> parsedFullJSON = jsonDecode(fullJSON);
+            } else {
+              if (report?.uuid != chunk.uuid) {
+                showError(context,
+                    "You are scanning a different report. Tap \"Clear\" to start over.");
+                return;
+              }
 
               setState(() {
-                mostRecentMatchShortKey = parsedFullJSON['matchKey'];
+                report!.addChunk(chunk);
               });
-
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text(
-                    "Uploading ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
-                behavior: SnackBarBehavior.floating,
-              ));
-
-              final response = await http.post(
-                  Uri.http(
-                    (await getServerAuthority())!,
-                    "/API/manager/addScoutReport",
-                  ),
-                  body: fullJSON,
-                  headers: <String, String>{
-                    'Content-Type': 'application/json',
-                  });
-
-              ScaffoldMessenger.of(context).removeCurrentSnackBar();
-
-              if (response.statusCode == 200) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      "Uploaded ${parsedFullJSON['scouterName']}'s data on ${parsedFullJSON['teamNumber']}"),
-                  behavior: SnackBarBehavior.floating,
-                ));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text(
-                      "Failed: ${response.statusCode} ${response.reasonPhrase}"),
-                  behavior: SnackBarBehavior.floating,
-                ));
-              }
-            })();
-          }
-        },
-        childBelow: SizedBox(
-          height: 280,
-          child: FutureBuilder(future: (() async {
-            final responses = await Future.wait([
-              getScoutedStatuses(),
-              TournamentSchedule.fromServer(
-                (await getServerAuthority())!,
-                (await SharedPreferences.getInstance())
-                    .getString(("tournament"))!,
+            }
+          },
+          childBelow: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(height: 120, child: indicator),
+              FilledButton.tonal(
+                onPressed: report == null || uploading
+                    ? null
+                    : () {
+                        setState(() {
+                          previousCodeValue = null;
+                          report = null;
+                        });
+                      },
+                child: const Text("Clear"),
               ),
-            ]);
+              FilledButton(
+                onPressed: report?.isComplete == true && !uploading
+                    ? () async {
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
 
-            Map<String, String?> isScoutedAll =
-                responses[0] as Map<String, String?>;
-            TournamentSchedule tournamentSchedule =
-                responses[1] as TournamentSchedule;
-            ScoutSchedule scoutSchedule = responses[2] as ScoutSchedule;
+                        try {
+                          setState(() {
+                            previousCodeValue = null;
+                            uploading = true;
+                          });
 
-            tournamentSchedule.matches
-                .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
+                          await report!.upload();
+                          scaffoldMessenger.showSnackBar(const SnackBar(
+                            content: Text("Report uploaded"),
+                            behavior: SnackBarBehavior.floating,
+                          ));
 
-            late final ScheduleMatch nextUnscoutedMatch;
-            late final List<String?> nextUnscoutedMatchStatus;
-            late final List<String> nextUnscoutedMatchPlannedScouts;
-
-            for (var match in tournamentSchedule.matches) {
-              var currentMatchStatus = [
-                "${match.identity.toMediumKey()}_0",
-                "${match.identity.toMediumKey()}_1",
-                "${match.identity.toMediumKey()}_2",
-                "${match.identity.toMediumKey()}_3",
-                "${match.identity.toMediumKey()}_4",
-                "${match.identity.toMediumKey()}_5",
-              ];
-
-              if (mostRecentMatchShortKey == null
-                  ? currentMatchStatus
-                          .any((element) => isScoutedAll[element] == null) &&
-                      !tournamentSchedule.matches
-                          .skip(tournamentSchedule.matches.indexOf(match) + 1)
-                          .any((element) {
-                        final otherMatchStatuses = [
-                          "${element.identity.toMediumKey()}_0",
-                          "${element.identity.toMediumKey()}_1",
-                          "${element.identity.toMediumKey()}_2",
-                          "${element.identity.toMediumKey()}_3",
-                          "${element.identity.toMediumKey()}_4",
-                          "${element.identity.toMediumKey()}_5",
-                        ];
-
-                        return otherMatchStatuses
-                            .any((element) => isScoutedAll[element] != null);
-                      })
-                  : "${match.identity.type.shortName}${match.identity.number}" ==
-                      mostRecentMatchShortKey) {
-                nextUnscoutedMatch = match;
-                nextUnscoutedMatchStatus =
-                    currentMatchStatus.map((e) => isScoutedAll[e]).toList();
-
-                // nextUnscoutedMatchPlannedScouts =
-                //     scoutSchedule.getScoutsForMatch(
-                //   match.ordinalNumber,
-                // );
-
-                return {
-                  'nextMatch': nextUnscoutedMatch,
-                  'nextMatchStatus': nextUnscoutedMatchStatus,
-                  // 'nextMatchPlannedScouts': nextUnscoutedMatchPlannedScouts,
-                };
-              }
-            }
-
-            return {
-              'nextMatch': tournamentSchedule.matches.last,
-              'nextMatchStatus': [
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_0",
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_1",
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_2",
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_3",
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_4",
-                "${tournamentSchedule.matches.last.identity.toMediumKey()}_5"
-              ].map((e) => isScoutedAll[e]).toList(),
-              // 'nextMatchPlannedScouts': scoutSchedule.getScoutsForMatch(
-              //   tournamentSchedule.matches.last.ordinalNumber,
-              // ),
-            };
-          })(), builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Container(
-                child: FriendlyErrorView(
-                  errorMessage: snapshot.error.toString(),
-                ),
-              );
-            }
-
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Column(
-                children: [
-                  const Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: SkeletonLine(
-                      style: SkeletonLineStyle(width: 90, height: 25),
-                    ),
-                  ),
-                  Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: List.generate(6, (index) => index)
-                          .map(
-                            (i) => Row(
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.all(9),
-                                  child: SkeletonAvatar(
-                                    style: SkeletonAvatarStyle(
-                                        height: 21, width: 21),
-                                  ),
-                                ),
-                                SkeletonLine(
-                                  style: SkeletonLineStyle(
-                                    height: 15,
-                                    width: Random(i).nextInt(100) + 60,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                          .toList()),
-                ],
-              );
-            }
-
-            ScheduleMatch nextMatch =
-                snapshot.data!['nextMatch'] as ScheduleMatch;
-            List<String?> nextMatchStatus =
-                snapshot.data!['nextMatchStatus'] as List<String?>;
-            List<String> nextMatchPlannedScouts =
-                snapshot.data!['nextMatchPlannedScouts'] as List<String>;
-
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    nextMatch.identity
-                        .getLocalizedDescription(includeTournament: false),
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: List.generate(6, (index) => index)
-                      .map(
-                        (i) => ScoutStatus(
-                          name: nextMatchStatus[i] ??
-                              (nextMatchPlannedScouts.isEmpty
-                                  ? null
-                                  : nextMatchPlannedScouts[i]),
-                          scanned: nextMatchStatus[i] != null,
-                          dataCollection: reportData[i],
+                          setState(() {
+                            report = null;
+                          });
+                        } on LovatAPIException catch (e) {
+                          showErrorAcrossAsync(scaffoldMessenger, e.message);
+                        } catch (e) {
+                          showErrorAcrossAsync(
+                              scaffoldMessenger, "An error occurred");
+                        } finally {
+                          setState(() {
+                            uploading = false;
+                          });
+                        }
+                      }
+                    : null,
+                child: uploading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
                         ),
                       )
-                      .toList(),
-                ),
-              ],
-            );
-          }),
-        ),
-      ),
+                    : const Text("Upload Report"),
+              ),
+            ],
+          )),
+      extendBodyBehindAppBar: true,
     );
   }
 }
 
-class ScoutStatus extends StatelessWidget {
-  const ScoutStatus({
-    Key? key,
-    this.name,
-    required this.scanned,
-    required this.dataCollection,
-  }) : super(key: key);
+class ChunkedScoutReport {
+  const ChunkedScoutReport({
+    required this.chunks,
+  });
 
-  final bool scanned;
-  final String? name;
-  final QRDataCollection dataCollection;
+  final List<ReportChunk> chunks;
 
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(children: [
-        name == null
-            ? const Text('--')
-            : scanned
-                ? const Icon(Icons.check_box)
-                : dataCollection.data.isEmpty
-                    ? const Icon(Icons.check_box_outline_blank)
-                    : Text(
-                        "${dataCollection.data.length}/${dataCollection.totalPageCount ?? '--'}"),
-        const SizedBox(width: 5),
-        Text(name ?? 'No scouter in schedule'),
-      ]),
-    );
+  int get totalChunks => chunks.first.total;
+  bool get isComplete => chunks.length == totalChunks;
+  String get uuid => chunks.first.uuid;
+
+  String get data {
+    if (!isComplete) {
+      throw Exception("Report is not complete");
+    }
+
+    return chunks.map((chunk) => chunk.data).join();
   }
+
+  void addChunk(ReportChunk chunk) {
+    if (chunks.any((c) => c.index == chunk.index)) {
+      throw Exception("Chunk already exists");
+    }
+
+    chunks.add(chunk);
+  }
+
+  Map<int, ReportChunk?> get chunkMap {
+    final map = <int, ReportChunk?>{};
+
+    for (var i = 0; i < totalChunks; i++) {
+      map[i] = chunks
+          .cast<ReportChunk?>()
+          .firstWhere((c) => c?.index == i, orElse: () => null);
+    }
+
+    return map;
+  }
+
+  Future<void> upload() async {
+    if (!isComplete) {
+      throw Exception("Report is not complete");
+    }
+
+    await lovatAPI.uploadScoutReport(data);
+  }
+}
+
+class ReportChunk {
+  const ReportChunk({
+    required this.encodedData,
+  });
+
+  final String encodedData;
+
+  int get index => chunkData['index'];
+  int get total => chunkData['total'];
+  String get uuid => chunkData['uuid'];
+  String get data => chunkData['data'];
+
+  Map<String, dynamic> get chunkData {
+    final string = Uri.parse(encodedData).queryParameters['d'];
+
+    if (string == null) {
+      throw Exception("Invalid QR code");
+    }
+
+    return jsonDecode(string) as Map<String, dynamic>;
+  }
+}
+
+Future<void> sleep(Duration duration) {
+  final completer = Completer<void>();
+  Timer(duration, completer.complete);
+  return completer.future;
 }

@@ -20,10 +20,8 @@ class _ScannerBodyState extends State<ScannerBody> {
     formats: [
       BarcodeFormat.qrCode,
     ],
-    detectionSpeed: DetectionSpeed.noDuplicates,
+    detectionSpeed: DetectionSpeed.normal,
   );
-
-  String? previousCodeVal;
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +30,7 @@ class _ScannerBodyState extends State<ScannerBody> {
         children: [
           MobileScanner(
             controller: scannerController,
-            onDetect: (e) {
-              if (previousCodeVal != e.barcodes.first.rawValue) {
-                widget.onDetect(e);
-              }
-
-              setState(() {
-                previousCodeVal = e.barcodes.first.rawValue;
-              });
-            },
+            onDetect: widget.onDetect,
           ),
           ColorFiltered(
             colorFilter: ColorFilter.mode(
