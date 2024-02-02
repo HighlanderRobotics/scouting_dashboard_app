@@ -279,44 +279,6 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             Theme.of(context).colorScheme.blueAlliance
           ][alliance],
         ),
-      const SizedBox(height: 15),
-      Container(
-        decoration: BoxDecoration(
-          color: [
-            Theme.of(context).colorScheme.onRedAlliance,
-            Theme.of(context).colorScheme.onBlueAlliance
-          ][alliance],
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Links",
-                style: TextStyle(
-                    color: [
-                  Theme.of(context).colorScheme.redAlliance,
-                  Theme.of(context).colorScheme.blueAlliance
-                ][alliance]),
-              ),
-              Text(
-                data["${allianceName}Alliance"]['links'] == null
-                    ? "--"
-                    : numberVizualizationBuilder(
-                        data["${allianceName}Alliance"]['links'],
-                      ),
-                style: TextStyle(
-                    color: [
-                  Theme.of(context).colorScheme.redAlliance,
-                  Theme.of(context).colorScheme.blueAlliance
-                ][alliance]),
-              ),
-            ],
-          ),
-        ),
-      ),
     ]);
   }
 }
