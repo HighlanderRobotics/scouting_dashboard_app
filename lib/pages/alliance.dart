@@ -64,7 +64,7 @@ class AllianceVizualization extends AnalysisVisualization {
                             })
                       },
                       child: Text(
-                        teamData['team'],
+                        teamData['team'].toString(),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
@@ -174,7 +174,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                         Navigator.of(context).pushNamed(
                                             "/auto_path_selector",
                                             arguments: <String, dynamic>{
-                                              'team': e['team'],
+                                              'team': e['team'].toString(),
                                               'autoPaths': (e['paths']
                                                       as List<dynamic>)
                                                   .map((path) =>
@@ -209,7 +209,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                         ),
                                         const SizedBox(width: 5),
                                         Text(
-                                          e['team'],
+                                          e['team'].toString(),
                                           style: Theme.of(context)
                                               .textTheme
                                               .labelMedium!
