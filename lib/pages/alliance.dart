@@ -101,8 +101,6 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
       const SizedBox(height: 10),
-      if (analysisMap['levelCargo'] != null) cargoStack(context, analysisMap),
-      const SizedBox(height: 10),
       AlllianceAutoPaths(data: analysisMap),
     ]);
   }
