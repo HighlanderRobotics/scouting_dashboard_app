@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import '../constants.dart';
 
 class MatchPredictorAnalysis extends AnalysisFunction {
@@ -23,16 +24,7 @@ class MatchPredictorAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    var response = await http.get(
-        Uri.http((await getServerAuthority())!, "/API/analysis/predictMatch", {
-      "blue1": blue1.toString(),
-      "blue2": blue2.toString(),
-      "blue3": blue3.toString(),
-      "red1": red1.toString(),
-      "red2": red2.toString(),
-      "red3": red3.toString(),
-    }));
-
-    return jsonDecode(utf8.decode(response.bodyBytes))[0];
+    return await lovatAPI.getMatchPrediction(
+        red1, red2, red3, blue1, blue2, blue3);
   }
 }
