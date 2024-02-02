@@ -176,7 +176,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                             onTap: () => Navigator.of(context).pushNamed(
                                 "/team_lookup",
                                 arguments: <String, dynamic>{
-                                  'team': int.parse(e['team'].toString())
+                                  'team':
+                                      int.parse(e['team'].toString().toString())
                                 }),
                             child: Container(
                               decoration: BoxDecoration(
@@ -200,7 +201,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                           ),
                                           const SizedBox(width: 5),
                                           Text(
-                                            e['team'],
+                                            e['team'].toString(),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyLarge,
