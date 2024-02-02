@@ -734,6 +734,28 @@ class LovatAPI {
 
     return jsonDecode(response!.body);
   }
+
+  Future<void> uploadScoutReport(String data) async {
+    final response = await post(
+      '/v1/manager/dashboard/scoutreport',
+      body: jsonDecode(data),
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+
+      late final Exception exception;
+
+      try {
+        exception =
+            LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } catch (_) {
+        exception = Exception('Failed to upload scout report');
+      }
+
+      throw exception;
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -900,6 +922,4 @@ class Note {
       );
 }
 
-// const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
-const lovatAPI = LovatAPI(
-    "https://curly-space-trout-g6r64pwwj5xcwx97-3000.preview.app.github.dev");
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
