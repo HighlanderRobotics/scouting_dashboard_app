@@ -759,6 +759,19 @@ enum CompletionFilter {
 
 enum Alliance { red, blue }
 
+extension AllianceExtension on Alliance {
+  static Alliance fromString(String string) {
+    switch (string) {
+      case "red":
+        return Alliance.red;
+      case "blue":
+        return Alliance.blue;
+      default:
+        throw "Invalid alliance string";
+    }
+  }
+}
+
 class ScoutedFlag extends StatelessWidget {
   const ScoutedFlag({
     Key? key,

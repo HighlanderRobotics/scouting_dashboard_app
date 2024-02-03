@@ -6,6 +6,7 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
@@ -802,6 +803,19 @@ class LovatAPI {
 
     return jsonDecode(response!.body);
   }
+
+  Future<List<MatchScheduleMatch>> getMatches(String tournamentKey) async {
+    final response = await get("/v1/manager/matches/$tournamentKey");
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get match schedule');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => MatchScheduleMatch.fromJson(e)).toList();
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -966,6 +980,69 @@ class Note {
         matchIdentity: GameMatchIdentity.fromLongKey(json['match']),
         author: json['scouterName'],
       );
+}
+
+class MatchScheduleMatch {
+  const MatchScheduleMatch({
+    required this.identity,
+    required this.red1,
+    required this.red2,
+    required this.red3,
+    required this.blue1,
+    required this.blue2,
+    required this.blue3,
+  });
+
+  final GameMatchIdentity identity;
+
+  final MatchScheduleTeamInfo red1;
+  final MatchScheduleTeamInfo red2;
+  final MatchScheduleTeamInfo red3;
+  final MatchScheduleTeamInfo blue1;
+  final MatchScheduleTeamInfo blue2;
+  final MatchScheduleTeamInfo blue3;
+
+  List<MatchScheduleTeamInfo> get allTeamInfo => [
+        red1,
+        red2,
+        red3,
+        blue1,
+        blue2,
+        blue3,
+      ];
+
+  factory MatchScheduleMatch.fromJson(Map<String, dynamic> json) {
+    return MatchScheduleMatch(
+      identity: GameMatchIdentity(MatchType.values[json['matchType']],
+          json['matchNumber'], json['tournamentKey']),
+      red1: MatchScheduleTeamInfo.fromJson(json['team1']),
+      red2: MatchScheduleTeamInfo.fromJson(json['team2']),
+      red3: MatchScheduleTeamInfo.fromJson(json['team3']),
+      blue1: MatchScheduleTeamInfo.fromJson(json['team4']),
+      blue2: MatchScheduleTeamInfo.fromJson(json['team5']),
+      blue3: MatchScheduleTeamInfo.fromJson(json['team6']),
+    );
+  }
+}
+
+class MatchScheduleTeamInfo {
+  const MatchScheduleTeamInfo({
+    required this.teamNumber,
+    required this.alliance,
+    required this.scouterNames,
+  });
+
+  final int teamNumber;
+  final Alliance alliance;
+  final List<String> scouterNames;
+
+  factory MatchScheduleTeamInfo.fromJson(Map<String, dynamic> json) {
+    return MatchScheduleTeamInfo(
+      teamNumber: json['number'],
+      alliance: AllianceExtension.fromString(json['alliance']),
+      scouterNames: (json['scouters'] as List<dynamic>).cast<String>(),
+    );
+  }
 }
 
 const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
