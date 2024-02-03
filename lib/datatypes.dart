@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Tournament {
@@ -43,6 +45,14 @@ class Tournament {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('tournament');
     await prefs.remove('tournament_localized');
+  }
+
+  Future<List<MatchScheduleMatch>> getMatches() async {
+    return await lovatAPI.getMatches(key);
+  }
+
+  Future<List<Team>> getTeams() async {
+    return await lovatAPI.getTeamsAtTournament(key);
   }
 }
 

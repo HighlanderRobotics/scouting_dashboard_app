@@ -804,8 +804,18 @@ class LovatAPI {
     return jsonDecode(response!.body);
   }
 
-  Future<List<MatchScheduleMatch>> getMatches(String tournamentKey) async {
-    final response = await get("/v1/manager/matches/$tournamentKey");
+  Future<List<MatchScheduleMatch>> getMatches(
+    String tournamentKey, {
+    bool? isScouted,
+    List<int>? teamNumbers,
+  }) async {
+    final response = await get(
+      "/v1/manager/matches/$tournamentKey",
+      query: {
+        if (isScouted != null) 'isScouted': isScouted.toString(),
+        if (teamNumbers != null) 'teams': jsonEncode(teamNumbers),
+      },
+    );
 
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
@@ -814,7 +824,22 @@ class LovatAPI {
 
     final json = jsonDecode(response!.body) as List<dynamic>;
 
+    debugPrint(response.body);
+
     return json.map((e) => MatchScheduleMatch.fromJson(e)).toList();
+  }
+
+  Future<List<Team>> getTeamsAtTournament(String tournamentKey) async {
+    final response = await get("/v1/manager/tournament/$tournamentKey/teams");
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get teams at tournament');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => Team.fromJson(e)).toList();
   }
 }
 
@@ -985,6 +1010,7 @@ class Note {
 class MatchScheduleMatch {
   const MatchScheduleMatch({
     required this.identity,
+    required this.isScouted,
     required this.red1,
     required this.red2,
     required this.red3,
@@ -1002,6 +1028,8 @@ class MatchScheduleMatch {
   final MatchScheduleTeamInfo blue2;
   final MatchScheduleTeamInfo blue3;
 
+  final bool isScouted;
+
   List<MatchScheduleTeamInfo> get allTeamInfo => [
         red1,
         red2,
@@ -1015,6 +1043,7 @@ class MatchScheduleMatch {
     return MatchScheduleMatch(
       identity: GameMatchIdentity(MatchType.values[json['matchType']],
           json['matchNumber'], json['tournamentKey']),
+      isScouted: json['scouted'],
       red1: MatchScheduleTeamInfo.fromJson(json['team1']),
       red2: MatchScheduleTeamInfo.fromJson(json['team2']),
       red3: MatchScheduleTeamInfo.fromJson(json['team3']),
@@ -1029,18 +1058,37 @@ class MatchScheduleTeamInfo {
   const MatchScheduleTeamInfo({
     required this.teamNumber,
     required this.alliance,
-    required this.scouterNames,
+    required this.scouters,
   });
 
   final int teamNumber;
   final Alliance alliance;
-  final List<String> scouterNames;
+  final List<MatchScheduleScouterInfo> scouters;
 
   factory MatchScheduleTeamInfo.fromJson(Map<String, dynamic> json) {
     return MatchScheduleTeamInfo(
       teamNumber: json['number'],
       alliance: AllianceExtension.fromString(json['alliance']),
-      scouterNames: (json['scouters'] as List<dynamic>).cast<String>(),
+      scouters: (json['scouters'] as List<dynamic>)
+          .map((e) => MatchScheduleScouterInfo.fromJson(e))
+          .toList(),
+    );
+  }
+}
+
+class MatchScheduleScouterInfo {
+  const MatchScheduleScouterInfo({
+    required this.name,
+    required this.isScouted,
+  });
+
+  final String name;
+  final bool isScouted;
+
+  factory MatchScheduleScouterInfo.fromJson(Map<String, dynamic> json) {
+    return MatchScheduleScouterInfo(
+      name: json['name'],
+      isScouted: json['scouted'],
     );
   }
 }
