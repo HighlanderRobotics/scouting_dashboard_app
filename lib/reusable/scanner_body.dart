@@ -43,7 +43,7 @@ class _ScannerBodyState extends State<ScannerBody> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(21.5),
+                padding: const EdgeInsets.all(21.5).copyWith(top: 64),
                 child: Center(
                   child: RowOrColumn(
                     isRow: constraints.maxWidth > constraints.maxHeight,
@@ -72,7 +72,7 @@ class _ScannerBodyState extends State<ScannerBody> {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.all(21.5),
+            padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
                 isRow: constraints.maxWidth > constraints.maxHeight,
@@ -95,7 +95,7 @@ class _ScannerBodyState extends State<ScannerBody> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(21.5),
+            padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
                 isRow: constraints.maxWidth > constraints.maxHeight,
