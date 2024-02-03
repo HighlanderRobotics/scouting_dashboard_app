@@ -671,7 +671,7 @@ class LovatAPI {
   }
 
   Future<List<Scout>> getScouts() async {
-    final response = await get('/v1/manager/scouters');
+    final response = await get('/v1/manager/scoutershift/scouters');
 
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
