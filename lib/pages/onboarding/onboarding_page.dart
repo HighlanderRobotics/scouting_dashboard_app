@@ -306,8 +306,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt("onboardingVersion", 1);
 
+    final tournament = await Tournament.getCurrent();
+
     Navigator.of(context).pushNamedAndRemoveUntil(
-      '/match_schedule',
+      tournament == null ? '/team_lookup' : '/match_schedule',
       (route) => false,
     );
   }

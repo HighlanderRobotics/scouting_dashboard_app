@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
-import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GlobalNavigationDrawer extends StatefulWidget {
@@ -75,18 +74,18 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
               Divider(
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
-              const SectionHeader(title: "Data & Utilities"),
-              DrawerDestination(
-                label: "Match Schedule",
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/match_schedule", (route) => false);
-                },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/match_schedule",
-                icon: Icons.today,
-              ),
-              if (selectedTournament != null)
+              if (selectedTournament != null) ...[
+                const SectionHeader(title: "Data & Utilities"),
+                DrawerDestination(
+                  label: "Match Schedule",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/match_schedule", (route) => false);
+                  },
+                  isSelected: ModalRoute.of(context)?.settings.name ==
+                      "/match_schedule",
+                  icon: Icons.today,
+                ),
                 DrawerDestination(
                   label: "Scan QR Codes",
                   onTap: () {
@@ -100,6 +99,7 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                       ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
                   icon: Icons.qr_code_scanner,
                 ),
+              ],
               const SectionHeader(title: "Analysis & Strategy"),
               DrawerDestination(
                 label: "Team Lookup",
