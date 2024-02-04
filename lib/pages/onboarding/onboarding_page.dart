@@ -349,7 +349,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
               const SizedBox(height: 10),
               Text(
-                "You are the first person on ${team?.number} to sign up for Lovat. Would you like to register on behalf of your team? You should only do this if you're in charge of your team's scouting.",
+                "You are the first person on ${team?.number} to sign up for Lovat. Would you like to register on behalf of your team? You should only do this if you're in charge of your team's scouting. You will only have to do this once.",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
               const Spacer(),
