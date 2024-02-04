@@ -327,6 +327,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               setState(() {
+                team = null;
                 phase = OnboardingPagePhase.teamSelection;
               });
             },
@@ -363,6 +364,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
               TextButton(
                 onPressed: () {
+                  setState(() {
+                    team = null;
+                  });
                   toSettingsOnboarding();
                 },
                 child: const Text("Just looking around"),
