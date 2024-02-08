@@ -9,8 +9,10 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
+import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
@@ -758,6 +760,21 @@ class LovatAPI {
     }
   }
 
+  Future<List<MinimalScoutReportInfo>> getScoutReportsByLongMatchKey(
+    String longMatchKey,
+  ) async {
+    final response = await get('/v1/analysis/scoutreports/match/$longMatchKey');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get scout reports');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => MinimalScoutReportInfo.fromJson(e)).toList();
+  }
+
   Future<Map<String, dynamic>> getMatchPrediction(
     int red1,
     int red2,
@@ -840,6 +857,37 @@ class LovatAPI {
     final json = jsonDecode(response!.body) as List<dynamic>;
 
     return json.map((e) => Team.fromJson(e)).toList();
+  }
+
+  Future<SingleScoutReportAnalysis> getScoutReportAnalysis(
+    String reportId,
+  ) async {
+    final response = await get('/v1/analysis/metrics/scoutreport/$reportId');
+    debugPrint(response?.body ?? '');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get scout report analysis');
+    }
+
+    return SingleScoutReportAnalysis.fromJson(jsonDecode(response!.body));
+  }
+
+  Future<List<ScoutReportEvent>> getEventsForScoutReport(
+    String reportId,
+  ) async {
+    final response = await get('/v1/analysis/timeline/scoutreport/$reportId');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to get events for scout report');
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json
+        .map((e) => ScoutReportEvent.fromList((e as List<dynamic>).cast<int>()))
+        .toList();
   }
 }
 
@@ -1089,6 +1137,64 @@ class MatchScheduleScouterInfo {
     return MatchScheduleScouterInfo(
       name: json['name'],
       isScouted: json['scouted'],
+    );
+  }
+}
+
+class MinimalScoutReportInfo {
+  const MinimalScoutReportInfo({
+    required this.uuid,
+    required this.scout,
+  });
+
+  final String uuid;
+  final Scout scout;
+
+  factory MinimalScoutReportInfo.fromJson(Map<String, dynamic> json) {
+    return MinimalScoutReportInfo(
+      uuid: json['uuid'],
+      scout: Scout(
+        id: json['scouterUuid'],
+        name: json['scouter']['name'],
+      ),
+    );
+  }
+}
+
+class SingleScoutReportAnalysis {
+  const SingleScoutReportAnalysis({
+    required this.totalPoints,
+    required this.driverAbility,
+    required this.robotRole,
+    required this.defense,
+    required this.ampScores,
+    required this.speakerScores,
+    required this.trapScores,
+    required this.pickups,
+    required this.autoPath,
+  });
+
+  final int totalPoints;
+  final DriverAbility driverAbility;
+  final RobotRole robotRole;
+  final int defense;
+  final int ampScores;
+  final int speakerScores;
+  final int trapScores;
+  final int pickups;
+  final AutoPath autoPath;
+
+  factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
+    return SingleScoutReportAnalysis(
+      totalPoints: json['totalPoints'],
+      driverAbility: DriverAbility.values[(json['driverAbility'] as int) - 1],
+      robotRole: RobotRole.values[json['role']],
+      defense: json['defense'],
+      ampScores: json['ampscores'],
+      speakerScores: json['speakerscores'],
+      trapScores: json['trapscores'],
+      pickups: json['pickups'],
+      autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
     );
   }
 }

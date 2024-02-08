@@ -420,6 +420,21 @@ class AutoPath {
     return output;
   }
 
+  factory AutoPath.fromMapSingleMatch(Map<String, dynamic> map) {
+    AutoPath output = AutoPath(
+      frequency: 1,
+      scores: [map['autoPoints']],
+      timeline: (map['positions'] as List<dynamic>)
+          .map((e) => AutoPathEvent.fromMap(e))
+          .toList(),
+      matches: [GameMatchIdentity.fromLongKey(map['match'])],
+    );
+
+    output.timeline.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    return output;
+  }
+
   String get shortDescription {
     final pieceCount =
         timeline.where((event) => event.type == AutoPathEventType.score).length;
