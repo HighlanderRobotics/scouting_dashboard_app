@@ -225,13 +225,18 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       children: [
         Row(
           children: [
-            ValueTile(
-              colorCombination: ColorCombination.emphasis,
-              label: const Text("Score"),
-              value: Text(reportAnalysis.totalPoints.toString()),
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                colorCombination: ColorCombination.colored,
+                label: const Text("Score"),
+                value: Text(reportAnalysis.totalPoints.toString()),
+              ),
             ),
-            roleContainer(reportAnalysis),
-            driverAbilityContainer(reportAnalysis),
+            Flexible(
+              fit: FlexFit.tight,
+              child: roleContainer(reportAnalysis),
+            ),
           ].withSpaceBetween(width: 10),
         ),
         sectionTitle("Auto"),
@@ -278,6 +283,22 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
+        sectionTitle("Driving"),
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: driverAbilityContainer(reportAnalysis),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("Defense"),
+                value: Text(reportAnalysis.defense.toString()),
+              ),
+            ),
+          ].withSpaceBetween(width: 10),
+        ),
       ].withSpaceBetween(height: 10),
     );
   }
@@ -296,7 +317,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
 
   Widget driverAbilityContainer(SingleScoutReportAnalysis reportAnalysis) {
     return ValueTile(
-      colorCombination: ColorCombination.colored,
       label: const Text("Driver ability"),
       value: Text("${reportAnalysis.driverAbility.index}/5"),
     );
