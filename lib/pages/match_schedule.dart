@@ -593,6 +593,7 @@ class AllianceRow extends StatelessWidget {
           ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: item.teamInfo.scouters
                 .map((scouterInfo) => Row(
                       mainAxisSize: MainAxisSize.min,
