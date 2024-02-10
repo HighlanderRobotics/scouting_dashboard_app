@@ -39,7 +39,16 @@ void main() async {
       '/loading': (context) => const InitialLoaderPage(),
       '/preview_over': (context) => const PreviewOverPage(),
       '/match_schedule': (context) => const MatchSchedulePage(),
-      '/raw_scout_report': (context) => const RawScoutReportPage(),
+      '/raw_scout_report': (context) => RawScoutReportPage(
+            uuid: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['uuid'],
+            teamNumber: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['teamNumber'],
+            matchIdentity: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['matchIdentity'],
+            scoutName: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['scoutName'],
+          ),
       '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
       '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:skeletons/skeletons.dart';
 
 import '../reusable/navigation_drawer.dart';
@@ -546,30 +548,15 @@ class AllianceRow extends StatelessWidget {
                       });
                     },
                   ),
-                  if (item.isScouted)
+                  if (item.isScouted && isScoutingLead == true)
                     CupertinoContextMenuAction(
-                      child: const Text("Per-match metrics"),
+                      child: const Text("View report data"),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed(
-                          '/team_per_match',
-                          arguments: TeamPerMatchArgs(
-                            longMatchKey: item.longMatchKey,
-                            teamNumber: item.teamInfo.teamNumber,
-                          ),
-                        );
-                      },
-                    ),
-                  if (item.isScouted && (isScoutingLead ?? false))
-                    CupertinoContextMenuAction(
-                      child: const Text("Raw report data"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed('/raw_scout_report',
-                            arguments: <String, dynamic>{
-                              'longMatchKey': item.longMatchKey,
-                              'team': item.teamInfo.teamNumber,
-                            });
+                        Navigator.of(context).pushWidget(RawScoutReportsPage(
+                          longMatchKey: item.longMatchKey,
+                          teamNumber: item.teamInfo.teamNumber,
+                        ));
                       },
                     ),
                 ],
