@@ -142,8 +142,6 @@ class AnalysisOverview extends AnalysisVisualization {
 
     return Column(
       children: [
-        if (analysisMap.containsKey('array'))
-          sparkline(context, snapshot, analysisFunction.metric.max),
         if (analysisMap.containsKey('one') &&
             analysisMap.containsKey('two') &&
             analysisMap.containsKey('three'))
@@ -328,6 +326,10 @@ class AnalysisOverview extends AnalysisVisualization {
               ),
             ),
         ]),
+        if (analysisMap.containsKey('array')) ...[
+          const SizedBox(height: 10),
+          sparkline(context, snapshot, analysisFunction.metric.max),
+        ],
         if (analysisMap.containsKey('paths'))
           TeamAutoPaths(
             autoPaths: (analysisMap['paths'] as List<dynamic>)
@@ -389,15 +391,20 @@ class AnalysisOverview extends AnalysisVisualization {
                         lineTouchData: LineTouchData(
                             touchTooltipData: LineTouchTooltipData(
                           getTooltipItems: (touchedSpots) {
-                            return touchedSpots
-                                .map((touchedSpot) => LineTooltipItem(
-                                      analysisFunction.metric
-                                          .valueVizualizationBuilder(
-                                        touchedSpot.y,
-                                      ),
-                                      Theme.of(context).textTheme.labelMedium!,
-                                    ))
-                                .toList();
+                            return touchedSpots.map((touchedSpot) {
+                              final matchIdentity =
+                                  GameMatchIdentity.fromLongKey(
+                                      snapshot.data['array']
+                                          [touchedSpot.spotIndex]['match']);
+
+                              debugPrint(
+                                  "Match: ${snapshot.data['array'][touchedSpot.spotIndex]}");
+
+                              return LineTooltipItem(
+                                "${matchIdentity.getShortLocalizedDescription()} at ${snapshot.data['array'][touchedSpot.spotIndex]['tournamentName']}",
+                                Theme.of(context).textTheme.labelMedium!,
+                              );
+                            }).toList();
                           },
                         )),
                         titlesData: FlTitlesData(
@@ -450,11 +457,12 @@ class AnalysisOverview extends AnalysisVisualization {
                               List<FlSpot> spots = [];
 
                               for (var i = 0; i < array.length; i++) {
-                                if (array[i]["value"] != null) {
+                                if (array[i]["dataPoint"] != null) {
+                                  debugPrint("Spot: ${array[i]["dataPoint"]}");
                                   spots.add(
                                     FlSpot(
                                       i.toDouble(),
-                                      array[i]["value"].toDouble(),
+                                      array[i]["dataPoint"].toDouble(),
                                     ),
                                   );
                                 }
