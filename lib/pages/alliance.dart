@@ -4,9 +4,11 @@ import 'package:scouting_dashboard_app/analysis_functions/alliance_analysis.dart
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
+import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
 class AlliancePage extends StatefulWidget {
   const AlliancePage({super.key});
@@ -75,7 +77,7 @@ class AllianceVizualization extends AnalysisVisualization {
       const SizedBox(height: 20),
       Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.primaryContainer,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: const BorderRadius.all(Radius.circular(10)),
         ),
         padding: const EdgeInsets.all(10),
@@ -85,7 +87,7 @@ class AllianceVizualization extends AnalysisVisualization {
             Text(
               "Teleop points",
               style: Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    color: Theme.of(context).colorScheme.onPrimary,
                   )),
             ),
             Text(
@@ -93,12 +95,37 @@ class AllianceVizualization extends AnalysisVisualization {
                   ? '--'
                   : numberVizualizationBuilder(
                       analysisMap['totalPoints'] as num),
-              style: Theme.of(context).textTheme.titleLarge!.merge(TextStyle(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
+              style: Theme.of(context).textTheme.titleMedium!.merge(TextStyle(
+                    color: Theme.of(context).colorScheme.onPrimary,
                   )),
             )
           ],
         ),
+      ),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: ValueTile(
+              colorCombination: ColorCombination.colored,
+              value: Text(
+                numberVizualizationBuilder(analysisMap['ampScores'] as num),
+              ),
+              label: const Text("Amp scores"),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            child: ValueTile(
+              colorCombination: ColorCombination.colored,
+              value: Text(
+                numberVizualizationBuilder(analysisMap['speakerScores'] as num),
+              ),
+              label: const Text("Speaker scores"),
+            ),
+          ),
+        ].withSpaceBetween(width: 10),
       ),
       const SizedBox(height: 10),
       AlllianceAutoPaths(data: analysisMap),
