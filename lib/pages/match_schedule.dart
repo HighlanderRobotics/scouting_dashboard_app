@@ -548,7 +548,7 @@ class AllianceRow extends StatelessWidget {
                       });
                     },
                   ),
-                  if (item.isScouted)
+                  if (item.isScouted && isScoutingLead == true)
                     CupertinoContextMenuAction(
                       child: const Text("View report data"),
                       onPressed: () {
