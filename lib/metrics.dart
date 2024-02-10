@@ -192,8 +192,7 @@ List<BreakdownData> breakdowns = [
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Park",
-        localizedNamePlural: "park",
-        path: "failed",
+        path: "park",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Onstage",
