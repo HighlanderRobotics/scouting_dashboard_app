@@ -5,6 +5,7 @@ import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
@@ -52,6 +53,18 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                   title: const Text("Match Predictor"),
                 ),
                 body: PageBody(child: Text("Error: ${snapshot.error}")),
+                drawer: (ModalRoute.of(context)!.settings.arguments == null)
+                    ? const GlobalNavigationDrawer()
+                    : null,
+              );
+            }
+
+            if (snapshot.data == "not enough data") {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Match Predictor"),
+                ),
+                body: notEnoughDataMessage(),
                 drawer: (ModalRoute.of(context)!.settings.arguments == null)
                     ? const GlobalNavigationDrawer()
                     : null,
@@ -156,6 +169,38 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               }
             });
           }),
+    );
+  }
+
+  Widget notEnoughDataMessage() {
+    return PageBody(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/images/no-notes-dark.png",
+            height: 200,
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 250),
+            child: Column(
+              children: [
+                Text(
+                  "Not enough data",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Text(
+                  "There must be 2 or more matches recorded for each team to make a prediction.",
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

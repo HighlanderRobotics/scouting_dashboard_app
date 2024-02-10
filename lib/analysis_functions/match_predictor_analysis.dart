@@ -24,7 +24,15 @@ class MatchPredictorAnalysis extends AnalysisFunction {
 
   @override
   Future getOnlineAnalysis() async {
-    return await lovatAPI.getMatchPrediction(
-        red1, red2, red3, blue1, blue2, blue3);
+    try {
+      return await lovatAPI.getMatchPrediction(
+          red1, red2, red3, blue1, blue2, blue3);
+    } on LovatAPIException catch (e) {
+      if (e.message == "Not enough data") {
+        return "not enough data";
+      } else {
+        rethrow;
+      }
+    }
   }
 }

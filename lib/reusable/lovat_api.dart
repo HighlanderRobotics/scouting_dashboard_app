@@ -800,6 +800,10 @@ class LovatAPI {
       throw Exception('Failed to get match prediction');
     }
 
+    if (response?.body == 'not enough data') {
+      throw const LovatAPIException('Not enough data');
+    }
+
     return jsonDecode(response!.body);
   }
 
