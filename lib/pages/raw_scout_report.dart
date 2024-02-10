@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
+import 'package:intl/intl.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
@@ -90,6 +92,8 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
         children: reports!
             .map((report) => ListTile(
                   title: Text(report.scout.name),
+                  // In format "Today at 12:34 PM" or "Yesterday at 12:34 PM" or "Monday at 12:34 PM" or "12/31/2021 at 12:34 PM"
+                  subtitle: Text(localizeTimestamp(report.timestamp)),
                   onTap: () {
                     Navigator.of(context).pushNamed(
                       '/raw_scout_report',
@@ -116,6 +120,38 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
       body: body,
     );
   }
+
+  String localizeTimestamp(DateTime timestamp) {
+    // In format "Today at 12:34 PM" or "Yesterday at 12:34 PM" or "Monday at 12:34 PM" or "12/31/2021 at 12:34 PM"
+    final now = DateTime.now();
+    final dateTime = timestamp.toLocal();
+
+    final time = TimeOfDay.fromDateTime(dateTime).format(context);
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
+      return "Today at $time";
+    }
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day - 1) {
+      return "Yesterday at $time";
+    }
+
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day - now.day < 7) {
+      final formatter = DateFormat('EEEE');
+
+      return "${formatter.format(dateTime)} at $time";
+    }
+
+    final formatter = DateFormat('MM/dd/yyyy');
+
+    return "${formatter.format(dateTime)} at $time";
+  }
 }
 
 class RawScoutReportPage extends StatefulWidget {
@@ -139,6 +175,7 @@ class RawScoutReportPage extends StatefulWidget {
 class _RawScoutReportPageState extends State<RawScoutReportPage> {
   SingleScoutReportAnalysis? reportAnalysis;
   List<ScoutReportEvent>? timeline;
+  bool loading = false;
 
   String? error;
 
@@ -146,6 +183,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     try {
       setState(() {
         error = null;
+        loading = true;
       });
 
       final reportAnalysis = await lovatAPI.getScoutReportAnalysis(widget.uuid);
@@ -162,6 +200,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     } catch (e) {
       setState(() {
         error = "Failed to get report";
+      });
+    } finally {
+      setState(() {
+        loading = false;
       });
     }
   }
@@ -205,10 +247,19 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       child: Scaffold(
         appBar: AppBar(
           title: appBarTitle,
-          bottom: const TabBar(tabs: [
-            Tab(text: "Overview"),
-            Tab(text: "Timeline"),
-          ]),
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(loading ? 53 : 49),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const TabBar(tabs: [
+                  Tab(text: "Overview"),
+                  Tab(text: "Timeline"),
+                ]),
+                if (loading) const LinearProgressIndicator(),
+              ],
+            ),
+          ),
         ),
         body: TabBarView(
           children: [
@@ -299,6 +350,41 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
+        if (reportAnalysis.notes != null)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Text(
+                      "Notes",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineMedium!
+                          .copyWith(
+                            color: Theme.of(context).colorScheme.onBackground,
+                          ),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () {
+                      Navigator.of(context).pushWidget(NotesEditor(
+                        initialNotes: reportAnalysis.notes,
+                        uuid: widget.uuid,
+                        onSubmitted: () => fetchData(),
+                      ));
+                    },
+                  ),
+                ],
+              ),
+              Text(reportAnalysis.notes!),
+            ],
+          ),
       ].withSpaceBetween(height: 10),
     );
   }
@@ -367,8 +453,22 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
   ScrollablePageBody timelineTab(
       List<ScoutReportEvent> timeline, BuildContext context) {
     return ScrollablePageBody(
-        children: timeline
-            .map((event) => Row(
+      padding: const EdgeInsets.all(0),
+      children: timeline
+          .map((event) => Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      width: 1,
+                    ),
+                  ),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 5,
+                  horizontal: 24,
+                ),
+                child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
@@ -391,9 +491,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                       ),
                     ),
                   ].withSpaceBetween(width: 5),
-                ))
-            .toList()
-            .withSpaceBetween(height: 10));
+                ),
+              ))
+          .toList(),
+    );
   }
 
   ScrollablePageBody fieldsTab(
@@ -620,5 +721,106 @@ extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
       case ScoutReportEventPosition.groundNoteCenterFarthestSourceSide:
         return "the spike mark on the central line farthest towards the source side";
     }
+  }
+}
+
+class NotesEditor extends StatefulWidget {
+  const NotesEditor({
+    super.key,
+    this.initialNotes,
+    this.onSubmitted,
+    required this.uuid,
+  });
+
+  final String? initialNotes;
+  final String uuid;
+  final dynamic Function()? onSubmitted;
+
+  @override
+  State<NotesEditor> createState() => _NotesEditorState();
+}
+
+class _NotesEditorState extends State<NotesEditor> {
+  final TextEditingController notesController = TextEditingController();
+
+  String notes = "";
+  bool submitLoading = false;
+  String? error;
+
+  @override
+  void dispose() {
+    super.dispose();
+    notesController.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    notes = widget.initialNotes ?? "";
+    notesController.text = notes;
+  }
+
+  Future<void> submit() async {
+    final navigation = Navigator.of(context);
+    setState(() {
+      submitLoading = true;
+      error = null;
+    });
+
+    try {
+      await lovatAPI.updateNote(widget.uuid, notes);
+      if (navigation.canPop()) {
+        navigation.pop();
+      }
+      widget.onSubmitted?.call();
+    } on LovatAPIException catch (e) {
+      setState(() {
+        error = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        error = "Failed to update notes";
+      });
+    } finally {
+      setState(() {
+        submitLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          title: const Text("Edit Notes"),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: submit,
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: submitLoading
+                ? const LinearProgressIndicator()
+                : const SizedBox(height: 4),
+          )),
+      body: PageBody(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: TextField(
+          controller: notesController,
+          maxLines: null,
+          expands: true,
+          decoration: const InputDecoration(border: InputBorder.none),
+          textAlignVertical: TextAlignVertical.top,
+          autofocus: true,
+          onChanged: (value) {
+            setState(() {
+              notes = value;
+            });
+          },
+        ),
+      ),
+    );
   }
 }

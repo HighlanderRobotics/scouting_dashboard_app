@@ -889,6 +889,21 @@ class LovatAPI {
         .map((e) => ScoutReportEvent.fromList((e as List<dynamic>).cast<int>()))
         .toList();
   }
+
+  Future<void> updateNote(String noteUuid, String newBody) async {
+    final response = await put(
+      '/v1/manager/notes/$noteUuid',
+      body: {
+        'note': newBody,
+      },
+    );
+
+    debugPrint(response?.body ?? '');
+
+    if (response?.statusCode != 200) {
+      throw Exception('Failed to update note');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -1145,10 +1160,12 @@ class MinimalScoutReportInfo {
   const MinimalScoutReportInfo({
     required this.uuid,
     required this.scout,
+    required this.timestamp,
   });
 
   final String uuid;
   final Scout scout;
+  final DateTime timestamp;
 
   factory MinimalScoutReportInfo.fromJson(Map<String, dynamic> json) {
     return MinimalScoutReportInfo(
@@ -1157,6 +1174,7 @@ class MinimalScoutReportInfo {
         id: json['scouterUuid'],
         name: json['scouter']['name'],
       ),
+      timestamp: DateTime.parse(json['startTime']),
     );
   }
 }
@@ -1172,6 +1190,7 @@ class SingleScoutReportAnalysis {
     required this.trapScores,
     required this.pickups,
     required this.autoPath,
+    this.notes,
   });
 
   final int totalPoints;
@@ -1183,6 +1202,7 @@ class SingleScoutReportAnalysis {
   final int trapScores;
   final int pickups;
   final AutoPath autoPath;
+  final String? notes;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
@@ -1195,6 +1215,7 @@ class SingleScoutReportAnalysis {
       trapScores: json['trapscores'],
       pickups: json['pickups'],
       autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
+      notes: (json['note'] as String).isEmpty ? null : json['note'],
     );
   }
 }
