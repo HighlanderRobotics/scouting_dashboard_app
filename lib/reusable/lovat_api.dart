@@ -1194,6 +1194,8 @@ class SingleScoutReportAnalysis {
     required this.trapScores,
     required this.pickups,
     required this.autoPath,
+    required this.stageResult,
+    required this.highNoteResult,
     this.notes,
   });
 
@@ -1207,6 +1209,8 @@ class SingleScoutReportAnalysis {
   final int pickups;
   final AutoPath autoPath;
   final String? notes;
+  final StageResult stageResult;
+  final HighNoteResult highNoteResult;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
@@ -1220,6 +1224,8 @@ class SingleScoutReportAnalysis {
       pickups: json['pickups'],
       autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
       notes: (json['note'] as String).isEmpty ? null : json['note'],
+      stageResult: StageResult.values[json['stage']],
+      highNoteResult: HighNoteResult.values[json['highNote']],
     );
   }
 }

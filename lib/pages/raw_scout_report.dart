@@ -350,6 +350,25 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
+        sectionTitle("Endgame"),
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("Stage"),
+                value: Text(reportAnalysis.stageResult.localizedDescription),
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("High note"),
+                value: Text(reportAnalysis.highNoteResult.localizedDescription),
+              ),
+            ),
+          ].withSpaceBetween(width: 10),
+        ),
         if (reportAnalysis.notes != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -720,6 +739,47 @@ extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
         return "the spike mark on the central line second-farthest towards the source side";
       case ScoutReportEventPosition.groundNoteCenterFarthestSourceSide:
         return "the spike mark on the central line farthest towards the source side";
+    }
+  }
+}
+
+enum StageResult {
+  nothing,
+  parked,
+  onstage,
+  onstageAndHarmony,
+}
+
+extension StageResultExtension on StageResult {
+  String get localizedDescription {
+    switch (this) {
+      case StageResult.nothing:
+        return "Nothing";
+      case StageResult.parked:
+        return "Parked";
+      case StageResult.onstage:
+        return "Onstage";
+      case StageResult.onstageAndHarmony:
+        return "Harmony";
+    }
+  }
+}
+
+enum HighNoteResult {
+  none,
+  fail,
+  success,
+}
+
+extension HighNoteResultExtension on HighNoteResult {
+  String get localizedDescription {
+    switch (this) {
+      case HighNoteResult.none:
+        return "None";
+      case HighNoteResult.fail:
+        return "Fail";
+      case HighNoteResult.success:
+        return "Success";
     }
   }
 }
