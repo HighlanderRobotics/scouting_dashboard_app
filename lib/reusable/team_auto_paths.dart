@@ -131,7 +131,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                 ),
           ),
           ...(selectedPath!.matches.map((e) => Text(
-                e.getLocalizedDescription(includeTournament: false),
+                e.getLocalizedDescription(),
                 style: Theme.of(context).textTheme.bodyMedium!.merge(
                       TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -411,7 +411,10 @@ class AutoPath {
           .map((e) => AutoPathEvent.fromMap(e))
           .toList(),
       matches: (map['matches'] as List<dynamic>)
-          .map((e) => GameMatchIdentity.fromLongKey(e))
+          .map((e) => GameMatchIdentity.fromLongKey(
+                e['matchKey'],
+                tournamentName: e['tournamentName'],
+              ))
           .toList(),
     );
 
