@@ -46,7 +46,7 @@ class _ScannerBodyState extends State<ScannerBody> {
                 padding: const EdgeInsets.all(21.5).copyWith(top: 64),
                 child: Center(
                   child: RowOrColumn(
-                    isRow: constraints.maxWidth > constraints.maxHeight,
+                    isRow: false,
                     children: [
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxHeight: 400),
@@ -75,7 +75,7 @@ class _ScannerBodyState extends State<ScannerBody> {
             padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
-                isRow: constraints.maxWidth > constraints.maxHeight,
+                isRow: false,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 400),
@@ -98,7 +98,7 @@ class _ScannerBodyState extends State<ScannerBody> {
             padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
-                isRow: constraints.maxWidth > constraints.maxHeight,
+                isRow: false,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 400),
