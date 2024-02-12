@@ -3,5 +3,5 @@
     "editor.tabCompletion": "on",
     "discord.enabled": true,
     "cmake.configureOnOpen": false,
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

@@ -39,12 +39,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
         });
       }
     } on CredentialsManagerException catch (e) {
-      if (e.code == "NO_CREDENTIALS") {
-        setState(() {
-          phase = OnboardingPagePhase.welcome;
-        });
-      } else if (e.code == "NO_REFRESH_TOKEN") {
-        debugPrint("No refresh token");
+      if (e.code == "NO_CREDENTIALS" ||
+          e.code == "NO_REFRESH_TOKEN" ||
+          e.code == "No Credentials were previously set.") {
         setState(() {
           phase = OnboardingPagePhase.welcome;
         });
@@ -286,7 +283,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
         phase = OnboardingPagePhase.loading;
       });
 
-      final credentials = await auth0.webAuthentication().login(
+      final credentials = await auth0
+          .webAuthentication(scheme: "com.frc8033.lovatdashboard")
+          .login(
             audience: "https://api.lovat.app",
           );
 
