@@ -6,6 +6,8 @@ import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
+import 'package:scouting_dashboard_app/reusable/color_combination.dart';
+import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
@@ -637,6 +639,24 @@ extension AllianceExtension on Alliance {
         return Alliance.blue;
       default:
         throw "Invalid alliance string";
+    }
+  }
+
+  ColorCombination get colorCombination {
+    switch (this) {
+      case Alliance.red:
+        return ColorCombination.red;
+      case Alliance.blue:
+        return ColorCombination.blue;
+    }
+  }
+
+  ColorCombination get emphasisColorCombination {
+    switch (this) {
+      case Alliance.red:
+        return ColorCombination.redEmphasis;
+      case Alliance.blue:
+        return ColorCombination.blueEmphasis;
     }
   }
 }
