@@ -121,6 +121,7 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                       ),
                     ),
                     TeamLookupNotesVizualization(
+                      key: GlobalKey(),
                       updateIncrement: updateIncrement,
                       function: TeamLookupNotesAnalysis(
                         team: teamNumberForAnalysis!,

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons/skeletons.dart';
 
@@ -61,7 +63,14 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
         : ScrollablePageBody(
             children: [
               NotesList(
-                notes: (notes).map((note) => NoteWidget(note)).toList(),
+                notes: (notes)
+                    .map(
+                      (note) => NoteWidget(
+                        note,
+                        onEdit: () => super.loadData(),
+                      ),
+                    )
+                    .toList(),
               ),
             ],
           );
@@ -88,9 +97,11 @@ class NoteWidget extends StatelessWidget {
   const NoteWidget(
     this.note, {
     Key? key,
+    this.onEdit,
   }) : super(key: key);
 
   final Note note;
+  final dynamic Function()? onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +127,25 @@ class NoteWidget extends StatelessWidget {
                         ),
                       ),
                 ),
+                if (note.uuid != null) ...[
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.of(context).pushWidget(
+                        NotesEditor(
+                          uuid: note.uuid!,
+                          initialNotes: note.body,
+                          onSubmitted: () => onEdit?.call(),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
               ],
             ),
             Text(

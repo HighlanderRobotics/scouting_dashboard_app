@@ -1075,17 +1075,20 @@ class Note {
     required this.body,
     required this.matchIdentity,
     this.author,
+    this.uuid,
   });
 
   final String body;
   final GameMatchIdentity matchIdentity;
   final String? author;
+  final String? uuid;
 
   factory Note.fromJson(Map<String, dynamic> json) => Note(
         body: json['notes'],
         matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
             tournamentName: json['tounramentName']),
         author: json['scouterName'],
+        uuid: json['uuid'],
       );
 }
 
