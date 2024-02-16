@@ -838,6 +838,11 @@ class LovatAPI {
       },
     );
 
+    if (response?.statusCode == 404) {
+      throw const LovatAPIException(
+          'No matches found. This is likely because the match schedule has not been posted on The Blue Alliance yet. Please try again later.');
+    }
+
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
       throw Exception('Failed to get match schedule');
