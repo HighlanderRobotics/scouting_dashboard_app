@@ -913,6 +913,15 @@ class LovatAPI {
       throw Exception('Failed to update note');
     }
   }
+
+  Future<void> deleteScoutReport(String reportId) async {
+    final response = await delete('/v1/manager/scoutreports/$reportId');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      throw Exception('Failed to delete scout report');
+    }
+  }
 }
 
 class LovatAPIException implements Exception {

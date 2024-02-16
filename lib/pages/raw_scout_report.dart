@@ -102,6 +102,9 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
                         'teamNumber': widget.teamNumber,
                         'matchIdentity': widget.matchIdentity,
                         'scoutName': report.scout.name,
+                        'onDeleted': () {
+                          fetchData();
+                        },
                       },
                     );
                   },
@@ -161,12 +164,15 @@ class RawScoutReportPage extends StatefulWidget {
     required this.teamNumber,
     required this.matchIdentity,
     required this.scoutName,
+    this.onDeleted,
   });
 
   final String uuid;
   final int teamNumber;
   final GameMatchIdentity matchIdentity;
   final String scoutName;
+
+  final dynamic Function()? onDeleted;
 
   @override
   State<RawScoutReportPage> createState() => _RawScoutReportPageState();
@@ -260,6 +266,25 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
               ],
             ),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.delete),
+              tooltip: "Delete report",
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => DeleteReportDialog(
+                    uuid: widget.uuid,
+                    onDeleted: () {
+                      widget.onDeleted?.call();
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  barrierDismissible: false,
+                );
+              },
+            ),
+          ],
         ),
         body: TabBarView(
           children: [
@@ -881,6 +906,98 @@ class _NotesEditorState extends State<NotesEditor> {
           },
         ),
       ),
+    );
+  }
+}
+
+class DeleteReportDialog extends StatefulWidget {
+  const DeleteReportDialog({
+    super.key,
+    required this.uuid,
+    this.onDeleted,
+  });
+
+  final String uuid;
+  final dynamic Function()? onDeleted;
+
+  @override
+  State<DeleteReportDialog> createState() => _DeleteReportDialogState();
+}
+
+class _DeleteReportDialogState extends State<DeleteReportDialog> {
+  bool deleting = false;
+  String? error;
+
+  Future<void> delete() async {
+    final navigation = Navigator.of(context);
+    setState(() {
+      deleting = true;
+      error = null;
+    });
+
+    try {
+      await lovatAPI.deleteScoutReport(widget.uuid);
+      if (navigation.canPop()) {
+        navigation.pop();
+      }
+      widget.onDeleted?.call();
+    } on LovatAPIException catch (e) {
+      setState(() {
+        error = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        error = "Failed to delete report";
+      });
+    } finally {
+      setState(() {
+        deleting = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Delete report"),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            "Are you sure you want to delete this report?",
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+          if (error != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 10),
+              child: Text(
+                error!,
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+              ),
+            ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: delete,
+          child: deleting
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                )
+              : const Text("Delete"),
+        ),
+      ],
     );
   }
 }

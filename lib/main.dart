@@ -48,6 +48,8 @@ void main() async {
                 as Map<String, dynamic>)['matchIdentity'],
             scoutName: (ModalRoute.of(context)!.settings.arguments
                 as Map<String, dynamic>)['scoutName'],
+            onDeleted: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['onDeleted'],
           ),
       '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
