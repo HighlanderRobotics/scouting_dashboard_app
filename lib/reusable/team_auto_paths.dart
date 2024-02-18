@@ -107,8 +107,6 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
             ),
           ),
           valueBoxes(context),
-          if (selectedPath!.chargeSuccessRate.hasAttempted)
-            ChargeSuccessBreakdown(path: selectedPath),
           matchList(context),
         ]
       ].withSpaceBetween(height: 10),
@@ -133,7 +131,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                 ),
           ),
           ...(selectedPath!.matches.map((e) => Text(
-                e.getLocalizedDescription(includeTournament: false),
+                e.getLocalizedDescription(),
                 style: Theme.of(context).textTheme.bodyMedium!.merge(
                       TextStyle(
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -228,105 +226,6 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
   }
 }
 
-class ChargeSuccessBreakdown extends StatelessWidget {
-  const ChargeSuccessBreakdown({
-    super.key,
-    required this.path,
-  });
-
-  final AutoPath? path;
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: const BorderRadius.all(Radius.circular(10)),
-      child: Row(children: [
-        Flexible(
-          fit: FlexFit.tight,
-          flex: path!.chargeSuccessRate.dockCount,
-          child: Container(
-            color: Theme.of(context).colorScheme.primary,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    path!.chargeSuccessRate.dockCount.toString(),
-                    style: Theme.of(context).textTheme.titleLarge!.merge(
-                        TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary)),
-                  ),
-                  Text(
-                    "docks",
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.onPrimary),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Flexible(
-          fit: FlexFit.tight,
-          flex: path!.chargeSuccessRate.engageCount,
-          child: Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    path!.chargeSuccessRate.engageCount.toString(),
-                    style: Theme.of(context).textTheme.titleLarge!.merge(
-                        TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer)),
-                  ),
-                  Text(
-                    "engages",
-                    style: TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onPrimaryContainer),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        Flexible(
-          fit: FlexFit.tight,
-          flex: path!.chargeSuccessRate.failCount,
-          child: Container(
-            color: Theme.of(context).colorScheme.error,
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    path!.chargeSuccessRate.failCount.toString(),
-                    style: Theme.of(context).textTheme.titleLarge!.merge(
-                        TextStyle(
-                            color: Theme.of(context).colorScheme.onError)),
-                  ),
-                  Text(
-                    "fails",
-                    style:
-                        TextStyle(color: Theme.of(context).colorScheme.onError),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ]),
-    );
-  }
-}
-
 class AutoPathField extends StatelessWidget {
   const AutoPathField({
     super.key,
@@ -338,7 +237,7 @@ class AutoPathField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 688 / 480,
+      aspectRatio: 522 / 489,
       child: Stack(children: [
         fieldBackground(context),
         ...paths,
@@ -497,15 +396,12 @@ class AutoPath {
     required this.scores,
     required this.timeline,
     required this.matches,
-    required this.chargeSuccessRate,
   });
 
   final int frequency;
   final List<int> scores;
   final List<AutoPathEvent> timeline;
   final List<GameMatchIdentity> matches;
-
-  final AutoPathChargeSuccessRate chargeSuccessRate;
 
   factory AutoPath.fromMap(Map<String, dynamic> map) {
     AutoPath output = AutoPath(
@@ -515,13 +411,26 @@ class AutoPath {
           .map((e) => AutoPathEvent.fromMap(e))
           .toList(),
       matches: (map['matches'] as List<dynamic>)
-          .map((e) => GameMatchIdentity.fromLongKey(e))
+          .map((e) => GameMatchIdentity.fromLongKey(
+                e['matchKey'],
+                tournamentName: e['tournamentName'],
+              ))
           .toList(),
-      chargeSuccessRate: AutoPathChargeSuccessRate(
-        dockCount: map['chargeRate']['docked'],
-        engageCount: map['chargeRate']['engaged'],
-        failCount: map['chargeRate']['failed'],
-      ),
+    );
+
+    output.timeline.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    return output;
+  }
+
+  factory AutoPath.fromMapSingleMatch(Map<String, dynamic> map) {
+    AutoPath output = AutoPath(
+      frequency: 1,
+      scores: [map['autoPoints']],
+      timeline: (map['positions'] as List<dynamic>)
+          .map((e) => AutoPathEvent.fromMap(e))
+          .toList(),
+      matches: [GameMatchIdentity.fromLongKey(map['match'])],
     );
 
     output.timeline.sort((a, b) => a.timestamp.compareTo(b.timestamp));
@@ -530,31 +439,22 @@ class AutoPath {
   }
 
   String get shortDescription {
-    final coneCount = timeline
-        .where((event) => event.type == AutoPathEventType.placeCone)
-        .length;
+    final pieceCount =
+        timeline.where((event) => event.type == AutoPathEventType.score).length;
 
-    final cubeCount = timeline
-        .where((event) => event.type == AutoPathEventType.placeCube)
-        .length;
-
-    bool didCharge =
-        timeline.any((e) => e.type == AutoPathEventType.chargeStation);
-
-    bool leftCommunity = timeline
-        .any((event) => event.type == AutoPathEventType.crossCommunityBorder);
+    bool leftWing =
+        timeline.any((event) => event.type == AutoPathEventType.leave);
 
     String name = <String>[
-      if (leftCommunity) "Mobility",
-      if (coneCount > 0) "$coneCount Cone",
-      if (cubeCount > 0) "$cubeCount Cube",
-      if (didCharge) "Charger",
-    ].join(", ");
+      if (pieceCount > 0) "$pieceCount Piece",
+      if (leftWing && pieceCount == 0) "Leave",
+    ].join(" + ");
 
     name = "${{
-      AutoPathLocation.communityCenter1: "Bump-side",
-      AutoPathLocation.communityCenter2: "Middle",
-      AutoPathLocation.communityCenter3: "Clear-side",
+      AutoPathLocation.wingCenter: "Center",
+      AutoPathLocation.wingNearAmp: "Near Amp",
+      AutoPathLocation.wingFrontOfSpeaker: "Front of Speaker",
+      AutoPathLocation.wingNearSource: "Near Source",
     }[timeline.first.location]} $name";
 
     if (name.isEmpty) name = "Nothing";
@@ -658,28 +558,26 @@ class AutoPath {
     List<GamePiece> inventory = [];
 
     for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.pickUpCube) {
-        inventory.add(GamePiece.cube);
+      if (event.type == AutoPathEventType.pickUp) {
+        inventory.add(GamePiece.note);
       }
 
-      if (event.type == AutoPathEventType.pickUpCone) {
-        inventory.add(GamePiece.cone);
-      }
-
-      if (event.type == AutoPathEventType.placeCone) {
+      if (event.type == AutoPathEventType.dropRing) {
         inventory.remove(
-          inventory.lastWhere((piece) => piece == GamePiece.cone),
+          inventory.last,
         );
       }
 
-      if (event.type == AutoPathEventType.placeCube) {
+      if (event.type == AutoPathEventType.feedRing) {
         inventory.remove(
-          inventory.lastWhere((piece) => piece == GamePiece.cube),
+          inventory.last,
         );
       }
 
-      if (event.type == AutoPathEventType.dropItem) {
-        inventory.remove(inventory.last);
+      if (event.type == AutoPathEventType.score) {
+        inventory.remove(
+          inventory.last,
+        );
       }
     }
 
@@ -690,49 +588,38 @@ class AutoPath {
     List<PositionedGamePiece> gamePieces = [];
 
     // Initial field
-    for (var event in timeline) {
-      if (event.type == AutoPathEventType.pickUpCone) {
-        gamePieces.add(PositionedGamePiece(
-            GamePiece.cone, randomizedOffsets[timeline.indexOf(event)]));
-      }
-
-      if (event.type == AutoPathEventType.pickUpCube) {
-        gamePieces.add(PositionedGamePiece(
-            GamePiece.cube, randomizedOffsets[timeline.indexOf(event)]));
-      }
-    }
+    gamePieces.addAll([
+      AutoPathLocation.groundNoteAllianceByStage,
+      AutoPathLocation.groundNoteAllianceFrontOfSpeaker,
+      AutoPathLocation.groundNoteAllianceNearAmp,
+      AutoPathLocation.groundNoteCenterCenter,
+      AutoPathLocation.groundNoteCenterFarthestAmpSide,
+      AutoPathLocation.groundNoteCenterFarthestSourceSide,
+      AutoPathLocation.groundNoteCenterTowardAmpSide,
+      AutoPathLocation.groundNoteCenterTowardSourceSide,
+    ].map((location) => PositionedGamePiece(
+        GamePiece.note,
+        Offset(
+          location.offset.dx,
+          location.offset.dy,
+        ))));
 
     // What's there now
     final currentTimeline =
         timeline.where((event) => event.timestamp <= timestamp);
 
     for (var event in currentTimeline) {
-      if ([AutoPathEventType.pickUpCone, AutoPathEventType.pickUpCube]
-          .contains(event.type)) {
-        gamePieces.remove(
-          gamePieces.firstWhere(
-            (piece) =>
-                piece.position == randomizedOffsets[timeline.indexOf(event)],
-          ),
-        );
-      }
+      if (event.type == AutoPathEventType.pickUp) {
+        final elementToRemove = gamePieces.cast().firstWhere(
+              (element) =>
+                  event.location.offset.dx == element.position.dx &&
+                  event.location.offset.dy == element.position.dy,
+              orElse: () => null,
+            );
 
-      if (event.type == AutoPathEventType.placeCube) {
-        gamePieces.add(
-          PositionedGamePiece(
-            GamePiece.cube,
-            randomizedOffsets[timeline.indexOf(event)],
-          ),
-        );
-      }
-
-      if (event.type == AutoPathEventType.placeCone) {
-        gamePieces.add(
-          PositionedGamePiece(
-            GamePiece.cone,
-            randomizedOffsets[timeline.indexOf(event)],
-          ),
-        );
+        if (elementToRemove != null) {
+          gamePieces.remove(elementToRemove);
+        }
       }
     }
 
@@ -770,7 +657,7 @@ class AutoPathEvent {
 
   Widget indicator(Color? teamColor) {
     switch (type) {
-      case AutoPathEventType.dropItem:
+      case AutoPathEventType.dropRing:
         return AutoPathEventIndicator(
           teamColor: teamColor,
           childBuilder: (context, teamColor, isHighlighted) =>
@@ -781,109 +668,7 @@ class AutoPathEvent {
             CupertinoIcons.bag_badge_minus,
           ),
         );
-      case AutoPathEventType.startWithoutItem:
-        return AutoPathEventIndicator(
-          childBuilder: (context, teamColor, isHighlighted) =>
-              iconAutoPathEventIndicator(
-            context,
-            teamColor,
-            isHighlighted,
-            Icons.play_arrow_outlined,
-          ),
-          isHighlighted: true,
-          teamColor: teamColor,
-        );
-      case AutoPathEventType.pickUpCone:
-        return AutoPathEventIndicator(
-          isHighlighted: [
-            AutoPathLocation.communityCenter1,
-            AutoPathLocation.communityCenter2,
-            AutoPathLocation.communityCenter3,
-          ].contains(location),
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) => AnimatedScale(
-            scale: 2 / 3,
-            duration: Duration.zero,
-            child: SvgPicture.asset(
-              'assets/images/frc_cone.svg',
-              colorFilter: ColorFilter.mode(
-                isHighlighted
-                    ? teamColor ?? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              height: 16,
-              width: 16,
-            ),
-          ),
-        );
-      case AutoPathEventType.pickUpCube:
-        return AutoPathEventIndicator(
-          isHighlighted: [
-            AutoPathLocation.communityCenter1,
-            AutoPathLocation.communityCenter2,
-            AutoPathLocation.communityCenter3,
-          ].contains(location),
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) => AnimatedScale(
-            scale: 2 / 3,
-            duration: Duration.zero,
-            child: SvgPicture.asset(
-              'assets/images/frc_cube.svg',
-              colorFilter: ColorFilter.mode(
-                isHighlighted
-                    ? teamColor ?? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              height: 16,
-              width: 16,
-            ),
-          ),
-        );
-      case AutoPathEventType.placeCone:
-        return AutoPathEventIndicator(
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) => AnimatedScale(
-            scale: 2 / 3,
-            duration: Duration.zero,
-            child: SvgPicture.asset(
-              'assets/images/frc_cone.svg',
-              colorFilter: ColorFilter.mode(
-                isHighlighted
-                    ? teamColor ?? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-            ),
-          ),
-        );
-      case AutoPathEventType.placeCube:
-        return AutoPathEventIndicator(
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) => AnimatedScale(
-            scale: 2 / 3,
-            duration: Duration.zero,
-            child: SvgPicture.asset(
-              'assets/images/frc_cube.svg',
-              colorFilter: ColorFilter.mode(
-                isHighlighted
-                    ? teamColor ?? Theme.of(context).colorScheme.primary
-                    : Colors.white,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-            ),
-          ),
-        );
-      case AutoPathEventType.chargeStation:
+      case AutoPathEventType.pickUp:
         return AutoPathEventIndicator(
           teamColor: teamColor,
           childBuilder: (context, teamColor, isHighlighted) =>
@@ -891,7 +676,18 @@ class AutoPathEvent {
             context,
             teamColor,
             isHighlighted,
-            Icons.bolt,
+            CupertinoIcons.bag_badge_plus,
+          ),
+        );
+      case AutoPathEventType.score:
+        return AutoPathEventIndicator(
+          teamColor: teamColor,
+          childBuilder: (context, teamColor, isHighlighted) =>
+              iconAutoPathEventIndicator(
+            context,
+            teamColor,
+            isHighlighted,
+            Icons.sports_score,
           ),
         );
       default:
@@ -960,54 +756,30 @@ class AnimatedAutoPathControls extends StatelessWidget {
 }
 
 enum AutoPathEventType {
-  pickUpCube,
-  pickUpCone,
-  unknown2,
-  dropItem,
-  placeCube,
-  placeCone,
-  unknown6,
-  crossCommunityBorder,
-  startWithoutItem,
-  chargeStation,
+  leave,
+  pickUp,
+  dropRing,
+  score,
+  defense,
+  feedRing,
+  start,
+  end,
+  startingPosition,
 }
 
 enum GamePiece {
-  cube,
-  cone,
+  note,
 }
 
 extension GamePieceExtension on GamePiece {
   Widget icon({Color color = Colors.white}) {
     switch (this) {
-      case GamePiece.cube:
-        return Transform.scale(
-            scale: 2 / 3,
-            child: SvgPicture.asset(
-              'assets/images/frc_cube.svg',
-              colorFilter: ColorFilter.mode(
-                color,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              height: 16,
-              width: 16,
-            ));
-      case GamePiece.cone:
-        return Transform.scale(
-            scale: 2 / 3,
-            child: SvgPicture.asset(
-              'assets/images/frc_cone.svg',
-              colorFilter: ColorFilter.mode(
-                color,
-                BlendMode.srcIn,
-              ),
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.center,
-              height: 16,
-              width: 16,
-            ));
+      case GamePiece.note:
+        return Icon(
+          Icons.radio_button_unchecked,
+          color: color,
+          size: 16,
+        );
     }
   }
 }
@@ -1062,85 +834,55 @@ Widget iconAutoPathEventIndicator(
 
 enum AutoPathLocation {
   none,
-  grid1,
-  grid2,
-  grid3,
-  grid4,
-  grid5,
-  grid6,
-  grid7,
-  grid8,
-  grid9,
-
-  /// The cable protector connected to the charge station
-  cableProtector,
-  chargeStation,
-  communityBorderNearBarrier,
-
-  /// Farthest from the scoring table
-  prePlacedPiece1,
-
-  /// 3rd closest to the scoring table
-  prePlacedPiece2,
-
-  /// 2nd closest to the scoring table
-  prePlacedPiece3,
-
-  /// Closest to the scoring table
-  prePlacedPiece4,
-
-  /// Center of the community ajacent to tag 3
-  communityCenter3,
-
-  /// Center of the community ajacent to tag 2
-  communityCenter2,
-
-  /// Center of the community ajacent to tag 1
-  communityCenter1,
+  amp,
+  speaker,
+  trap,
+  wingNearAmp,
+  wingFrontOfSpeaker,
+  wingCenter,
+  wingNearSource,
+  groundNoteAllianceNearAmp,
+  groundNoteAllianceFrontOfSpeaker,
+  groundNoteAllianceByStage,
+  groundNoteCenterFarthestAmpSide,
+  groundNoteCenterTowardAmpSide,
+  groundNoteCenterCenter,
+  groundNoteCenterTowardSourceSide,
+  groundNoteCenterFarthestSourceSide,
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
   /// `x` and `y` are between `0` and `100`, starting from the top right of the field.
   Offset get offset {
     switch (this) {
-      case AutoPathLocation.cableProtector:
-        return const Offset(51, 88);
-      case AutoPathLocation.chargeStation:
-        return const Offset(51, 50);
-      case AutoPathLocation.communityBorderNearBarrier:
-        return const Offset(58, 14);
-      case AutoPathLocation.communityCenter1:
-        return const Offset(75, 75);
-      case AutoPathLocation.communityCenter2:
-        return const Offset(75, 50);
-      case AutoPathLocation.communityCenter3:
-        return const Offset(75, 25);
-      case AutoPathLocation.grid1:
-        return const Offset(86, 82);
-      case AutoPathLocation.grid2:
-        return const Offset(86, 50);
-      case AutoPathLocation.grid3:
-        return const Offset(86, 20);
-      case AutoPathLocation.grid4:
-        return const Offset(91, 82);
-      case AutoPathLocation.grid5:
-        return const Offset(91, 50);
-      case AutoPathLocation.grid6:
-        return const Offset(91, 20);
-      case AutoPathLocation.grid7:
-        return const Offset(96, 82);
-      case AutoPathLocation.grid8:
-        return const Offset(96, 50);
-      case AutoPathLocation.grid9:
-        return const Offset(96, 20);
-      case AutoPathLocation.prePlacedPiece1:
-        return const Offset(10.27, 16.7);
-      case AutoPathLocation.prePlacedPiece2:
-        return const Offset(10.27, 39.2);
-      case AutoPathLocation.prePlacedPiece3:
-        return const Offset(10.27, 61.6);
-      case AutoPathLocation.prePlacedPiece4:
-        return const Offset(10.27, 84);
+      case AutoPathLocation.amp:
+        return const Offset(78, 4);
+      case AutoPathLocation.speaker:
+        return const Offset(93, 33);
+      case AutoPathLocation.wingCenter:
+        return const Offset(88, 50);
+      case AutoPathLocation.wingNearAmp:
+        return const Offset(88, 10);
+      case AutoPathLocation.wingFrontOfSpeaker:
+        return const Offset(84, 33);
+      case AutoPathLocation.wingNearSource:
+        return const Offset(88, 75);
+      case AutoPathLocation.groundNoteAllianceNearAmp:
+        return const Offset(67.2, 16);
+      case AutoPathLocation.groundNoteAllianceFrontOfSpeaker:
+        return const Offset(67.2, 33);
+      case AutoPathLocation.groundNoteAllianceByStage:
+        return const Offset(67.2, 50);
+      case AutoPathLocation.groundNoteCenterFarthestAmpSide:
+        return const Offset(8.5, 10.7);
+      case AutoPathLocation.groundNoteCenterTowardAmpSide:
+        return const Offset(8.5, 30.3);
+      case AutoPathLocation.groundNoteCenterCenter:
+        return const Offset(8.5, 49.9);
+      case AutoPathLocation.groundNoteCenterTowardSourceSide:
+        return const Offset(8.5, 69.5);
+      case AutoPathLocation.groundNoteCenterFarthestSourceSide:
+        return const Offset(8.5, 89.1);
       default:
         return const Offset(0, 0);
     }
@@ -1148,40 +890,10 @@ extension AutoPathLocationExtension on AutoPathLocation {
 
   Offset get randomVariance {
     switch (this) {
-      case AutoPathLocation.chargeStation:
-        return const Offset(4, 9);
-      case AutoPathLocation.prePlacedPiece1:
-        return const Offset(0, 0);
-      case AutoPathLocation.prePlacedPiece2:
-        return const Offset(0, 0);
-      case AutoPathLocation.prePlacedPiece3:
-        return const Offset(0, 0);
-      case AutoPathLocation.prePlacedPiece4:
-        return const Offset(0, 0);
-      case AutoPathLocation.cableProtector:
-        return const Offset(0, 7);
-      case AutoPathLocation.communityBorderNearBarrier:
-        return const Offset(0, 5);
-      case AutoPathLocation.grid1:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid2:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid3:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid4:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid5:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid6:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid7:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid8:
-        return const Offset(1.3, 4);
-      case AutoPathLocation.grid9:
-        return const Offset(1.3, 4);
+      case AutoPathLocation.speaker:
+        return const Offset(3, 8);
       default:
-        return const Offset(2, 2);
+        return const Offset(0, 0);
     }
   }
 }

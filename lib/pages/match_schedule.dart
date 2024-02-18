@@ -1,21 +1,22 @@
-import 'dart:convert';
-
 import 'package:chips_input/chips_input.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
-import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
+import 'package:scouting_dashboard_app/reusable/color_combination.dart';
+import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/team.dart';
+import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:skeletons/skeletons.dart';
 
 import '../reusable/navigation_drawer.dart';
-
-import 'package:http/http.dart' as http;
 
 class MatchSchedulePage extends StatefulWidget {
   const MatchSchedulePage({super.key});
@@ -25,122 +26,127 @@ class MatchSchedulePage extends StatefulWidget {
 }
 
 class _MatchSchedulePageState extends State<MatchSchedulePage> {
-  List<int> _teamsFilter = [];
+  List<Team> _teamsFilter = [];
   CompletionFilter completionFilter = CompletionFilter.any;
 
   GameMatchIdentity? nextMatch;
 
-  TournamentSchedule? tournamentSchedule;
-  ScoutSchedule? scoutSchedule;
-  Map<String, String?>? isScouted;
+  List<MatchScheduleMatch>? matches;
 
   String? initialError;
   String? noScheduleTournament;
 
-  List<Map<String, dynamic>>? teamsInTournament;
+  List<Team>? teamsInTournament;
 
   bool isDataFetched = false;
   bool? isScoutingLead;
+  Tournament? currentTournament;
+  bool showProgressIndicator = false;
 
   bool fabVisible = false;
 
   Future<void> checkRole() async {
-    final prefs = await SharedPreferences.getInstance();
-    final role = prefs.getString("role");
+    final profile = await lovatAPI.getUserProfile();
 
     setState(() {
-      isScoutingLead = role == "8033_scouting_lead";
+      isScoutingLead = profile.role == UserRole.scoutingLead;
     });
   }
 
-  Future<void> fetchData() async {
-    List<dynamic> outputs = [];
+  Future<void> checkTournament() async {
+    final current = await Tournament.getCurrent();
+
+    setState(() {
+      currentTournament = current;
+    });
+  }
+
+  Future<void> fetchData({bool indicator = true}) async {
     try {
-      outputs = await Future.wait(
-        [
-          TournamentSchedule.fromServer(
-            (await getServerAuthority())!,
-            (await SharedPreferences.getInstance()).getString('tournament')!,
-          ),
-          getScoutSchedule(),
-          getScoutedStatuses(),
-        ],
-      );
-
-      final fetchedTournamentSchedule = outputs[0] as TournamentSchedule;
-      final fetchedScoutSchedule = outputs[1] as ScoutSchedule;
-      final fetchedIsScouted = outputs[2] as Map<String, String?>;
-
-      fetchedTournamentSchedule.matches
-          .sort((a, b) => a.ordinalNumber.compareTo(b.ordinalNumber));
-
-      ScheduleMatch? nextScheduleMatch;
-
-      try {
-        final ScheduleMatch fetchedLastScoutedMatch =
-            fetchedTournamentSchedule.matches.lastWhere((match) => [
-                  fetchedIsScouted["${match.identity.toMediumKey()}_0"],
-                  fetchedIsScouted["${match.identity.toMediumKey()}_1"],
-                  fetchedIsScouted["${match.identity.toMediumKey()}_2"],
-                  fetchedIsScouted["${match.identity.toMediumKey()}_3"],
-                  fetchedIsScouted["${match.identity.toMediumKey()}_4"],
-                  fetchedIsScouted["${match.identity.toMediumKey()}_5"],
-                ].any((e) => e != null));
-
-        nextScheduleMatch = fetchedTournamentSchedule.matches
-            .cast<ScheduleMatch?>()
-            .singleWhere(
-              (match) =>
-                  match?.ordinalNumber ==
-                  fetchedLastScoutedMatch.ordinalNumber + 1,
-              orElse: () => null,
-            );
-      } catch (error) {
-        print(error);
-
-        nextScheduleMatch = fetchedTournamentSchedule.matches.first;
-      }
-
-      setState(() {
-        if (nextScheduleMatch?.identity.toMediumKey() !=
-            nextMatch?.toMediumKey()) {
-          nextMatch = nextScheduleMatch?.identity;
-        }
-
-        tournamentSchedule = fetchedTournamentSchedule;
-        scoutSchedule = fetchedScoutSchedule;
-        isScouted = fetchedIsScouted;
-
-        isDataFetched = true;
-      });
-    } catch (error) {
-      final prefs = await SharedPreferences.getInstance();
-
-      if (error == "No matches found for ${prefs.getString('tournament')}") {
+      if (indicator && currentTournament != null) {
         setState(() {
-          noScheduleTournament = prefs.getString('tournament_localized');
+          showProgressIndicator = true;
         });
       }
 
+      final tournament = await Tournament.getCurrent();
+
       setState(() {
-        initialError = error.toString();
+        currentTournament = tournament;
+      });
+
+      if (tournament == null) {
+        setState(() {
+          noScheduleTournament = "No tournament selected";
+          isDataFetched = true;
+        });
+        return;
+      } // TODO: Make this message
+
+      final matches = await lovatAPI.getMatches(
+        tournament.key,
+        isScouted: completionFilter == CompletionFilter.any
+            ? null
+            : completionFilter == CompletionFilter.finished,
+        teamNumbers: _teamsFilter.isEmpty
+            ? null
+            : _teamsFilter.map((e) => e.number).toList(),
+      );
+
+      GameMatchIdentity? nextMatch = this.nextMatch;
+      if (this.matches == null) {
+        final MatchScheduleMatch? lastScouted = matches.cast().lastWhere(
+              (match) => match.isScouted,
+              orElse: () => null,
+            );
+
+        if (lastScouted == null) {
+          nextMatch = matches.first.identity;
+        } else {
+          final index = matches.indexOf(lastScouted);
+
+          if (index == matches.length - 1) {
+            nextMatch = null;
+          } else {
+            nextMatch = matches[index + 1].identity;
+          }
+        }
+      }
+
+      setState(() {
+        this.matches = matches;
+        this.nextMatch = nextMatch;
+        isDataFetched = true;
+      });
+    } on LovatAPIException catch (e) {
+      setState(() {
+        initialError = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        initialError = "An unknown error occurred";
+      });
+    } finally {
+      setState(() {
+        showProgressIndicator = false;
       });
     }
   }
 
   Future<void> fetchTeamsInTournament() async {
-    final prefs = await SharedPreferences.getInstance();
+    try {
+      final tournament = await Tournament.getCurrent();
 
-    final response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/manager/getTeamsInTournament", {
-      'tournamentKey': prefs.getString("tournament")!,
-    }));
+      final teams = await tournament?.getTeams();
 
-    if (response.statusCode != 200) {
+      setState(() {
+        teamsInTournament = teams;
+      });
+    } on LovatAPIException catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Error fetching teams: ${response.statusCode} ${response.reasonPhrase}: ${response.body}",
+            "Error fetching teams: ${e.message}",
             style: TextStyle(
               color: Theme.of(context).colorScheme.onErrorContainer,
             ),
@@ -148,14 +154,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           backgroundColor: Theme.of(context).colorScheme.errorContainer,
         ),
       );
-
-      return;
     }
-
-    setState(() {
-      teamsInTournament =
-          jsonDecode(response.body).cast<Map<String, dynamic>>();
-    });
   }
 
   @override
@@ -164,6 +163,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
     fetchData();
     checkRole();
+    checkTournament();
     fetchTeamsInTournament();
   }
 
@@ -176,56 +176,16 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    List<ScheduleMatch>? filteredMatches;
-
-    if (isDataFetched) {
-      filteredMatches = tournamentSchedule!.matches.where((match) {
-        List<String?> scouted = [
-          isScouted!["${match.identity.toMediumKey()}_0"],
-          isScouted!["${match.identity.toMediumKey()}_1"],
-          isScouted!["${match.identity.toMediumKey()}_2"],
-          isScouted!["${match.identity.toMediumKey()}_3"],
-          isScouted!["${match.identity.toMediumKey()}_4"],
-          isScouted!["${match.identity.toMediumKey()}_5"],
-        ];
-
-        if (!_teamsFilter.every((team) => match.teams.contains(team)) &&
-            _teamsFilter.isNotEmpty) {
-          return false;
-        }
-
-        if (completionFilter == CompletionFilter.finished &&
-            !scouted.any((report) => report != null)) {
-          return false;
-        }
-
-        if (completionFilter == CompletionFilter.upcoming &&
-            scouted.any((report) => report != null)) {
-          return false;
-        }
-
-        return true;
-      }).toList();
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Match Schedule"),
         actions: [
-          if (isScoutingLead ?? false)
+          if ((isScoutingLead ?? false) && currentTournament != null)
             IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed("/edit_scout_schedule");
               },
               icon: const Icon(Icons.edit_outlined),
-            ),
-          if (isScoutingLead ?? false)
-            IconButton(
-              onPressed: () {
-                Navigator.of(context).pushNamed("/display_qr_codes");
-              },
-              icon: const Icon(Icons.qr_code),
-              tooltip: "Display QR codes",
             ),
         ],
         bottom: PreferredSize(
@@ -253,12 +213,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                             setState(() {
                               completionFilter = CompletionFilter.any;
                             });
-                            return;
+                          } else {
+                            setState(() {
+                              completionFilter = CompletionFilter.upcoming;
+                            });
                           }
 
-                          setState(() {
-                            completionFilter = CompletionFilter.upcoming;
-                          });
+                          fetchData();
                         },
                       ),
                       const SizedBox(width: 8),
@@ -270,12 +231,13 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                             setState(() {
                               completionFilter = CompletionFilter.any;
                             });
-                            return;
+                          } else {
+                            setState(() {
+                              completionFilter = CompletionFilter.finished;
+                            });
                           }
 
-                          setState(() {
-                            completionFilter = CompletionFilter.finished;
-                          });
+                          fetchData();
                         },
                       ),
                       const Spacer(),
@@ -309,9 +271,14 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                   ],
                 ),
               ),
-              Divider(
-                height: 1,
-                color: Theme.of(context).colorScheme.surfaceVariant,
+              SizedBox(
+                height: 4,
+                child: showProgressIndicator
+                    ? const LinearProgressIndicator()
+                    : Divider(
+                        height: 1,
+                        color: Theme.of(context).colorScheme.surfaceVariant,
+                      ),
               ),
             ],
           ),
@@ -349,9 +316,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                       fetchData();
                     },
                   )
-                : (tournamentSchedule == null ||
-                        scoutSchedule == null ||
-                        isScouted == null)
+                : (matches == null)
                     ? const SkeletonMatches()
                     : NotificationListener<ScrollUpdateNotification>(
                         onNotification: (notification) {
@@ -368,14 +333,12 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                           return false;
                         },
                         child: Matches(
-                          onRefresh: () => fetchData(),
-                          isScouted: isScouted,
+                          onRefresh: () => fetchData(indicator: false),
                           scrollController: scrollController,
-                          filteredMatches: filteredMatches,
+                          matches: matches,
                           nextMatch: nextMatch,
                           nextMatchKey: nextMatchKey,
                           isScoutingLead: isScoutingLead,
-                          scoutSchedule: scoutSchedule,
                         ),
                       ),
       ),
@@ -408,32 +371,47 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
     }
   }
 
-  ChipsInput<int> teamsInput() {
+  ChipsInput<Team> teamsInput() {
     return ChipsInput(
       chipBuilder: ((context, state, data) {
-        return InputChip(
-          label: Text(data.toString()),
-          onDeleted: () => state.deleteChip(data),
-          backgroundColor: Theme.of(context).colorScheme.background,
-          labelStyle: Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              )),
-          deleteIconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+        return Transform(
+          transform: Matrix4.translationValues(0, -2, 0),
+          child: InputChip(
+            label: Text(data.number.toString()),
+            onDeleted: () => state.deleteChip(data),
+            backgroundColor: Theme.of(context).colorScheme.background,
+            labelStyle: Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                )),
+            deleteIconColor: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         );
       }),
       findSuggestions: ((query) {
-        if (int.tryParse(query) != null) {
-          return <int>[
-            int.parse(query),
-            ...(teamsInTournament
-                    ?.map((e) => e['teamNumber'])
-                    .cast<int>()
-                    .where((e) => e.toString().startsWith(query)) ??
-                [])
+        if (query.isEmpty) {
+          return <Team>[];
+        }
+
+        final parsedQuery = int.tryParse(query);
+
+        if (teamsInTournament == null && parsedQuery != null) {
+          return <Team>[
+            Team(
+              number: parsedQuery,
+              name: "",
+            ),
           ];
         }
 
-        return <int>[];
+        if (teamsInTournament != null) {
+          return teamsInTournament!
+              .where((team) =>
+                  team.name.toLowerCase().contains(query.toLowerCase()) ||
+                  team.number.toString().contains(query))
+              .toList();
+        }
+
+        return <Team>[];
       }),
       decoration: InputDecoration(
         border: const OutlineInputBorder(),
@@ -447,12 +425,16 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         setState(() {
           _teamsFilter = value;
         });
+
+        fetchData();
       },
       suggestionBuilder: (context, data) {
-        return ListTile(title: Text(data.toString()));
+        return ListTile(
+            title: Text(data.name == ""
+                ? data.number.toString()
+                : "${data.number} - ${data.name}"));
       },
       maxChips: 3,
-      keyboardType: TextInputType.number,
     );
   }
 }
@@ -493,18 +475,17 @@ class SkeletonMatches extends StatelessWidget {
 
 class AllianceRowItem {
   const AllianceRowItem({
-    required this.team,
-    this.scout,
-    this.warnings = const [],
-    this.longMatchKey,
-    required this.scouted,
+    required this.matchIdentity,
+    required this.longMatchKey,
+    required this.teamInfo,
   });
 
-  final int team;
-  final String? scout;
-  final List<String> warnings;
-  final String? longMatchKey;
-  final bool scouted;
+  final GameMatchIdentity matchIdentity;
+  final String longMatchKey;
+  final MatchScheduleTeamInfo teamInfo;
+
+  bool get isScouted =>
+      teamInfo.scouters.where((s) => s.isScouted == true).isNotEmpty;
 }
 
 class AllianceRow extends StatelessWidget {
@@ -525,7 +506,7 @@ class AllianceRow extends StatelessWidget {
       onTap: () {
         Navigator.of(context)
             .pushNamed('/alliance', arguments: <String, dynamic>{
-          'teams': items.map((e) => e.team).toList(),
+          'teams': items.map((e) => e.teamInfo.teamNumber).toList(),
         });
       },
       child: Container(
@@ -565,34 +546,19 @@ class AllianceRow extends StatelessWidget {
                       Navigator.of(context).pop();
                       Navigator.of(context)
                           .pushNamed("/team_lookup", arguments: {
-                        'team': item.team,
+                        'team': item.teamInfo.teamNumber,
                       });
                     },
                   ),
-                  if (item.scouted && item.longMatchKey != null)
+                  if (item.isScouted && isScoutingLead == true)
                     CupertinoContextMenuAction(
-                      child: const Text("Per-match metrics"),
+                      child: const Text("View report data"),
                       onPressed: () {
                         Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed(
-                          '/team_per_match',
-                          arguments: TeamPerMatchArgs(
-                            longMatchKey: item.longMatchKey!,
-                            teamNumber: item.team,
-                          ),
-                        );
-                      },
-                    ),
-                  if (item.scouted && (isScoutingLead ?? false))
-                    CupertinoContextMenuAction(
-                      child: const Text("Raw report data"),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.of(context).pushNamed('/raw_scout_report',
-                            arguments: <String, dynamic>{
-                              'longMatchKey': item.longMatchKey,
-                              'team': item.team,
-                            });
+                        Navigator.of(context).pushWidget(RawScoutReportsPage(
+                          longMatchKey: item.longMatchKey,
+                          teamNumber: item.teamInfo.teamNumber,
+                        ));
                       },
                     ),
                 ],
@@ -602,146 +568,54 @@ class AllianceRow extends StatelessWidget {
                         if (animation.value == 0) {
                           Navigator.of(context)
                               .pushNamed("/team_lookup", arguments: {
-                            'team': item.team,
+                            'team': item.teamInfo.teamNumber,
                           });
                         }
                       },
                       child: Text(
-                        item.team.toString(),
+                        item.teamInfo.teamNumber.toString(),
                         style: Theme.of(context).textTheme.titleLarge,
                       ));
                 },
               ),
-              if (item.warnings.isNotEmpty)
-                InkWell(
-                  onTap: () {
-                    showDialog(
-                        context: context,
-                        builder: (context) => Dialog(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      5,
-                                      5,
-                                      0,
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          Icons.error,
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant,
-                                        ),
-                                        const Spacer(),
-                                        IconButton(
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                          icon: const Icon(Icons.close),
-                                          tooltip: "Close",
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(
-                                      20,
-                                      0,
-                                      20,
-                                      20,
-                                    ),
-                                    child: Column(
-                                      mainAxisSize: MainAxisSize.min,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          "Issues with ${item.scout}'s data for ${GameMatchIdentity.fromLongKey(item.longMatchKey!).getShortLocalizedDescription()}",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleLarge!
-                                              .copyWith(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .onSurfaceVariant,
-                                              ),
-                                        ),
-                                        const SizedBox(height: 5),
-                                        ...(item.warnings
-                                            .map((warning) => Text(
-                                                  '• $warning',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodyLarge,
-                                                ))
-                                            .toList()),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ));
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    child: Icon(
-                      Icons.error,
-                      color: Theme.of(context).colorScheme.warningText,
-                      size: 24,
-                    ),
-                  ),
-                )
             ],
           ),
-          if (item.scout != null)
-            Text(
-              item.scout!,
-              style: Theme.of(context).textTheme.labelSmall!.merge(
-                    TextStyle(
-                      color: alliance == Alliance.red
-                          ? Theme.of(context).colorScheme.onRedAlliance
-                          : Theme.of(context).colorScheme.onBlueAlliance,
-                    ),
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          // Column(
-          //   crossAxisAlignment: alignment,
-          //   children: item.warnings
-          //       .map(
-          //         (warning) => Row(
-          //           crossAxisAlignment: CrossAxisAlignment.start,
-          //           children: [
-          //             Icon(
-          //               Icons.error,
-          //               size: 20,
-          //               color: Theme.of(context).colorScheme.warningText,
-          //             ),
-          //             Flexible(
-          //               child: Padding(
-          //                 padding: const EdgeInsets.fromLTRB(2, 2, 0, 0),
-          //                 child: Text(
-          //                   warning,
-          //                   style: Theme.of(context)
-          //                       .textTheme
-          //                       .labelSmall!
-          //                       .merge(TextStyle(
-          //                           color: Theme.of(context)
-          //                               .colorScheme
-          //                               .warningText)),
-          //                 ),
-          //               ),
-          //             ),
-          //           ],
-          //         ),
-          //       )
-          //       .toList(),
-          // )
+          Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: item.teamInfo.scouters
+                .map((scouterInfo) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          scouterInfo.isScouted
+                              ? Icons.check_circle
+                              : Icons.radio_button_unchecked,
+                          size: 16,
+                          color: alliance == Alliance.red
+                              ? Theme.of(context).colorScheme.onRedAlliance
+                              : Theme.of(context).colorScheme.onBlueAlliance,
+                        ),
+                        Text(
+                          scouterInfo.name,
+                          style: Theme.of(context).textTheme.labelSmall!.merge(
+                                TextStyle(
+                                  color: alliance == Alliance.red
+                                      ? Theme.of(context)
+                                          .colorScheme
+                                          .onRedAlliance
+                                      : Theme.of(context)
+                                          .colorScheme
+                                          .onBlueAlliance,
+                                ),
+                              ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ].withSpaceBetween(width: 2),
+                    ))
+                .toList(),
+          ),
         ],
       ),
     );
@@ -755,6 +629,37 @@ enum CompletionFilter {
 }
 
 enum Alliance { red, blue }
+
+extension AllianceExtension on Alliance {
+  static Alliance fromString(String string) {
+    switch (string) {
+      case "red":
+        return Alliance.red;
+      case "blue":
+        return Alliance.blue;
+      default:
+        throw "Invalid alliance string";
+    }
+  }
+
+  ColorCombination get colorCombination {
+    switch (this) {
+      case Alliance.red:
+        return ColorCombination.red;
+      case Alliance.blue:
+        return ColorCombination.blue;
+    }
+  }
+
+  ColorCombination get emphasisColorCombination {
+    switch (this) {
+      case Alliance.red:
+        return ColorCombination.redEmphasis;
+      case Alliance.blue:
+        return ColorCombination.blueEmphasis;
+    }
+  }
+}
 
 class ScoutedFlag extends StatelessWidget {
   const ScoutedFlag({
@@ -783,26 +688,25 @@ class ScoutedFlag extends StatelessWidget {
 }
 
 class Matches extends StatefulWidget {
-  const Matches(
-      {super.key,
-      required this.onRefresh,
-      this.isScouted,
-      required this.scrollController,
-      this.filteredMatches,
-      this.nextMatch,
-      required this.nextMatchKey,
-      this.isScoutingLead,
-      this.scoutSchedule});
+  const Matches({
+    super.key,
+    required this.onRefresh,
+    this.isScouted,
+    required this.scrollController,
+    this.matches,
+    this.nextMatch,
+    required this.nextMatchKey,
+    this.isScoutingLead,
+  });
 
   final dynamic Function() onRefresh;
   final Map<String, String?>? isScouted;
   final ScrollController scrollController;
-  final List<ScheduleMatch>? filteredMatches;
+  final List<MatchScheduleMatch>? matches;
 
   final GameMatchIdentity? nextMatch;
   final GlobalKey<State<StatefulWidget>> nextMatchKey;
   final bool? isScoutingLead;
-  final ScoutSchedule? scoutSchedule;
 
   @override
   State<Matches> createState() => _MatchesState();
@@ -817,16 +721,7 @@ class _MatchesState extends State<Matches> {
       child: SingleChildScrollView(
         controller: widget.scrollController,
         child: Column(
-            children: widget.filteredMatches!.map((match) {
-          List<String?> scouted = [
-            widget.isScouted!["${match.identity.toMediumKey()}_0"],
-            widget.isScouted!["${match.identity.toMediumKey()}_1"],
-            widget.isScouted!["${match.identity.toMediumKey()}_2"],
-            widget.isScouted!["${match.identity.toMediumKey()}_3"],
-            widget.isScouted!["${match.identity.toMediumKey()}_4"],
-            widget.isScouted!["${match.identity.toMediumKey()}_5"],
-          ];
-
+            children: widget.matches!.map((match) {
           return Padding(
             key: match.identity.toMediumKey() == widget.nextMatch?.toMediumKey()
                 ? widget.nextMatchKey
@@ -849,45 +744,25 @@ class _MatchesState extends State<Matches> {
                               style: Theme.of(context).textTheme.labelMedium,
                             ),
                           ),
-                          if (!scouted.contains(null)) const ScoutedFlag(),
+                          if (match.isScouted) const ScoutedFlag(),
                           const Spacer(),
                           IconButton(
                             onPressed: () {
                               Navigator.of(context).pushNamed(
                                 "/match_predictor",
                                 arguments: {
-                                  'red1': match.teams[0].toString(),
-                                  'red2': match.teams[1].toString(),
-                                  'red3': match.teams[2].toString(),
-                                  'blue1': match.teams[3].toString(),
-                                  'blue2': match.teams[4].toString(),
-                                  'blue3': match.teams[5].toString(),
+                                  'red1': match.red1.teamNumber.toString(),
+                                  'red2': match.red2.teamNumber.toString(),
+                                  'red3': match.red3.teamNumber.toString(),
+                                  'blue1': match.blue1.teamNumber.toString(),
+                                  'blue2': match.blue2.teamNumber.toString(),
+                                  'blue3': match.blue3.teamNumber.toString(),
                                 },
                               );
                             },
                             icon: const Icon(Icons.psychology),
                             tooltip: "Match Predictor",
                           ),
-                          // IconButton(
-                          //   onPressed: () {
-                          //     Navigator.of(context).pushNamed(
-                          //       "/match_suggestions",
-                          //       arguments: {
-                          //         'teams': <String, int>{
-                          //           'red1': match.teams[0],
-                          //           'red2': match.teams[1],
-                          //           'red3': match.teams[2],
-                          //           'blue1': match.teams[3],
-                          //           'blue2': match.teams[4],
-                          //           'blue3': match.teams[5],
-                          //         },
-                          //         'matchIdentity': match.identity,
-                          //         'matchType': match.identity.type,
-                          //       },
-                          //     );
-                          //   },
-                          //   icon: const Icon(Icons.assistant),
-                          // ),
                         ],
                       ),
                       AllianceRow(
@@ -895,55 +770,19 @@ class _MatchesState extends State<Matches> {
                         isScoutingLead: widget.isScoutingLead,
                         items: [
                           AllianceRowItem(
-                            scouted: scouted[0] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_0",
-                            team: match.teams[0],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[0],
-                            warnings: getWarnings(
-                              scouted,
-                              0,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.red1,
                           ),
                           AllianceRowItem(
-                            scouted: scouted[1] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_1",
-                            team: match.teams[1],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[1],
-                            warnings: getWarnings(
-                              scouted,
-                              1,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.red2,
                           ),
                           AllianceRowItem(
-                            scouted: scouted[2] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_2",
-                            team: match.teams[2],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[2],
-                            warnings: getWarnings(
-                              scouted,
-                              2,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.red3,
                           ),
                         ],
                       ),
@@ -952,55 +791,19 @@ class _MatchesState extends State<Matches> {
                         isScoutingLead: widget.isScoutingLead,
                         items: [
                           AllianceRowItem(
-                            scouted: scouted[3] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_3",
-                            team: match.teams[3],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[3],
-                            warnings: getWarnings(
-                              scouted,
-                              3,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.blue1,
                           ),
                           AllianceRowItem(
-                            scouted: scouted[4] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_4",
-                            team: match.teams[4],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[4],
-                            warnings: getWarnings(
-                              scouted,
-                              4,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.blue2,
                           ),
                           AllianceRowItem(
-                            scouted: scouted[5] != null,
+                            matchIdentity: match.identity,
                             longMatchKey: "${match.identity.toMediumKey()}_5",
-                            team: match.teams[5],
-                            scout: widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)
-                                    .isEmpty
-                                ? null
-                                : widget.scoutSchedule!
-                                    .getScoutsForMatch(match.ordinalNumber)[5],
-                            warnings: getWarnings(
-                              scouted,
-                              5,
-                              widget.scoutSchedule!
-                                  .getScoutsForMatch(match.ordinalNumber),
-                            ),
+                            teamInfo: match.blue3,
                           ),
                         ],
                       ),

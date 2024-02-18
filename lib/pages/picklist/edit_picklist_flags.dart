@@ -50,7 +50,7 @@ class _PopupMenuLabelState extends State<PopupMenuLabel> {
   Widget build(BuildContext context) => SizedBox(
         height: widget.height,
         child: Padding(
-          padding: EdgeInsets.all(15),
+          padding: const EdgeInsets.all(15),
           child: widget.text,
         ),
       );
@@ -233,8 +233,9 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
                           int positionalIndex = i;
 
                           if (draggingFromIndex != null &&
-                              draggingFromIndex! <= positionalIndex)
+                              draggingFromIndex! <= positionalIndex) {
                             positionalIndex -= 1;
+                          }
 
                           if (willAcceptIndex != null &&
                               willAcceptIndex! <= positionalIndex) {

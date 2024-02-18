@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
@@ -49,48 +51,19 @@ class ConfiguredPicklist {
   String? author;
 
   Future<List<int>> fetchTeamRankings() async {
-    Map<String, dynamic> params = weights.asMap().map((key, value) => MapEntry(
-          value.path,
-          value.value.toString(),
-        ));
+    final analysis = await lovatAPI.getPicklistAnalysis([], weights);
 
-    params['tournamentKey'] =
-        (await SharedPreferences.getInstance()).getString('tournament');
-
-    params['flags'] = '[]';
-
-    final response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/analysis/picklist", params));
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
+    if (analysis['result'] == null) {
+      throw const LovatAPIException("Failed to fetch team rankings.");
     }
 
-    return (jsonDecode(utf8.decode(response.bodyBytes))[0]['result']
-            as List<dynamic>)
+    return (analysis['result'] as List<dynamic>)
         .map((e) => e['team'] as int)
         .toList();
   }
 
   Future<void> upload() async {
-    String authority = (await getServerAuthority())!;
-    final prefs = await SharedPreferences.getInstance();
-
-    final response =
-        await http.get(Uri.http(authority, '/API/manager/addPicklist', {
-      'uuid': id,
-      'name': title,
-      'team': prefs.getInt('team').toString(),
-      ...(weights.asMap().map(
-            (index, weight) =>
-                MapEntry<String, dynamic>(weight.path, weight.value.toString()),
-          )),
-      if (author != null) 'userName': author,
-    }));
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-    }
+    await lovatAPI.sharePicklist(this);
   }
 
   String toJSON() => jsonEncode({
@@ -142,6 +115,29 @@ class ConfiguredPicklist {
         .toList();
 
     return ConfiguredPicklist.autoUuid(title, allWeights, author: author);
+  }
+
+  ConfiguredPicklistMeta get meta =>
+      ConfiguredPicklistMeta(title, id, author: author);
+}
+
+class ConfiguredPicklistMeta {
+  const ConfiguredPicklistMeta(this.title, this.id, {this.author});
+
+  final String title;
+  final String id;
+  final String? author;
+
+  factory ConfiguredPicklistMeta.fromJson(Map<String, dynamic> json) {
+    return ConfiguredPicklistMeta(
+      json['name'],
+      json['uuid'],
+      author: json['author']['username'],
+    );
+  }
+
+  Future<ConfiguredPicklist> getPicklist() async {
+    return await lovatAPI.getSharedPicklistById(id);
   }
 }
 
@@ -197,30 +193,12 @@ class MutablePicklist {
       name: decodedJSON['name'],
       author:
           decodedJSON.containsKey('userName') ? decodedJSON['userName'] : null,
-      teams: decodedJSON['teams'],
+      teams: decodedJSON['teams'].cast<int>(),
     );
   }
 
   Future<void> upload() async {
-    final authority = (await getServerAuthority())!;
-    final prefs = await SharedPreferences.getInstance();
-
-    final response =
-        await http.post(Uri.http(authority, '/API/manager/addMutablePicklist'),
-            body: jsonEncode({
-              'uuid': uuid,
-              'name': name,
-              'teams': teams,
-              if (author != null) 'userName': author,
-              'team': prefs.getInt('team').toString(),
-            }),
-            headers: {
-          'Content-Type': 'application/json',
-        });
-
-    if (response.statusCode != 200) {
-      throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
-    }
+    await lovatAPI.createMutablePicklist(this);
   }
 
   Future<void> delete() async {
@@ -240,5 +218,43 @@ class MutablePicklist {
     if (response.statusCode != 200) {
       throw "${response.statusCode} ${response.reasonPhrase}: ${response.body}";
     }
+  }
+
+  MutablePicklistMeta get meta =>
+      MutablePicklistMeta(uuid: uuid, name: name, author: author);
+
+  Future<void> update() async {
+    await lovatAPI.updateMutablePicklist(this);
+  }
+}
+
+class MutablePicklistMeta {
+  MutablePicklistMeta({
+    required this.uuid,
+    required this.name,
+    this.author,
+    this.tournamentKey,
+  });
+
+  String uuid;
+  String name;
+  String? author;
+  String? tournamentKey;
+
+  factory MutablePicklistMeta.fromJson(Map<String, dynamic> json) {
+    return MutablePicklistMeta(
+      uuid: json['uuid'],
+      name: json['name'],
+      author: json['author']['username'],
+      tournamentKey: json['tournamentKey'],
+    );
+  }
+
+  Future<MutablePicklist> getPicklist() async {
+    return await lovatAPI.getMutablePicklistById(uuid);
+  }
+
+  Future<void> delete() async {
+    await lovatAPI.deleteMutablePicklistById(uuid);
   }
 }

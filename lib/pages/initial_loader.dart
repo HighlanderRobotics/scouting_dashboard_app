@@ -1,14 +1,8 @@
-import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/flags.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 
 class InitialLoaderPage extends StatefulWidget {
   const InitialLoaderPage({super.key});
@@ -19,89 +13,44 @@ class InitialLoaderPage extends StatefulWidget {
 
 class _InitialLoaderPageState extends State<InitialLoaderPage> {
   Future<void> load(NavigatorState navigator) async {
-    // if (kDebugMode) {
-    //   Map<String, Object> values = <String, Object>{
-    //     'onboardingCompleted': false,
-    //   };
-    //   SharedPreferences.setMockInitialValues(values);
-    // }
-
+    final navigator = Navigator.of(context);
     final prefs = await SharedPreferences.getInstance();
 
-    bool onboardingCompleted = false;
-
-    if (prefs.getBool("onboardingCompleted") == true) {
-      onboardingCompleted = true;
-    }
-
-    if (prefs.getString("tournament_localized") == null) {
-      onboardingCompleted = false;
-    }
-
-    if (prefs.getStringList('picklists') == null) {
-      await prefs.setStringList(
-          'picklists', defaultPicklists.map((e) => e.toJSON()).toList());
-    }
-
-    if (prefs.getString('role') == 'team_analyst') {
-      await prefs.setString('role', 'analyst');
-    }
-
-    if (prefs.getString('serverAuthority') == null) {
-      await prefs.setString('serverAuthority', '157.131.22.135:25565');
-    }
-
-    if (prefs.getStringList('picklist_flags') == null) {
-      await prefs.setStringList(
-        'picklist_flags',
-        defaultPicklistFlags.map((e) => jsonEncode(e.toJson())).toList(),
+    // Set default picklists if they don't exist
+    if (!prefs.containsKey('picklists')) {
+      prefs.setStringList(
+        'picklists',
+        defaultPicklists.map((e) => e.toJSON()).toList(),
       );
     }
 
-    if (prefs.getString('team_lookup_flag') == null) {
-      await prefs.setString(
-        'team_lookup_flag',
-        jsonEncode(defaultTeamLookupFlag.toJson()),
-      );
+    // Set default picklist flags if they don't exist
+    if (!prefs.containsKey('picklist_flags')) {
+      prefs.setStringList('picklist_flags', []);
     }
 
-    if (onboardingCompleted) {
-      final teamIsSet = prefs.getInt('team') != null;
-      final usernameIsSet = prefs.getString('username') != null;
+    final onboardingVersion = prefs.getInt('onboardingVersion');
 
-      if (!teamIsSet) {
-        navigator.pushNamedAndRemoveUntil(
-          "/more_info_prompt",
-          (route) => false,
-          arguments: MoreInfoArgs(onContinue: () {
-            navigator.pushNamed(
-              "/team_selector",
-              arguments: const TeamSelectorArgs(isOnboarding: false),
-            );
-          }),
-        );
-      } else if (!usernameIsSet) {
-        navigator.pushNamedAndRemoveUntil(
-          "/more_info_prompt",
-          (route) => false,
-          arguments: MoreInfoArgs(onContinue: () {
-            navigator.pushNamed(
-              "/username_selector",
-              arguments: const UsernameSelectorArgs(isOnboarding: false),
-            );
-          }),
-        );
-      } else {
-        navigator.pushNamedAndRemoveUntil("/match_schedule", (route) => false);
-      }
-    } else {
-      navigator.pushNamedAndRemoveUntil(
-        "/team_selector",
-        (route) => false,
-        arguments: const TeamSelectorArgs(
-          isOnboarding: true,
+    if (onboardingVersion == null || onboardingVersion < 1) {
+      navigator.pushReplacement(
+        PageRouteBuilder(
+          pageBuilder: (context, animation, secondaryAnimation) =>
+              const OnboardingPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              child,
+          transitionDuration: Duration.zero,
         ),
       );
+      return;
+    }
+
+    final tournament = await Tournament.getCurrent();
+
+    if (tournament == null) {
+      navigator.pushReplacementNamed('/team_lookup');
+      return;
+    } else {
+      navigator.pushReplacementNamed('/match_schedule');
     }
   }
 

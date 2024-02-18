@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:http/http.dart' as http;
@@ -336,7 +337,7 @@ class TeamPerMatchVizualization extends StatelessWidget {
   Widget autoPath(BuildContext context) {
     return Column(
       children: [
-        AnimatedAutoPath(analysis: analysis),
+        // AnimatedAutoPath(analysis: analysis),
         IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -430,15 +431,6 @@ class TeamPerMatchVizualization extends StatelessWidget {
             EmphasizedContainer(
               child: Text(path.scores.join(', ')),
             ),
-            if (path.chargeSuccessRate.hasAttempted) ...[
-              Text(
-                "Charge station",
-                style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-              ),
-              ChargeSuccessBreakdown(path: path)
-            ],
           ].withSpaceBetween(height: 10),
         ),
       ),
@@ -553,7 +545,7 @@ class AnimatedAutoPath extends StatefulWidget {
     required this.analysis,
   });
 
-  final TeamPerMatchResponse analysis;
+  final SingleScoutReportAnalysis analysis;
 
   @override
   State<AnimatedAutoPath> createState() => _AnimatedAutoPathState();

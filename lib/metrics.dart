@@ -1,6 +1,3 @@
-import 'package:duration/duration.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
-
 class CategoryMetric {
   CategoryMetric({
     required this.localizedName,
@@ -72,232 +69,139 @@ final List<MetricCategoryData> metricCategories = [
       localizedName: "Average total",
       abbreviatedLocalizedName: "Avg total",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "avgScore",
-      hideDetails: true,
+      path: "totalpoints",
     ),
     CategoryMetric(
       localizedName: "Average auto",
       abbreviatedLocalizedName: "Avg auto",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "avgAutoScore",
+      path: "autopoints",
     ),
     CategoryMetric(
       localizedName: "Average teleop",
       abbreviatedLocalizedName: "Avg teleop",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "avgTeleScore",
+      path: "teleoppoints",
     ),
   ]),
-  MetricCategoryData("Feed time", [
+  MetricCategoryData("Note scoring", [
     CategoryMetric(
-      localizedName: "Cones",
-      abbreviatedLocalizedName: "Cones",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "cycleConeTeam",
-    ),
-    CategoryMetric(
-      localizedName: "Cubes",
-      abbreviatedLocalizedName: "Cubes",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "cycleCubeTeam",
-    ),
-  ]),
-  MetricCategoryData("Autonomous", [
-    CategoryMetric(
-      localizedName: "Average cones",
-      abbreviatedLocalizedName: "Avg cones",
+      localizedName: "Amp scores",
+      abbreviatedLocalizedName: "Amp",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coneCountAuto",
+      path: "ampscores",
     ),
     CategoryMetric(
-      localizedName: "Average cubes",
-      abbreviatedLocalizedName: "Avg cubes",
+      localizedName: "Speaker scores",
+      abbreviatedLocalizedName: "Speaker",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "cubeCountAuto",
+      path: "speakerscores",
     ),
     CategoryMetric(
-      localizedName: "Paths",
-      abbreviatedLocalizedName: "Paths",
-      valueVizualizationBuilder: ((p0) => "Shouldn't show up"),
-      path: "teamAutoPaths",
-      hideOverview: true,
-    ),
-  ]),
-  MetricCategoryData("Cones", [
-    CategoryMetric(
-      localizedName: "Average count",
-      abbreviatedLocalizedName: "Avg count",
+      localizedName: "Feeds",
+      abbreviatedLocalizedName: "Feeds",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coneCount",
-    ),
-    CategoryMetric(
-      localizedName: "Cycle time",
-      abbreviatedLocalizedName: "Cycle time",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "cycleConeScore",
-    ),
-    CategoryMetric(
-      localizedName: "Maximum row",
-      abbreviatedLocalizedName: "Max row",
-      valueVizualizationBuilder: ((p0) =>
-          GridRow.values[(p0 as num).toInt()].localizedDescriptonAbbreviated),
-      path: "coneMax",
-      hideDetails: true,
+      path: "feeds",
     ),
   ]),
-  MetricCategoryData("Cubes", [
+  MetricCategoryData("Note interactions", [
     CategoryMetric(
-      localizedName: "Average count",
-      abbreviatedLocalizedName: "Avg count",
+      localizedName: "Pickups",
+      abbreviatedLocalizedName: "Pickups",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "cubeCount",
+      path: "pickups",
     ),
     CategoryMetric(
-      localizedName: "Cycle time",
-      abbreviatedLocalizedName: "Cycle time",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "cycleCubeScore",
+      localizedName: "Drops",
+      abbreviatedLocalizedName: "Drops",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "drops",
+    ),
+  ]),
+  MetricCategoryData("Other", [
+    CategoryMetric(
+      localizedName: "Driver ability",
+      abbreviatedLocalizedName: "Driver ability",
+      valueVizualizationBuilder: ((rating) =>
+          "${numberVizualizationBuilder(rating)}/5"),
+      path: "driverability",
     ),
     CategoryMetric(
-      localizedName: "Maximum row",
-      abbreviatedLocalizedName: "Max row",
-      valueVizualizationBuilder: ((p0) =>
-          GridRow.values[(p0 as num).toInt()].localizedDescriptonAbbreviated),
-      path: "cubeMax",
+      localizedName: "Defense",
+      abbreviatedLocalizedName: "Defense",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "defense",
       hideDetails: true,
     ),
   ]),
-  MetricCategoryData("Driving", [
-    CategoryMetric(
-      localizedName: 'Driver ability',
-      abbreviatedLocalizedName: 'Driver ability',
-      valueVizualizationBuilder: (v) => numberVizualizationBuilder(v),
-      path: 'driverAbility',
-      max: 4,
-    ),
-    CategoryMetric(
-      localizedName: 'Penalties',
-      abbreviatedLocalizedName: 'Penalties',
-      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
-      path: 'pentalties',
-      hideFlag: true,
-    ),
-  ]),
-  MetricCategoryData("Misc", [
-    CategoryMetric(
-      localizedName: "Avg defense time",
-      abbreviatedLocalizedName: "Avg defense time",
-      valueVizualizationBuilder: ((p0) => prettyDuration(
-          Duration(seconds: (p0 as num).toInt()),
-          abbreviated: true)),
-      path: "defenseTime",
-    ),
-    CategoryMetric(
-      localizedName: "Links",
-      abbreviatedLocalizedName: "Links",
-      valueVizualizationBuilder: ((p0) => (p0 as num).toStringAsFixed(1)),
-      path: "links",
-    ),
-  ]),
-  MetricCategoryData("Climber adjusted", [
-    CategoryMetric(
-      localizedName: "Docked",
-      abbreviatedLocalizedName: "Docked",
-      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
-      path: 'adjustedDocked',
-      hideDetails: true,
-    ),
-    CategoryMetric(
-      localizedName: "Engaged",
-      abbreviatedLocalizedName: "Engaged",
-      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
-      path: 'adjustedEngaged',
-      hideDetails: true,
-    ),
-    CategoryMetric(
-      localizedName: "Points",
-      abbreviatedLocalizedName: "Points",
-      valueVizualizationBuilder: (p0) => numberVizualizationBuilder(p0),
-      path: 'adjustedClimbPoints',
-      hideDetails: true,
-    ),
-  ]),
-  MetricCategoryData("Expected Points Added", [
-    CategoryMetric(
-      localizedName: "Lovat",
-      abbreviatedLocalizedName: "Lovat",
-      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
-      path: "ourEPA",
-      hideDetails: true,
-    ),
-    CategoryMetric(
-      localizedName: "Statbotics",
-      abbreviatedLocalizedName: "Statbotics",
-      valueVizualizationBuilder: (val) => numberVizualizationBuilder(val),
-      path: "statboticsEPA",
-      hideDetails: true,
-    ),
-  ])
 ];
 
 List<BreakdownData> breakdowns = [
   BreakdownData(
     localizedName: "Role",
-    path: "role",
+    path: "robotRole",
     segments: [
-      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
-      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
       BreakdownSegmentData(localizedNameSingular: "Offense", path: "offense"),
+      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
+      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
       BreakdownSegmentData(localizedNameSingular: "Immobile", path: "immobile"),
     ],
   ),
   BreakdownData(
-    localizedName: "Charge station teleop",
-    path: "climber",
+    localizedName: "Pick-up",
+    path: "pickUp",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Dock",
-        localizedNamePlural: "Docks",
-        path: "docked",
+        localizedNameSingular: "Ground",
+        path: "ground",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Engage",
-        localizedNamePlural: "Engages",
-        path: "engaged",
+        localizedNameSingular: "Chute",
+        path: "chute",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Fail",
-        localizedNamePlural: "Fails",
-        path: "failed",
+        localizedNameSingular: "Both",
+        path: "both",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Charge station auto",
-    path: "climberAuto",
+    localizedName: "High note",
+    path: "highNote",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Dock",
-        localizedNamePlural: "Docks",
-        path: "docked",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Engage",
-        localizedNamePlural: "Engages",
-        path: "engaged",
+        localizedNameSingular: "Successful",
+        path: "successful",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Fail",
-        localizedNamePlural: "Fails",
         path: "failed",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Not attempted",
+        path: "not_attempted",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Stage",
+    path: "stage",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Nothing",
+        path: "nothing",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Park",
+        path: "park",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Onstage",
+        path: "onstage",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Onstage & Harmony",
+        path: "onstage_harmony",
       ),
     ],
   ),

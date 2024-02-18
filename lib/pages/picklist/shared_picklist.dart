@@ -9,12 +9,13 @@ class SharedPicklistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ConfiguredPicklist picklist = (ModalRoute.of(context)!.settings.arguments
-        as Map<String, dynamic>)['picklist'];
+    ConfiguredPicklistMeta picklistMeta = (ModalRoute.of(context)!
+        .settings
+        .arguments as Map<String, dynamic>)['picklist'];
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(picklist.title),
+        title: Text(picklistMeta.title),
         actions: [
           IconButton(
             onPressed: () async {
@@ -24,6 +25,8 @@ class SharedPicklistPage extends StatelessWidget {
               ));
 
               try {
+                final picklist = await picklistMeta.getPicklist();
+
                 final mutablePicklist =
                     await MutablePicklist.fromReactivePicklist(picklist);
 
@@ -61,7 +64,7 @@ class SharedPicklistPage extends StatelessWidget {
             onPressed: () {
               Navigator.of(context)
                   .pushNamed('/view_picklist_weights', arguments: {
-                'picklist': picklist,
+                'picklistMeta': picklistMeta,
               });
             },
             icon: const Icon(Icons.balance),
@@ -73,7 +76,7 @@ class SharedPicklistPage extends StatelessWidget {
         padding: EdgeInsets.zero,
         bottom: false,
         child: PicklistVisuzlization(
-          analysisFunction: PicklistAnalysis(picklist: picklist),
+          analysisFunction: SharedPicklistAnalysis(picklistMeta: picklistMeta),
         ),
       ),
     );

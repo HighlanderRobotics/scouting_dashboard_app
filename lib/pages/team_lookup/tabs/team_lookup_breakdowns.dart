@@ -67,105 +67,80 @@ class Breakdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.of(context).pushNamed('/team_lookup_breakdown_details',
-            arguments: <String, dynamic>{
-              'matches': data[dataIdentity.path]!['array'],
-              'breakdownData': dataIdentity,
-              'team': team,
-            });
-      },
-      child: Column(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        dataIdentity.localizedName,
-                        style: Theme.of(context).textTheme.titleMedium!.merge(
-                              TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                            ),
-                      ),
-                      Icon(
-                        Icons.navigate_next,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  dataIdentity.segments
-                          .where((segmentData) =>
-                              data
-                                  .cast()[dataIdentity.path]!
-                                  .cast()[segmentData.path]! !=
-                              0)
-                          .isEmpty
-                      ? Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(6),
-                            color: Theme.of(context).colorScheme.background,
-                          ),
-                          height: 64,
-                          child: const Center(child: Text("None recorded")),
-                        )
-                      : ClipRRect(
-                          borderRadius:
-                              const BorderRadius.all(Radius.circular(6)),
-                          child: Row(
-                              children: dataIdentity.segments
-                                  .where((segmentData) =>
-                                      data
-                                          .cast()[dataIdentity.path]!
-                                          .cast()[segmentData.path]! !=
-                                      0)
-                                  .map((BreakdownSegmentData segmentData) {
-                            int analyzedSegmentValue = data
-                                .cast()[dataIdentity.path]!
-                                .cast()[segmentData.path]!;
-
-                            return segment(
-                              context,
-                              analyzedSegmentValue == 1
-                                  ? segmentData.localizedNameSingular
-                                  : (segmentData.localizedNamePlural ??
-                                      segmentData.localizedNameSingular),
-                              analyzedSegmentValue,
-                              (dataIdentity.segments.indexOf(segmentData) /
-                                          dataIdentity.segments.length) *
-                                      0.7 +
-                                  0.3,
-                            );
-                          }).toList()),
+    return Column(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: const BorderRadius.all(Radius.circular(10)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  dataIdentity.localizedName,
+                  style: Theme.of(context).textTheme.titleMedium!.merge(
+                        TextStyle(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
-                ],
-              ),
+                      ),
+                ),
+                const SizedBox(height: 10),
+                data[dataIdentity.path] == null ||
+                        data[dataIdentity.path]!.isEmpty
+                    ? Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(6),
+                          color: Theme.of(context).colorScheme.background,
+                        ),
+                        height: 64,
+                        child: const Center(child: Text("None recorded")),
+                      )
+                    : ClipRRect(
+                        borderRadius:
+                            const BorderRadius.all(Radius.circular(6)),
+                        child: Row(
+                            children: dataIdentity.segments
+                                .where((segmentData) =>
+                                    (data.cast()[dataIdentity.path]
+                                            [segmentData.path] ??
+                                        0) !=
+                                    0)
+                                .map((BreakdownSegmentData segmentData) {
+                          double analyzedSegmentValue = data[dataIdentity.path]
+                                      ?[segmentData.path]
+                                  ?.toDouble() ??
+                              0;
+
+                          return segment(
+                            context,
+                            analyzedSegmentValue == 1
+                                ? segmentData.localizedNameSingular
+                                : (segmentData.localizedNamePlural ??
+                                    segmentData.localizedNameSingular),
+                            analyzedSegmentValue,
+                            (dataIdentity.segments.indexOf(segmentData) /
+                                        dataIdentity.segments.length) *
+                                    0.7 +
+                                0.3,
+                          );
+                        }).toList()),
+                      ),
+              ],
             ),
           ),
-          const SizedBox(height: 10),
-        ],
-      ),
+        ),
+        const SizedBox(height: 10),
+      ],
     );
   }
 
   Flexible segment(
-      BuildContext context, String name, int value, double colorFactor) {
+      BuildContext context, String name, double value, double colorFactor) {
     return Flexible(
-      flex: value,
+      flex: (value * 1000).round(),
       fit: FlexFit.tight,
       child: Container(
         // color: Theme.of(context).colorScheme.primary,
@@ -180,7 +155,7 @@ class Breakdown extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                value.toString(),
+                "${(value * 100).round()}%",
                 style: Theme.of(context).textTheme.titleLarge,
               ),
               Text(

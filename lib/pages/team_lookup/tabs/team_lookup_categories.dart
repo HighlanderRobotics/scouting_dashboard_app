@@ -145,12 +145,10 @@ class MetricCategory extends StatelessWidget {
                             ),
                       ),
                       const SizedBox(height: 5),
-                      Row(
-                        children: metricTiles
-                            .expand((element) =>
-                                [element, const SizedBox(width: 10)])
-                            .take(metricTiles.length * 2 - 1)
-                            .toList(),
+                      Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: metricTiles,
                       ),
                     ],
                   ),

@@ -7,14 +7,8 @@ import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/more_info_prompt.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/role_selector.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/server_authority_selector.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/setup_code_scanner.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/team_selector.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/tournament_selector.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
-import 'package:scouting_dashboard_app/pages/onboarding/username_selector.dart';
+import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/mutable_picklist.dart';
@@ -30,7 +24,6 @@ import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
-import 'package:scouting_dashboard_app/pages/scout_schedule/new_scout_shift.dart';
 import 'package:scouting_dashboard_app/pages/display_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
@@ -39,24 +32,25 @@ import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_d
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 
-import 'pages/scout_schedule/edit_scout_shift.dart';
-
 void main() async {
   runApp(MaterialApp(
     initialRoute: "/loading",
     routes: {
       '/loading': (context) => const InitialLoaderPage(),
-      '/more_info_prompt': (context) => const MoreInfoPage(),
-      '/team_selector': (context) => const TeamSelectorPage(),
-      '/username_selector': (context) => const UsernameSelectorPage(),
-      '/role_selector': (context) => const RoleSelectorPage(),
-      '/server_authority_setup': (context) =>
-          const ServerAuthoritySelectorPage(),
-      '/setup_code_scanner': (context) => const SetupCodeScannerPage(),
-      '/tournament_selector': (context) => const TournamentSelectorPage(),
       '/preview_over': (context) => const PreviewOverPage(),
       '/match_schedule': (context) => const MatchSchedulePage(),
-      '/raw_scout_report': (context) => const RawScoutReportPage(),
+      '/raw_scout_report': (context) => RawScoutReportPage(
+            uuid: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['uuid'],
+            teamNumber: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['teamNumber'],
+            matchIdentity: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['matchIdentity'],
+            scoutName: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['scoutName'],
+            onDeleted: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['onDeleted'],
+          ),
       '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
       '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),
@@ -65,8 +59,6 @@ void main() async {
           const TeamLookupBreakdownDetailsPage(),
       '/display_qr_codes': (context) => const DisplayQRCodesPage(),
       '/edit_scout_schedule': (context) => const EditScoutSchedulePage(),
-      '/edit_scout_shift': (context) => const EditScoutShiftPage(),
-      '/new_scout_shift': (context) => const NewScoutShiftPage(),
       '/match_predictor': (context) => const MatchPredictorPage(),
       '/match_predictor_opener': (context) => const MatchPredictorOpenerPage(),
       '/match_suggestions': (context) => const MatchSuggestionsPage(),
@@ -85,9 +77,23 @@ void main() async {
       '/picklist_team_breakdown': (context) =>
           const PicklistTeamBreakdownPage(),
       '/shared_picklist': (context) => const SharedPicklistPage(),
-      '/view_picklist_weights': (context) => const ViewPicklistWeightsPage(),
+      '/view_picklist_weights': (context) => ViewPicklistWeightsPage(
+            picklistMeta: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['picklistMeta'],
+          ),
       '/mutable_picklist': (context) => const MutablePicklistPage(),
       '/picked_teams': (context) => const PickedTeamsPage(),
+      '/specific_source_teams': (context) => SpecificSourceTeamPage(
+            onSubmit: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .onSubmit,
+            initialTeams: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .initialTeams,
+            submitText: (ModalRoute.of(context)!.settings.arguments
+                    as SpecificSourceTeamsArguments)
+                .submitText,
+          ),
     },
     theme: ThemeData(
       useMaterial3: true,

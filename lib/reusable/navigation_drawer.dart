@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/reusable/role_exclusive.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class GlobalNavigationDrawer extends StatelessWidget {
+class GlobalNavigationDrawer extends StatefulWidget {
   const GlobalNavigationDrawer({
     Key? key,
   }) : super(key: key);
 
-  Future<String> getTournamentName() async {
+  @override
+  State<GlobalNavigationDrawer> createState() => _GlobalNavigationDrawerState();
+}
+
+class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
+  Tournament? selectedTournament;
+
+  Future<void> fetchData() async {
+    final tournament = await Tournament.getCurrent();
+
+    setState(() {
+      selectedTournament = tournament;
+    });
+  }
+
+  Future<String?> getTournamentName() async {
     final prefs = await SharedPreferences.getInstance();
 
-    return prefs.getString("tournament_localized")!;
+    return prefs.getString("tournament_localized");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
   }
 
   @override
@@ -42,7 +63,8 @@ class GlobalNavigationDrawer extends StatelessWidget {
               FutureBuilder(
                 builder: ((context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.done) {
-                    return SectionHeader(title: snapshot.data!);
+                    return SectionHeader(
+                        title: snapshot.data ?? "No tournament selected");
                   }
 
                   return const SectionHeader(title: "--");
@@ -52,20 +74,19 @@ class GlobalNavigationDrawer extends StatelessWidget {
               Divider(
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
-              const SectionHeader(title: "Data & Utilities"),
-              DrawerDestination(
-                label: "Match Schedule",
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/match_schedule", (route) => false);
-                },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/match_schedule",
-                icon: Icons.today,
-              ),
-              RoleExclusive(
-                roles: const ['8033_scouting_lead'],
-                child: DrawerDestination(
+              if (selectedTournament != null) ...[
+                const SectionHeader(title: "Data & Utilities"),
+                DrawerDestination(
+                  label: "Match Schedule",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/match_schedule", (route) => false);
+                  },
+                  isSelected: ModalRoute.of(context)?.settings.name ==
+                      "/match_schedule",
+                  icon: Icons.today,
+                ),
+                DrawerDestination(
                   label: "Scan QR Codes",
                   onTap: () {
                     Navigator.pushNamedAndRemoveUntil(
@@ -78,7 +99,7 @@ class GlobalNavigationDrawer extends StatelessWidget {
                       ModalRoute.of(context)?.settings.name == "/scan_qr_codes",
                   icon: Icons.qr_code_scanner,
                 ),
-              ),
+              ],
               const SectionHeader(title: "Analysis & Strategy"),
               DrawerDestination(
                 label: "Team Lookup",

@@ -20,10 +20,8 @@ class _ScannerBodyState extends State<ScannerBody> {
     formats: [
       BarcodeFormat.qrCode,
     ],
-    detectionSpeed: DetectionSpeed.noDuplicates,
+    detectionSpeed: DetectionSpeed.normal,
   );
-
-  String? previousCodeVal;
 
   @override
   Widget build(BuildContext context) {
@@ -32,15 +30,7 @@ class _ScannerBodyState extends State<ScannerBody> {
         children: [
           MobileScanner(
             controller: scannerController,
-            onDetect: (e) {
-              if (previousCodeVal != e.barcodes.first.rawValue) {
-                widget.onDetect(e);
-              }
-
-              setState(() {
-                previousCodeVal = e.barcodes.first.rawValue;
-              });
-            },
+            onDetect: widget.onDetect,
           ),
           ColorFiltered(
             colorFilter: ColorFilter.mode(
@@ -53,10 +43,10 @@ class _ScannerBodyState extends State<ScannerBody> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(21.5),
+                padding: const EdgeInsets.all(21.5).copyWith(top: 64),
                 child: Center(
                   child: RowOrColumn(
-                    isRow: constraints.maxWidth > constraints.maxHeight,
+                    isRow: false,
                     children: [
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxHeight: 400),
@@ -82,10 +72,10 @@ class _ScannerBodyState extends State<ScannerBody> {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.all(21.5),
+            padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
-                isRow: constraints.maxWidth > constraints.maxHeight,
+                isRow: false,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 400),
@@ -105,10 +95,10 @@ class _ScannerBodyState extends State<ScannerBody> {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(21.5),
+            padding: const EdgeInsets.all(21.5).copyWith(top: 64),
             child: Center(
               child: RowOrColumn(
-                isRow: constraints.maxWidth > constraints.maxHeight,
+                isRow: false,
                 children: [
                   ConstrainedBox(
                     constraints: const BoxConstraints(maxHeight: 400),

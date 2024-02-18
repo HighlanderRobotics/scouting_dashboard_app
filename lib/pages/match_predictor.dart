@@ -5,9 +5,12 @@ import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
+import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
 class MatchPredictorPage extends StatefulWidget {
   const MatchPredictorPage({super.key});
@@ -58,6 +61,18 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               );
             }
 
+            if (snapshot.data == "not enough data") {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Match Predictor"),
+                ),
+                body: notEnoughDataMessage(),
+                drawer: (ModalRoute.of(context)!.settings.arguments == null)
+                    ? const GlobalNavigationDrawer()
+                    : null,
+              );
+            }
+
             if (snapshot.connectionState != ConnectionState.done) {
               return Scaffold(
                 appBar: AppBar(
@@ -87,15 +102,15 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                               blueWinning: snapshot.data['blueWinning'],
                             ),
                           ),
-                          TabBar(tabs: [
+                          const TabBar(tabs: [
                             Column(
-                              children: const [
+                              children: [
                                 Text("Red"),
                                 SizedBox(height: 7),
                               ],
                             ),
                             Column(
-                              children: const [
+                              children: [
                                 Text("Blue"),
                                 SizedBox(height: 7),
                               ],
@@ -159,14 +174,48 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
     );
   }
 
+  Widget notEnoughDataMessage() {
+    return PageBody(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            "assets/images/no-notes-dark.png",
+            height: 200,
+          ),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 250),
+            child: Column(
+              children: [
+                Text(
+                  "Not enough data",
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+                Text(
+                  "There must be 2 or more matches recorded for each team to make a prediction.",
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget allianceTab(int alliance, Map<String, dynamic> data) {
-    String allianceName = alliance == 0 ? 'red' : 'blue';
+    Alliance allianceColor = Alliance.values[alliance];
+
+    Map<String, dynamic> allianceData = data["${allianceColor.name}Alliance"];
 
     return Column(children: [
-      data["${allianceName}Alliance"]['teams'] == null
+      allianceData['teams'] == null
           ? const Text("Not enough data")
           : Row(
-              children: (data["${allianceName}Alliance"]['teams']
+              children: (allianceData['teams']
                       .map((e) {
                         final role = RobotRole.values[e['role']];
 
@@ -176,7 +225,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                             onTap: () => Navigator.of(context).pushNamed(
                                 "/team_lookup",
                                 arguments: <String, dynamic>{
-                                  'team': int.parse(e['team'].toString())
+                                  'team':
+                                      int.parse(e['team'].toString().toString())
                                 }),
                             child: Container(
                               decoration: BoxDecoration(
@@ -200,7 +250,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                           ),
                                           const SizedBox(width: 5),
                                           Text(
-                                            e['team'],
+                                            e['team'].toString(),
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodyLarge,
@@ -254,21 +304,48 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             children: [
               const Text("Teleop points"),
               Text(
-                data["${allianceName}Alliance"]['totalPoints'] == null
+                allianceData['totalPoints'] == null
                     ? "--"
                     : numberVizualizationBuilder(
-                        data["${allianceName}Alliance"]['totalPoints'],
+                        allianceData['totalPoints'],
                       ),
               ),
             ],
           ),
         ),
       ),
+      Padding(
+        padding: const EdgeInsets.only(top: 15),
+        child: Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                colorCombination: allianceColor.colorCombination,
+                value: Text(
+                  (allianceData['ampScores'] ?? "--").toString(),
+                ),
+                label: const Text("Amp scores"),
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                colorCombination: allianceColor.colorCombination,
+                value: Text(
+                  (allianceData['ampScores'] ?? "--").toString(),
+                ),
+                label: const Text("Speaker scores"),
+              ),
+            ),
+          ].withSpaceBetween(width: 15),
+        ),
+      ),
       const SizedBox(height: 15),
-      if (data['${allianceName}Alliance']['levelCargo'] != null)
+      if (allianceData['levelCargo'] != null)
         cargoStack(
           context,
-          data['${allianceName}Alliance'],
+          allianceData,
           backgroundColor: [
             Theme.of(context).colorScheme.onRedAlliance,
             Theme.of(context).colorScheme.onBlueAlliance
@@ -278,44 +355,6 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             Theme.of(context).colorScheme.blueAlliance
           ][alliance],
         ),
-      const SizedBox(height: 15),
-      Container(
-        decoration: BoxDecoration(
-          color: [
-            Theme.of(context).colorScheme.onRedAlliance,
-            Theme.of(context).colorScheme.onBlueAlliance
-          ][alliance],
-          borderRadius: const BorderRadius.all(Radius.circular(10)),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "Links",
-                style: TextStyle(
-                    color: [
-                  Theme.of(context).colorScheme.redAlliance,
-                  Theme.of(context).colorScheme.blueAlliance
-                ][alliance]),
-              ),
-              Text(
-                data["${allianceName}Alliance"]['links'] == null
-                    ? "--"
-                    : numberVizualizationBuilder(
-                        data["${allianceName}Alliance"]['links'],
-                      ),
-                style: TextStyle(
-                    color: [
-                  Theme.of(context).colorScheme.redAlliance,
-                  Theme.of(context).colorScheme.blueAlliance
-                ][alliance]),
-              ),
-            ],
-          ),
-        ),
-      ),
     ]);
   }
 }

@@ -1,46 +1,53 @@
-import 'dart:convert';
-
-import 'package:flutter/widgets.dart';
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
-import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 
-class PicklistAnalysis extends AnalysisFunction {
-  PicklistAnalysis({
+abstract class PicklistAnalysis extends AnalysisFunction {
+  @override
+  Future<Map<String, List<dynamic>>> getOnlineAnalysis() async {
+    throw UnimplementedError();
+  }
+
+  ConfiguredPicklistMeta get picklistMeta => throw UnimplementedError();
+}
+
+class MyPicklistAnalysis extends PicklistAnalysis {
+  MyPicklistAnalysis({
     required this.picklist,
   });
 
   ConfiguredPicklist picklist;
 
   @override
-  Future getOnlineAnalysis() async {
-    Map<String, dynamic> params =
-        picklist.weights.asMap().map((key, value) => MapEntry(
-              value.path,
-              value.value.toString(),
-            ));
-
+  Future<Map<String, List<dynamic>>> getOnlineAnalysis() async {
     final flags = await getPicklistFlags();
 
-    params['tournamentKey'] =
-        (await SharedPreferences.getInstance()).getString('tournament');
+    final flagStrings = flags.map((e) => e.type.path).toList();
 
-    params['flags'] = jsonEncode(flags.map((e) => e.type.path).toList());
+    return await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights);
+  }
 
-    var response = await http.get(Uri.http(
-        (await getServerAuthority())!, "/API/analysis/picklist", params));
+  @override
+  ConfiguredPicklistMeta get picklistMeta => picklist.meta;
+}
 
-    debugPrint(response.body);
+class SharedPicklistAnalysis extends PicklistAnalysis {
+  SharedPicklistAnalysis({
+    required this.picklistMeta,
+  });
 
-    final result = (jsonDecode(utf8.decode(response.bodyBytes))[0]['result']
-        as List<dynamic>);
+  @override
+  ConfiguredPicklistMeta picklistMeta;
 
-    return {
-      'result': result,
-      'flags': flags,
-    };
+  @override
+  Future<Map<String, List<dynamic>>> getOnlineAnalysis() async {
+    final flags = await getPicklistFlags();
+
+    final flagStrings = flags.map((e) => e.type.path).toList();
+
+    final picklist = await picklistMeta.getPicklist();
+
+    return await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights);
   }
 }

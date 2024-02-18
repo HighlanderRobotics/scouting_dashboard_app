@@ -133,6 +133,7 @@ class AnalysisOverview extends AnalysisVisualization {
     required this.analysisFunction,
   }) : super(analysisFunction: analysisFunction);
 
+  @override
   final TeamMetricDetailsAnalysis analysisFunction;
 
   @override
@@ -141,8 +142,6 @@ class AnalysisOverview extends AnalysisVisualization {
 
     return Column(
       children: [
-        if (analysisMap.containsKey('array'))
-          sparkline(context, snapshot, analysisFunction.metric.max),
         if (analysisMap.containsKey('one') &&
             analysisMap.containsKey('two') &&
             analysisMap.containsKey('three'))
@@ -327,6 +326,10 @@ class AnalysisOverview extends AnalysisVisualization {
               ),
             ),
         ]),
+        if (analysisMap.containsKey('array')) ...[
+          const SizedBox(height: 10),
+          sparkline(context, snapshot, analysisFunction.metric.max),
+        ],
         if (analysisMap.containsKey('paths'))
           TeamAutoPaths(
             autoPaths: (analysisMap['paths'] as List<dynamic>)
@@ -379,144 +382,105 @@ class AnalysisOverview extends AnalysisVisualization {
                 ? const Center(
                     child: Text("No matches"),
                   )
-                : FutureBuilder(future: (() async {
-                    return await TournamentSchedule.fromServer(
-                      (await getServerAuthority())!,
-                      (await SharedPreferences.getInstance())
-                          .getString("tournament")!,
-                    );
-                  })(), builder: (context, scheduleSnapshot) {
-                    if (scheduleSnapshot.connectionState !=
-                        ConnectionState.done) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+                : Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LineChart(
+                      LineChartData(
+                        minY: 0,
+                        maxY: max,
+                        lineTouchData: LineTouchData(
+                            touchTooltipData: LineTouchTooltipData(
+                          getTooltipItems: (touchedSpots) {
+                            return touchedSpots.map((touchedSpot) {
+                              final matchIdentity =
+                                  GameMatchIdentity.fromLongKey(
+                                      snapshot.data['array']
+                                          [touchedSpot.spotIndex]['match']);
 
-                    return Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: LineChart(
-                        LineChartData(
-                          minY: 0,
-                          maxY: max,
-                          titlesData: FlTitlesData(
-                            bottomTitles: AxisTitles(
-                                axisNameWidget: const Text("Match"),
-                                sideTitles: SideTitles(
-                                  interval: 1,
-                                  showTitles: true,
-                                  reservedSize: 55,
-                                  getTitlesWidget: (value, meta) => RotatedBox(
-                                    quarterTurns: 1,
-                                    child: Text(
-                                      value.roundToDouble() == value &&
-                                              (snapshot.data['array']
-                                                      as List<dynamic>)
-                                                  .map((e) =>
-                                                      (e['match'] as String)
-                                                          .replaceAll(
-                                                              RegExp('_\\d+\$'),
-                                                              ""))
-                                                  .contains(scheduleSnapshot
-                                                      .data!
-                                                      .matches[
-                                                          value.toInt() - 1]
-                                                      .identity
-                                                      .toMediumKey())
-                                          ? scheduleSnapshot
-                                              .data!
-                                              .matches[value.toInt() - 1]
-                                              .identity
-                                              .getShortLocalizedDescription()
-                                          : "",
+                              debugPrint(
+                                  "Match: ${snapshot.data['array'][touchedSpot.spotIndex]}");
+
+                              return LineTooltipItem(
+                                "${matchIdentity.getShortLocalizedDescription()} at ${snapshot.data['array'][touchedSpot.spotIndex]['tournamentName']}",
+                                Theme.of(context).textTheme.labelMedium!,
+                              );
+                            }).toList();
+                          },
+                        )),
+                        titlesData: FlTitlesData(
+                          bottomTitles: AxisTitles(),
+                          topTitles: AxisTitles(),
+                          leftTitles: AxisTitles(
+                            axisNameWidget: Text(analysisFunction
+                                .metric.abbreviatedLocalizedName),
+                            sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) =>
+                                    SideTitleWidget(
+                                      axisSide: meta.axisSide,
+                                      child: Text(
+                                        analysisFunction.metric == null
+                                            ? "--"
+                                            : analysisFunction.metric
+                                                .valueVizualizationBuilder(
+                                                    value),
+                                      ),
                                     ),
-                                  ),
-                                )),
-                            topTitles: AxisTitles(),
-                            leftTitles: AxisTitles(
-                              axisNameWidget: Text(analysisFunction
-                                  .metric.abbreviatedLocalizedName),
-                              sideTitles: SideTitles(
-                                  showTitles: true,
-                                  getTitlesWidget: (value, meta) =>
-                                      SideTitleWidget(
-                                        axisSide: meta.axisSide,
-                                        child: Text(
-                                          analysisFunction.metric == null
-                                              ? "--"
-                                              : analysisFunction.metric
-                                                  .valueVizualizationBuilder(
-                                                      value),
-                                        ),
-                                      ),
-                                  reservedSize: 50),
-                            ),
-                            rightTitles: AxisTitles(),
+                                reservedSize: 50),
                           ),
-                          borderData: FlBorderData(
-                            border: Border.all(
-                              color: Theme.of(context).colorScheme.outline,
-                            ),
-                          ),
-                          gridData: FlGridData(
-                            getDrawingHorizontalLine: (value) {
-                              return FlLine(
-                                color: Theme.of(context).colorScheme.outline,
-                                strokeWidth: 1,
-                              );
-                            },
-                            getDrawingVerticalLine: (value) {
-                              return FlLine(
-                                color: Theme.of(context).colorScheme.outline,
-                                strokeWidth: 1,
-                              );
-                            },
-                          ),
-                          lineBarsData: [
-                            LineChartBarData(
-                              spots: (() {
-                                final TournamentSchedule schedule =
-                                    scheduleSnapshot.data!;
-                                final List array = snapshot.data['array'];
-
-                                List<FlSpot> spots = [];
-
-                                for (var i = 0; i < array.length; i++) {
-                                  if (array[i]["value"] != null) {
-                                    spots.add(
-                                      FlSpot(
-                                        schedule.matches
-                                            .firstWhere(
-                                              (match) =>
-                                                  match.identity
-                                                      .toMediumKey() ==
-                                                  (array[i]["match"] as String)
-                                                      .replaceAll(
-                                                          RegExp('_\\d+\$'),
-                                                          ""),
-                                            )
-                                            .ordinalNumber
-                                            .toDouble(),
-                                        array[i]["value"].toDouble(),
-                                      ),
-                                    );
-                                  }
-                                }
-
-                                spots.sort((a, b) => a.x.compareTo(b.x));
-
-                                return spots;
-                              })(),
-                              isCurved: true,
-                              curveSmoothness: 0.4,
-                              preventCurveOverShooting: true,
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
-                          ],
+                          rightTitles: AxisTitles(),
                         ),
+                        borderData: FlBorderData(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                        ),
+                        gridData: FlGridData(
+                          getDrawingHorizontalLine: (value) {
+                            return FlLine(
+                              color: Theme.of(context).colorScheme.outline,
+                              strokeWidth: 1,
+                            );
+                          },
+                          getDrawingVerticalLine: (value) {
+                            return FlLine(
+                              color: Theme.of(context).colorScheme.outline,
+                              strokeWidth: 1,
+                            );
+                          },
+                        ),
+                        lineBarsData: [
+                          LineChartBarData(
+                            spots: (() {
+                              final List array = snapshot.data['array'];
+
+                              List<FlSpot> spots = [];
+
+                              for (var i = 0; i < array.length; i++) {
+                                if (array[i]["dataPoint"] != null) {
+                                  debugPrint("Spot: ${array[i]["dataPoint"]}");
+                                  spots.add(
+                                    FlSpot(
+                                      i.toDouble(),
+                                      array[i]["dataPoint"].toDouble(),
+                                    ),
+                                  );
+                                }
+                              }
+
+                              spots.sort((a, b) => a.x.compareTo(b.x));
+
+                              return spots;
+                            })(),
+                            isCurved: true,
+                            curveSmoothness: 0.4,
+                            preventCurveOverShooting: true,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ],
                       ),
-                    );
-                  }),
+                    ),
+                  ),
           ),
         ),
         const SizedBox(height: 11),
@@ -665,22 +629,8 @@ class _ScoringBreakdownState extends State<ScoringBreakdown> {
                                                             constraints
                                                                 .maxHeight) /
                                                         2,
-                                                    title: (data![e]!
-                                                                    .toDouble() *
-                                                                100)
-                                                            .round()
-                                                            .toString() +
-                                                        "%\n" +
-                                                        (scoringMethods.any(
-                                                                (f) =>
-                                                                    f.path == e)
-                                                            ? scoringMethods
-                                                                .firstWhere(
-                                                                    (f) =>
-                                                                        f.path ==
-                                                                        e)
-                                                                .localizedName
-                                                            : e),
+                                                    title:
+                                                        "${(data![e]!.toDouble() * 100).round()}%\n${scoringMethods.any((f) => f.path == e) ? scoringMethods.firstWhere((f) => f.path == e).localizedName : e}",
                                                     value: data![e]!.toDouble(),
                                                     color: Theme.of(context)
                                                         .colorScheme

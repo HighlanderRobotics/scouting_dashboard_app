@@ -94,7 +94,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
         padding: EdgeInsets.zero,
         bottom: false,
         child: PicklistVisuzlization(
-          analysisFunction: PicklistAnalysis(picklist: picklist),
+          analysisFunction: MyPicklistAnalysis(picklist: picklist),
           key: picklistVisualizationKey,
         ),
       ),
@@ -103,7 +103,10 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
 }
 
 class PicklistVisuzlization extends AnalysisVisualization {
-  const PicklistVisuzlization({super.key, required super.analysisFunction});
+  const PicklistVisuzlization({
+    super.key,
+    required PicklistAnalysis super.analysisFunction,
+  });
 
   @override
   Widget loadingView() {
@@ -125,20 +128,6 @@ class PicklistVisuzlization extends AnalysisVisualization {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    FlagRow(
-                      flagConfigurations,
-                      (teamData['flags'] as List<dynamic>)
-                          .asMap()
-                          .map(
-                            (k, value) => MapEntry(
-                              value['type'],
-                              value['result'],
-                            ),
-                          )
-                          .cast<String, dynamic>(),
-                      teamData['team'],
-                      onEdit: () => super.loadData(),
-                    ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)
@@ -148,7 +137,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                           'unweighted': teamData['unweighted'],
                           'picklistTitle':
                               (analysisFunction as PicklistAnalysis)
-                                  .picklist
+                                  .picklistMeta
                                   .title,
                         });
                       },

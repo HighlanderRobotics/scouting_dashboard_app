@@ -4,7 +4,7 @@ import '../analysis_functions/analysis.dart';
 
 abstract class AnalysisVisualization extends StatefulWidget {
   const AnalysisVisualization({
-    Key? key,
+    GlobalKey<AnalysisVisualizationState>? key,
     required this.analysisFunction,
     this.updateIncrement = 0,
   }) : super(key: key);

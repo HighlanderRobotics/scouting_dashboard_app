@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Tournament {
@@ -15,14 +15,45 @@ class Tournament {
 
   @override
   String toString() => localized;
-}
 
-Future<ScoutSchedule> getScoutSchedule() async {
-  final json = utf8.decode((await http.get(Uri.http(
-          (await getServerAuthority())!, '/API/manager/getScoutersSchedule')))
-      .bodyBytes);
+  factory Tournament.fromJson(Map<String, dynamic> json) {
+    return Tournament(
+      json['key'],
+      "${(json['date'] as String).split('-')[0]} ${json['name']}",
+    );
+  }
 
-  return ScoutSchedule.fromJSON(json);
+  Future<void> storeAsCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('tournament', key);
+    await prefs.setString('tournament_localized', localized);
+  }
+
+  static Future<Tournament?> getCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    final key = prefs.getString('tournament');
+    final name = prefs.getString('tournament_localized');
+
+    if (key == null || name == null) {
+      return null;
+    }
+
+    return Tournament(key, name);
+  }
+
+  static Future<void> clearCurrent() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('tournament');
+    await prefs.remove('tournament_localized');
+  }
+
+  Future<List<MatchScheduleMatch>> getMatches() async {
+    return await lovatAPI.getMatches(key);
+  }
+
+  Future<List<Team>> getTeams() async {
+    return await lovatAPI.getTeamsAtTournament(key);
+  }
 }
 
 Future<List<String>> getScoutNames() async {
@@ -31,32 +62,6 @@ Future<List<String>> getScoutNames() async {
           .bodyBytes))) as List<dynamic>)
       .map((e) => e.toString())
       .toList();
-}
-
-bool areShiftsEqual(ScoutingShift shift1, ScoutingShift shift2) {
-  return shift1.start == shift2.start &&
-      shift1.end == shift2.end &&
-      listEquals(shift1.scouts, shift2.scouts);
-}
-
-bool areSchedulesEqual(ScoutSchedule schedule1, ScoutSchedule schedule2) {
-  try {
-    return schedule1.version == schedule2.version &&
-        schedule1.shifts.every(
-          (shift) => areShiftsEqual(
-            shift,
-            schedule2.shifts[schedule1.shifts.indexOf(shift)],
-          ),
-        ) &&
-        schedule2.shifts.every(
-          (shift) => areShiftsEqual(
-            shift,
-            schedule1.shifts[schedule2.shifts.indexOf(shift)],
-          ),
-        );
-  } on RangeError {
-    return false;
-  }
 }
 
 enum Penalty {
@@ -84,7 +89,7 @@ extension PenaltyExtension on Penalty {
       case Penalty.none:
         return Colors.green[700]!;
       case Penalty.yellowCard:
-        return Color.fromARGB(255, 230, 251, 45);
+        return const Color.fromARGB(255, 230, 251, 45);
       case Penalty.redCard:
         return Colors.red[700]!;
       default:
@@ -121,7 +126,7 @@ class ScoringMethod {
 
 extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withSpaceBetween({double? width, double? height}) => [
-        for (int i = 0; i < this.length; i++) ...[
+        for (int i = 0; i < length; i++) ...[
           if (i > 0) SizedBox(width: width, height: height),
           this[i],
         ],
