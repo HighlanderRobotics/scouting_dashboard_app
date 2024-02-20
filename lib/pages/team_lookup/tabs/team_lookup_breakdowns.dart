@@ -101,32 +101,34 @@ class Breakdown extends StatelessWidget {
                     : ClipRRect(
                         borderRadius:
                             const BorderRadius.all(Radius.circular(6)),
-                        child: Row(
-                            children: dataIdentity.segments
-                                .where((segmentData) =>
-                                    (data.cast()[dataIdentity.path]
-                                            [segmentData.path] ??
-                                        0) !=
-                                    0)
-                                .map((BreakdownSegmentData segmentData) {
-                          double analyzedSegmentValue = data[dataIdentity.path]
-                                      ?[segmentData.path]
-                                  ?.toDouble() ??
-                              0;
+                        child: IntrinsicHeight(
+                          child: Row(
+                              children: dataIdentity.segments
+                                  .where((segmentData) =>
+                                      (data.cast()[dataIdentity.path]
+                                              [segmentData.path] ??
+                                          0) !=
+                                      0)
+                                  .map((BreakdownSegmentData segmentData) {
+                            double analyzedSegmentValue =
+                                data[dataIdentity.path]?[segmentData.path]
+                                        ?.toDouble() ??
+                                    0;
 
-                          return segment(
-                            context,
-                            analyzedSegmentValue == 1
-                                ? segmentData.localizedNameSingular
-                                : (segmentData.localizedNamePlural ??
-                                    segmentData.localizedNameSingular),
-                            analyzedSegmentValue,
-                            (dataIdentity.segments.indexOf(segmentData) /
-                                        dataIdentity.segments.length) *
-                                    0.7 +
-                                0.3,
-                          );
-                        }).toList()),
+                            return segment(
+                              context,
+                              analyzedSegmentValue == 1
+                                  ? segmentData.localizedNameSingular
+                                  : (segmentData.localizedNamePlural ??
+                                      segmentData.localizedNameSingular),
+                              analyzedSegmentValue,
+                              (dataIdentity.segments.indexOf(segmentData) /
+                                          dataIdentity.segments.length) *
+                                      0.7 +
+                                  0.3,
+                            );
+                          }).toList()),
+                        ),
                       ),
               ],
             ),
@@ -152,11 +154,12 @@ class Breakdown extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(10),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 "${(value * 100).round()}%",
-                style: Theme.of(context).textTheme.titleLarge,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
               Text(
                 name,
