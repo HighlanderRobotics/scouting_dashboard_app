@@ -42,27 +42,11 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
 
   @override
   Widget build(BuildContext context) {
-    Widget body;
+    Widget body = SkeletonListView(
+      itemBuilder: (context, index) => SkeletonListTile(),
+    );
 
-    if (error != null) {
-      body = FriendlyErrorView(
-        errorMessage: error!,
-        onRetry: () async {
-          setState(() {
-            error = null;
-            scoutSchedule = null;
-          });
-
-          await fetchData();
-        },
-      );
-    }
-
-    if (scoutSchedule == null) {
-      body = SkeletonListView(
-        itemBuilder: (context, index) => SkeletonListTile(),
-      );
-    } else {
+    if (scoutSchedule != null) {
       body = ListView.builder(
         itemBuilder: (context, index) {
           final shift = scoutSchedule!.shifts[index];
@@ -121,7 +105,11 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                           await lovatAPI.updateScouterScheduleShift(shift);
 
                           await fetchData();
-                        } catch (e) {
+                        } on LovatAPIException catch (e) {
+                          setState(() {
+                            error = e.message;
+                          });
+                        } catch (_) {
                           setState(() {
                             error = "Failed to update shift";
                           });
@@ -137,6 +125,21 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
           );
         },
         itemCount: scoutSchedule!.shifts.length,
+      );
+    }
+
+    if (error != null) {
+      body = FriendlyErrorView(
+        errorMessage: error!,
+        retryLabel: "Reload",
+        onRetry: () async {
+          setState(() {
+            error = null;
+            scoutSchedule = null;
+          });
+
+          await fetchData();
+        },
       );
     }
 
@@ -160,7 +163,11 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                   await lovatAPI.createScoutScheduleShift(shift);
 
                   await fetchData();
-                } catch (e) {
+                } on LovatAPIException catch (e) {
+                  setState(() {
+                    error = e.message;
+                  });
+                } catch (_) {
                   setState(() {
                     error = "Failed to create shift";
                   });

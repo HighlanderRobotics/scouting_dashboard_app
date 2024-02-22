@@ -666,8 +666,14 @@ class LovatAPI {
     );
 
     if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to update scouter schedule shift');
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        debugPrint(response?.body ?? '');
+        throw Exception('Failed to update scouter schedule shift');
+      }
     }
   }
 
@@ -719,8 +725,14 @@ class LovatAPI {
     );
 
     if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to create scouter schedule shift');
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        debugPrint(response?.body ?? '');
+        throw Exception('Failed to create scouter schedule shift');
+      }
     }
   }
 

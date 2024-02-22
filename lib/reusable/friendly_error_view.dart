@@ -5,10 +5,12 @@ class FriendlyErrorView extends StatelessWidget {
     super.key,
     this.errorMessage,
     this.onRetry,
+    this.retryLabel = "Retry",
   });
 
   final String? errorMessage;
   final dynamic Function()? onRetry;
+  final String retryLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +38,7 @@ class FriendlyErrorView extends StatelessWidget {
           ],
           if (onRetry != null) ...[
             const SizedBox(height: 24),
-            FilledButton(onPressed: onRetry, child: const Text("Retry")),
+            FilledButton(onPressed: onRetry, child: Text(retryLabel)),
           ]
         ],
       ),
