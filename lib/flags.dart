@@ -54,7 +54,7 @@ final flags = <FlagType>[
         FlagTemplate(
       foregroundColor: foregroundColor,
       backgroundColor: backgroundColor,
-      child: Text(data.toString()),
+      child: Text(data == 0 ? "N/A" : data.toString()),
     ),
   ),
   ...metricCategories
