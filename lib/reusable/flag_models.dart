@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 import 'package:http/http.dart' as http;
@@ -258,28 +259,22 @@ class _NetworkFlagState extends State<NetworkFlag> {
       loadingTeam = widget.team;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final authority = (await getServerAuthority())!;
-    final response = await http.get(Uri.http(authority, '/API/analysis/flag', {
-      'types': jsonEncode([widget.flag.type.path]),
-      'team': widget.team.toString(),
-      'tournamentKey': prefs.getString('tournament'),
-    }));
+    try {
+      final result = await lovatAPI.getFlag(widget.flag.type.path, widget.team);
 
-    if (response.statusCode != 200) {
+      setState(() {
+        loaded = true;
+        data = result;
+      });
+    } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            "Error fetching ${widget.flag.type.readableName}: ${response.statusCode} ${response.reasonPhrase}: ${response.body}",
+            "Error fetching ${widget.flag.type.readableName}: $error",
           ),
         ),
       );
     }
-
-    setState(() {
-      loaded = true;
-      data = jsonDecode(response.body)[0]['result'][0]['result'];
-    });
   }
 
   @override

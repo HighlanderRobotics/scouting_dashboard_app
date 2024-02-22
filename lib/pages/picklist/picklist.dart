@@ -118,7 +118,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     final result = snapshot.data['result'];
-    final flagConfigurations = snapshot.data['flags'];
+    final List<FlagConfiguration> flagConfigurations = snapshot.data['flags'];
 
     return ListView(
       children: (result as List<dynamic>)
@@ -128,6 +128,20 @@ class PicklistVisuzlization extends AnalysisVisualization {
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    FlagRow(
+                      flagConfigurations,
+                      teamData['flags']
+                          .asMap()
+                          .map(
+                            (k, value) => MapEntry(
+                              value['type'],
+                              value['result'],
+                            ),
+                          )
+                          .cast<String, dynamic>(),
+                      teamData['team'],
+                      onEdit: () => super.loadData(),
+                    ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)

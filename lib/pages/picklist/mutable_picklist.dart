@@ -1,8 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
+import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
 class MutablePicklistPage extends StatefulWidget {
@@ -28,11 +32,20 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
     });
   }
 
+  Future<void> refreshFlagConfigurations() async {
+    final configs = await getPicklistFlags();
+
+    setState(() {
+      flagConfigurations = configs;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
     refreshPickedTeams();
+    refreshFlagConfigurations();
   }
 
   @override
@@ -143,6 +156,23 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (flagConfigurations != null)
+                            MutablePicklistFlagRow(
+                              onLoad: (data) {
+                                setState(() {
+                                  flagData[team] = data;
+                                });
+                              },
+                              flagConfigurations: flagConfigurations!,
+                              flagData: flagData,
+                              team: team,
+                              onEdit: () {
+                                refreshFlagConfigurations();
+                                setState(() {
+                                  flagData = {};
+                                });
+                              },
+                            ),
                           Icon(
                             Icons.arrow_right,
                             color:
@@ -163,6 +193,64 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
               .toList(),
         ),
       ),
+    );
+  }
+}
+
+class MutablePicklistFlagRow extends StatefulWidget {
+  const MutablePicklistFlagRow({
+    super.key,
+    required this.flagData,
+    required this.team,
+    required this.flagConfigurations,
+    required this.onLoad,
+    required this.onEdit,
+  });
+
+  final Map<int, Map<String, dynamic>> flagData;
+  final int team;
+  final List<FlagConfiguration> flagConfigurations;
+  final dynamic Function(Map<String, dynamic> data) onLoad;
+  final dynamic Function() onEdit;
+
+  @override
+  State<MutablePicklistFlagRow> createState() => _MutablePicklistFlagRowState();
+}
+
+class _MutablePicklistFlagRowState extends State<MutablePicklistFlagRow> {
+  Future<void> loadData() async {
+    final flags = await lovatAPI.getFlags(
+      widget.flagConfigurations.map((e) => e.type.path).toList(),
+      widget.team,
+    );
+
+    widget.onLoad(flags.asMap().map(
+          (key, value) => MapEntry(
+            widget.flagConfigurations[key].type.path,
+            value,
+          ),
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!widget.flagData.containsKey(widget.team)) {
+      loadData();
+
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: widget.flagConfigurations
+            .map((e) => const SkeletonFlag())
+            .toList()
+            .withSpaceBetween(width: 10),
+      );
+    }
+
+    return FlagRow(
+      widget.flagConfigurations,
+      widget.flagData[widget.team]!,
+      widget.team,
+      onEdit: widget.onEdit,
     );
   }
 }

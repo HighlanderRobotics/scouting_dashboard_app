@@ -25,7 +25,10 @@ class MyPicklistAnalysis extends PicklistAnalysis {
 
     final flagStrings = flags.map((e) => e.type.path).toList();
 
-    return await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights);
+    return {
+      ...(await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights)),
+      "flags": flags,
+    };
   }
 
   @override
@@ -48,6 +51,9 @@ class SharedPicklistAnalysis extends PicklistAnalysis {
 
     final picklist = await picklistMeta.getPicklist();
 
-    return await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights);
+    return {
+      ...(await lovatAPI.getPicklistAnalysis(flagStrings, picklist.weights)),
+      "flags": flags,
+    };
   }
 }

@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitialLoaderPage extends StatefulWidget {
@@ -27,6 +31,32 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
     // Set default picklist flags if they don't exist
     if (!prefs.containsKey('picklist_flags')) {
       prefs.setStringList('picklist_flags', []);
+    }
+
+    // Remove picklist flags that are no longer valid
+    final picklistFlags = prefs.getStringList('picklist_flags')!;
+
+    final validPicklistFlags = picklistFlags.where((e) {
+      final flag = FlagConfiguration.fromJson(jsonDecode(e));
+      return flags.any((f) => f.path == flag.type.path);
+    }).toList();
+
+    prefs.setStringList('picklist_flags', validPicklistFlags);
+
+    // Set default team lookup flag if it doesn't exist
+    if (!prefs.containsKey('team_lookup_flag') ||
+        !flags.any((e) => (FlagConfiguration.fromJson(
+              jsonDecode(
+                prefs.getString('team_lookup_flag')!,
+              ),
+            ).type.path ==
+            e.path))) {
+      prefs.setString(
+        'team_lookup_flag',
+        jsonEncode(
+          FlagConfiguration(flags.first, flags.first.defaultHue).toJson(),
+        ),
+      );
     }
 
     final onboardingVersion = prefs.getInt('onboardingVersion');

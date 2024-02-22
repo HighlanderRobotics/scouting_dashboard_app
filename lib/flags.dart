@@ -46,7 +46,7 @@ extension TeamTrendExtension on TeamTrend {
 
 final flags = <FlagType>[
   FlagType(
-    'ranking',
+    'rank',
     readableName: 'Tournament Ranking',
     description: 'Leaderboard rank from TBA',
     defaultHue: 220,
@@ -55,61 +55,6 @@ final flags = <FlagType>[
       foregroundColor: foregroundColor,
       backgroundColor: backgroundColor,
       child: Text(data.toString()),
-    ),
-  ),
-  FlagType(
-    'mainRole',
-    readableName: 'Main Role',
-    description: 'Robot\'s primary alliance role',
-    defaultHue: 0,
-    visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
-        FlagTemplate(
-      foregroundColor: foregroundColor,
-      backgroundColor: backgroundColor,
-      icon: RobotRole.values[data].littleEmblem,
-    ),
-  ),
-  FlagType(
-    'trend',
-    readableName: "Score Trend",
-    description: "Change in score over time",
-    defaultHue: 256,
-    visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
-        FlagTemplate(
-      foregroundColor: foregroundColor,
-      backgroundColor: backgroundColor,
-      icon: TeamTrend.values[data].icon,
-    ),
-  ),
-  FlagType(
-    'pentalties',
-    readableName: "Penalties",
-    description: 'Card color the team has received',
-    defaultHue: 30,
-    disableHue: true,
-    visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
-        FlagFrame(
-      foregroundColor: foregroundColor,
-      backgroundColor: HSLColor.fromColor(Penalty.values[data].color)
-          .withSaturation(0.4)
-          .withLightness(0.7)
-          .toColor(),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Container(
-            height: 30,
-            width: 20,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(5),
-              color: HSLColor.fromColor(Penalty.values[data].color)
-                  .withSaturation(0.8)
-                  .withLightness(0.2)
-                  .toColor(),
-            ),
-          ),
-        ],
-      ),
     ),
   ),
   ...metricCategories

@@ -450,7 +450,6 @@ class LovatAPI {
 
     return {
       'result': json['teams'] as List<dynamic>,
-      'flags': json['flags'] as List<dynamic>? ?? [],
     };
   }
 
@@ -922,6 +921,28 @@ class LovatAPI {
       throw Exception('Failed to delete scout report');
     }
   }
+
+  Future<List<dynamic>> getFlags(List<String> paths, int teamNumber) async {
+    final tournament = await Tournament.getCurrent();
+
+    final response = await get(
+      '/v1/analysis/flag/team/$teamNumber',
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+        'flags': jsonEncode(paths),
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      throw Exception('Failed to get flags');
+    }
+
+    return jsonDecode(response!.body) as List<dynamic>;
+  }
+
+  Future<dynamic> getFlag(path, teamNumber) async {
+    return (await getFlags([path], teamNumber)).first;
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -1248,4 +1269,4 @@ class SingleScoutReportAnalysis {
   }
 }
 
-const lovatAPI = LovatAPI("https://api.lovat.app");
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");

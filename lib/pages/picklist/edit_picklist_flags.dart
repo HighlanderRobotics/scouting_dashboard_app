@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
 import 'package:http/http.dart' as http;
@@ -152,23 +153,13 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
         .where((f) => !flagValues!.containsKey(f))
         .toList();
 
-    final prefs = await SharedPreferences.getInstance();
-
-    final authority = await getServerAuthority();
-    final tournamentKey = prefs.getString('tournament');
-    final response = await http.get(Uri.http(authority!, '/API/analysis/flag', {
-      'tournamentKey': tournamentKey,
-      'team': team.toString(),
-      'types': jsonEncode(paths),
-    }));
+    final values = await lovatAPI.getFlags(paths, team);
 
     setState(() {
       flagValues = {
         ...flagValues!,
-        ...(jsonDecode(response.body)[0]['result'] as List<dynamic>)
-            .asMap()
-            .map(
-              (key, value) => MapEntry(value['type'], value['result']),
+        ...values.asMap().map(
+              (key, value) => MapEntry(paths[key], value),
             ),
       };
     });
