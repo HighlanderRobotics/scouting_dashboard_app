@@ -117,6 +117,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             }),
             onSubmit: () => toRegistrationStatusView(team!),
             team: team ?? const Team(number: 0, name: ''),
+            teamEmail: teamEmail,
           ),
           OnboardingPagePhase.error: const FriendlyErrorView(),
           OnboardingPagePhase.teamCode: TeamCodePage(
@@ -177,6 +178,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ? null
           : await lovatAPI.getRegistrationStatus(
               teamNumber); // The status of the team, not the user
+
+      if (registrationStatus?.teamEmail != null) {
+        setState(() {
+          teamEmail = registrationStatus?.teamEmail;
+        });
+      }
 
       final isUsernameSet = profile.username != null;
 
@@ -1086,6 +1093,7 @@ class EmailVerificationPage extends StatefulWidget {
   const EmailVerificationPage({
     super.key,
     required this.team,
+    this.teamEmail,
     this.onBack,
     this.onSubmit,
   });
@@ -1093,6 +1101,7 @@ class EmailVerificationPage extends StatefulWidget {
   final dynamic Function()? onBack;
   final dynamic Function()? onSubmit;
   final Team team;
+  final String? teamEmail;
 
   @override
   State<EmailVerificationPage> createState() => _EmailVerificationPageState();
@@ -1121,13 +1130,29 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             children: [
               const Spacer(),
               Text(
-                "Check your email",
+                "Check your team's inbox",
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 10),
               Text(
-                "We've sent an email to your team with a link to verify that it belongs to you.",
+                "We've sent an email to ${widget.teamEmail ?? 'your team'} with a link to verify that it belongs to your team.",
                 style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  FilledButton.tonalIcon(
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) =>
+                            EditEmailDialog(onSuccess: widget.onSubmit),
+                      );
+                    },
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text("Change address"),
+                  ),
+                ],
               ),
               const Spacer(),
               if (errorText != null) ...[
@@ -1152,7 +1177,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
                         final status = await lovatAPI
                             .getRegistrationStatus(widget.team.number);
 
-                        if (status ==
+                        if (status.status ==
                             RegistrationStatus.pendingEmailVerification) {
                           setState(() {
                             errorText = "No, you haven't";
@@ -1216,6 +1241,103 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
             ],
           ),
         ));
+  }
+}
+
+class EditEmailDialog extends StatefulWidget {
+  const EditEmailDialog({
+    super.key,
+    this.onSuccess,
+  });
+
+  final Function()? onSuccess;
+
+  @override
+  State<EditEmailDialog> createState() => _EditEmailDialogState();
+}
+
+class _EditEmailDialogState extends State<EditEmailDialog> {
+  String email = '';
+  bool submitting = false;
+  String? error;
+
+  Future<void> onSubmitted(String value) async {
+    setState(() {
+      error = null;
+    });
+
+    try {
+      setState(() {
+        submitting = true;
+      });
+
+      await lovatAPI.editTeamEmail(value);
+
+      if (Navigator.of(context).canPop()) {
+        Navigator.of(context).pop();
+      }
+
+      widget.onSuccess?.call();
+    } on LovatAPIException catch (e) {
+      setState(() {
+        error = e.message;
+      });
+    } catch (_) {
+      setState(() {
+        error = "Error changing email";
+      });
+    } finally {
+      setState(() {
+        submitting = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text("Change team email"),
+      content: TextField(
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: "Email",
+          filled: true,
+          errorText: error,
+        ),
+        keyboardType: TextInputType.emailAddress,
+        textInputAction: TextInputAction.next,
+        onSubmitted: onSubmitted,
+        onChanged: (value) {
+          setState(() {
+            email = value;
+          });
+        },
+      ),
+      actions: [
+        TextButton(
+          onPressed: submitting
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
+          child: const Text("Cancel"),
+        ),
+        TextButton(
+          onPressed: submitting
+              ? null
+              : () {
+                  onSubmitted(email);
+                },
+          child: submitting
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 3),
+                )
+              : const Text("Submit"),
+        ),
+      ],
+    );
   }
 }
 

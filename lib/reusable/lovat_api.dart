@@ -955,6 +955,26 @@ class LovatAPI {
   Future<dynamic> getFlag(path, teamNumber) async {
     return (await getFlags([path], teamNumber)).first;
   }
+
+  Future<void> editTeamEmail(String newEmail) async {
+    final response = await lovatAPI.put(
+      '/v1/manager/settings/teamemail',
+      query: {
+        'email': newEmail,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to edit team email');
+      }
+    }
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -1057,9 +1077,17 @@ class RegistrationStatusResponse {
   RegistrationStatus get status =>
       RegistrationStatusExtension.fromString(data['status']);
 
-  String? get teamEmail => status == RegistrationStatus.pendingTeamVerification
-      ? data['teamEmail']
-      : null;
+  String? get teamEmail {
+    if (status == RegistrationStatus.pendingTeamVerification) {
+      return data['teamEmail'];
+    }
+
+    if (status == RegistrationStatus.pendingEmailVerification) {
+      return data['email'];
+    }
+
+    return null;
+  }
 }
 
 class SourceTeamSettingsResponse {
