@@ -1360,6 +1360,8 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
 
   String filterText = '';
 
+  bool notOnTeamLoading = false;
+
   Future<Team?> getTeam(int index) async {
     if (_teamCache.containsKey(index)) {
       return _teamCache[index];
@@ -1451,10 +1453,45 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
               bottom: 10,
               child: SafeArea(
                 child: FilledButton.tonal(
-                  onPressed: () {
-                    widget.onSubmit?.call(null);
-                  },
-                  child: const Text("I'm not on a team"),
+                  onPressed: notOnTeamLoading
+                      ? null
+                      : () async {
+                          try {
+                            setState(() {
+                              notOnTeamLoading = true;
+                            });
+
+                            await lovatAPI.setNotOnTeam();
+
+                            widget.onSubmit?.call(null);
+                          } on LovatAPIException catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(e.message),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          } catch (e) {
+                            debugPrint(e.toString());
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Error setting not on team"),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          } finally {
+                            setState(() {
+                              notOnTeamLoading = false;
+                            });
+                          }
+                        },
+                  child: notOnTeamLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 3),
+                        )
+                      : const Text("I'm not on a team"),
                 ),
               ),
             ),
