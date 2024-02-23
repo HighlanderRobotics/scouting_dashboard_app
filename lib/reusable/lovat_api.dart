@@ -22,7 +22,9 @@ class LovatAPI {
   final String baseUrl;
 
   Future<Credentials> login() async {
-    final newCredentials = await auth0.webAuthentication().login(
+    final newCredentials = await auth0
+        .webAuthentication(scheme: "com.frc8033.lovatdashboard")
+        .login(
           audience: "https://api.lovat.app",
         );
 
@@ -1324,4 +1326,4 @@ class SingleScoutReportAnalysis {
   }
 }
 
-const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
+const lovatAPI = LovatAPI("https://api.lovat.app");

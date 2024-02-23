@@ -22,7 +22,7 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
 
     // Set default picklists if they don't exist
     if (!prefs.containsKey('picklists')) {
-      prefs.setStringList(
+      await prefs.setStringList(
         'picklists',
         defaultPicklists.map((e) => e.toJSON()).toList(),
       );
@@ -30,7 +30,7 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
 
     // Set default picklist flags if they don't exist
     if (!prefs.containsKey('picklist_flags')) {
-      prefs.setStringList('picklist_flags', []);
+      await prefs.setStringList('picklist_flags', []);
     }
 
     // Remove picklist flags that are no longer valid
@@ -41,7 +41,7 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
       return flags.any((f) => f.path == flag.type.path);
     }).toList();
 
-    prefs.setStringList('picklist_flags', validPicklistFlags);
+    await prefs.setStringList('picklist_flags', validPicklistFlags);
 
     // Set default team lookup flag if it doesn't exist
     if (!prefs.containsKey('team_lookup_flag') ||
@@ -51,7 +51,7 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
               ),
             ).type.path ==
             e.path))) {
-      prefs.setString(
+      await prefs.setString(
         'team_lookup_flag',
         jsonEncode(
           FlagConfiguration(flags.first, flags.first.defaultHue).toJson(),
