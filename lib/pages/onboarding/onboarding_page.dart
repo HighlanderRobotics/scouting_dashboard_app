@@ -253,12 +253,15 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     fontSize: 20,
                     height: 1,
                   )),
-              Text(
-                "Lovat",
-                style: TextStyle(
-                  fontSize: 100,
-                  color: Theme.of(context).colorScheme.primary,
-                  height: 1,
+              FittedBox(
+                child: Text(
+                  "Lovat",
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 100,
+                    color: Theme.of(context).colorScheme.primary,
+                    height: 1,
+                  ),
                 ),
               ),
             ],
