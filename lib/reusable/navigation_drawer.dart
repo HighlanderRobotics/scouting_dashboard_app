@@ -1,5 +1,8 @@
+import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class GlobalNavigationDrawer extends StatefulWidget {
@@ -13,6 +16,7 @@ class GlobalNavigationDrawer extends StatefulWidget {
 
 class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
   Tournament? selectedTournament;
+  LovatUserProfile? userProfile;
 
   Future<void> fetchData() async {
     final tournament = await Tournament.getCurrent();
@@ -20,6 +24,24 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
     setState(() {
       selectedTournament = tournament;
     });
+
+    try {
+      final profile = await lovatAPI.getUserProfile();
+
+      setState(() {
+        userProfile = profile;
+      });
+    } on LovatAPIException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Failed to load user profile: ${e.message}"),
+        behavior: SnackBarBehavior.floating,
+      ));
+    } catch (_) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Failed to load user profile"),
+        behavior: SnackBarBehavior.floating,
+      ));
+    }
   }
 
   Future<String?> getTournamentName() async {
@@ -74,8 +96,10 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
               Divider(
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
-              if (selectedTournament != null) ...[
+              if (selectedTournament != null ||
+                  userProfile?.role == UserRole.scoutingLead)
                 const SectionHeader(title: "Data & Utilities"),
+              if (selectedTournament != null) ...[
                 DrawerDestination(
                   label: "Match Schedule",
                   onTap: () {
@@ -86,6 +110,20 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                       "/match_schedule",
                   icon: Icons.today,
                 ),
+              ],
+              if (userProfile?.role == UserRole.scoutingLead) ...[
+                DrawerDestination(
+                  label: "Scouters",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/scouters", (route) => false);
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/scouters",
+                  icon: Icons.supervised_user_circle,
+                ),
+              ],
+              if (selectedTournament != null) ...[
                 DrawerDestination(
                   label: "Scan QR Codes",
                   onTap: () {
