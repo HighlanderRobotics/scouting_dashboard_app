@@ -9,6 +9,7 @@ import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
+import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 
 class TeamAutoPaths extends StatefulWidget {
   const TeamAutoPaths({
@@ -203,6 +204,30 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
           widget.onChanged!(newValue);
         }
       },
+      popupProps: PopupProps.menu(
+        constraints: BoxConstraints(
+          maxHeight: min(widget.autoPaths.length * 55, 200),
+        ),
+        itemBuilder: (context, item, isSelected) => ListTile(
+          title: Text(item?.shortDescription ?? "None"),
+          trailing: item == null
+              ? null
+              : EmphasizedContainer(
+                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  child: Text(
+                    "Score: ${numberVizualizationBuilder(item.scores.cast<num>().average())}",
+                    style: Theme.of(context).textTheme.bodyMedium!.merge(
+                          TextStyle(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                  ),
+                ),
+          selected: isSelected,
+          contentPadding: const EdgeInsets.only(left: 16, right: 10),
+        ),
+      ),
       dropdownButtonProps: selectedPath == null
           ? const DropdownButtonProps()
           : DropdownButtonProps(
