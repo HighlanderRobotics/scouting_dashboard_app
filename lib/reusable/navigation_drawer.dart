@@ -112,16 +112,17 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                     ModalRoute.of(context)?.settings.name == "/team_lookup",
                 icon: Icons.search,
               ),
-              DrawerDestination(
-                label: "Picklist",
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/picklists", (route) => false);
-                },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/picklists",
-                icon: Icons.format_list_numbered,
-              ),
+              if (selectedTournament != null)
+                DrawerDestination(
+                  label: "Picklist",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/picklists", (route) => false);
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/picklists",
+                  icon: Icons.format_list_numbered,
+                ),
               DrawerDestination(
                 label: "Match Predictor",
                 onTap: () {
