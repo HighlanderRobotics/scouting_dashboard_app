@@ -50,7 +50,8 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                   const SectionHeader(title: "Lovat Dashboard"),
                   IconButton(
                     onPressed: () {
-                      Navigator.of(context).popAndPushNamed("/settings");
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          "/settings", (route) => false);
                     },
                     icon: const Icon(Icons.settings),
                     tooltip: "Settings",
