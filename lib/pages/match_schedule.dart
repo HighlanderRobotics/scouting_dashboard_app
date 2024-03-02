@@ -94,7 +94,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       );
 
       GameMatchIdentity? nextMatch = this.nextMatch;
-      if (this.matches == null) {
+      if (_teamsFilter.isEmpty && completionFilter == CompletionFilter.any) {
         final MatchScheduleMatch? lastScouted = matches.cast().lastWhere(
               (match) => match.isScouted,
               orElse: () => null,
