@@ -289,21 +289,44 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                             .cast<Widget>(),
                       ),
                       const SizedBox(height: 10),
-                      AutoPathField(
-                        paths: selectedPaths
-                            .where((e) => e != null)
-                            .map((path) => AutoPathWidget(
-                                  animationProgress: controller.value == 0
-                                      ? null
-                                      : Duration(
-                                          milliseconds:
-                                              (controller.value * 15 * 1000)
-                                                  .round()),
-                                  autoPath: path!,
-                                  teamColor: autoPathColors[
-                                      selectedPaths.indexOf(path)],
-                                ))
-                            .toList(),
+                      Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          Opacity(
+                            opacity:
+                                selectedPaths.any((e) => e != null) ? 1 : 0.3,
+                            child: AutoPathField(
+                              paths: selectedPaths
+                                  .where((e) => e != null)
+                                  .map((path) => AutoPathWidget(
+                                        animationProgress: controller.value == 0
+                                            ? null
+                                            : Duration(
+                                                milliseconds:
+                                                    (controller.value *
+                                                            15 *
+                                                            1000)
+                                                        .round()),
+                                        autoPath: path!,
+                                        teamColor: autoPathColors[
+                                            selectedPaths.indexOf(path)],
+                                      ))
+                                  .toList(),
+                            ),
+                          ),
+                          if (!selectedPaths.any((e) => e != null))
+                            Text(
+                              "Tap a team to select a path",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge!
+                                  .copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                        ],
                       ),
                       AnimatedAutoPathControls(
                         controller: controller,
