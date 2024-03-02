@@ -118,17 +118,19 @@ class NoteWidget extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  note.matchIdentity.getLocalizedDescription(),
-                  style: Theme.of(context).textTheme.titleMedium!.merge(
-                        TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer,
+                Flexible(
+                  child: Text(
+                    note.matchIdentity.getLocalizedDescription(),
+                    style: Theme.of(context).textTheme.titleMedium!.merge(
+                          TextStyle(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
                         ),
-                      ),
+                  ),
                 ),
                 if (note.uuid != null) ...[
-                  const Spacer(),
                   IconButton(
                     onPressed: () {
                       Navigator.of(context).pushWidget(
