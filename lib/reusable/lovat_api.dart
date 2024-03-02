@@ -480,6 +480,12 @@ class LovatAPI {
 
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
+
+      if (response?.body ==
+          'Not authortized to get mutable picklists because your not on a team') {
+        throw const LovatAPIException('Not on team');
+      }
+
       throw Exception('Failed to get shared picklists');
     }
 
@@ -536,6 +542,12 @@ class LovatAPI {
 
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
+
+      if (response?.body ==
+          'Not authortized to get mutable picklists because your not on a team') {
+        throw const LovatAPIException('Not on team');
+      }
+
       throw Exception('Failed to get mutable picklists');
     }
 
@@ -1326,4 +1338,4 @@ class SingleScoutReportAnalysis {
   }
 }
 
-const lovatAPI = LovatAPI("https://api.lovat.app");
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
