@@ -6,18 +6,20 @@ class EmphasizedContainer extends StatelessWidget {
     required this.child,
     this.color,
     this.padding = const EdgeInsets.all(10),
+    this.radius = 10,
   });
 
   final Widget child;
   final Color? color;
   final EdgeInsets padding;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(radius),
         color: color ?? Theme.of(context).colorScheme.surfaceVariant,
       ),
       child: Padding(

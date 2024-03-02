@@ -131,14 +131,45 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                   ),
                 ),
           ),
-          ...(selectedPath!.matches.map((e) => Text(
-                e.getLocalizedDescription(),
-                style: Theme.of(context).textTheme.bodyMedium!.merge(
-                      TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ...(selectedPath!.matches
+              .map(
+                (e) => Row(
+                  children: [
+                    Flexible(
+                      fit: FlexFit.tight,
+                      child: Text(
+                        e.getLocalizedDescription(),
+                        style: Theme.of(context).textTheme.bodyMedium!.merge(
+                              TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-              ))),
+                    EmphasizedContainer(
+                      color: Theme.of(context).colorScheme.background,
+                      padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                      radius: 7,
+                      child: Text(
+                        "Score: ${numberVizualizationBuilder(selectedPath!.scores[selectedPath!.matches.indexOf(e)])}",
+                        style: Theme.of(context).textTheme.bodyMedium!.merge(
+                              TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+              .toList()
+              .withSpaceBetween(height: 7)),
         ]),
       ),
     );
@@ -161,7 +192,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                   ),
                 ),
           ),
-          selectedPath!.scores.length == 1 ? "Score" : "Scores",
+          "Avg score",
           false,
         ),
       ),
@@ -213,7 +244,8 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
           trailing: item == null
               ? null
               : EmphasizedContainer(
-                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
+                  radius: 7,
                   child: Text(
                     "Score: ${numberVizualizationBuilder(item.scores.cast<num>().average())}",
                     style: Theme.of(context).textTheme.bodyMedium!.merge(
