@@ -241,6 +241,14 @@ class _SharedPicklistsState extends State<SharedPicklists> {
       builder: (BuildContext context,
           AsyncSnapshot<List<ConfiguredPicklistMeta>> snapshot) {
         if (snapshot.hasError) {
+          if (snapshot.error is LovatAPIException) {
+            LovatAPIException error = snapshot.error as LovatAPIException;
+
+            if (error.message == "Not on team") {
+              return const NotOnTeamMessage();
+            }
+          }
+
           return FriendlyErrorView(errorMessage: snapshot.error.toString());
         }
 
@@ -348,6 +356,32 @@ class _SharedPicklistsState extends State<SharedPicklists> {
   }
 }
 
+class NotOnTeamMessage extends StatelessWidget {
+  const NotOnTeamMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return PageBody(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Image.asset("assets/images/welcome-back-dark.png"),
+          Text(
+            "Strategize with your team",
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 7),
+          Text(
+            "Join a team to collaborate on picklists with your teammates.",
+            style: Theme.of(context).textTheme.bodyMedium,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class MutablePicklists extends StatefulWidget {
   const MutablePicklists({super.key});
 
@@ -368,6 +402,14 @@ class _MutablePicklistsState extends State<MutablePicklists> {
         future: lovatAPI.getMutablePicklists(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            if (snapshot.error is LovatAPIException) {
+              LovatAPIException error = snapshot.error as LovatAPIException;
+
+              if (error.message == "Not on team") {
+                return const NotOnTeamMessage();
+              }
+            }
+
             return FriendlyErrorView(errorMessage: snapshot.error.toString());
           }
 

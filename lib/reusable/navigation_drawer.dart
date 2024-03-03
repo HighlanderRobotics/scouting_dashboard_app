@@ -72,7 +72,8 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                   const SectionHeader(title: "Lovat Dashboard"),
                   IconButton(
                     onPressed: () {
-                      Navigator.of(context).popAndPushNamed("/settings");
+                      Navigator.of(context).pushNamedAndRemoveUntil(
+                          "/settings", (route) => false);
                     },
                     icon: const Icon(Icons.settings),
                     tooltip: "Settings",
@@ -149,16 +150,17 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                     ModalRoute.of(context)?.settings.name == "/team_lookup",
                 icon: Icons.search,
               ),
-              DrawerDestination(
-                label: "Picklist",
-                onTap: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/picklists", (route) => false);
-                },
-                isSelected:
-                    ModalRoute.of(context)?.settings.name == "/picklists",
-                icon: Icons.format_list_numbered,
-              ),
+              if (selectedTournament != null)
+                DrawerDestination(
+                  label: "Picklist",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/picklists", (route) => false);
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/picklists",
+                  icon: Icons.format_list_numbered,
+                ),
               DrawerDestination(
                 label: "Match Predictor",
                 onTap: () {

@@ -144,30 +144,35 @@ class Breakdown extends StatelessWidget {
     return Flexible(
       flex: (value * 1000).round(),
       fit: FlexFit.tight,
-      child: Container(
-        // color: Theme.of(context).colorScheme.primary,
-        color: Color.lerp(
-          Theme.of(context).colorScheme.primary,
-          Theme.of(context).colorScheme.primaryContainer,
-          colorFactor,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "${(value * 100).round()}%",
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              Text(
-                name,
-                style: Theme.of(context).textTheme.labelMedium,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ],
+      child: Tooltip(
+        message: "$name - ${(value * 100).round()}%",
+        child: Container(
+          // color: Theme.of(context).colorScheme.primary,
+          color: Color.lerp(
+            Theme.of(context).colorScheme.primary,
+            Theme.of(context).colorScheme.primaryContainer,
+            colorFactor,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${(value * 100).round()}%",
+                  style: Theme.of(context).textTheme.titleMedium,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+                Text(
+                  name,
+                  style: Theme.of(context).textTheme.labelMedium,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ),
           ),
         ),
       ),

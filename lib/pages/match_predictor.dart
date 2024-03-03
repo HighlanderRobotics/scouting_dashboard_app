@@ -322,9 +322,9 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               fit: FlexFit.tight,
               child: ValueTile(
                 colorCombination: allianceColor.colorCombination,
-                value: Text(
-                  (allianceData['ampScores'] ?? "--").toString(),
-                ),
+                value: Text(allianceData['ampScores'] == null
+                    ? "--"
+                    : numberVizualizationBuilder(allianceData['ampScores'])),
                 label: const Text("Amp scores"),
               ),
             ),
@@ -332,9 +332,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               fit: FlexFit.tight,
               child: ValueTile(
                 colorCombination: allianceColor.colorCombination,
-                value: Text(
-                  (allianceData['ampScores'] ?? "--").toString(),
-                ),
+                value: Text(allianceData['speakerScores'] == null
+                    ? "--"
+                    : numberVizualizationBuilder(
+                        allianceData['speakerScores'])),
                 label: const Text("Speaker scores"),
               ),
             ),
