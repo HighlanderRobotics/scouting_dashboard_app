@@ -1501,5 +1501,4 @@ class ScouterOverview {
   }
 }
 
-// const lovatAPI = LovatAPI("https://api.lovat.app");
-const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
+const lovatAPI = LovatAPI("https://api.lovat.app");
