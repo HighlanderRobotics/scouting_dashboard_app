@@ -1234,11 +1234,13 @@ class MatchScheduleTeamInfo {
     required this.teamNumber,
     required this.alliance,
     required this.scouters,
+    required this.externalReportCount,
   });
 
   final int teamNumber;
   final Alliance alliance;
   final List<MatchScheduleScouterInfo> scouters;
+  final int externalReportCount;
 
   factory MatchScheduleTeamInfo.fromJson(Map<String, dynamic> json) {
     return MatchScheduleTeamInfo(
@@ -1247,6 +1249,7 @@ class MatchScheduleTeamInfo {
       scouters: (json['scouters'] as List<dynamic>)
           .map((e) => MatchScheduleScouterInfo.fromJson(e))
           .toList(),
+      externalReportCount: json['externalReports'],
     );
   }
 }
