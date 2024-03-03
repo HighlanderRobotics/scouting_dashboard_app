@@ -98,10 +98,10 @@ final List<MetricCategoryData> metricCategories = [
       path: "speakerscores",
     ),
     CategoryMetric(
-      localizedName: "Feeds",
-      abbreviatedLocalizedName: "Feeds",
+      localizedName: "Trap scores",
+      abbreviatedLocalizedName: "Trap",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "feeds",
+      path: "trapscores",
     ),
   ]),
   MetricCategoryData("Note interactions", [
@@ -116,6 +116,12 @@ final List<MetricCategoryData> metricCategories = [
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "drops",
+    ),
+    CategoryMetric(
+      localizedName: "Feeds",
+      abbreviatedLocalizedName: "Feeds",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "feeds",
     ),
   ]),
   MetricCategoryData("Other", [
