@@ -376,21 +376,15 @@ class _ScouterDetailsPageState extends State<ScouterDetailsPage> {
           leadingIcon: const Icon(Icons.delete_outlined),
           child: const Text("Delete"),
           onPressed: () async {
-            Navigator.of(context).pop();
-            try {
-              await lovatAPI.deleteScouter(widget.scouterOverview.scout.id);
-              widget.onChanged?.call();
-            } on LovatAPIException catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text("Failed to delete scouter: ${e.message}"),
-                behavior: SnackBarBehavior.floating,
-              ));
-            } catch (_) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Failed to delete scouter"),
-                behavior: SnackBarBehavior.floating,
-              ));
-            }
+            showDialog(
+              context: context,
+              builder: (context) => DeleteScouterDialog(
+                  scouter: widget.scouterOverview.scout,
+                  onDeleted: () => {
+                        widget.onChanged?.call(),
+                        Navigator.of(context).pop(),
+                      }),
+            );
           },
         ),
       ],
