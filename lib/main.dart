@@ -25,6 +25,7 @@ import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
 import 'package:scouting_dashboard_app/pages/display_qr_codes.dart';
+import 'package:scouting_dashboard_app/pages/scouters.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
@@ -94,6 +95,7 @@ void main() async {
                     as SpecificSourceTeamsArguments)
                 .submitText,
           ),
+      '/scouters': (context) => const ScoutersPage(),
     },
     theme: ThemeData(
       useMaterial3: true,

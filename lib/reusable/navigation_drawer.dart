@@ -5,6 +5,8 @@ import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+LovatUserProfile? cachedUserProfile;
+
 class GlobalNavigationDrawer extends StatefulWidget {
   const GlobalNavigationDrawer({
     Key? key,
@@ -27,6 +29,8 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
 
     try {
       final profile = await lovatAPI.getUserProfile();
+
+      cachedUserProfile = profile;
 
       setState(() {
         userProfile = profile;
@@ -53,6 +57,7 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
   @override
   void initState() {
     super.initState();
+    userProfile = cachedUserProfile;
     fetchData();
   }
 
@@ -83,22 +88,15 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
               Divider(
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
-              FutureBuilder(
-                builder: ((context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return SectionHeader(
-                        title: snapshot.data ?? "No tournament selected");
-                  }
-
-                  return const SectionHeader(title: "--");
-                }),
-                future: getTournamentName(),
-              ),
+              SectionHeader(
+                  title: selectedTournament?.localized ??
+                      "No tournament selected"),
               Divider(
                 color: Theme.of(context).colorScheme.surfaceVariant,
               ),
               if (selectedTournament != null ||
-                  userProfile?.role == UserRole.scoutingLead)
+                  (userProfile?.role == UserRole.scoutingLead &&
+                      userProfile?.team != null))
                 const SectionHeader(title: "Data & Utilities"),
               if (selectedTournament != null) ...[
                 DrawerDestination(
@@ -112,7 +110,8 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                   icon: Icons.today,
                 ),
               ],
-              if (userProfile?.role == UserRole.scoutingLead) ...[
+              if (userProfile?.role == UserRole.scoutingLead &&
+                  userProfile?.team != null) ...[
                 DrawerDestination(
                   label: "Scouters",
                   onTap: () {

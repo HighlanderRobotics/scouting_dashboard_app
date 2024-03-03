@@ -1004,6 +1004,119 @@ class LovatAPI {
       }
     }
   }
+
+  Future<List<ScouterOverview>> getScouterOverviews() async {
+    final tournament = await Tournament.getCurrent();
+
+    final response = await lovatAPI.get(
+      '/v1/manager/scouterspage',
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to get scouter overviews');
+      }
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json.map((e) => ScouterOverview.fromJson(e)).toList();
+  }
+
+  Future<void> addScouter(String name) async {
+    final response = await lovatAPI.post(
+      '/v1/manager/scouterdashboard',
+      body: {
+        'name': name,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to add scouter');
+      }
+    }
+  }
+
+  Future<void> deleteScouter(String id) async {
+    final response = await lovatAPI.delete(
+      '/v1/manager/scouterdashboard',
+      body: {
+        'scouterUuid': id,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to delete scouter');
+      }
+    }
+  }
+
+  Future<void> renameScouter(String id, String newName) async {
+    final response = await lovatAPI.put(
+      '/v1/manager/scoutername',
+      body: {
+        'scouterUuid': id,
+        'newName': newName,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to rename scouter');
+      }
+    }
+  }
+
+  Future<List<ScouterPageMinimalScoutReportInfo>> getScoutReportsByScouter(
+    String scouterId,
+  ) async {
+    final tournament = await Tournament.getCurrent();
+
+    final response = await lovatAPI.get(
+      '/v1/manager/scouterreports',
+      query: {
+        'scouterUuid': scouterId,
+        if (tournament != null) 'tournamentKey': tournament.key,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to get scout reports by scouter');
+      }
+    }
+
+    final json = jsonDecode(response!.body) as List<dynamic>;
+
+    return json
+        .map((e) => ScouterPageMinimalScoutReportInfo.fromJson(e))
+        .toList();
+  }
 }
 
 class LovatAPIException implements Exception {
@@ -1294,6 +1407,30 @@ class MinimalScoutReportInfo {
   }
 }
 
+class ScouterPageMinimalScoutReportInfo {
+  const ScouterPageMinimalScoutReportInfo({
+    required this.matchIdentity,
+    required this.reportId,
+    required this.teamNumber,
+  });
+
+  final GameMatchIdentity matchIdentity;
+  final String reportId;
+  final int teamNumber;
+
+  factory ScouterPageMinimalScoutReportInfo.fromJson(
+      Map<String, dynamic> json) {
+    return ScouterPageMinimalScoutReportInfo(
+      matchIdentity: GameMatchIdentity.fromLongKey(
+        json['teamMatchData']['key'],
+        tournamentName: json['teamMatchData']['tournament']['name'],
+      ),
+      reportId: json['uuid'],
+      teamNumber: json['teamMatchData']['teamNumber'],
+    );
+  }
+}
+
 class SingleScoutReportAnalysis {
   const SingleScoutReportAnalysis({
     required this.totalPoints,
@@ -1341,4 +1478,28 @@ class SingleScoutReportAnalysis {
   }
 }
 
-const lovatAPI = LovatAPI("https://api.lovat.app");
+class ScouterOverview {
+  const ScouterOverview({
+    required this.totalMatches,
+    required this.missedMatches,
+    required this.scout,
+  });
+
+  final int totalMatches;
+  final int missedMatches;
+  final Scout scout;
+
+  factory ScouterOverview.fromJson(Map<String, dynamic> json) {
+    return ScouterOverview(
+      totalMatches: json['matchesScouted'],
+      missedMatches: json['missedMatches'] ?? 0,
+      scout: Scout(
+        id: json['scouterUuid'],
+        name: json['scouterName'],
+      ),
+    );
+  }
+}
+
+// const lovatAPI = LovatAPI("https://api.lovat.app");
+const lovatAPI = LovatAPI("https://lovat-server-staging.up.railway.app");
