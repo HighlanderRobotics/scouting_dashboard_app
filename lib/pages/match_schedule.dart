@@ -119,9 +119,17 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         isDataFetched = true;
       });
     } on LovatAPIException catch (e) {
-      setState(() {
-        initialError = e.message;
-      });
+      if (e.message == "Tournament not found") {
+        setState(() {
+          noScheduleTournament =
+              currentTournament?.localized ?? "No tournament";
+          isDataFetched = true;
+        });
+      } else {
+        setState(() {
+          initialError = e.message;
+        });
+      }
     } catch (e) {
       setState(() {
         initialError = "An unknown error occurred";
@@ -860,11 +868,11 @@ class NoScheduleMessage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            'No matches for $tournament',
+            'No schedule found for $tournament',
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           Text(
-            "If it's on The Blue Alliance and the schedule has been posted, someone will need to add them to Lovat automatically. If it's a custom tournament, someone will need to manually add the matches.",
+            "The Lovat team may have deleted the tournament in the process of removing test data. Open settings to select a tournament that exists.",
             style: Theme.of(context).textTheme.bodyMedium,
           )
         ].withSpaceBetween(height: 10),

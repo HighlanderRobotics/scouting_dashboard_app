@@ -868,9 +868,21 @@ class LovatAPI {
           'No matches found. This is likely because the match schedule has not been posted on The Blue Alliance yet. Please try again later.');
     }
 
+    if (response?.body ==
+        'tournament not found when trying to insert tournament matches') {
+      throw const LovatAPIException('Tournament not found');
+    }
+
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
-      throw Exception('Failed to get match schedule');
+
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to get match schedule');
+      }
     }
 
     final json = jsonDecode(response!.body) as List<dynamic>;
