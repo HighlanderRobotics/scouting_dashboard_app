@@ -17,20 +17,36 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
 class LovatAPI {
-  const LovatAPI(this.baseUrl);
+  LovatAPI(this.baseUrl);
 
   final String baseUrl;
+  bool isAuthenticating = false;
 
   Future<Credentials> login() async {
-    final newCredentials = await auth0
-        .webAuthentication(scheme: "com.frc8033.lovatdashboard")
-        .login(
-          audience: "https://api.lovat.app",
-        );
+    if (isAuthenticating) {
+      // Wait for the current login to finish
+      while (isAuthenticating) {
+        await Future.delayed(const Duration(milliseconds: 100));
+      }
 
-    await auth0.credentialsManager.storeCredentials(newCredentials);
+      return await auth0.credentialsManager.credentials();
+    }
 
-    return newCredentials;
+    isAuthenticating = true;
+
+    try {
+      final newCredentials = await auth0
+          .webAuthentication(scheme: "com.frc8033.lovatdashboard")
+          .login(
+            audience: "https://api.lovat.app",
+          );
+
+      await auth0.credentialsManager.storeCredentials(newCredentials);
+
+      return newCredentials;
+    } finally {
+      isAuthenticating = false;
+    }
   }
 
   Future<String?> getAccessToken() async {
@@ -1513,4 +1529,4 @@ class ScouterOverview {
   }
 }
 
-const lovatAPI = LovatAPI("https://api.lovat.app");
+final lovatAPI = LovatAPI("https://api.lovat.app");
