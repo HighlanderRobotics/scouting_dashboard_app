@@ -1145,6 +1145,27 @@ class LovatAPI {
         .map((e) => ScouterPageMinimalScoutReportInfo.fromJson(e))
         .toList();
   }
+
+  Future<String> getCSVExport(Tournament tournament) async {
+    final response = await lovatAPI.get(
+      '/v1/analysis/csvplain',
+      query: {
+        'tournamentKey': tournament.key,
+      },
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to get CSV export');
+      }
+    }
+
+    return response!.body;
+  }
 }
 
 class LovatAPIException implements Exception {

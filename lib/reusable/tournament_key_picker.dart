@@ -9,9 +9,11 @@ class TournamentKeyPicker extends StatefulWidget {
   const TournamentKeyPicker({
     super.key,
     this.decoration,
+    this.onChanged,
   });
 
   final InputDecoration? decoration;
+  final Function(Tournament?)? onChanged;
 
   @override
   State<TournamentKeyPicker> createState() => _TournamentKeyPickerState();
@@ -103,6 +105,10 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
     setState(() {
       selectedItem = tournament;
     });
+
+    if (widget.onChanged != null) {
+      widget.onChanged!(tournament);
+    }
   }
 
   @override

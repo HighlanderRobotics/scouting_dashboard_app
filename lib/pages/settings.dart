@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -5,10 +7,12 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons/skeletons.dart';
 
@@ -20,6 +24,22 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  Tournament? selectedTournament;
+
+  Future<void> load() async {
+    final tournament = await Tournament.getCurrent();
+
+    setState(() {
+      selectedTournament = tournament;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,12 +67,32 @@ class _SettingsPageState extends State<SettingsPage> {
               const SizedBox(height: 7),
               const TournamentSourceSelector(),
               const SizedBox(height: 28),
-              const TournamentKeyPicker(
-                decoration: InputDecoration(
+              TournamentKeyPicker(
+                decoration: const InputDecoration(
                   filled: true,
                   labelText: "At tournament",
                 ),
+                onChanged: (tournament) {
+                  setState(() {
+                    selectedTournament = tournament;
+                  });
+                },
               ),
+              if (cachedUserProfile?.role == UserRole.scoutingLead &&
+                  selectedTournament != null) ...[
+                const SizedBox(height: 14),
+                FilledButton.tonalIcon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                        context: context,
+                        builder: (context) {
+                          return const DataExportDrawer();
+                        });
+                  },
+                  icon: const Icon(Icons.download_outlined),
+                  label: const Text("Export CSV"),
+                ),
+              ],
               const AnalystsBox(),
               const SizedBox(height: 40),
               const ResetAppButton(),
@@ -560,6 +600,81 @@ class _TournamentSourceSelectorSettingsPageState
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class DataExportDrawer extends StatefulWidget {
+  const DataExportDrawer({super.key});
+
+  @override
+  State<DataExportDrawer> createState() => _DataExportDrawerState();
+}
+
+class _DataExportDrawerState extends State<DataExportDrawer> {
+  String? errorMessage;
+
+  Future<void> export() async {
+    try {
+      final tournament = await Tournament.getCurrent();
+      if (tournament == null) {
+        setState(() {
+          errorMessage = "No tournament selected";
+        });
+        return;
+      }
+      final csv = await lovatAPI.getCSVExport(tournament);
+
+      debugPrint(csv);
+
+      final csvFile = XFile.fromData(
+        utf8.encode(csv),
+        mimeType: "text/csv",
+      );
+
+      if (mounted) {
+        Share.shareXFiles([csvFile], subject: "${tournament.localized} data");
+        Navigator.of(context).pop();
+      }
+    } on LovatAPIException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+
+      setState(() {
+        errorMessage = "Failed to export data";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    export();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (errorMessage != null) {
+      return FriendlyErrorView(errorMessage: errorMessage, onRetry: export);
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Exporting data...",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
+        ),
       ),
     );
   }
