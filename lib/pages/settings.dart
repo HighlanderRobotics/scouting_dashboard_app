@@ -1227,7 +1227,7 @@ class _DataExportPageState extends State<DataExportPage> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "Download a file containing your team's collected data at ${tournament?.localized ?? 'your tournament'}.",
+          "Download a file containing data collected at ${tournament?.localized ?? 'your tournament'}, by all teams in your data set.",
         ),
         InsetPicker(
           CSVExportMode.values,

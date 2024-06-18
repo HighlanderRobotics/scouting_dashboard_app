@@ -1207,7 +1207,7 @@ extension CSVExportModeExtension on CSVExportMode {
       case CSVExportMode.byTeam:
         return 'Each row contains a team\'s aggregated statistics throughout the tournament.';
       case CSVExportMode.byMatch:
-        return 'Each row contains data about how a team performed in a specific match.';
+        return 'Each row contains averaged data about how a team performed in a specific match.';
     }
   }
 }
