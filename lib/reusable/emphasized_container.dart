@@ -20,11 +20,13 @@ class EmphasizedContainer extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
-        color: color ?? Theme.of(context).colorScheme.surfaceVariant,
       ),
-      child: Padding(
-        padding: padding,
-        child: child,
+      child: Material(
+        color: color ?? Theme.of(context).colorScheme.surfaceVariant,
+        child: Padding(
+          padding: padding,
+          child: child,
+        ),
       ),
     );
   }

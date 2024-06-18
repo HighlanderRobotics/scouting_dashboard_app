@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
@@ -1146,9 +1147,9 @@ class LovatAPI {
         .toList();
   }
 
-  Future<String> getCSVExport(Tournament tournament) async {
+  Future<String> getCSVExport(Tournament tournament, CSVExportMode mode) async {
     final response = await lovatAPI.get(
-      '/v1/analysis/csvplain',
+      '/v1/analysis/${mode.slug}',
       query: {
         'tournamentKey': tournament.key,
       },
@@ -1175,6 +1176,40 @@ class LovatAPIException implements Exception {
 
   @override
   String toString() => message;
+}
+
+enum CSVExportMode {
+  byTeam,
+  byMatch,
+}
+
+extension CSVExportModeExtension on CSVExportMode {
+  String get slug {
+    switch (this) {
+      case CSVExportMode.byTeam:
+        return 'csvplain';
+      case CSVExportMode.byMatch:
+        return 'matchcsv';
+    }
+  }
+
+  String get localizedDescription {
+    switch (this) {
+      case CSVExportMode.byTeam:
+        return 'By team';
+      case CSVExportMode.byMatch:
+        return 'By match';
+    }
+  }
+
+  String get longLocalizedDescription {
+    switch (this) {
+      case CSVExportMode.byTeam:
+        return 'Each row contains a team\'s aggregated statistics throughout the tournament.';
+      case CSVExportMode.byMatch:
+        return 'Each row contains data about how a team performed in a specific match.';
+    }
+  }
 }
 
 class PartialTeamList {

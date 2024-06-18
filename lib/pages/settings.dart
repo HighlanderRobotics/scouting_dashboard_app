@@ -5,10 +5,13 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/inset_picker.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
+import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
@@ -83,11 +86,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 const SizedBox(height: 14),
                 FilledButton.tonalIcon(
                   onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return const DataExportDrawer();
-                        });
+                    Navigator.of(context).pushWidget(const DataExportPage());
                   },
                   icon: const Icon(Icons.download_outlined),
                   label: const Text("Export CSV"),
@@ -606,7 +605,9 @@ class _TournamentSourceSelectorSettingsPageState
 }
 
 class DataExportDrawer extends StatefulWidget {
-  const DataExportDrawer({super.key});
+  const DataExportDrawer(this.exportMode, {super.key});
+
+  final CSVExportMode exportMode;
 
   @override
   State<DataExportDrawer> createState() => _DataExportDrawerState();
@@ -624,7 +625,7 @@ class _DataExportDrawerState extends State<DataExportDrawer> {
         });
         return;
       }
-      final csv = await lovatAPI.getCSVExport(tournament);
+      final csv = await lovatAPI.getCSVExport(tournament, widget.exportMode);
 
       debugPrint(csv);
 
@@ -1179,6 +1180,84 @@ class CodeViewerPage extends StatelessWidget {
           ),
         ]),
       ]),
+    );
+  }
+}
+
+class DataExportPage extends StatefulWidget {
+  const DataExportPage({super.key});
+
+  @override
+  State<DataExportPage> createState() => _DataExportPageState();
+}
+
+class _DataExportPageState extends State<DataExportPage> {
+  Tournament? tournament;
+  String? errorText;
+
+  CSVExportMode? exportMode;
+
+  void loadData() async {
+    Tournament? tournament = await Tournament.getCurrent();
+
+    if (tournament == null) {
+      setState(() {
+        errorText = 'No tournament selected';
+      });
+    } else {
+      setState(() {
+        this.tournament = tournament;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
+
+  Widget body(BuildContext context) {
+    if (errorText != null) {
+      return FriendlyErrorView(errorMessage: errorText, onRetry: loadData);
+    }
+
+    return PageBody(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          "Download a file containing your team's collected data at ${tournament?.localized ?? 'your tournament'}.",
+        ),
+        InsetPicker(
+          CSVExportMode.values,
+          titleBuilder: (mode) => mode.localizedDescription,
+          descriptionBuilder: (mode) => mode.longLocalizedDescription,
+          selectedItem: exportMode,
+          onChanged: (value) => setState(() => exportMode = value),
+        ),
+        const Spacer(),
+        FilledButton.icon(
+          onPressed: exportMode == null
+              ? null
+              : () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => DataExportDrawer(exportMode!),
+                  );
+                },
+          icon: const Icon(Icons.download),
+          label: const Text("Export"),
+        ),
+      ].withSpaceBetween(height: 10),
+    ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("CSV Export")),
+      body: body(context),
     );
   }
 }
