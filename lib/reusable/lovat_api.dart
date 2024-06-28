@@ -1180,7 +1180,7 @@ class LovatAPIException implements Exception {
 
 enum CSVExportMode {
   byTeam,
-  byMatch,
+  byScoutReport,
 }
 
 extension CSVExportModeExtension on CSVExportMode {
@@ -1188,8 +1188,8 @@ extension CSVExportModeExtension on CSVExportMode {
     switch (this) {
       case CSVExportMode.byTeam:
         return 'csvplain';
-      case CSVExportMode.byMatch:
-        return 'matchcsv';
+      case CSVExportMode.byScoutReport:
+        return 'reportcsv';
     }
   }
 
@@ -1197,8 +1197,8 @@ extension CSVExportModeExtension on CSVExportMode {
     switch (this) {
       case CSVExportMode.byTeam:
         return 'By team';
-      case CSVExportMode.byMatch:
-        return 'By match';
+      case CSVExportMode.byScoutReport:
+        return 'By scout report';
     }
   }
 
@@ -1206,8 +1206,8 @@ extension CSVExportModeExtension on CSVExportMode {
     switch (this) {
       case CSVExportMode.byTeam:
         return 'Each row contains a team\'s aggregated statistics throughout the tournament.';
-      case CSVExportMode.byMatch:
-        return 'Each row contains averaged data about how a team performed in a specific match.';
+      case CSVExportMode.byScoutReport:
+        return 'Each row contains data collected by one scouter about a specific team\'s performance during a match.';
     }
   }
 }
