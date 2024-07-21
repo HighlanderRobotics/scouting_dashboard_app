@@ -4,7 +4,7 @@ import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 import '../constants.dart';
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;

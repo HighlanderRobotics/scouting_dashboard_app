@@ -134,32 +134,6 @@ class LovatAPI {
   }
 
   // Specific endpoints
-  Future<PartialTeamList> getTeams({
-    int? take,
-    int? skip,
-    String filter = '',
-  }) async {
-    final response = await get(
-      '/v1/manager/teams',
-      query: {
-        if (take != null) 'take': take.toString(),
-        if (skip != null) 'skip': skip.toString(),
-        'filter': filter,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      throw Exception('Failed to get teams');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-    final teamJson = json['teams'] as List<dynamic>;
-
-    final teams = teamJson.map((e) => Team.fromJson(e)).toList();
-
-    return PartialTeamList(teams: teams, total: json['count']);
-  }
-
   Future<PartialTournamentList> getTournaments({
     int? take,
     int? skip,
@@ -1210,16 +1184,6 @@ extension CSVExportModeExtension on CSVExportMode {
         return 'Each row contains data collected by one scouter about a specific team\'s performance during a match.';
     }
   }
-}
-
-class PartialTeamList {
-  const PartialTeamList({
-    required this.teams,
-    required this.total,
-  });
-
-  final List<Team> teams;
-  final int total;
 }
 
 class PartialTournamentList {
