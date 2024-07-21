@@ -7,6 +7,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_reports_by_long_match_key.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';

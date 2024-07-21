@@ -133,21 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<MinimalScoutReportInfo>> getScoutReportsByLongMatchKey(
-    String longMatchKey,
-  ) async {
-    final response = await get('/v1/analysis/scoutreports/match/$longMatchKey');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get scout reports');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json.map((e) => MinimalScoutReportInfo.fromJson(e)).toList();
-  }
-
   Future<Map<String, dynamic>> getMatchPrediction(
     int red1,
     int red2,
