@@ -133,20 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<SingleScoutReportAnalysis> getScoutReportAnalysis(
-    String reportId,
-  ) async {
-    final response = await get('/v1/analysis/metrics/scoutreport/$reportId');
-    debugPrint(response?.body ?? '');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get scout report analysis');
-    }
-
-    return SingleScoutReportAnalysis.fromJson(jsonDecode(response!.body));
-  }
-
   Future<List<ScoutReportEvent>> getEventsForScoutReport(
     String reportId,
   ) async {
@@ -494,53 +480,6 @@ class ScouterPageMinimalScoutReportInfo {
       ),
       reportId: json['uuid'],
       teamNumber: json['teamMatchData']['teamNumber'],
-    );
-  }
-}
-
-class SingleScoutReportAnalysis {
-  const SingleScoutReportAnalysis({
-    required this.totalPoints,
-    required this.driverAbility,
-    required this.robotRole,
-    required this.defense,
-    required this.ampScores,
-    required this.speakerScores,
-    required this.trapScores,
-    required this.pickups,
-    required this.autoPath,
-    required this.stageResult,
-    required this.highNoteResult,
-    this.notes,
-  });
-
-  final int totalPoints;
-  final DriverAbility driverAbility;
-  final RobotRole robotRole;
-  final int defense;
-  final int ampScores;
-  final int speakerScores;
-  final int trapScores;
-  final int pickups;
-  final AutoPath autoPath;
-  final String? notes;
-  final StageResult stageResult;
-  final HighNoteResult highNoteResult;
-
-  factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
-    return SingleScoutReportAnalysis(
-      totalPoints: json['totalPoints'],
-      driverAbility: DriverAbility.values[(json['driverAbility'] as int) - 1],
-      robotRole: RobotRole.values[json['role']],
-      defense: json['defense'],
-      ampScores: json['ampscores'],
-      speakerScores: json['speakerscores'],
-      trapScores: json['trapscores'],
-      pickups: json['pickups'],
-      autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
-      notes: (json['note'] as String).isEmpty ? null : json['note'],
-      stageResult: StageResult.values[json['stage']],
-      highNoteResult: HighNoteResult.values[json['highNote']],
     );
   }
 }
