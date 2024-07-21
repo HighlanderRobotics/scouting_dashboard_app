@@ -133,15 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> deleteScoutReport(String reportId) async {
-    final response = await delete('/v1/manager/scoutreports/$reportId');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to delete scout report');
-    }
-  }
-
   Future<List<dynamic>> getFlags(List<String> paths, int teamNumber) async {
     final tournament = await Tournament.getCurrent();
 
