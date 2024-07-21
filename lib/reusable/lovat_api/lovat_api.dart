@@ -169,27 +169,4 @@ class Analyst {
   }
 }
 
-class MinimalScoutReportInfo {
-  const MinimalScoutReportInfo({
-    required this.uuid,
-    required this.scout,
-    required this.timestamp,
-  });
-
-  final String uuid;
-  final Scout scout;
-  final DateTime timestamp;
-
-  factory MinimalScoutReportInfo.fromJson(Map<String, dynamic> json) {
-    return MinimalScoutReportInfo(
-      uuid: json['uuid'],
-      scout: Scout(
-        id: json['scouterUuid'],
-        name: json['scouter']['name'],
-      ),
-      timestamp: DateTime.parse(json['startTime']),
-    );
-  }
-}
-
 final lovatAPI = LovatAPI("https://api.lovat.app");
