@@ -10,6 +10,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/promote_analyst.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:uuid/uuid.dart';
@@ -131,20 +132,6 @@ class LovatAPI {
   }
 
   // MARK: Endpoints
-
-  Future<void> promoteAnalyst(String id) async {
-    final response = await post(
-      '/v1/manager/upgradeuser',
-      body: {
-        'user': id,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to promote analyst');
-    }
-  }
 
   Future<String?> getTeamCode() async {
     final response = await get('/v1/manager/code', query: {
