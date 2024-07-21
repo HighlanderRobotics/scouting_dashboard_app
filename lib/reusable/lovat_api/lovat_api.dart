@@ -133,26 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<ServerScoutSchedule> getScouterSchedule() async {
-    final tournament = await Tournament.getCurrent();
-
-    if (tournament == null) {
-      throw Exception('No tournament selected');
-    }
-
-    final response =
-        await get('/v1/manager/tournament/${tournament.key}/scoutershifts');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get scouter schedule');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-    return ServerScoutSchedule.fromJson(json);
-  }
-
   Future<void> updateScouterScheduleShift(
     ServerScoutingShift shift,
   ) async {
