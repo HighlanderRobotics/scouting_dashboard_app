@@ -5,9 +5,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 extension SourceTournamentSettings on LovatAPI {
-  Future<void> setSourceTournamentKeys(
-    List<String> tournamentKeys,
-  ) async {
+  Future<void> setSourceTournamentKeys(List<String> tournamentKeys) async {
     final response = await post(
       '/v1/manager/settings/tournamentsource',
       body: {
@@ -21,9 +19,7 @@ extension SourceTournamentSettings on LovatAPI {
     }
   }
 
-  Future<void> setSourceTournaments(
-    List<Tournament> tournaments,
-  ) async {
+  Future<void> setSourceTournaments(List<Tournament> tournaments) async {
     await setSourceTournamentKeys(tournaments.map((e) => e.key).toList());
   }
 
