@@ -133,23 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<ScoutReportEvent>> getEventsForScoutReport(
-    String reportId,
-  ) async {
-    final response = await get('/v1/analysis/timeline/scoutreport/$reportId');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get events for scout report');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json
-        .map((e) => ScoutReportEvent.fromList((e as List<dynamic>).cast<int>()))
-        .toList();
-  }
-
   Future<void> updateNote(String noteUuid, String newBody) async {
     final response = await put(
       '/v1/manager/notes/$noteUuid',
