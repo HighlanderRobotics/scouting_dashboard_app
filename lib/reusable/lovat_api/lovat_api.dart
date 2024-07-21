@@ -133,36 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<ScouterPageMinimalScoutReportInfo>> getScoutReportsByScouter(
-    String scouterId,
-  ) async {
-    final tournament = await Tournament.getCurrent();
-
-    final response = await lovatAPI.get(
-      '/v1/manager/scouterreports',
-      query: {
-        'scouterUuid': scouterId,
-        if (tournament != null) 'tournamentKey': tournament.key,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      try {
-        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
-      } on LovatAPIException {
-        rethrow;
-      } catch (_) {
-        throw Exception('Failed to get scout reports by scouter');
-      }
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json
-        .map((e) => ScouterPageMinimalScoutReportInfo.fromJson(e))
-        .toList();
-  }
-
   Future<String> getCSVExport(Tournament tournament, CSVExportMode mode) async {
     final response = await lovatAPI.get(
       '/v1/analysis/${mode.slug}',
@@ -275,30 +245,6 @@ class MinimalScoutReportInfo {
         name: json['scouter']['name'],
       ),
       timestamp: DateTime.parse(json['startTime']),
-    );
-  }
-}
-
-class ScouterPageMinimalScoutReportInfo {
-  const ScouterPageMinimalScoutReportInfo({
-    required this.matchIdentity,
-    required this.reportId,
-    required this.teamNumber,
-  });
-
-  final GameMatchIdentity matchIdentity;
-  final String reportId;
-  final int teamNumber;
-
-  factory ScouterPageMinimalScoutReportInfo.fromJson(
-      Map<String, dynamic> json) {
-    return ScouterPageMinimalScoutReportInfo(
-      matchIdentity: GameMatchIdentity.fromLongKey(
-        json['teamMatchData']['key'],
-        tournamentName: json['teamMatchData']['tournament']['name'],
-      ),
-      reportId: json['uuid'],
-      teamNumber: json['teamMatchData']['teamNumber'],
     );
   }
 }
