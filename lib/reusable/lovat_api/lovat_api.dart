@@ -133,19 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> deleteScoutScheduleShiftById(String id) async {
-    final response = await delete('/v1/manager/scoutershifts/$id');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to delete scouter schedule shift');
-    }
-  }
-
-  Future<void> deleteScoutScheduleShift(ServerScoutingShift shift) async {
-    await deleteScoutScheduleShiftById(shift.id);
-  }
-
   Future<void> createScoutScheduleShift(ScoutingShift shift) async {
     final tournament = await Tournament.getCurrent();
 
