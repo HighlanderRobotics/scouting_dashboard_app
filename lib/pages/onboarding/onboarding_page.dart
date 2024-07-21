@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_teams.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_tournaments.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/join_team_by_code.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/register_team.dart';

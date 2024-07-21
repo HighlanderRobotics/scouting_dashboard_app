@@ -134,18 +134,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<LovatUserProfile> getUserProfile() async {
-    final response = await get('/v1/manager/profile');
-
-    if (response?.statusCode != 200) {
-      throw Exception('Failed to get user profile');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-    return LovatUserProfile.fromJson(json);
-  }
-
   Future<void> setSourceTeams(
     SourceTeamSettingsMode mode, {
     List<int>? teams,
