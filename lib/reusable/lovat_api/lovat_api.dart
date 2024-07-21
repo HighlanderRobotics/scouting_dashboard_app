@@ -133,26 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> editTeamEmail(String newEmail) async {
-    final response = await lovatAPI.put(
-      '/v1/manager/settings/teamemail',
-      query: {
-        'email': newEmail,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      try {
-        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
-      } on LovatAPIException {
-        rethrow;
-      } catch (_) {
-        throw Exception('Failed to edit team email');
-      }
-    }
-  }
-
   Future<List<ScouterOverview>> getScouterOverviews() async {
     final tournament = await Tournament.getCurrent();
 
