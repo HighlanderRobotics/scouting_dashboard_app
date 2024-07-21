@@ -133,21 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> updateMutablePicklist(MutablePicklist picklist) async {
-    final response = await put(
-      '/v1/manager/mutablepicklists/${picklist.uuid}',
-      body: {
-        'name': picklist.name,
-        'teams': picklist.teams,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to update mutable picklist');
-    }
-  }
-
   Future<Map<String, dynamic>> getCategoryMetricsByTeamNumber(
     int teamNumber,
   ) async {

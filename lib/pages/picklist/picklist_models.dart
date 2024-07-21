@@ -7,6 +7,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/create_mutable_picklist.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/delete_mutable_picklist.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/get_mutable_picklist_by_id.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/update_mutable_picklist.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/get_shared_picklist_by_id.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/share_picklist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
