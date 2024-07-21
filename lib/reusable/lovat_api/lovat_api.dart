@@ -133,28 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> uploadScoutReport(String data) async {
-    final response = await post(
-      '/v1/manager/dashboard/scoutreport',
-      body: jsonDecode(data),
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-
-      late final Exception exception;
-
-      try {
-        exception =
-            LovatAPIException(jsonDecode(response!.body)['displayError']);
-      } catch (_) {
-        exception = Exception('Failed to upload scout report');
-      }
-
-      throw exception;
-    }
-  }
-
   Future<List<MinimalScoutReportInfo>> getScoutReportsByLongMatchKey(
     String longMatchKey,
   ) async {
