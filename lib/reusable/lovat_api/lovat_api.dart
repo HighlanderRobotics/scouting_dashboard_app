@@ -132,20 +132,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> setTeamWebsite(String website) async {
-    final response = await post(
-      '/v1/manager/onboarding/teamwebsite',
-      body: {
-        'website': website,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to set team website');
-    }
-  }
-
   Future<void> deleteAccount() async {
     final response = await delete('/v1/manager/user');
 
