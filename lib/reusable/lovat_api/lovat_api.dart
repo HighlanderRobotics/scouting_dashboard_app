@@ -3,17 +3,8 @@ import 'dart:convert';
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
-import 'package:scouting_dashboard_app/pages/match_schedule.dart';
-import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
-import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api/promote_analyst.dart';
-import 'package:scouting_dashboard_app/reusable/models/team.dart';
-import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
-import 'package:uuid/uuid.dart';
 
 class LovatAPI {
   LovatAPI(this.baseUrl);
