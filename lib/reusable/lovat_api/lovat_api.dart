@@ -133,15 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> deleteSharedPicklistById(String id) async {
-    final response = await delete('/v1/manager/picklists/$id');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to delete shared picklist');
-    }
-  }
-
   Future<void> createMutablePicklist(MutablePicklist picklist) async {
     final tournament = await Tournament.getCurrent();
 
