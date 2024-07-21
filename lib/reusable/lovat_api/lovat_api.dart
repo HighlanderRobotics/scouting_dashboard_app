@@ -132,15 +132,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> deleteAccount() async {
-    final response = await delete('/v1/manager/user');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to delete account');
-    }
-  }
-
   Future<List<Analyst>?> getAnalysts() async {
     final response = await get('/v1/manager/analysts');
 
