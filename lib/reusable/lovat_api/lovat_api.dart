@@ -133,19 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<Team>> getTeamsAtTournament(String tournamentKey) async {
-    final response = await get("/v1/manager/tournament/$tournamentKey/teams");
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get teams at tournament');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json.map((e) => Team.fromJson(e)).toList();
-  }
-
   Future<SingleScoutReportAnalysis> getScoutReportAnalysis(
     String reportId,
   ) async {
