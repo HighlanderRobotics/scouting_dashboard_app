@@ -5,7 +5,10 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/get_mutable_picklists.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/delete_shared_picklist.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/get_shared_picklists.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
@@ -309,8 +312,7 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               ),
                             );
 
-                            await lovatAPI
-                                .deleteSharedPicklistById(picklist.id);
+                            await lovatAPI.deleteSharedPicklist(picklist.id);
 
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 

@@ -1,7 +1,8 @@
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 
 abstract class PicklistAnalysis extends AnalysisFunction {
   @override

@@ -1,8 +1,9 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_tournaments.dart';
 
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:skeletons/skeletons.dart';
 
 class TournamentKeyPicker extends StatefulWidget {

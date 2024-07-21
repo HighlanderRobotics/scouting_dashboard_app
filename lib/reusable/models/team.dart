@@ -1,4 +1,5 @@
-import 'package:scouting_dashboard_app/reusable/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/registration_status.dart';
 
 class Team {
   const Team({
