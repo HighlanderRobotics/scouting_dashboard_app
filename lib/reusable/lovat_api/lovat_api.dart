@@ -133,19 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<Scout>> getScouts() async {
-    final response = await get('/v1/manager/scoutershift/scouters');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get scouts');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json.map((e) => Scout.fromJson(e)).toList();
-  }
-
   Future<void> deleteScoutScheduleShiftById(String id) async {
     final response = await delete('/v1/manager/scoutershifts/$id');
 
