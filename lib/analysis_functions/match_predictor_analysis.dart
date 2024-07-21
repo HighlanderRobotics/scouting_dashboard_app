@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:http/http.dart' as http;
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_match_prediction.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import '../constants.dart';
 
