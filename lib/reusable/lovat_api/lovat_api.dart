@@ -141,32 +141,4 @@ class LovatAPIException implements Exception {
   String toString() => message;
 }
 
-class Analyst {
-  const Analyst({
-    required this.id,
-    required this.name,
-    required this.email,
-  });
-
-  final String id;
-  final String name;
-  final String email;
-
-  factory Analyst.fromJson(Map<String, dynamic> json) => Analyst(
-        id: json['id'] as String,
-        name: json['username'] as String,
-        email: json['email'] as String,
-      );
-
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'username': name,
-        'email': email,
-      };
-
-  Future<void> promote() async {
-    await lovatAPI.promoteAnalyst(id);
-  }
-}
-
 final lovatAPI = LovatAPI("https://api.lovat.app");
