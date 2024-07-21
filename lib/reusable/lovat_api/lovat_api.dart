@@ -134,21 +134,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> registerTeam(int teamNumber, String email) async {
-    final response = await post(
-      '/v1/manager/onboarding/team',
-      body: {
-        'email': email,
-        'number': teamNumber,
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to register team');
-    }
-  }
-
   Future<bool> joinTeamByCode(int teamNumber, String code) async {
     final response = await post(
       '/v1/manager/onboarding/teamcode',
