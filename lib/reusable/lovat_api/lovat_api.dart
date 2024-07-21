@@ -133,21 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> updateNote(String noteUuid, String newBody) async {
-    final response = await put(
-      '/v1/manager/notes/$noteUuid',
-      body: {
-        'note': newBody,
-      },
-    );
-
-    debugPrint(response?.body ?? '');
-
-    if (response?.statusCode != 200) {
-      throw Exception('Failed to update note');
-    }
-  }
-
   Future<void> deleteScoutReport(String reportId) async {
     final response = await delete('/v1/manager/scoutreports/$reportId');
 

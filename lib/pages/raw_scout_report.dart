@@ -11,6 +11,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/get_events_for_scout_r
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_report_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_reports_by_long_match_key.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/update_note.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
