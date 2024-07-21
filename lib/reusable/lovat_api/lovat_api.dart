@@ -133,21 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<Note>> getNotesByTeamNumber(
-    int teamNumber,
-  ) async {
-    final response = await get('/v1/analysis/notes/team/$teamNumber');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get notes');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json.map((e) => Note.fromJson(e)).toList();
-  }
-
   Future<ServerScoutSchedule> getScouterSchedule() async {
     final tournament = await Tournament.getCurrent();
 
@@ -729,28 +714,6 @@ class Analyst {
   Future<void> promote() async {
     await lovatAPI.promoteAnalyst(id);
   }
-}
-
-class Note {
-  const Note({
-    required this.body,
-    required this.matchIdentity,
-    this.author,
-    this.uuid,
-  });
-
-  final String body;
-  final GameMatchIdentity matchIdentity;
-  final String? author;
-  final String? uuid;
-
-  factory Note.fromJson(Map<String, dynamic> json) => Note(
-        body: json['notes'],
-        matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
-            tournamentName: json['tounramentName']),
-        author: json['scouterName'],
-        uuid: json['uuid'],
-      );
 }
 
 class MatchScheduleMatch {

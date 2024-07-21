@@ -4,6 +4,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_notes.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
