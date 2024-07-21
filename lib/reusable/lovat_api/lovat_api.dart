@@ -133,15 +133,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> deleteMutablePicklistById(String id) async {
-    final response = await delete('/v1/manager/mutablepicklists/$id');
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to delete mutable picklist');
-    }
-  }
-
   Future<void> updateMutablePicklist(MutablePicklist picklist) async {
     final response = await put(
       '/v1/manager/mutablepicklists/${picklist.uuid}',
