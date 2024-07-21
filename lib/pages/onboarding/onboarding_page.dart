@@ -13,6 +13,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/join_team_by_code.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/register_team.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/registration_status.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/resend_verification_email.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/set_username.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_teams.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tournaments.dart';

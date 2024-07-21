@@ -132,21 +132,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<void> resendVerificationEmail() async {
-    final response =
-        await post('/v1/manager/onboarding/resendverificationemail');
-
-    if (response?.statusCode == 200) return;
-
-    if (response?.statusCode == 429) {
-      throw const LovatAPIException(
-          'Too many emails. Please wait a few minutes.');
-    }
-
-    debugPrint(response?.body ?? '');
-    throw const LovatAPIException('Failed to resend verification email');
-  }
-
   Future<void> setTeamWebsite(String website) async {
     final response = await post(
       '/v1/manager/onboarding/teamwebsite',
