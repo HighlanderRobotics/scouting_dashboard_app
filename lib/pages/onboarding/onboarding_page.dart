@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/register_te
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/registration_status.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/set_username.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_teams.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tournaments.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';

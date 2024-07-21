@@ -12,6 +12,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/get_tournaments.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_teams.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tournaments.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
