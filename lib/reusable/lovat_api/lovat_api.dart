@@ -132,22 +132,6 @@ class LovatAPI {
 
   // MARK: Endpoints
 
-  Future<List<Analyst>?> getAnalysts() async {
-    final response = await get('/v1/manager/analysts');
-
-    if ([403, 404].contains(response?.statusCode)) {
-      return null;
-    }
-
-    if (response?.statusCode != 200) {
-      throw Exception('Failed to get analysts');
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json.map((e) => Analyst.fromJson(e)).toList();
-  }
-
   Future<void> promoteAnalyst(String id) async {
     final response = await post(
       '/v1/manager/upgradeuser',
