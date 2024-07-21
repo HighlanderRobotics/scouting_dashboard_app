@@ -311,8 +311,7 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               ),
                             );
 
-                            await lovatAPI
-                                .deleteSharedPicklistById(picklist.id);
+                            await lovatAPI.deleteSharedPicklist(picklist.id);
 
                             ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
