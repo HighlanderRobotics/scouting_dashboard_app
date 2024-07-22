@@ -33,8 +33,9 @@ class _EditPicklistPageState extends State<EditPicklistPage> {
         actions: [
           IconButton(
             onPressed: () async {
+              final navigatorState = Navigator.of(context);
               await onChanged();
-              Navigator.of(context).pop();
+              navigatorState.pop();
             },
             icon: const Icon(Icons.check),
             tooltip: "Save changes",
