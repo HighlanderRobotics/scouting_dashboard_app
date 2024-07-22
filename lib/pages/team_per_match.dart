@@ -598,7 +598,7 @@ class _AnimatedAutoPathState extends State<AnimatedAutoPath>
                       : Duration(
                           milliseconds: (controller.value * 15 * 1000).round(),
                         ),
-                  autoPath: analysis.autoPath!,
+                  autoPath: analysis.autoPath,
                   teamColor: Colors.blue[700],
                 ),
               ]),
