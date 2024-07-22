@@ -40,8 +40,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   Future<void> init() async {
     try {
-      final credentials = await auth0.credentialsManager.credentials();
-
       final profile = await lovatAPI.getUserProfile();
 
       if (profile.team != null) {
@@ -306,9 +304,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         phase = OnboardingPagePhase.loading;
       });
 
-      final credentials = await auth0
-          .webAuthentication(scheme: "com.frc8033.lovatdashboard")
-          .login(
+      await auth0.webAuthentication(scheme: "com.frc8033.lovatdashboard").login(
             audience: "https://api.lovat.app",
           );
 
