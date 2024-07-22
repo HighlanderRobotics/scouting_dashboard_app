@@ -155,7 +155,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           OnboardingPagePhase.atTournament: AtTournamentPage(
             onSubmit: () {
-              onBoardingCompleted();
+              onBoardingCompleted(Navigator.of(context));
             },
           ),
           OnboardingPagePhase.otherUserRegistering: OtherUserRegisteringPage(
@@ -320,13 +320,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void onBoardingCompleted() async {
+  void onBoardingCompleted(NavigatorState navigatorState) async {
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt("onboardingVersion", 1);
 
     final tournament = await Tournament.getCurrent();
 
-    Navigator.of(context).pushNamedAndRemoveUntil(
+    navigatorState.pushNamedAndRemoveUntil(
       tournament == null ? '/team_lookup' : '/match_schedule',
       (route) => false,
     );
