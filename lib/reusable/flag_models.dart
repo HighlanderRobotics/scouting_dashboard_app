@@ -258,6 +258,8 @@ class _NetworkFlagState extends State<NetworkFlag> {
       loadingTeam = widget.team;
     });
 
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+
     try {
       final result = await lovatAPI.getFlag(widget.flag.type.path, widget.team);
 
@@ -266,7 +268,7 @@ class _NetworkFlagState extends State<NetworkFlag> {
         data = result;
       });
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessengerState.showSnackBar(
         SnackBar(
           content: Text(
             "Error fetching ${widget.flag.type.readableName}: $error",
