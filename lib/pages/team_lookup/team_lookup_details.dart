@@ -418,11 +418,8 @@ class AnalysisOverview extends AnalysisVisualization {
                                     SideTitleWidget(
                                       axisSide: meta.axisSide,
                                       child: Text(
-                                        analysisFunction.metric == null
-                                            ? "--"
-                                            : analysisFunction.metric
-                                                .valueVizualizationBuilder(
-                                                    value),
+                                        analysisFunction.metric
+                                            .valueVizualizationBuilder(value),
                                       ),
                                     ),
                                 reservedSize: 50),
