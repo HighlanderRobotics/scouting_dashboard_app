@@ -465,6 +465,10 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                 loading = true;
                               });
 
+                              final scaffoldMessengerState =
+                                  ScaffoldMessenger.of(context);
+                              final themeData = Theme.of(context);
+
                               try {
                                 Navigator.of(context).pushNamed(
                                     '/mutable_picklist',
@@ -474,16 +478,14 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                       'callback': () => setState(() {}),
                                     });
                               } catch (error) {
-                                ScaffoldMessenger.of(context).showSnackBar(
+                                scaffoldMessengerState.showSnackBar(
                                   SnackBar(
                                     content: Text("Error: $error",
                                         style: TextStyle(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .onErrorContainer)),
-                                    backgroundColor: Theme.of(context)
-                                        .colorScheme
-                                        .errorContainer,
+                                            color: themeData
+                                                .colorScheme.onErrorContainer)),
+                                    backgroundColor:
+                                        themeData.colorScheme.errorContainer,
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );
