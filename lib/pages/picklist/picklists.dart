@@ -171,11 +171,15 @@ class _MyPicklistsState extends State<MyPicklists> {
                             },
                           ),
                           onDismissed: (direction) async {
+                            final scaffoldMessengerState =
+                                ScaffoldMessenger.of(context);
+                            final themeData = Theme.of(context);
+
                             picklists.remove(picklist);
 
                             await setPicklists(picklists);
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content: Text('Deleted "${picklist.title}"'),
                                 behavior: SnackBarBehavior.floating,
@@ -187,19 +191,16 @@ class _MyPicklistsState extends State<MyPicklists> {
                                         await setPicklists(picklists);
                                         setState(() {});
                                       } catch (error) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
+                                        scaffoldMessengerState.showSnackBar(
                                           SnackBar(
                                             content: Text(
                                               error.toString(),
                                               style: TextStyle(
-                                                  color: Theme.of(context)
-                                                      .colorScheme
+                                                  color: themeData.colorScheme
                                                       .onErrorContainer),
                                             ),
-                                            backgroundColor: Theme.of(context)
-                                                .colorScheme
-                                                .errorContainer,
+                                            backgroundColor: themeData
+                                                .colorScheme.errorContainer,
                                             behavior: SnackBarBehavior.floating,
                                           ),
                                         );
