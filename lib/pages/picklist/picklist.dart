@@ -36,8 +36,11 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
         actions: [
           IconButton(
             onPressed: () async {
+              final scaffoldMessengeState = ScaffoldMessenger.of(context);
+              final themeData = Theme.of(context);
+
               try {
-                ScaffoldMessenger.of(context).showSnackBar(
+                scaffoldMessengeState.showSnackBar(
                   const SnackBar(
                     content: Text("Uploading..."),
                     behavior: SnackBarBehavior.floating,
@@ -46,9 +49,9 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
 
                 await picklist.upload();
 
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                scaffoldMessengeState.hideCurrentSnackBar();
 
-                ScaffoldMessenger.of(context).showSnackBar(
+                scaffoldMessengeState.showSnackBar(
                   const SnackBar(
                     content: Text("Successfully uploaded picklist."),
                     behavior: SnackBarBehavior.floating,
@@ -57,17 +60,17 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
               } catch (error) {
                 debugPrint((error as TypeError).stackTrace.toString());
 
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                scaffoldMessengeState.hideCurrentSnackBar();
 
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                scaffoldMessengeState.showSnackBar(SnackBar(
                   content: Text(
                     "Error uploading picklist: $error",
                     style: TextStyle(
-                      color: Theme.of(context).colorScheme.onErrorContainer,
+                      color: themeData.colorScheme.onErrorContainer,
                     ),
                   ),
                   behavior: SnackBarBehavior.floating,
-                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                  backgroundColor: themeData.colorScheme.errorContainer,
                 ));
               }
             },
