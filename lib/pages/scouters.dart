@@ -548,17 +548,20 @@ class _DeleteScouterDialogState extends State<DeleteScouterDialog> {
                     submitting = true;
                   });
 
+                  final navigatorState = Navigator.of(context);
+                  final scaffoldMessengerState = ScaffoldMessenger.of(context);
+
                   try {
                     await lovatAPI.deleteScouter(widget.scouter.id);
                     widget.onDeleted?.call();
-                    Navigator.of(context).pop();
+                    navigatorState.pop();
                   } on LovatAPIException catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    scaffoldMessengerState.showSnackBar(SnackBar(
                       content: Text("Failed to delete scouter: ${e.message}"),
                       behavior: SnackBarBehavior.floating,
                     ));
                   } catch (_) {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    scaffoldMessengerState.showSnackBar(const SnackBar(
                       content: Text("Failed to delete scouter"),
                       behavior: SnackBarBehavior.floating,
                     ));
