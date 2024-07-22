@@ -155,7 +155,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
           OnboardingPagePhase.atTournament: AtTournamentPage(
             onSubmit: () {
-              onBoardingCompleted(Navigator.of(context));
+              onBoardingCompleted();
             },
           ),
           OnboardingPagePhase.otherUserRegistering: OtherUserRegisteringPage(
@@ -320,7 +320,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
-  void onBoardingCompleted(NavigatorState navigatorState) async {
+  void onBoardingCompleted() async {
+    final navigatorState = Navigator.of(context);
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt("onboardingVersion", 1);
 
