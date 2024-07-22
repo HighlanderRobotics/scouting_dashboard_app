@@ -102,12 +102,14 @@ class _EditTeamLookupFlagStatePage extends State<EditTeamLookupFlagPage> {
                 ? const Icon(Icons.check)
                 : null,
             onTap: () async {
+              final navigatorState = Navigator.of(context);
+
               final flag = FlagConfiguration.start(displayedFlags[index]);
 
               await setFlag(flag);
               args.onChange(flag);
 
-              Navigator.of(context).pop();
+              navigatorState.pop();
             },
           ),
           itemCount: displayedFlags.length,
