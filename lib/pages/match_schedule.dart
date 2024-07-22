@@ -142,6 +142,9 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   }
 
   Future<void> fetchTeamsInTournament() async {
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+    final themeData = Theme.of(context);
+
     try {
       final tournament = await Tournament.getCurrent();
 
@@ -151,15 +154,15 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         teamsInTournament = teams;
       });
     } on LovatAPIException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessengerState.showSnackBar(
         SnackBar(
           content: Text(
             "Error fetching teams: ${e.message}",
             style: TextStyle(
-              color: Theme.of(context).colorScheme.onErrorContainer,
+              color: themeData.colorScheme.onErrorContainer,
             ),
           ),
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
+          backgroundColor: themeData.colorScheme.errorContainer,
         ),
       );
     }
