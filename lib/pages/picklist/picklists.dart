@@ -299,8 +299,12 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                           },
                         ),
                         onDismissed: (direction) async {
+                          final scaffoldMessengerState =
+                              ScaffoldMessenger.of(context);
+                          final themeData = Theme.of(context);
+
                           try {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               const SnackBar(
                                 content: Text("Deleting..."),
                                 behavior: SnackBarBehavior.floating,
@@ -309,9 +313,9 @@ class _SharedPicklistsState extends State<SharedPicklists> {
 
                             await lovatAPI.deleteSharedPicklist(picklist.id);
 
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            scaffoldMessengerState.hideCurrentSnackBar();
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content: Text(
                                   'Successfully deleted picklist "${picklist.title}"',
@@ -320,20 +324,18 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               ),
                             );
                           } catch (error) {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            scaffoldMessengerState.hideCurrentSnackBar();
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content: Text(
                                   error.toString(),
                                   style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onErrorContainer),
+                                      color: themeData
+                                          .colorScheme.onErrorContainer),
                                 ),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .errorContainer,
+                                backgroundColor:
+                                    themeData.colorScheme.errorContainer,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
