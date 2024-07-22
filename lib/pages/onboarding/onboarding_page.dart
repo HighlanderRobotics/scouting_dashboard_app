@@ -843,7 +843,7 @@ extension SourceTeamSettingsModeExtension on SourceTeamSettingsMode {
                   : CrossFadeState.showSecond,
               duration: const Duration(
                 milliseconds: 250,
-              ), // TODO: Check if this looks good in release mode
+              ),
             ),
           ),
           Material(
