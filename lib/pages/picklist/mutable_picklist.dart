@@ -99,6 +99,9 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
         bottom: false,
         child: ReorderableListView(
           onReorder: (int oldIndex, int newIndex) async {
+            final scaffoldMessengerState = ScaffoldMessenger.of(context);
+            final themeData = Theme.of(context);
+
             List<int> newTeams =
                 (updatedTeamList ?? picklist.teams).where((e) => true).toList();
 
@@ -122,15 +125,15 @@ class _MutablePicklistPageState extends State<MutablePicklistPage> {
             try {
               await newPicklist.update();
             } catch (error) {
-              ScaffoldMessenger.of(context).showSnackBar(
+              scaffoldMessengerState.showSnackBar(
                 SnackBar(
                   behavior: SnackBarBehavior.floating,
                   content: Text(
                     "Error moving team: ${error.toString()}",
                     style: TextStyle(
-                        color: Theme.of(context).colorScheme.onErrorContainer),
+                        color: themeData.colorScheme.onErrorContainer),
                   ),
-                  backgroundColor: Theme.of(context).colorScheme.errorContainer,
+                  backgroundColor: themeData.colorScheme.errorContainer,
                 ),
               );
               setState(() {
