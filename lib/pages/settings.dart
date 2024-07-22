@@ -1089,6 +1089,9 @@ class _CodeViewerButtonState extends State<CodeViewerButton> {
   String? code;
 
   Future<void> load() async {
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+    final themeData = Theme.of(context);
+
     try {
       final code = await lovatAPI.getTeamCode();
 
@@ -1096,14 +1099,14 @@ class _CodeViewerButtonState extends State<CodeViewerButton> {
         this.code = code;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      scaffoldMessengerState.showSnackBar(SnackBar(
         content: Text(
           "Error getting team code: $e",
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onErrorContainer,
+            color: themeData.colorScheme.onErrorContainer,
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        backgroundColor: themeData.colorScheme.errorContainer,
         behavior: SnackBarBehavior.floating,
       ));
     }
