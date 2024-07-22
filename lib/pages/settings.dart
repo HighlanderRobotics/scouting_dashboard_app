@@ -1039,6 +1039,8 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
                     errorMessage = null;
                   });
 
+                  final navigatorState = Navigator.of(context);
+
                   try {
                     if (willDeleteAccount) {
                       await lovatAPI.deleteAccount();
@@ -1049,8 +1051,8 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
                     await prefs.clear();
                     await auth0.credentialsManager.clearCredentials();
 
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil("/loading", (route) => false);
+                    navigatorState.pushNamedAndRemoveUntil(
+                        "/loading", (route) => false);
                   } catch (e) {
                     setState(() {
                       errorMessage = "Failed to delete configuration";
