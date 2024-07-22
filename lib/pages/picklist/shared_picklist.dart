@@ -19,7 +19,10 @@ class SharedPicklistPage extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () async {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              final scaffoldMessengerState = ScaffoldMessenger.of(context);
+              final themeData = Theme.of(context);
+
+              scaffoldMessengerState.showSnackBar(const SnackBar(
                 behavior: SnackBarBehavior.floating,
                 content: Text("Converting to mutable..."),
               ));
@@ -32,25 +35,23 @@ class SharedPicklistPage extends StatelessWidget {
 
                 await mutablePicklist.upload();
               } catch (error) {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                ScaffoldMessenger.of(context).showSnackBar(
+                scaffoldMessengerState.hideCurrentSnackBar();
+                scaffoldMessengerState.showSnackBar(
                   SnackBar(
                     behavior: SnackBarBehavior.floating,
                     content: Text(
                       "Error converting to mutable: ${error.toString()}",
                       style: TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onErrorContainer),
+                          color: themeData.colorScheme.onErrorContainer),
                     ),
-                    backgroundColor:
-                        Theme.of(context).colorScheme.errorContainer,
+                    backgroundColor: themeData.colorScheme.errorContainer,
                   ),
                 );
                 return;
               }
 
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-              ScaffoldMessenger.of(context).showSnackBar(
+              scaffoldMessengerState.hideCurrentSnackBar();
+              scaffoldMessengerState.showSnackBar(
                 const SnackBar(
                   behavior: SnackBarBehavior.floating,
                   content: Text("Successfully converted to mutable."),
