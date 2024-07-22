@@ -126,14 +126,12 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
   }
 }
 
-class AnalysisOverview extends AnalysisVisualization {
+class AnalysisOverview
+    extends AnalysisVisualization<TeamMetricDetailsAnalysis> {
   const AnalysisOverview({
     super.key,
-    required this.analysisFunction,
-  }) : super(analysisFunction: analysisFunction);
-
-  @override
-  final TeamMetricDetailsAnalysis analysisFunction;
+    required super.analysisFunction,
+  });
 
   @override
   Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {

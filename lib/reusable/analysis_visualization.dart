@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 
 import '../analysis_functions/analysis.dart';
 
-abstract class AnalysisVisualization extends StatefulWidget {
+abstract class AnalysisVisualization<T extends AnalysisFunction>
+    extends StatefulWidget {
   const AnalysisVisualization({
     GlobalKey<AnalysisVisualizationState>? key,
     required this.analysisFunction,
     this.updateIncrement = 0,
   }) : super(key: key);
 
-  final AnalysisFunction analysisFunction;
+  final T analysisFunction;
   final int updateIncrement;
 
   Widget loadingView() => const Center(child: CircularProgressIndicator());
