@@ -279,6 +279,10 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
   }
 }
 
+extension FirstOrNull<T> on Set<T> {
+  T? get firstOrNull => isEmpty ? null : first;
+}
+
 // Instead of a button group, it has a container that displays the current value ("2023 Chezy Champs" or "18 tournaments") with a button to change it (new page)
 class TournamentSourceSelector extends StatefulWidget {
   const TournamentSourceSelector({super.key});
