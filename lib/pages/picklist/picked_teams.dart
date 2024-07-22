@@ -85,7 +85,10 @@ class _MarkPickedTeamDialogState extends State<MarkPickedTeamDialog> {
               : () async {
                   Navigator.of(context).pop();
 
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  final scaffoldMessengerState = ScaffoldMessenger.of(context);
+                  final themeData = Theme.of(context);
+
+                  scaffoldMessengerState.showSnackBar(
                     const SnackBar(
                       content: Text("Adding..."),
                       behavior: SnackBarBehavior.floating,
@@ -95,25 +98,23 @@ class _MarkPickedTeamDialogState extends State<MarkPickedTeamDialog> {
                   try {
                     await addPickedTeam(int.parse(fieldValue));
 
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    scaffoldMessengerState.hideCurrentSnackBar();
 
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessengerState.showSnackBar(
                       SnackBar(
                         content: Text("Marked $fieldValue as picked"),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
                   } catch (error) {
-                    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    scaffoldMessengerState.hideCurrentSnackBar();
 
-                    ScaffoldMessenger.of(context).showSnackBar(
+                    scaffoldMessengerState.showSnackBar(
                       SnackBar(
                         content: Text(
                           "Error: $error",
                           style: TextStyle(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
+                            color: themeData.colorScheme.onPrimaryContainer,
                           ),
                         ),
                         behavior: SnackBarBehavior.floating,
