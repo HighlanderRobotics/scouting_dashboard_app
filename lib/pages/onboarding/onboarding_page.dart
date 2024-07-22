@@ -1473,6 +1473,9 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
                   onPressed: notOnTeamLoading
                       ? null
                       : () async {
+                          final scaffoldMessengerState =
+                              ScaffoldMessenger.of(context);
+
                           try {
                             setState(() {
                               notOnTeamLoading = true;
@@ -1482,7 +1485,7 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
 
                             widget.onSubmit?.call(null);
                           } on LovatAPIException catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content: Text(e.message),
                                 behavior: SnackBarBehavior.floating,
@@ -1490,7 +1493,7 @@ class _TeamNumberPageState extends State<TeamNumberPage> {
                             );
                           } catch (e) {
                             debugPrint(e.toString());
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               const SnackBar(
                                 content: Text("Error setting not on team"),
                                 behavior: SnackBarBehavior.floating,
