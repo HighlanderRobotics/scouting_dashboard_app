@@ -439,8 +439,10 @@ class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
       error = null;
     });
 
+    final navigatorState = Navigator.of(context);
+
     if (mode == SourceTeamSettingsMode.specificTeams) {
-      Navigator.of(context).pushNamed(
+      navigatorState.pushNamed(
         '/specific_source_teams',
         arguments: SpecificSourceTeamsArguments(
           onSubmit: (teams) async {
@@ -459,7 +461,7 @@ class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
               );
 
               widget.onSubmit?.call();
-              Navigator.of(context).popUntil((a) => a.isFirst);
+              navigatorState.popUntil((a) => a.isFirst);
             } catch (e) {
               debugPrint(e.toString());
               setState(() {
