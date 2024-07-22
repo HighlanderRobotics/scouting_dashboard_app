@@ -33,18 +33,24 @@ class _NewPicklistPageState extends State<NewPicklistPage> {
                           snapshot.connectionState != ConnectionState.done
                       ? null
                       : () async {
+                          final onCreate = (ModalRoute.of(context)!
+                              .settings
+                              .arguments as Map<String, dynamic>)['onCreate'];
+
+                          final scaffoldMessengerState =
+                              ScaffoldMessenger.of(context);
+                          final navigatorState = Navigator.of(context);
+
                           await addPicklist(picklist);
 
-                          (ModalRoute.of(context)!.settings.arguments
-                              as Map<String, dynamic>)['onCreate']();
+                          onCreate();
 
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
+                          scaffoldMessengerState.showSnackBar(const SnackBar(
                             content: Text("Created picklist"),
                             behavior: SnackBarBehavior.floating,
                           ));
 
-                          Navigator.of(context).pop();
+                          navigatorState.pop();
                         },
                   icon: const Icon(Icons.check),
                   tooltip: "Create",
