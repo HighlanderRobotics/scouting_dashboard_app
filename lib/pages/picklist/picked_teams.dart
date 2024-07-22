@@ -194,7 +194,11 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
                           ),
                         ),
                         onDismissed: (direction) async {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          final scaffoldMessengerState =
+                              ScaffoldMessenger.of(context);
+                          final themeData = Theme.of(context);
+
+                          scaffoldMessengerState.showSnackBar(
                             const SnackBar(
                               content: Text("Removing..."),
                               behavior: SnackBarBehavior.floating,
@@ -204,9 +208,9 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
                           try {
                             await removePickedTeam(team);
 
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            scaffoldMessengerState.hideCurrentSnackBar();
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content:
                                     Text("Removed $team from picked teams"),
@@ -214,21 +218,19 @@ class _PickedTeamsPageState extends State<PickedTeamsPage> {
                               ),
                             );
                           } catch (error) {
-                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                            scaffoldMessengerState.hideCurrentSnackBar();
 
-                            ScaffoldMessenger.of(context).showSnackBar(
+                            scaffoldMessengerState.showSnackBar(
                               SnackBar(
                                 content: Text(
                                   "Error: $error",
                                   style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onErrorContainer,
+                                    color:
+                                        themeData.colorScheme.onErrorContainer,
                                   ),
                                 ),
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .errorContainer,
+                                backgroundColor:
+                                    themeData.colorScheme.errorContainer,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
