@@ -498,10 +498,12 @@ class _TournamentSourceSelectorSettingsPageState
       isSubmitLoading = true;
     });
 
+    final navigatorState = Navigator.of(context);
+
     try {
       await lovatAPI.setSourceTournamentKeys(selectedTournamentKeys!);
       widget.onSubmit?.call();
-      Navigator.of(context).pop();
+      navigatorState.pop();
     } catch (e) {
       setState(() {
         errorMessage = "Failed to save source tournament settings";
