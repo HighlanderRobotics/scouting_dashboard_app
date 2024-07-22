@@ -497,8 +497,11 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                             },
                           ),
                           onDismissed: (direction) async {
-                            ScaffoldMessenger.of(context)
-                                .showSnackBar(const SnackBar(
+                            final scaffoldMessengerState =
+                                ScaffoldMessenger.of(context);
+                            final themeData = Theme.of(context);
+
+                            scaffoldMessengerState.showSnackBar(const SnackBar(
                               content: Text("Deleting..."),
                               behavior: SnackBarBehavior.floating,
                             ));
@@ -506,32 +509,27 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                             try {
                               await picklistMeta.delete();
 
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
+                              scaffoldMessengerState.hideCurrentSnackBar();
 
-                              ScaffoldMessenger.of(context)
+                              scaffoldMessengerState
                                   .showSnackBar(const SnackBar(
                                 content: Text("Successfully deleted"),
                                 behavior: SnackBarBehavior.floating,
                               ));
                             } catch (error) {
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
+                              scaffoldMessengerState.hideCurrentSnackBar();
 
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(SnackBar(
+                              scaffoldMessengerState.showSnackBar(SnackBar(
                                 content: Text(
                                   "Error deleting: $error",
                                   style: TextStyle(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onErrorContainer,
+                                    color:
+                                        themeData.colorScheme.onErrorContainer,
                                   ),
                                 ),
                                 behavior: SnackBarBehavior.floating,
-                                backgroundColor: Theme.of(context)
-                                    .colorScheme
-                                    .errorContainer,
+                                backgroundColor:
+                                    themeData.colorScheme.errorContainer,
                               ));
 
                               return;
