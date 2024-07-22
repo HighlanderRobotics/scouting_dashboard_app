@@ -215,7 +215,6 @@ class _TeamPerMatchPageState extends State<TeamPerMatchPage> {
     );
   }
 
-  // TODO: Replace with skeleton
   Widget loadingView() => const Center(child: CircularProgressIndicator());
 
   Widget loadedView(TeamPerMatchArgs args) {
