@@ -1,13 +1,8 @@
-import 'dart:convert';
-
 import 'package:scouting_dashboard_app/analysis_functions/analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 
-import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_metric_details.dart';
-
-import '../constants.dart';
 
 class TeamMetricDetailsAnalysis extends AnalysisFunction {
   TeamMetricDetailsAnalysis({

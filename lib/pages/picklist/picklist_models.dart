@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
-import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/create_mutable_picklist.dart';
