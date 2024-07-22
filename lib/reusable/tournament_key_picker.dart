@@ -61,6 +61,9 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
   }
 
   Future<void> setInitialTournament() async {
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+    final themeData = Theme.of(context);
+
     try {
       final current = await Tournament.getCurrent();
 
@@ -74,14 +77,14 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
         initialized = true;
       });
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      scaffoldMessengerState.showSnackBar(SnackBar(
         content: Text(
           "Error getting current tournament: $error",
           style: TextStyle(
-            color: Theme.of(context).colorScheme.onErrorContainer,
+            color: themeData.colorScheme.onErrorContainer,
           ),
         ),
-        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        backgroundColor: themeData.colorScheme.errorContainer,
         behavior: SnackBarBehavior.floating,
       ));
 
