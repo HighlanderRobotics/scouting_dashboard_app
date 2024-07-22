@@ -81,7 +81,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           isDataFetched = true;
         });
         return;
-      } // TODO: Make this message
+      }
 
       final matches = await lovatAPI.getMatches(
         tournament.key,
