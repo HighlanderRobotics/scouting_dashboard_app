@@ -585,7 +585,6 @@ class _AnimatedAutoPathState extends State<AnimatedAutoPath>
     return AnimatedBuilder(
       animation: controller,
       builder: (context, widget) {
-        debugPrint(controller.duration.toString());
         return EmphasizedContainer(
           padding: const EdgeInsets.fromLTRB(10, 10, 10, 3),
           child: Column(

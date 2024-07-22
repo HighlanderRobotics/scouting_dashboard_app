@@ -1,6 +1,3 @@
-import 'dart:convert';
-
-import 'package:flutter/widgets.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 
 class LovatUserProfile {
@@ -17,8 +14,6 @@ class LovatUserProfile {
   final UserRole? role;
 
   factory LovatUserProfile.fromJson(Map<String, dynamic> json) {
-    debugPrint(jsonEncode(json));
-
     return LovatUserProfile(
       email: json['email'],
       username: json['username'],

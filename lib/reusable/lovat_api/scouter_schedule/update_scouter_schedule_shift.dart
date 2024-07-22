@@ -8,8 +8,6 @@ extension UpdateScouterScheduleShift on LovatAPI {
   Future<void> updateScouterScheduleShift(
     ServerScoutingShift shift,
   ) async {
-    debugPrint(shift.team1.toString());
-
     final response = await post(
       '/v1/manager/scoutershifts/${shift.id}',
       body: {

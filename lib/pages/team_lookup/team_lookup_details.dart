@@ -394,9 +394,6 @@ class AnalysisOverview
                                       snapshot.data['array']
                                           [touchedSpot.spotIndex]['match']);
 
-                              debugPrint(
-                                  "Match: ${snapshot.data['array'][touchedSpot.spotIndex]}");
-
                               return LineTooltipItem(
                                 "${matchIdentity.getShortLocalizedDescription()} at ${snapshot.data['array'][touchedSpot.spotIndex]['tournamentName']}",
                                 Theme.of(context).textTheme.labelMedium!,
@@ -452,7 +449,6 @@ class AnalysisOverview
 
                               for (var i = 0; i < array.length; i++) {
                                 if (array[i]["dataPoint"] != null) {
-                                  debugPrint("Spot: ${array[i]["dataPoint"]}");
                                   spots.add(
                                     FlSpot(
                                       i.toDouble(),

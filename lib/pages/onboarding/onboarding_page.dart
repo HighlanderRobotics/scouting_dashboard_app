@@ -308,8 +308,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
             audience: "https://api.lovat.app",
           );
 
-      debugPrint((await auth0.credentialsManager.credentials()).accessToken);
-
       toRegistrationStatusView(null);
     } catch (e) {
       debugPrint(e.toString());
@@ -1019,8 +1017,6 @@ class _TeamEmailPageState extends State<TeamEmailPage> {
       });
 
       final submittedEmail = jsonDecode(jsonEncode(email));
-
-      debugPrint(email);
 
       await lovatAPI.registerTeam(widget.team.number, submittedEmail);
 

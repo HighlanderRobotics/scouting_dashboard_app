@@ -130,8 +130,6 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
     try {
       final sourceTeamSettings = await lovatAPI.getSourceTeamSettings();
 
-      debugPrint("${sourceTeamSettings.mode} ${sourceTeamSettings.teams}");
-
       setState(() {
         mode = sourceTeamSettings.mode;
         teams = sourceTeamSettings.teams;
@@ -165,7 +163,6 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("thisTeam: $thisTeamNumber");
     if (isLoading && errorMesssage == null) {
       return const SkeletonAvatar(
         style: SkeletonAvatarStyle(
@@ -639,8 +636,6 @@ class _DataExportDrawerState extends State<DataExportDrawer> {
         return;
       }
       final csv = await lovatAPI.getCSVExport(tournament, widget.exportMode);
-
-      debugPrint(csv);
 
       final csvFile = XFile.fromData(
         utf8.encode(csv),

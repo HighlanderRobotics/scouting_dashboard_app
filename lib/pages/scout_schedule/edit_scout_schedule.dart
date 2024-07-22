@@ -28,7 +28,7 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
   Future<void> fetchData() async {
     try {
       final scoutSchedule = await lovatAPI.getScouterSchedule();
-      debugPrint(scoutSchedule.shifts.toString());
+
       setState(() {
         this.scoutSchedule = scoutSchedule;
       });
@@ -216,7 +216,6 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
   TextEditingController endFieldController = TextEditingController();
 
   Future<void> fetchData() async {
-    debugPrint("Fetching data");
     try {
       setState(() {
         errorMessage = null;
@@ -225,9 +224,7 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
       setState(() {
         this.allScouts = allScouts;
       });
-      debugPrint("Done fetching data");
     } catch (e) {
-      debugPrint("Failed to fetch data");
       setState(() {
         errorMessage = "Failed to load scouts";
       });
@@ -424,10 +421,8 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
             onChanged: (newScout) {
               final newScouts = scouts.toList();
               if (newScout == null) {
-                debugPrint("Removing scout");
                 newScouts.remove(scout);
               } else {
-                debugPrint("Replacing scout");
                 newScouts[scouts.indexOf(scout)] = newScout;
               }
               onChanged?.call(newScouts);
