@@ -21,6 +21,8 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
   LovatUserProfile? userProfile;
 
   Future<void> fetchData() async {
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+
     final tournament = await Tournament.getCurrent();
 
     setState(() {
@@ -36,12 +38,12 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
         userProfile = profile;
       });
     } on LovatAPIException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      scaffoldMessengerState.showSnackBar(SnackBar(
         content: Text("Failed to load user profile: ${e.message}"),
         behavior: SnackBarBehavior.floating,
       ));
     } catch (_) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+      scaffoldMessengerState.showSnackBar(const SnackBar(
         content: Text("Failed to load user profile"),
         behavior: SnackBarBehavior.floating,
       ));
