@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picked_teams.dart';
