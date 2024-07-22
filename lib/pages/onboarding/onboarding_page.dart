@@ -1281,6 +1281,8 @@ class _EditEmailDialogState extends State<EditEmailDialog> {
       error = null;
     });
 
+    final navigatorState = Navigator.of(context);
+
     try {
       setState(() {
         submitting = true;
@@ -1288,8 +1290,8 @@ class _EditEmailDialogState extends State<EditEmailDialog> {
 
       await lovatAPI.editTeamEmail(value);
 
-      if (Navigator.of(context).canPop()) {
-        Navigator.of(context).pop();
+      if (navigatorState.canPop()) {
+        navigatorState.pop();
       }
 
       widget.onSuccess?.call();
