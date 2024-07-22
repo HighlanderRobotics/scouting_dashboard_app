@@ -193,10 +193,12 @@ class _AddScouterDialogState extends State<AddScouterDialog> {
                     error = null;
                   });
 
+                  final navigatorState = Navigator.of(context);
+
                   try {
                     await lovatAPI.addScouter(name);
                     widget.onAdd?.call();
-                    Navigator.of(context).pop();
+                    navigatorState.pop();
                   } on LovatAPIException catch (e) {
                     setState(() {
                       error = e.message;
