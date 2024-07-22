@@ -474,10 +474,12 @@ class _RenameScouterDialogState extends State<RenameScouterDialog> {
                     error = null;
                   });
 
+                  final navigatorState = Navigator.of(context);
+
                   try {
                     await lovatAPI.renameScouter(widget.scouter.id, name);
                     widget.onRenamed?.call(name);
-                    Navigator.of(context).pop();
+                    navigatorState.pop();
                   } on LovatAPIException catch (e) {
                     setState(() {
                       error = e.message;
