@@ -66,40 +66,6 @@ Future<List<String>> getScoutNames() async {
       .toList();
 }
 
-enum Penalty {
-  none,
-  yellowCard,
-  redCard,
-}
-
-extension PenaltyExtension on Penalty {
-  String get localizedDescription {
-    switch (this) {
-      case Penalty.none:
-        return "None";
-      case Penalty.yellowCard:
-        return "Yellow card";
-      case Penalty.redCard:
-        return "Red card";
-      default:
-        return "Unknown";
-    }
-  }
-
-  Color get color {
-    switch (this) {
-      case Penalty.none:
-        return Colors.green[700]!;
-      case Penalty.yellowCard:
-        return const Color.fromARGB(255, 230, 251, 45);
-      case Penalty.redCard:
-        return Colors.red[700]!;
-      default:
-        return Colors.grey[700]!;
-    }
-  }
-}
-
 Future<Map<String, String?>> getScoutedStatuses() async {
   final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(utf8.decode(
           (await http.get(Uri.http(
@@ -117,13 +83,6 @@ Future<Map<String, String?>> getScoutedStatuses() async {
   }
 
   return isScoutedElegante;
-}
-
-class ScoringMethod {
-  const ScoringMethod(this.path, this.localizedName);
-
-  final String path;
-  final String localizedName;
 }
 
 extension ListSpaceBetweenExtension on List<Widget> {
