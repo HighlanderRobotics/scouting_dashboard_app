@@ -119,13 +119,6 @@ Future<Map<String, String?>> getScoutedStatuses() async {
   return isScoutedElegante;
 }
 
-class ScoringMethod {
-  const ScoringMethod(this.path, this.localizedName);
-
-  final String path;
-  final String localizedName;
-}
-
 extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withSpaceBetween({double? width, double? height}) => [
         for (int i = 0; i < length; i++) ...[
