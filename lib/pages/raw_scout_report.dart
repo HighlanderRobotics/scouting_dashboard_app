@@ -546,34 +546,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     );
   }
 
-  ScrollablePageBody fieldsTab(
-    String scouterName,
-    RobotRole robotRole,
-    ChallengeResult autoChallengeResult,
-    ChallengeResult teleopChallengeResult,
-    DriverAbility driverAbility,
-    Penalty penaltyCard,
-    int? links,
-    String notes,
-  ) {
-    return ScrollablePageBody(
-        children: [
-      field("Scouter", scouterName),
-      field(
-        "Role",
-        robotRole.name,
-        valueLeading: Icon(robotRole.littleEmblem),
-      ),
-      field("Auto Charge", autoChallengeResult.localizedDescription),
-      field("Teleop Charge", teleopChallengeResult.localizedDescription),
-      field("Driver Ability",
-          "${driverAbility.localizedDescription} (${driverAbility.index + 1}/${DriverAbility.values.length})"),
-      field("Penalty Cards", penaltyCard.localizedDescription),
-      field("Links", links == null ? '--' : links.toString()),
-      field("Notes", notes.isEmpty ? "--" : notes)
-    ].withSpaceBetween(height: 10));
-  }
-
   Widget field(String title, String value, {Widget? valueLeading}) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
