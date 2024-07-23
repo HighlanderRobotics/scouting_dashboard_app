@@ -95,8 +95,8 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
     setInitialTournament();
     getTournaments();

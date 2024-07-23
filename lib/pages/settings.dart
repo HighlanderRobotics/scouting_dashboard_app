@@ -1112,8 +1112,8 @@ class _CodeViewerButtonState extends State<CodeViewerButton> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     load();
   }
 

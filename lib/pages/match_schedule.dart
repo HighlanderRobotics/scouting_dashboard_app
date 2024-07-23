@@ -169,8 +169,8 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
     fetchData();
     checkRole();

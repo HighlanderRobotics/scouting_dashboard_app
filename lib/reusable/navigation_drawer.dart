@@ -60,6 +60,11 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
   void initState() {
     super.initState();
     userProfile = cachedUserProfile;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     fetchData();
   }
 
