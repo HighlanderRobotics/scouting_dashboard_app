@@ -228,31 +228,6 @@ class AnalysisOverview
     );
   }
 
-  Row gridRow(
-    BuildContext context,
-    Map<String, dynamic> analysisMap,
-    String key,
-    String label,
-  ) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.labelLarge!.merge(
-                TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ),
-        ),
-        Text(
-          analysisFunction.metric.valueVizualizationBuilder(analysisMap[key]),
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      ],
-    );
-  }
-
   Widget sparkline(
       BuildContext context, AsyncSnapshot<dynamic> snapshot, double? max) {
     return Column(
