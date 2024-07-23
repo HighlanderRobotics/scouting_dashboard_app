@@ -139,36 +139,6 @@ class AnalysisOverview
 
     return Column(
       children: [
-        if (analysisMap.containsKey('one') &&
-            analysisMap.containsKey('two') &&
-            analysisMap.containsKey('three'))
-          Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).colorScheme.surfaceVariant,
-                  borderRadius: const BorderRadius.all(Radius.circular(10)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(children: [
-                    gridRow(context, analysisMap, 'three', 'Top'),
-                    Divider(
-                      height: 21,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    gridRow(context, analysisMap, 'two', 'Middle'),
-                    Divider(
-                      height: 21,
-                      color: Theme.of(context).colorScheme.outline,
-                    ),
-                    gridRow(context, analysisMap, 'one', 'Hybrid'),
-                  ]),
-                ),
-              ),
-              const SizedBox(height: 10),
-            ],
-          ),
         Row(children: [
           if (analysisMap.containsKey('result'))
             valueBox(
