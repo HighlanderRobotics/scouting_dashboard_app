@@ -8,6 +8,7 @@ on:
 
 jobs:
   analyze:
+    name: Analyze
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -21,6 +22,7 @@ jobs:
       - run: flutter analyze
 
   check-format:
+    name: Check format
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
