@@ -157,69 +157,141 @@ final List<MetricCategoryData> metricCategories = [
 List<BreakdownData> breakdowns = [
   BreakdownData(
     localizedName: "Role",
-    path: "robotRole",
+    path: "robotrole",
     segments: [
-      BreakdownSegmentData(localizedNameSingular: "Offense", path: "offense"),
-      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
-      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
-      BreakdownSegmentData(localizedNameSingular: "Immobile", path: "immobile"),
+      BreakdownSegmentData(localizedNameSingular: "Offense", path: "OFFENSE"),
+      BreakdownSegmentData(localizedNameSingular: "Defense", path: "DEFENSE"),
+      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "FEEDER"),
+      BreakdownSegmentData(localizedNameSingular: "Immobile", path: "IMMOBILE"),
     ],
   ),
   BreakdownData(
-    localizedName: "Pick-up",
-    path: "pickUp",
+    localizedName: "Coral intake",
+    path: "coralpickup",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Ground",
-        path: "ground",
+        path: "NONE",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Chute",
-        path: "chute",
+        localizedNameSingular: "Ground",
+        path: "GROUND",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Station",
+        path: "STATION",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Both",
-        path: "both",
+        path: "BOTH",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "High note",
-    path: "highNote",
+    localizedName: "Algae intake",
+    path: "algaepickup",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Successful",
-        path: "successful",
+        localizedNameSingular: "Ground",
+        path: "NONE",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Fail",
-        path: "failed",
+        localizedNameSingular: "Ground",
+        path: "GROUND",
       ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Reef",
+        path: "REEF",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Both",
+        path: "BOTH",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Barge result",
+    path: "bargeresult",
+    segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Not attempted",
-        path: "not_attempted",
+        path: "NOT_ATTEMPTED",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Parked",
+        path: "PARKED",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Shallow",
+        path: "SHALLOW",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Shallow, failed",
+        path: "FAILED_SHALLOW",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Deep",
+        path: "DEEP",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Deep, failed",
+        path: "FAILED_DEEP",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Stage",
-    path: "stage",
+    localizedName: "Knocks algae",
+    path: "knocksalgae",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Nothing",
-        path: "nothing",
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Park",
-        path: "park",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Traverses under cage",
+    path: "Undershallowcage",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Onstage",
-        path: "onstage",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Leaves during auto",
+    path: "leavesauto",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Onstage & Harmony",
-        path: "onstage_harmony",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Coral levels",
+    path: "corallevels",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "No",
+        path: "False",
       ),
     ],
   ),
