@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
+import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/inset_picker.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/delete_account.dart';
@@ -102,6 +103,35 @@ class _SettingsPageState extends State<SettingsPage> {
               const AnalystsBox(),
               const SizedBox(height: 40),
               const ResetAppButton(),
+              if (lovatAPI.baseUrl != kProductionBaseUrl) ...[
+                const SizedBox(height: 20),
+                EmphasizedContainer(
+                    child: Row(
+                  children: [
+                    const SizedBox(width: 7),
+                    Text("Stage: ${lovatAPI.stage}"),
+                    const Spacer(),
+                    TextButton(
+                      onPressed: () async {
+                        final prefs = await SharedPreferences.getInstance();
+
+                        await prefs.setString(
+                            'api_base_url', kProductionBaseUrl);
+                        await prefs.remove('stage');
+
+                        lovatAPI.baseUrl = kProductionBaseUrl;
+                        lovatAPI.stage = null;
+
+                        Navigator.of(context).pushNamedAndRemoveUntil(
+                            "/loading", (route) => false);
+                      },
+                      style: const ButtonStyle(
+                          visualDensity: VisualDensity.compact),
+                      child: const Text("Use production"),
+                    ),
+                  ],
+                ))
+              ],
             ],
           ),
         ],

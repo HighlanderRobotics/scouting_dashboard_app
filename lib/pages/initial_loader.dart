@@ -6,6 +6,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/flags.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class InitialLoaderPage extends StatefulWidget {
@@ -19,6 +20,11 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
   Future<void> load(NavigatorState navigator) async {
     final navigator = Navigator.of(context);
     final prefs = await SharedPreferences.getInstance();
+
+    // Retrieve the base API URL
+    if (prefs.containsKey('api_base_url')) {
+      lovatAPI.baseUrl = prefs.getString('api_base_url')!;
+    }
 
     // Set default picklists if they don't exist
     if (!prefs.containsKey('picklists')) {

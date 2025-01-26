@@ -26,12 +26,15 @@ import 'package:scouting_dashboard_app/pages/match_predictor.dart';
 import 'package:scouting_dashboard_app/pages/scout_schedule/edit_scout_schedule.dart';
 import 'package:scouting_dashboard_app/pages/display_qr_codes.dart';
 import 'package:scouting_dashboard_app/pages/scouters.dart';
+import 'package:scouting_dashboard_app/pages/set_api_url.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   runApp(MaterialApp(
@@ -96,6 +99,36 @@ void main() async {
                 .submitText,
           ),
       '/scouters': (context) => const ScoutersPage(),
+      // '/set-api-url': (context) => const SetAPIUrlPage(),
+    },
+    onGenerateRoute: (settings) {
+      if (settings.name == null) return null;
+
+      if (settings.name!.startsWith('/set-api-url')) {
+        // Parse the URL query parameters
+        final Map<String, String> queryParameters = Map.fromEntries(settings
+            .name!
+            .split('?')[1]
+            .split('&')
+            .map((e) => e.split('='))
+            .map((e) => MapEntry(e[0], e[1]))
+            .map((e) => MapEntry(
+                Uri.decodeComponent(e.key), Uri.decodeComponent(e.value))));
+
+        final String? apiBaseUrl = queryParameters['url'];
+        final String? stage = queryParameters['stage'];
+
+        if (apiBaseUrl == null || stage == null) {
+          return null;
+        }
+
+        return MaterialPageRoute<void>(
+          builder: (context) => SetAPIUrlPage(
+            apiBaseUrl: apiBaseUrl,
+            stage: stage,
+          ),
+        );
+      }
     },
     theme: ThemeData(
       useMaterial3: true,
