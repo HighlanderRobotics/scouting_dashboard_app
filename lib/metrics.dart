@@ -84,44 +84,56 @@ final List<MetricCategoryData> metricCategories = [
       path: "teleoppoints",
     ),
   ]),
-  MetricCategoryData("Note scoring", [
+  MetricCategoryData("Algae", [
     CategoryMetric(
-      localizedName: "Amp scores",
-      abbreviatedLocalizedName: "Amp",
+      localizedName: "Processor scores",
+      abbreviatedLocalizedName: "Processor",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "ampscores",
-    ),
-    CategoryMetric(
-      localizedName: "Speaker scores",
-      abbreviatedLocalizedName: "Speaker",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "speakerscores",
-    ),
-    CategoryMetric(
-      localizedName: "Trap scores",
-      abbreviatedLocalizedName: "Trap",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "trapscores",
-    ),
-  ]),
-  MetricCategoryData("Note interactions", [
-    CategoryMetric(
-      localizedName: "Pickups",
-      abbreviatedLocalizedName: "Pickups",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "pickups",
+      path: "processorAlgae",
     ),
     CategoryMetric(
       localizedName: "Drops",
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "drops",
+      path: "dropalgae",
     ),
     CategoryMetric(
       localizedName: "Feeds",
       abbreviatedLocalizedName: "Feeds",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "feeds",
+    ),
+  ]),
+  MetricCategoryData("Coral", [
+    CategoryMetric(
+      localizedName: "L1 Score",
+      abbreviatedLocalizedName: "L1",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level1",
+    ),
+    CategoryMetric(
+      localizedName: "L2 Score",
+      abbreviatedLocalizedName: "L2",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level2",
+    ),
+    CategoryMetric(
+      localizedName: "L3 Score",
+      abbreviatedLocalizedName: "L3",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level3",
+    ),
+    CategoryMetric(
+      localizedName: "L4 Score",
+      abbreviatedLocalizedName: "L4",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level4",
+    ),
+    CategoryMetric(
+      localizedName: "Drops",
+      abbreviatedLocalizedName: "Drops",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "dropcoral",
     ),
   ]),
   MetricCategoryData("Other", [
@@ -133,10 +145,10 @@ final List<MetricCategoryData> metricCategories = [
       path: "driverability",
     ),
     CategoryMetric(
-      localizedName: "Defense",
-      abbreviatedLocalizedName: "Defense",
+      localizedName: "Defends",
+      abbreviatedLocalizedName: "Defends",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "defense",
+      path: "defends",
       hideDetails: true,
     ),
   ]),
