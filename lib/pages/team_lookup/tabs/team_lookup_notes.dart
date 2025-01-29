@@ -7,7 +7,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_notes.
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class TeamLookupNotesVizualization extends AnalysisVisualization {
   const TeamLookupNotesVizualization({

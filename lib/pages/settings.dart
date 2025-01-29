@@ -24,7 +24,7 @@ import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);

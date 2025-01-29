@@ -14,7 +14,7 @@ import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 import '../reusable/navigation_drawer.dart';
 

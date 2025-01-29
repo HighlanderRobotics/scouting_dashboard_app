@@ -275,7 +275,7 @@ class AnalysisOverview
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) =>
                                     SideTitleWidget(
-                                      axisSide: meta.axisSide,
+                                      meta: meta,
                                       child: Text(
                                         analysisFunction.metric
                                             .valueVizualizationBuilder(value),

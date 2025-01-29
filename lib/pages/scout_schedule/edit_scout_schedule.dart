@@ -12,7 +12,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/get_s
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/update_scouter_schedule_shift.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class EditScoutSchedulePage extends StatefulWidget {
   const EditScoutSchedulePage({super.key});

@@ -6,7 +6,7 @@ import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_flags.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class FlagType {
   const FlagType(

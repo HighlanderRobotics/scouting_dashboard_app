@@ -4,7 +4,7 @@ import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class TeamLookupBreakdownsVizualization extends AnalysisVisualization {
   const TeamLookupBreakdownsVizualization({

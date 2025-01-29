@@ -9,7 +9,7 @@ import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class MyPicklistPage extends StatefulWidget {
   const MyPicklistPage({super.key});

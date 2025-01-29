@@ -10,7 +10,7 @@ import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class ScoutersPage extends StatefulWidget {
   const ScoutersPage({super.key});

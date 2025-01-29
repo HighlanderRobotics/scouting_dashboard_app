@@ -4,7 +4,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_tournaments.dart';
 
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
-import 'package:skeletons/skeletons.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class TournamentKeyPicker extends StatefulWidget {
   const TournamentKeyPicker({
