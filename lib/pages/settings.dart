@@ -106,21 +106,32 @@ class _SettingsPageState extends State<SettingsPage> {
               if (lovatAPI.baseUrl != kProductionBaseUrl) ...[
                 const SizedBox(height: 20),
                 EmphasizedContainer(
-                    child: Row(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(width: 7),
-                    Text("Stage: ${lovatAPI.stage}"),
-                    const Spacer(),
-                    TextButton(
+                    // const SizedBox(width: 7),
+                    Text(
+                      "URL",
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    Text(
+                      lovatAPI.baseUrl,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                    const SizedBox(height: 10),
+                    FilledButton(
                       onPressed: () async {
                         final prefs = await SharedPreferences.getInstance();
 
                         await prefs.setString(
                             'api_base_url', kProductionBaseUrl);
-                        await prefs.remove('stage');
 
                         lovatAPI.baseUrl = kProductionBaseUrl;
-                        lovatAPI.stage = null;
 
                         Navigator.of(context).pushNamedAndRemoveUntil(
                             "/loading", (route) => false);

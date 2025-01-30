@@ -5,14 +5,9 @@ import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SetAPIUrlPage extends StatefulWidget {
-  const SetAPIUrlPage({
-    super.key,
-    required this.apiBaseUrl,
-    required this.stage,
-  });
+  const SetAPIUrlPage({super.key, required this.apiBaseUrl});
 
   final String apiBaseUrl;
-  final String stage;
 
   @override
   State<SetAPIUrlPage> createState() => _SetAPIUrlPageState();
@@ -25,10 +20,8 @@ class _SetAPIUrlPageState extends State<SetAPIUrlPage> {
     final prefs = await SharedPreferences.getInstance();
 
     await prefs.setString('api_base_url', widget.apiBaseUrl);
-    await prefs.setString('stage', widget.stage);
 
     lovatAPI.baseUrl = widget.apiBaseUrl;
-    lovatAPI.stage = widget.stage;
 
     setState(() {
       connected = true;
@@ -50,11 +43,13 @@ class _SetAPIUrlPageState extends State<SetAPIUrlPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              connected ? "Connected to stage" : "Connecting to stage",
+              connected
+                  ? "Connected to development server"
+                  : "Connecting to development server",
               style: Theme.of(context).textTheme.headlineLarge,
             ),
             Text(
-              "Lovat Dashboard will send API requests using the ${widget.stage} stage. You can reset it to production in settings.",
+              "Lovat Dashboard will send API requests to ${Uri.parse(widget.apiBaseUrl).host}. You can reset it to production in settings.",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             FilledButton(

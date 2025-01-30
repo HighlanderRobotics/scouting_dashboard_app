@@ -104,7 +104,7 @@ void main() async {
     onGenerateRoute: (settings) {
       if (settings.name == null) return null;
 
-      if (settings.name!.startsWith('/set-api-url')) {
+      if (settings.name!.startsWith('/set-url')) {
         // Parse the URL query parameters
         final Map<String, String> queryParameters = Map.fromEntries(settings
             .name!
@@ -115,18 +115,14 @@ void main() async {
             .map((e) => MapEntry(
                 Uri.decodeComponent(e.key), Uri.decodeComponent(e.value))));
 
-        final String? apiBaseUrl = queryParameters['url'];
-        final String? stage = queryParameters['stage'];
+        final String? apiBaseUrl = queryParameters['u'];
 
-        if (apiBaseUrl == null || stage == null) {
+        if (apiBaseUrl == null) {
           return null;
         }
 
         return MaterialPageRoute<void>(
-          builder: (context) => SetAPIUrlPage(
-            apiBaseUrl: apiBaseUrl,
-            stage: stage,
-          ),
+          builder: (context) => SetAPIUrlPage(apiBaseUrl: apiBaseUrl),
         );
       }
     },

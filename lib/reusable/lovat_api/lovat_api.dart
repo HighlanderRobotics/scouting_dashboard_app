@@ -9,7 +9,6 @@ class LovatAPI {
   LovatAPI(this.baseUrl);
 
   String baseUrl;
-  String? stage;
   bool isAuthenticating = false;
 
   Future<Credentials> login() async {
