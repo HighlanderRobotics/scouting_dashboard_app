@@ -65,6 +65,5 @@ class _SetAPIUrlPageState extends State<SetAPIUrlPage> {
         ),
       ),
     );
-    ;
   }
 }

@@ -33,8 +33,6 @@ import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   runApp(MaterialApp(
@@ -125,6 +123,8 @@ void main() async {
           builder: (context) => SetAPIUrlPage(apiBaseUrl: apiBaseUrl),
         );
       }
+
+      return null;
     },
     theme: ThemeData(
       useMaterial3: true,
