@@ -19,16 +19,16 @@ List<Tournament> tournamentList = <Tournament>[
 // Picklists
 
 final List<PicklistWeight> picklistWeights = [
-  PicklistWeight("totalPoints", "Total points"),
-  PicklistWeight("defense", "Defense"),
-  PicklistWeight("pickUps", "Pickups"),
-  PicklistWeight("stage", "Stage"),
-  PicklistWeight("autoPoints", "Auto points"),
-  PicklistWeight("driverAbility", "Driver ability"),
-  PicklistWeight("speakerScores", "Speaker scores"),
-  PicklistWeight("ampScores", "Amp scores"),
-  PicklistWeight("teleopPoints", "Teleop points"),
-  PicklistWeight("trapScores", "Trap scores"),
+  PicklistWeight("totalpoints", "Total points"),
+  PicklistWeight("autopoints", "Auto points"),
+  PicklistWeight("teleoppoints", "Teleop points"),
+  PicklistWeight("driverability", "Driver ability"),
+  PicklistWeight("bargeresult", "Barge result"),
+  PicklistWeight("level1", "L1 Coral"),
+  PicklistWeight("level2", "L2 Coral"),
+  PicklistWeight("level3", "L3 Coral"),
+  PicklistWeight("level4", "L4 Coral"),
+  PicklistWeight("coralpickup", "Coral pick-ups"),
   PicklistWeight("feeds", "Feeds"),
 ];
 

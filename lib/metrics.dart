@@ -84,44 +84,56 @@ final List<MetricCategoryData> metricCategories = [
       path: "teleoppoints",
     ),
   ]),
-  MetricCategoryData("Note scoring", [
+  MetricCategoryData("Algae", [
     CategoryMetric(
-      localizedName: "Amp scores",
-      abbreviatedLocalizedName: "Amp",
+      localizedName: "Processor scores",
+      abbreviatedLocalizedName: "Processor",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "ampscores",
-    ),
-    CategoryMetric(
-      localizedName: "Speaker scores",
-      abbreviatedLocalizedName: "Speaker",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "speakerscores",
-    ),
-    CategoryMetric(
-      localizedName: "Trap scores",
-      abbreviatedLocalizedName: "Trap",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "trapscores",
-    ),
-  ]),
-  MetricCategoryData("Note interactions", [
-    CategoryMetric(
-      localizedName: "Pickups",
-      abbreviatedLocalizedName: "Pickups",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "pickups",
+      path: "processorAlgae",
     ),
     CategoryMetric(
       localizedName: "Drops",
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "drops",
+      path: "dropalgae",
     ),
     CategoryMetric(
       localizedName: "Feeds",
       abbreviatedLocalizedName: "Feeds",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "feeds",
+    ),
+  ]),
+  MetricCategoryData("Coral", [
+    CategoryMetric(
+      localizedName: "L1 Score",
+      abbreviatedLocalizedName: "L1",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level1",
+    ),
+    CategoryMetric(
+      localizedName: "L2 Score",
+      abbreviatedLocalizedName: "L2",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level2",
+    ),
+    CategoryMetric(
+      localizedName: "L3 Score",
+      abbreviatedLocalizedName: "L3",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level3",
+    ),
+    CategoryMetric(
+      localizedName: "L4 Score",
+      abbreviatedLocalizedName: "L4",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "level4",
+    ),
+    CategoryMetric(
+      localizedName: "Drops",
+      abbreviatedLocalizedName: "Drops",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "dropcoral",
     ),
   ]),
   MetricCategoryData("Other", [
@@ -133,10 +145,10 @@ final List<MetricCategoryData> metricCategories = [
       path: "driverability",
     ),
     CategoryMetric(
-      localizedName: "Defense",
-      abbreviatedLocalizedName: "Defense",
+      localizedName: "Defends",
+      abbreviatedLocalizedName: "Defends",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "defense",
+      path: "defends",
       hideDetails: true,
     ),
   ]),
@@ -145,69 +157,141 @@ final List<MetricCategoryData> metricCategories = [
 List<BreakdownData> breakdowns = [
   BreakdownData(
     localizedName: "Role",
-    path: "robotRole",
+    path: "robotrole",
     segments: [
-      BreakdownSegmentData(localizedNameSingular: "Offense", path: "offense"),
-      BreakdownSegmentData(localizedNameSingular: "Defense", path: "defense"),
-      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "feeder"),
-      BreakdownSegmentData(localizedNameSingular: "Immobile", path: "immobile"),
+      BreakdownSegmentData(localizedNameSingular: "Offense", path: "OFFENSE"),
+      BreakdownSegmentData(localizedNameSingular: "Defense", path: "DEFENSE"),
+      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "FEEDER"),
+      BreakdownSegmentData(localizedNameSingular: "Immobile", path: "IMMOBILE"),
     ],
   ),
   BreakdownData(
-    localizedName: "Pick-up",
-    path: "pickUp",
+    localizedName: "Coral intake",
+    path: "coralpickup",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Ground",
-        path: "ground",
+        path: "NONE",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Chute",
-        path: "chute",
+        localizedNameSingular: "Ground",
+        path: "GROUND",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Station",
+        path: "STATION",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Both",
-        path: "both",
+        path: "BOTH",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "High note",
-    path: "highNote",
+    localizedName: "Algae intake",
+    path: "algaepickup",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Successful",
-        path: "successful",
+        localizedNameSingular: "Ground",
+        path: "NONE",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Fail",
-        path: "failed",
+        localizedNameSingular: "Ground",
+        path: "GROUND",
       ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Reef",
+        path: "REEF",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Both",
+        path: "BOTH",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Barge result",
+    path: "bargeresult",
+    segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Not attempted",
-        path: "not_attempted",
+        path: "NOT_ATTEMPTED",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Parked",
+        path: "PARKED",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Shallow",
+        path: "SHALLOW",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Shallow, failed",
+        path: "FAILED_SHALLOW",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Deep",
+        path: "DEEP",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Deep, failed",
+        path: "FAILED_DEEP",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Stage",
-    path: "stage",
+    localizedName: "Knocks algae",
+    path: "knocksalgae",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Nothing",
-        path: "nothing",
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Park",
-        path: "park",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Traverses under cage",
+    path: "Undershallowcage",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Onstage",
-        path: "onstage",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Leaves during auto",
+    path: "leavesauto",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Onstage & Harmony",
-        path: "onstage_harmony",
+        localizedNameSingular: "No",
+        path: "False",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Coral levels",
+    path: "corallevels",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "True",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "No",
+        path: "False",
       ),
     ],
   ),
