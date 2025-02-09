@@ -29,14 +29,10 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
       selectedTournament = tournament;
     });
 
+    LovatUserProfile? profile;
+
     try {
-      final profile = await lovatAPI.getUserProfile();
-
-      cachedUserProfile = profile;
-
-      setState(() {
-        userProfile = profile;
-      });
+      profile = await lovatAPI.getUserProfile();
     } on LovatAPIException catch (e) {
       scaffoldMessengerState.showSnackBar(SnackBar(
         content: Text("Failed to load user profile: ${e.message}"),
@@ -47,6 +43,14 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
         content: Text("Failed to load user profile"),
         behavior: SnackBarBehavior.floating,
       ));
+    }
+
+    if (profile != null) {
+      cachedUserProfile = profile;
+
+      setState(() {
+        userProfile = profile;
+      });
     }
   }
 
