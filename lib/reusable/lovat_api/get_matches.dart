@@ -115,7 +115,7 @@ class MatchScheduleTeamInfo {
   factory MatchScheduleTeamInfo.fromJson(
       Map<String, dynamic> json, Alliance alliance) {
     return MatchScheduleTeamInfo(
-      teamNumber: json['teamNumber'],
+      teamNumber: json['number'],
       alliance: alliance,
       scouters: (json['scouters'] as List<dynamic>)
           .map((e) => MatchScheduleScouterInfo.fromJson(e))
