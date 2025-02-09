@@ -131,6 +131,6 @@ class LovatAPIException implements Exception {
   String toString() => message;
 }
 
-const kProductionBaseUrl = "https://lovat-server-staging.up.railway.app";
+const kProductionBaseUrl = "https://api.lovat.app";
 
 final lovatAPI = LovatAPI(kProductionBaseUrl);
