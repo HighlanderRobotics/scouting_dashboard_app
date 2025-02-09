@@ -103,30 +103,7 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
       const SizedBox(height: 10),
-      Row(
-        children: [
-          Flexible(
-            fit: FlexFit.tight,
-            child: ValueTile(
-              colorCombination: ColorCombination.colored,
-              value: Text(
-                numberVizualizationBuilder(analysisMap['ampScores'] as num),
-              ),
-              label: const Text("Amp scores"),
-            ),
-          ),
-          Flexible(
-            fit: FlexFit.tight,
-            child: ValueTile(
-              colorCombination: ColorCombination.colored,
-              value: Text(
-                numberVizualizationBuilder(analysisMap['speakerScores'] as num),
-              ),
-              label: const Text("Speaker scores"),
-            ),
-          ),
-        ].withSpaceBetween(width: 10),
-      ),
+      cargoStack(context, analysisMap),
       const SizedBox(height: 10),
       AlllianceAutoPaths(data: analysisMap),
     ]);

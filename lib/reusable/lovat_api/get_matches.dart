@@ -19,6 +19,8 @@ extension GetMatches on LovatAPI {
       },
     );
 
+    debugPrint(response?.body);
+
     if (response?.statusCode == 404) {
       throw const LovatAPIException(
           'No matches found. This is likely because the match schedule has not been posted on The Blue Alliance yet. Please try again later.');

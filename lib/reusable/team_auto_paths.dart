@@ -4,6 +4,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:duration/duration.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
@@ -495,16 +496,26 @@ class AutoPath {
   }
 
   String get shortDescription {
-    final pieceCount =
-        timeline.where((event) => event.type == AutoPathEventType.score).length;
+    final coralCount = timeline
+        .where((event) => event.type == AutoPathEventType.scoreCoral)
+        .length;
 
-    bool leftWing =
-        timeline.any((event) => event.type == AutoPathEventType.leave);
+    final netCount = timeline
+        .where((event) => event.type == AutoPathEventType.scoreNet)
+        .length;
+
+    final processorCount = timeline
+        .where((event) => event.type == AutoPathEventType.scoreProcessor)
+        .length;
+
+    bool left = timeline.any((event) => event.type == AutoPathEventType.leave);
 
     String name = <String>[
-      if (pieceCount > 0) "$pieceCount Piece",
-      if (leftWing && pieceCount == 0) "Leave",
-    ].join(" + ");
+      if (coralCount > 0) "$coralCount Coral",
+      if (processorCount > 0) "$processorCount Coral",
+      if (netCount > 0) "$netCount Net",
+      if (left && coralCount + netCount + processorCount == 0) "Leave",
+    ].join(", ");
 
     name = "${{
       AutoPathLocation.wingCenter: "Center",
@@ -713,39 +724,39 @@ class AutoPathEvent {
 
   Widget indicator(Color? teamColor) {
     switch (type) {
-      case AutoPathEventType.dropRing:
-        return AutoPathEventIndicator(
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) =>
-              iconAutoPathEventIndicator(
-            context,
-            teamColor,
-            isHighlighted,
-            CupertinoIcons.bag_badge_minus,
-          ),
-        );
-      case AutoPathEventType.pickUp:
-        return AutoPathEventIndicator(
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) =>
-              iconAutoPathEventIndicator(
-            context,
-            teamColor,
-            isHighlighted,
-            CupertinoIcons.bag_badge_plus,
-          ),
-        );
-      case AutoPathEventType.score:
-        return AutoPathEventIndicator(
-          teamColor: teamColor,
-          childBuilder: (context, teamColor, isHighlighted) =>
-              iconAutoPathEventIndicator(
-            context,
-            teamColor,
-            isHighlighted,
-            Icons.sports_score,
-          ),
-        );
+      // case AutoPathEventType.dropRing:
+      //   return AutoPathEventIndicator(
+      //     teamColor: teamColor,
+      //     childBuilder: (context, teamColor, isHighlighted) =>
+      //         iconAutoPathEventIndicator(
+      //       context,
+      //       teamColor,
+      //       isHighlighted,
+      //       CupertinoIcons.bag_badge_minus,
+      //     ),
+      //   );
+      // case AutoPathEventType.pickUp:
+      //   return AutoPathEventIndicator(
+      //     teamColor: teamColor,
+      //     childBuilder: (context, teamColor, isHighlighted) =>
+      //         iconAutoPathEventIndicator(
+      //       context,
+      //       teamColor,
+      //       isHighlighted,
+      //       CupertinoIcons.bag_badge_plus,
+      //     ),
+      //   );
+      // case AutoPathEventType.score:
+      //   return AutoPathEventIndicator(
+      //     teamColor: teamColor,
+      //     childBuilder: (context, teamColor, isHighlighted) =>
+      //         iconAutoPathEventIndicator(
+      //       context,
+      //       teamColor,
+      //       isHighlighted,
+      //       Icons.sports_score,
+      //     ),
+      //   );
       default:
         return Container();
     }
@@ -812,30 +823,56 @@ class AnimatedAutoPathControls extends StatelessWidget {
 }
 
 enum AutoPathEventType {
+  intakeCoral,
+  intakeAlgae,
+  unused2,
   leave,
-  pickUp,
-  dropRing,
-  score,
-  defense,
-  feedRing,
-  start,
-  end,
-  startingPosition,
+  unused4,
+  scoreNet,
+  unused6,
+  scoreProcessor,
+  scoreCoral,
+  unused9,
+  unused10,
+  startMatch,
 }
 
 enum GamePiece {
-  note,
+  coral,
+  algae,
 }
 
 extension GamePieceExtension on GamePiece {
   Widget icon({Color color = Colors.white}) {
     switch (this) {
-      case GamePiece.note:
-        return Icon(
-          Icons.radio_button_unchecked,
-          color: color,
-          size: 16,
-        );
+      case GamePiece.coral:
+        return Transform.scale(
+            scale: 2 / 3,
+            child: SvgPicture.asset(
+              'assets/images/frc_coral.svg',
+              colorFilter: ColorFilter.mode(
+                color,
+                BlendMode.srcIn,
+              ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              height: 16,
+              width: 16,
+            ));
+      case GamePiece.algae:
+        return Transform.scale(
+            scale: 2 / 3,
+            child: SvgPicture.asset(
+              'assets/images/frc_algae.svg',
+              colorFilter: ColorFilter.mode(
+                color,
+                BlendMode.srcIn,
+              ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              height: 16,
+              width: 16,
+            ));
     }
   }
 }
@@ -890,21 +927,46 @@ Widget iconAutoPathEventIndicator(
 
 enum AutoPathLocation {
   none,
-  amp,
-  speaker,
-  trap,
-  wingNearAmp,
-  wingFrontOfSpeaker,
-  wingCenter,
-  wingNearSource,
-  groundNoteAllianceNearAmp,
-  groundNoteAllianceFrontOfSpeaker,
-  groundNoteAllianceByStage,
-  groundNoteCenterFarthestAmpSide,
-  groundNoteCenterTowardAmpSide,
-  groundNoteCenterCenter,
-  groundNoteCenterTowardSourceSide,
-  groundNoteCenterFarthestSourceSide,
+
+  /// Far side of the field, same as red alliance's processor
+  startOne,
+
+  /// Middle of the field, near red's net
+  startTwo,
+
+  /// Middle of the field, near blue's net
+  startThree,
+
+  /// Far side of the field, same as blue alliance's processor
+  startFour,
+
+  reefL1,
+  reefL2,
+  reefL3,
+  reefL4,
+
+  reefL1A,
+  reefL1B,
+  reefL1C,
+
+  reefL2A,
+  reefL2B,
+  reefL2C,
+
+  reefL3A,
+  reefL3B,
+  reefL3C,
+
+  reefL4A,
+  reefL4B,
+  reefL4C,
+
+  groundPieceA,
+  groundPieceB,
+  groundPieceC,
+
+  coralStationOne,
+  coralStationTwo,
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
