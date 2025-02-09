@@ -45,7 +45,9 @@ extension GetMatches on LovatAPI {
 
     debugPrint(response.body);
 
-    return json.map((e) => MatchScheduleMatch.fromJson(e)).toList();
+    return json
+        .map((e) => MatchScheduleMatch.fromJson(e, tournamentKey))
+        .toList();
   }
 }
 
@@ -81,17 +83,18 @@ class MatchScheduleMatch {
         blue3,
       ];
 
-  factory MatchScheduleMatch.fromJson(Map<String, dynamic> json) {
+  factory MatchScheduleMatch.fromJson(
+      Map<String, dynamic> json, String tournamentKey) {
     return MatchScheduleMatch(
       identity: GameMatchIdentity(MatchType.values[json['matchType']],
-          json['matchNumber'], json['tournamentKey']),
+          json['matchNumber'], tournamentKey),
       isScouted: json['scouted'],
-      red1: MatchScheduleTeamInfo.fromJson(json['team1']),
-      red2: MatchScheduleTeamInfo.fromJson(json['team2']),
-      red3: MatchScheduleTeamInfo.fromJson(json['team3']),
-      blue1: MatchScheduleTeamInfo.fromJson(json['team4']),
-      blue2: MatchScheduleTeamInfo.fromJson(json['team5']),
-      blue3: MatchScheduleTeamInfo.fromJson(json['team6']),
+      red1: MatchScheduleTeamInfo.fromJson(json['team1'], Alliance.red),
+      red2: MatchScheduleTeamInfo.fromJson(json['team2'], Alliance.red),
+      red3: MatchScheduleTeamInfo.fromJson(json['team3'], Alliance.red),
+      blue1: MatchScheduleTeamInfo.fromJson(json['team4'], Alliance.blue),
+      blue2: MatchScheduleTeamInfo.fromJson(json['team5'], Alliance.blue),
+      blue3: MatchScheduleTeamInfo.fromJson(json['team6'], Alliance.blue),
     );
   }
 }
@@ -109,10 +112,11 @@ class MatchScheduleTeamInfo {
   final List<MatchScheduleScouterInfo> scouters;
   final int externalReportCount;
 
-  factory MatchScheduleTeamInfo.fromJson(Map<String, dynamic> json) {
+  factory MatchScheduleTeamInfo.fromJson(
+      Map<String, dynamic> json, Alliance alliance) {
     return MatchScheduleTeamInfo(
-      teamNumber: json['number'],
-      alliance: AllianceExtension.fromString(json['alliance']),
+      teamNumber: json['teamNumber'],
+      alliance: alliance,
       scouters: (json['scouters'] as List<dynamic>)
           .map((e) => MatchScheduleScouterInfo.fromJson(e))
           .toList(),
