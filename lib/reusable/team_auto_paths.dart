@@ -518,10 +518,10 @@ class AutoPath {
     ].join(", ");
 
     name = "${{
-      AutoPathLocation.wingCenter: "Center",
-      AutoPathLocation.wingNearAmp: "Near Amp",
-      AutoPathLocation.wingFrontOfSpeaker: "Front of Speaker",
-      AutoPathLocation.wingNearSource: "Near Source",
+      AutoPathLocation.startOne: "Far left",
+      AutoPathLocation.startTwo: "Mid left",
+      AutoPathLocation.startThree: "Mid right",
+      AutoPathLocation.startFour: "Far right",
     }[timeline.first.location]} $name";
 
     if (name.isEmpty) name = "Nothing";
@@ -625,26 +625,24 @@ class AutoPath {
     List<GamePiece> inventory = [];
 
     for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.pickUp) {
-        inventory.add(GamePiece.note);
+      if (event.type == AutoPathEventType.intakeAlgae) {
+        inventory.add(GamePiece.algae);
       }
 
-      if (event.type == AutoPathEventType.dropRing) {
-        inventory.remove(
-          inventory.last,
-        );
+      if (event.type == AutoPathEventType.intakeCoral) {
+        inventory.add(GamePiece.coral);
       }
 
-      if (event.type == AutoPathEventType.feedRing) {
-        inventory.remove(
-          inventory.last,
-        );
+      if (event.type == AutoPathEventType.scoreCoral) {
+        inventory.remove(inventory.lastWhere((p) => p == GamePiece.coral));
       }
 
-      if (event.type == AutoPathEventType.score) {
-        inventory.remove(
-          inventory.last,
-        );
+      if (event.type == AutoPathEventType.scoreNet) {
+        inventory.remove(inventory.lastWhere((p) => p == GamePiece.algae));
+      }
+
+      if (event.type == AutoPathEventType.scoreProcessor) {
+        inventory.remove(inventory.lastWhere((p) => p == GamePiece.algae));
       }
     }
 
@@ -656,31 +654,29 @@ class AutoPath {
 
     // Initial field
     gamePieces.addAll([
-      AutoPathLocation.groundNoteAllianceByStage,
-      AutoPathLocation.groundNoteAllianceFrontOfSpeaker,
-      AutoPathLocation.groundNoteAllianceNearAmp,
-      AutoPathLocation.groundNoteCenterCenter,
-      AutoPathLocation.groundNoteCenterFarthestAmpSide,
-      AutoPathLocation.groundNoteCenterFarthestSourceSide,
-      AutoPathLocation.groundNoteCenterTowardAmpSide,
-      AutoPathLocation.groundNoteCenterTowardSourceSide,
+      AutoPathLocation.groundCoralA,
+      AutoPathLocation.groundCoralB,
+      AutoPathLocation.groundCoralC,
+      AutoPathLocation.groundAlgaeA,
+      AutoPathLocation.groundAlgaeB,
+      AutoPathLocation.groundAlgaeC,
     ].map((location) => PositionedGamePiece(
-        GamePiece.note,
-        Offset(
-          location.offset.dx,
-          location.offset.dy,
-        ))));
+          location.gamePiece!,
+          location.offset,
+        )));
 
     // What's there now
     final currentTimeline =
         timeline.where((event) => event.timestamp <= timestamp);
 
     for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.pickUp) {
+      if (event.type == AutoPathEventType.intakeAlgae) {
         final elementToRemove = gamePieces.cast().firstWhere(
               (element) =>
                   event.location.offset.dx == element.position.dx &&
-                  event.location.offset.dy == element.position.dy,
+                  event.location.offset.dy == element.position.dy &&
+                  event.location.isGroundPiece &&
+                  element.gamePiece == event.location.gamePiece,
               orElse: () => null,
             );
 
@@ -928,16 +924,16 @@ Widget iconAutoPathEventIndicator(
 enum AutoPathLocation {
   none,
 
-  /// Far side of the field, same as red alliance's processor
+  /// LO - LI based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
   startOne,
 
-  /// Middle of the field, near red's net
+  /// LI - LM based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
   startTwo,
 
-  /// Middle of the field, near blue's net
+  /// RM - RI based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
   startThree,
 
-  /// Far side of the field, same as blue alliance's processor
+  /// RI - RO based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
   startFour,
 
   reefL1,
@@ -961,46 +957,22 @@ enum AutoPathLocation {
   reefL4B,
   reefL4C,
 
-  groundPieceA,
-  groundPieceB,
-  groundPieceC,
+  groundCoralA,
+  groundCoralB,
+  groundCoralC,
 
   coralStationOne,
   coralStationTwo,
+
+  groundAlgaeA,
+  groundAlgaeB,
+  groundAlgaeC,
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
   /// `x` and `y` are between `0` and `100`, starting from the top right of the field.
   Offset get offset {
     switch (this) {
-      case AutoPathLocation.amp:
-        return const Offset(78, 4);
-      case AutoPathLocation.speaker:
-        return const Offset(93, 33);
-      case AutoPathLocation.wingCenter:
-        return const Offset(88, 50);
-      case AutoPathLocation.wingNearAmp:
-        return const Offset(88, 10);
-      case AutoPathLocation.wingFrontOfSpeaker:
-        return const Offset(84, 33);
-      case AutoPathLocation.wingNearSource:
-        return const Offset(88, 75);
-      case AutoPathLocation.groundNoteAllianceNearAmp:
-        return const Offset(67.2, 16);
-      case AutoPathLocation.groundNoteAllianceFrontOfSpeaker:
-        return const Offset(67.2, 33);
-      case AutoPathLocation.groundNoteAllianceByStage:
-        return const Offset(67.2, 50);
-      case AutoPathLocation.groundNoteCenterFarthestAmpSide:
-        return const Offset(8.5, 10.7);
-      case AutoPathLocation.groundNoteCenterTowardAmpSide:
-        return const Offset(8.5, 30.3);
-      case AutoPathLocation.groundNoteCenterCenter:
-        return const Offset(8.5, 49.9);
-      case AutoPathLocation.groundNoteCenterTowardSourceSide:
-        return const Offset(8.5, 69.5);
-      case AutoPathLocation.groundNoteCenterFarthestSourceSide:
-        return const Offset(8.5, 89.1);
       default:
         return const Offset(0, 0);
     }
@@ -1008,10 +980,36 @@ extension AutoPathLocationExtension on AutoPathLocation {
 
   Offset get randomVariance {
     switch (this) {
-      case AutoPathLocation.speaker:
-        return const Offset(3, 8);
       default:
         return const Offset(0, 0);
+    }
+  }
+
+  bool get isGroundPiece => [
+        AutoPathLocation.groundCoralA,
+        AutoPathLocation.groundCoralB,
+        AutoPathLocation.groundCoralC,
+        AutoPathLocation.groundAlgaeA,
+        AutoPathLocation.groundAlgaeB,
+        AutoPathLocation.groundAlgaeC,
+      ].contains(this);
+
+  GamePiece? get gamePiece {
+    switch (this) {
+      case AutoPathLocation.groundCoralA:
+        return GamePiece.coral;
+      case AutoPathLocation.groundCoralB:
+        return GamePiece.coral;
+      case AutoPathLocation.groundCoralC:
+        return GamePiece.coral;
+      case AutoPathLocation.groundAlgaeA:
+        return GamePiece.algae;
+      case AutoPathLocation.groundAlgaeB:
+        return GamePiece.algae;
+      case AutoPathLocation.groundAlgaeC:
+        return GamePiece.algae;
+      default:
+        return null;
     }
   }
 }
