@@ -404,7 +404,6 @@ Container reefStack(
           .map((row) {
             index++;
             return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   ReefLevel.values[index].localizedDescripton,
@@ -413,6 +412,17 @@ Container reefStack(
                             color: foregroundColor ??
                                 Theme.of(context).colorScheme.onSurfaceVariant,
                           )),
+                ),
+                Flexible(
+                  fit: FlexFit.tight,
+                  child: Container(
+                    height: 1,
+                    decoration: BoxDecoration(
+                      color: (foregroundColor ??
+                              Theme.of(context).colorScheme.onSurfaceVariant)!
+                          .withValues(alpha: 0.3),
+                    ),
+                  ),
                 ),
                 Row(
                   children: [
@@ -435,7 +445,7 @@ Container reefStack(
                     ),
                   ],
                 ),
-              ],
+              ].withSpaceBetween(width: 7),
             );
           })
           .toList()
