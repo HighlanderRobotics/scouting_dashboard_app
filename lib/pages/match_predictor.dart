@@ -313,6 +313,19 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
           ),
         ),
       ),
+      const SizedBox(height: 15),
+      reefStack(
+        context,
+        allianceData,
+        backgroundColor: [
+          Theme.of(context).colorScheme.onRedAlliance,
+          Theme.of(context).colorScheme.onBlueAlliance
+        ][alliance],
+        foregroundColor: [
+          Theme.of(context).colorScheme.redAlliance,
+          Theme.of(context).colorScheme.blueAlliance
+        ][alliance],
+      ),
       Padding(
         padding: const EdgeInsets.only(top: 15),
         child: Row(
@@ -321,40 +334,25 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               fit: FlexFit.tight,
               child: ValueTile(
                 colorCombination: allianceColor.colorCombination,
-                value: Text(allianceData['ampScores'] == null
+                value: Text(allianceData['net'] == null
                     ? "--"
-                    : numberVizualizationBuilder(allianceData['ampScores'])),
-                label: const Text("Amp scores"),
+                    : numberVizualizationBuilder(allianceData['net'])),
+                label: const Text("Net"),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
                 colorCombination: allianceColor.colorCombination,
-                value: Text(allianceData['speakerScores'] == null
+                value: Text(allianceData['processor'] == null
                     ? "--"
-                    : numberVizualizationBuilder(
-                        allianceData['speakerScores'])),
-                label: const Text("Speaker scores"),
+                    : numberVizualizationBuilder(allianceData['processor'])),
+                label: const Text("Processor"),
               ),
             ),
           ].withSpaceBetween(width: 15),
         ),
       ),
-      const SizedBox(height: 15),
-      if (allianceData['levelCargo'] != null)
-        reefStack(
-          context,
-          allianceData,
-          backgroundColor: [
-            Theme.of(context).colorScheme.onRedAlliance,
-            Theme.of(context).colorScheme.onBlueAlliance
-          ][alliance],
-          foregroundColor: [
-            Theme.of(context).colorScheme.redAlliance,
-            Theme.of(context).colorScheme.blueAlliance
-          ][alliance],
-        ),
     ]);
   }
 }
