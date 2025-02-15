@@ -343,7 +343,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       ),
       const SizedBox(height: 15),
       if (allianceData['levelCargo'] != null)
-        cargoStack(
+        reefStack(
           context,
           allianceData,
           backgroundColor: [

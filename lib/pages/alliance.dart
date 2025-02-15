@@ -5,6 +5,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
+import 'package:scouting_dashboard_app/reusable/models/reef_level.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
@@ -103,7 +104,26 @@ class AllianceVizualization extends AnalysisVisualization {
         ),
       ),
       const SizedBox(height: 10),
-      cargoStack(context, analysisMap),
+      reefStack(context, analysisMap),
+      const SizedBox(height: 10),
+      Row(
+        children: [
+          Flexible(
+            fit: FlexFit.tight,
+            child: ValueTile(
+              value: Text(numberVizualizationBuilder(analysisMap['processor'])),
+              label: const Text('Processor'),
+            ),
+          ),
+          Flexible(
+            fit: FlexFit.tight,
+            child: ValueTile(
+              value: Text(numberVizualizationBuilder(analysisMap['net'])),
+              label: const Text('Net'),
+            ),
+          ),
+        ].withSpaceBetween(width: 10),
+      ),
       const SizedBox(height: 10),
       AlllianceAutoPaths(data: analysisMap),
     ]);
@@ -359,7 +379,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
   }
 }
 
-Container cargoStack(
+Container reefStack(
   BuildContext context,
   Map<String, dynamic> analysisMap, {
   Color? backgroundColor,
@@ -375,14 +395,19 @@ Container cargoStack(
     padding: const EdgeInsets.all(10),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: (analysisMap['levelCargo'] as List<dynamic>)
+      children: ([
+        analysisMap['coralL1'],
+        analysisMap['coralL2'],
+        analysisMap['coralL3'],
+        analysisMap['coralL4']
+      ])
           .map((row) {
             index++;
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  GridRow.values[index].localizedDescripton,
+                  ReefLevel.values[index].localizedDescripton,
                   style:
                       Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
                             color: foregroundColor ??
@@ -392,70 +417,20 @@ Container cargoStack(
                 Row(
                   children: [
                     SizedBox(
-                      width: 80,
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/frc_cone.svg',
-                            colorFilter: ColorFilter.mode(
-                              foregroundColor ??
+                      width: 55,
+                      child: Text(
+                        analysisMap['totalPoints'] == null
+                            ? '--'
+                            : numberVizualizationBuilder(row as num),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleLarge!
+                            .merge(TextStyle(
+                              color: foregroundColor ??
                                   Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            analysisMap['totalPoints'] == null
-                                ? '--'
-                                : numberVizualizationBuilder(
-                                    row['cones'] as num),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .merge(TextStyle(
-                                  color: foregroundColor ??
-                                      Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                )),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    SizedBox(
-                      width: 80,
-                      child: Row(
-                        children: [
-                          SvgPicture.asset(
-                            'assets/images/frc_cube.svg',
-                            colorFilter: ColorFilter.mode(
-                              foregroundColor ??
-                                  Theme.of(context)
-                                      .colorScheme
-                                      .onSurfaceVariant,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          const SizedBox(width: 2),
-                          Text(
-                            analysisMap['totalPoints'] == null
-                                ? '--'
-                                : numberVizualizationBuilder(
-                                    row['cubes'] as num),
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleLarge!
-                                .merge(TextStyle(
-                                  color: foregroundColor ??
-                                      Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
-                                )),
-                          ),
-                        ],
+                            )),
                       ),
                     ),
                   ],

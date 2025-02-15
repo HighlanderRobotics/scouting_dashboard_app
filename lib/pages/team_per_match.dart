@@ -267,7 +267,7 @@ class TeamPerMatchVizualization extends StatelessWidget {
           autoPath(context),
         ],
         headline(context, "Teleop"),
-        cargoStack(
+        reefStack(
           context,
           analysis.cargoStackAnalysisMap,
           foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
