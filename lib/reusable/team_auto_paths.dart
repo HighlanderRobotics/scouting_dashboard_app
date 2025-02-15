@@ -1043,6 +1043,19 @@ extension AutoPathLocationExtension on AutoPathLocation {
 
   Offset get randomVariance {
     switch (this) {
+      case AutoPathLocation.reefL1A:
+      case AutoPathLocation.reefL2A:
+      case AutoPathLocation.reefL3A:
+      case AutoPathLocation.reefL4A:
+      case AutoPathLocation.reefL1B:
+      case AutoPathLocation.reefL2B:
+      case AutoPathLocation.reefL3B:
+      case AutoPathLocation.reefL4B:
+      case AutoPathLocation.reefL1C:
+      case AutoPathLocation.reefL2C:
+      case AutoPathLocation.reefL3C:
+      case AutoPathLocation.reefL4C:
+        return const Offset(5, 5);
       default:
         return const Offset(0, 0);
     }
