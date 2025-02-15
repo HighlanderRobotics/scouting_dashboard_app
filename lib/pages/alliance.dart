@@ -418,7 +418,7 @@ Container reefStack(
                     decoration: BoxDecoration(
                       color: (foregroundColor ??
                               Theme.of(context).colorScheme.onSurfaceVariant)
-                          .withValues(alpha: 0.3),
+                          .withValues(alpha: 0.2),
                     ),
                   ),
                 ),
