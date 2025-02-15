@@ -829,11 +829,11 @@ extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
       case ScoutReportEventPosition.reefL4C:
         return "L4 on the reef, far side from drivers";
       case ScoutReportEventPosition.groundPieceA:
-        return "the ground piece, drivers' right";
-      case ScoutReportEventPosition.groundPieceB:
         return "the ground piece, drivers' left";
+      case ScoutReportEventPosition.groundPieceB:
+        return "the ground piece, drivers' center";
       case ScoutReportEventPosition.groundPieceC:
-        return "the ground piece, far side from drivers";
+        return "the ground piece, drivers' right";
       case ScoutReportEventPosition.coralStationOne:
         return "the coral station on the left";
       case ScoutReportEventPosition.coralStationTwo:
