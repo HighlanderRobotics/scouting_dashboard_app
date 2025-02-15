@@ -27,44 +27,50 @@ class SingleScoutReportAnalysis {
     required this.totalPoints,
     required this.driverAbility,
     required this.robotRole,
+    required this.bargeResult,
     required this.defense,
-    required this.ampScores,
-    required this.speakerScores,
-    required this.trapScores,
-    required this.pickups,
+    required this.coralL1,
+    required this.coralL2,
+    required this.coralL3,
+    required this.coralL4,
+    required this.processorScores,
+    required this.netScores,
+    required this.netFails,
     required this.autoPath,
-    required this.stageResult,
-    required this.highNoteResult,
     this.notes,
   });
 
   final int totalPoints;
   final DriverAbility driverAbility;
   final RobotRole robotRole;
+  final BargeResult bargeResult;
   final int defense;
-  final int ampScores;
-  final int speakerScores;
-  final int trapScores;
-  final int pickups;
   final AutoPath autoPath;
   final String? notes;
-  final StageResult stageResult;
-  final HighNoteResult highNoteResult;
+  final int coralL1;
+  final int coralL2;
+  final int coralL3;
+  final int coralL4;
+  final int processorScores;
+  final int netScores;
+  final int netFails;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
       totalPoints: json['totalPoints'],
       driverAbility: DriverAbility.values[(json['driverAbility'] as int) - 1],
       robotRole: RobotRole.values[json['role']],
-      defense: json['defense'],
-      ampScores: json['ampscores'],
-      speakerScores: json['speakerscores'],
-      trapScores: json['trapscores'],
-      pickups: json['pickups'],
+      bargeResult: BargeResult.values[json['barge']],
+      defense: json['defends'],
+      coralL1: json['coralL1'],
+      coralL2: json['coralL2'],
+      coralL3: json['coralL3'],
+      coralL4: json['coralL4'],
+      processorScores: json['processorScores'],
+      netScores: json['netScores'],
+      netFails: json['netFails'],
       autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
       notes: (json['note'] as String).isEmpty ? null : json['note'],
-      stageResult: StageResult.values[json['stage']],
-      highNoteResult: HighNoteResult.values[json['highNote']],
     );
   }
 }

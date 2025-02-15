@@ -378,13 +378,23 @@ class AutoPathWidget extends StatelessWidget {
       return Stack(
         children: [
           Positioned(
-            left: robotOffset.dx / 100 * constraints.maxWidth - 12,
+            left: robotOffset.dx / 100 * constraints.maxWidth - 24,
             top: robotOffset.dy / 100 * constraints.maxHeight - 12,
             child: AutoPathEventIndicator(
+              // width: max(24, inventory.length * 24),
+              width: 48,
               teamColor: teamColor,
               isHighlighted: false,
-              childBuilder: (context, teamColor, isHighlighted) =>
-                  inventory.isEmpty ? Container() : inventory.last.icon(),
+              childBuilder: (context, teamColor, isHighlighted) => Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: inventory
+                    .map((e) => SizedBox(
+                          child: e.icon(),
+                          height: 24,
+                          width: 24,
+                        ))
+                    .toList(),
+              ),
             ),
           ),
           ...(gamePieces
@@ -670,7 +680,8 @@ class AutoPath {
         timeline.where((event) => event.timestamp <= timestamp);
 
     for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.intakeAlgae) {
+      if (event.type == AutoPathEventType.intakeAlgae ||
+          event.type == AutoPathEventType.intakeCoral) {
         final elementToRemove = gamePieces.cast().firstWhere(
               (element) =>
                   event.location.offset.dx == element.position.dx &&
@@ -683,6 +694,10 @@ class AutoPath {
         if (elementToRemove != null) {
           gamePieces.remove(elementToRemove);
         }
+      }
+
+      if (event.type == AutoPathEventType.scoreCoral) {
+        gamePieces.add(PositionedGamePiece(GamePiece.coral, event.offset));
       }
     }
 
@@ -879,6 +894,8 @@ class AutoPathEventIndicator extends StatelessWidget {
     required this.childBuilder,
     this.isHighlighted = false,
     this.teamColor,
+    this.width = 24,
+    this.height = 24,
   });
 
   final Color? teamColor;
@@ -888,12 +905,14 @@ class AutoPathEventIndicator extends StatelessWidget {
     Color? teamColor,
     bool isHighlighted,
   ) childBuilder;
+  final double width;
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 24,
-      width: 24,
+      height: height,
+      width: width,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(12)),
@@ -973,6 +992,50 @@ extension AutoPathLocationExtension on AutoPathLocation {
   /// `x` and `y` are between `0` and `100`, starting from the top right of the field.
   Offset get offset {
     switch (this) {
+      case AutoPathLocation.startOne:
+        return const Offset(13.5, 85);
+      case AutoPathLocation.startTwo:
+        return const Offset(13.5, 65);
+      case AutoPathLocation.startThree:
+        return const Offset(13.5, 35);
+      case AutoPathLocation.startFour:
+        return const Offset(13.5, 15);
+      case AutoPathLocation.reefL1:
+      case AutoPathLocation.reefL2:
+      case AutoPathLocation.reefL3:
+      case AutoPathLocation.reefL4:
+        return const Offset(48.3, 50.2);
+      case AutoPathLocation.reefL1A:
+      case AutoPathLocation.reefL2A:
+      case AutoPathLocation.reefL3A:
+      case AutoPathLocation.reefL4A:
+        return const Offset(56, 42.7);
+      case AutoPathLocation.reefL1B:
+      case AutoPathLocation.reefL2B:
+      case AutoPathLocation.reefL3B:
+      case AutoPathLocation.reefL4B:
+        return const Offset(56, 58);
+      case AutoPathLocation.reefL1C:
+      case AutoPathLocation.reefL2C:
+      case AutoPathLocation.reefL3C:
+      case AutoPathLocation.reefL4C:
+        return const Offset(39.5, 50.2);
+      case AutoPathLocation.groundAlgaeA:
+        return const Offset(85.2 + 3, 71.9);
+      case AutoPathLocation.groundAlgaeB:
+        return const Offset(85.2 + 3, 50);
+      case AutoPathLocation.groundAlgaeC:
+        return const Offset(85.2 + 3, 28.1);
+      case AutoPathLocation.groundCoralA:
+        return const Offset(85.2 - 3, 71.9);
+      case AutoPathLocation.groundCoralB:
+        return const Offset(85.2 - 3, 50);
+      case AutoPathLocation.groundCoralC:
+        return const Offset(85.2 - 3, 28.1);
+      case AutoPathLocation.coralStationOne:
+        return const Offset(89, 90);
+      case AutoPathLocation.coralStationTwo:
+        return const Offset(89, 10);
       default:
         return const Offset(0, 0);
     }

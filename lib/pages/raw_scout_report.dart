@@ -327,21 +327,21 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           label: const Text("Path score"),
           colorCombination: ColorCombination.colored,
         ),
-        sectionTitle("Note interactions"),
+        sectionTitle("Coral scoring"),
         Row(
           children: [
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("Amp"),
-                value: Text(reportAnalysis.ampScores.toString()),
+                label: const Text("L1"),
+                value: Text(reportAnalysis.coralL1.toString()),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("Speaker"),
-                value: Text(reportAnalysis.speakerScores.toString()),
+                label: const Text("L2"),
+                value: Text(reportAnalysis.coralL2.toString()),
               ),
             ),
           ].withSpaceBetween(width: 10),
@@ -351,15 +351,45 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("Pickups"),
-                value: Text(reportAnalysis.pickups.toString()),
+                label: const Text("L3"),
+                value: Text(reportAnalysis.coralL3.toString()),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("Trap"),
-                value: Text(reportAnalysis.trapScores.toString()),
+                label: const Text("L4"),
+                value: Text(reportAnalysis.coralL4.toString()),
+              ),
+            ),
+          ].withSpaceBetween(width: 10),
+        ),
+        sectionTitle("Algae scoring"),
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("Net, success"),
+                value: Text(reportAnalysis.netScores.toString()),
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("Net, fail"),
+                value: Text(reportAnalysis.netFails.toString()),
+              ),
+            ),
+          ].withSpaceBetween(width: 10),
+        ),
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: ValueTile(
+                label: const Text("Processor"),
+                value: Text(reportAnalysis.processorScores.toString()),
               ),
             ),
           ].withSpaceBetween(width: 10),
@@ -386,15 +416,17 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("Stage"),
-                value: Text(reportAnalysis.stageResult.localizedDescription),
+                label: const Text("Barge result"),
+                value:
+                    Text(reportAnalysis.bargeResult.descriptionWithoutAccuracy),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                label: const Text("High note"),
-                value: Text(reportAnalysis.highNoteResult.localizedDescription),
+                label: const Text("Climb success"),
+                value: Text(
+                    reportAnalysis.bargeResult.isSuccess ? "Success" : "Fail"),
               ),
             ),
           ].withSpaceBetween(width: 10),
@@ -568,29 +600,55 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       );
 }
 
-enum ChallengeResult {
+enum BargeResult {
   none,
-  docked,
-  engaged,
-  failed,
-  inCommunity,
+  parked,
+  shallowSuccess,
+  shallowFail,
+  deepSuccess,
+  deepFail,
 }
 
-extension ChallengeResultExtension on ChallengeResult {
+extension BargeResultExtension on BargeResult {
   String get localizedDescription {
     switch (this) {
-      case ChallengeResult.none:
+      case BargeResult.none:
         return "None";
-      case ChallengeResult.docked:
-        return "Docked";
-      case ChallengeResult.engaged:
-        return "Engaged";
-      case ChallengeResult.failed:
-        return "Failed";
-      case ChallengeResult.inCommunity:
-        return "In community";
+      case BargeResult.parked:
+        return "Parked";
+      case BargeResult.shallowSuccess:
+        return "Shallow, success";
+      case BargeResult.shallowFail:
+        return "Shallow, fail";
+      case BargeResult.deepSuccess:
+        return "Deep, success";
+      case BargeResult.deepFail:
+        return "Deep, fail";
       default:
         return "Unknown";
+    }
+  }
+
+  String get descriptionWithoutAccuracy {
+    switch (this) {
+      case BargeResult.shallowSuccess:
+      case BargeResult.shallowFail:
+        return "Shallow";
+      case BargeResult.deepSuccess:
+      case BargeResult.deepFail:
+        return "Deep";
+      default:
+        return localizedDescription;
+    }
+  }
+
+  bool get isSuccess {
+    switch (this) {
+      case BargeResult.shallowFail:
+      case BargeResult.deepFail:
+        return false;
+      default:
+        return true;
     }
   }
 }
@@ -651,14 +709,17 @@ class ScoutReportEvent {
 }
 
 enum ScoutReportEventAction {
+  intakeCoral,
+  intakeAlgae,
+  feedAlgae,
   leave,
-  pickUp,
-  dropRing,
-  score,
-  defense,
-  feedRing,
-  startAmplifying,
-  endAmplifying,
+  defend,
+  scoreNetSuccess,
+  scoreNetFail,
+  scoreProcessor,
+  scoreCoral,
+  dropAlgae,
+  dropCoral,
   startingPosition,
 }
 
@@ -667,20 +728,26 @@ extension ScoutReportEventActionExtension on ScoutReportEventAction {
     switch (this) {
       case ScoutReportEventAction.leave:
         return "Left the starting zone";
-      case ScoutReportEventAction.pickUp:
-        return "Collected a note";
-      case ScoutReportEventAction.dropRing:
-        return "Dropped a note";
-      case ScoutReportEventAction.score:
-        return "Scored a note";
-      case ScoutReportEventAction.defense:
-        return "Played defense";
-      case ScoutReportEventAction.feedRing:
-        return "Fed a note";
-      case ScoutReportEventAction.startAmplifying:
-        return "Alliance started amplifying";
-      case ScoutReportEventAction.endAmplifying:
-        return "Alliance stopped amplifying";
+      case ScoutReportEventAction.intakeCoral:
+        return "Collected a coral";
+      case ScoutReportEventAction.intakeAlgae:
+        return "Collected an algae";
+      case ScoutReportEventAction.dropAlgae:
+        return "Dropped an algae";
+      case ScoutReportEventAction.dropCoral:
+        return "Dropped a coral";
+      case ScoutReportEventAction.scoreCoral:
+        return "Scored a coral";
+      case ScoutReportEventAction.scoreNetSuccess:
+        return "Successfully scored an algae in the net";
+      case ScoutReportEventAction.scoreNetFail:
+        return "Failed to score an algae in the net";
+      case ScoutReportEventAction.scoreProcessor:
+        return "Scored an algae in the processor";
+      case ScoutReportEventAction.defend:
+        return "Made a defensive action";
+      case ScoutReportEventAction.feedAlgae:
+        return "Fed an algae";
       case ScoutReportEventAction.startingPosition:
         return "Started the match";
     }
@@ -689,21 +756,31 @@ extension ScoutReportEventActionExtension on ScoutReportEventAction {
 
 enum ScoutReportEventPosition {
   none,
-  amp,
-  speaker,
-  trap,
-  wingNearAmp,
-  wingFrontOfSpeaker,
-  wingCenter,
-  wingNearSource,
-  groundNoteAllianceNearAmp,
-  groundNoteAllianceFrontOfSpeaker,
-  groundNoteAllianceByStage,
-  groundNoteCenterFarthestAmpSide,
-  groundNoteCenterTowardAmpSide,
-  groundNoteCenterCenter,
-  groundNoteCenterTowardSourceSide,
-  groundNoteCenterFarthestSourceSide,
+  startOne,
+  startTwo,
+  startThree,
+  startFour,
+  reefL1,
+  reefL2,
+  reefL3,
+  reefL4,
+  reefL1A,
+  reefL1B,
+  reefL1C,
+  reefL2A,
+  reefL2B,
+  reefL2C,
+  reefL3A,
+  reefL3B,
+  reefL3C,
+  reefL4A,
+  reefL4B,
+  reefL4C,
+  groundPieceA,
+  groundPieceB,
+  groundPieceC,
+  coralStationOne,
+  coralStationTwo,
 }
 
 extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
@@ -711,77 +788,56 @@ extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
     switch (this) {
       case ScoutReportEventPosition.none:
         return "nowhere";
-      case ScoutReportEventPosition.amp:
-        return "the amp";
-      case ScoutReportEventPosition.speaker:
-        return "the speaker";
-      case ScoutReportEventPosition.trap:
-        return "the trap";
-      case ScoutReportEventPosition.wingNearAmp:
-        return "the wing near the amp";
-      case ScoutReportEventPosition.wingFrontOfSpeaker:
-        return "the wing in front of the speaker";
-      case ScoutReportEventPosition.wingCenter:
-        return "the center of the wing";
-      case ScoutReportEventPosition.wingNearSource:
-        return "the wing near the source";
-      case ScoutReportEventPosition.groundNoteAllianceNearAmp:
-        return "the spike mark on the alliance side near the amp";
-      case ScoutReportEventPosition.groundNoteAllianceFrontOfSpeaker:
-        return "the spike mark on the alliance side in front of the speaker";
-      case ScoutReportEventPosition.groundNoteAllianceByStage:
-        return "the spike mark on the alliance side by the stage";
-      case ScoutReportEventPosition.groundNoteCenterFarthestAmpSide:
-        return "the spike mark on the central line farthest towards the amp side";
-      case ScoutReportEventPosition.groundNoteCenterTowardAmpSide:
-        return "the spike mark on the central line second-farthest towards the amp side";
-      case ScoutReportEventPosition.groundNoteCenterCenter:
-        return "the spike mark on the central line, in the center";
-      case ScoutReportEventPosition.groundNoteCenterTowardSourceSide:
-        return "the spike mark on the central line second-farthest towards the source side";
-      case ScoutReportEventPosition.groundNoteCenterFarthestSourceSide:
-        return "the spike mark on the central line farthest towards the source side";
-    }
-  }
-}
-
-enum StageResult {
-  nothing,
-  parked,
-  onstage,
-  onstageAndHarmony,
-}
-
-extension StageResultExtension on StageResult {
-  String get localizedDescription {
-    switch (this) {
-      case StageResult.nothing:
-        return "Nothing";
-      case StageResult.parked:
-        return "Parked";
-      case StageResult.onstage:
-        return "Onstage";
-      case StageResult.onstageAndHarmony:
-        return "Harmony";
-    }
-  }
-}
-
-enum HighNoteResult {
-  none,
-  fail,
-  success,
-}
-
-extension HighNoteResultExtension on HighNoteResult {
-  String get localizedDescription {
-    switch (this) {
-      case HighNoteResult.none:
-        return "None";
-      case HighNoteResult.fail:
-        return "Fail";
-      case HighNoteResult.success:
-        return "Success";
+      case ScoutReportEventPosition.startOne:
+        return "the starting line, far left";
+      case ScoutReportEventPosition.startTwo:
+        return "the starting line, mid left";
+      case ScoutReportEventPosition.startThree:
+        return "the starting line, mid right";
+      case ScoutReportEventPosition.startFour:
+        return "the starting line, far right";
+      case ScoutReportEventPosition.reefL1:
+        return "L1 on the reef";
+      case ScoutReportEventPosition.reefL2:
+        return "L2 on the reef";
+      case ScoutReportEventPosition.reefL3:
+        return "L3 on the reef";
+      case ScoutReportEventPosition.reefL4:
+        return "L4 on the reef";
+      case ScoutReportEventPosition.reefL1A:
+        return "L1 on the reef, drivers' right";
+      case ScoutReportEventPosition.reefL1B:
+        return "L1 on the reef, drivers' left";
+      case ScoutReportEventPosition.reefL1C:
+        return "L1 on the reef, far side from drivers";
+      case ScoutReportEventPosition.reefL2A:
+        return "L2 on the reef, drivers' right";
+      case ScoutReportEventPosition.reefL2B:
+        return "L2 on the reef, drivers' left";
+      case ScoutReportEventPosition.reefL2C:
+        return "L2 on the reef, far side from drivers";
+      case ScoutReportEventPosition.reefL3A:
+        return "L3 on the reef, drivers' right";
+      case ScoutReportEventPosition.reefL3B:
+        return "L3 on the reef, drivers' left";
+      case ScoutReportEventPosition.reefL3C:
+        return "L3 on the reef, far side from drivers";
+      case ScoutReportEventPosition.reefL4A:
+        return "L4 on the reef, drivers' right";
+      case ScoutReportEventPosition.reefL4B:
+        return "L4 on the reef, drivers' left";
+      case ScoutReportEventPosition.reefL4C:
+        return "L4 on the reef, far side from drivers";
+      case ScoutReportEventPosition.groundPieceA:
+        return "the ground piece, drivers' right";
+      case ScoutReportEventPosition.groundPieceB:
+        return "the ground piece, drivers' left";
+      case ScoutReportEventPosition.groundPieceC:
+        return "the ground piece, far side from drivers";
+      case ScoutReportEventPosition.coralStationOne:
+        return "the coral station on the left";
+      case ScoutReportEventPosition.coralStationTwo:
+        return "the coral station on the right";
     }
   }
 }
