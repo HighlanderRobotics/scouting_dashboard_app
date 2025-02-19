@@ -8,13 +8,11 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 extension GetMatches on LovatAPI {
   Future<List<MatchScheduleMatch>> getMatches(
     String tournamentKey, {
-    bool? isScouted,
     List<int>? teamNumbers,
   }) async {
     final response = await get(
       "/v1/manager/matches/$tournamentKey",
       query: {
-        if (isScouted != null) 'isScouted': isScouted.toString(),
         if (teamNumbers != null) 'teams': jsonEncode(teamNumbers),
       },
     );
@@ -57,6 +55,7 @@ class MatchScheduleMatch {
   const MatchScheduleMatch({
     required this.identity,
     required this.isScouted,
+    required this.isFinished,
     required this.red1,
     required this.red2,
     required this.red3,
@@ -75,6 +74,7 @@ class MatchScheduleMatch {
   final MatchScheduleTeamInfo blue3;
 
   final bool isScouted;
+  final bool isFinished;
 
   List<MatchScheduleTeamInfo> get allTeamInfo => [
         red1,
@@ -91,6 +91,7 @@ class MatchScheduleMatch {
       identity: GameMatchIdentity(MatchType.values[json['matchType']],
           json['matchNumber'], tournamentKey),
       isScouted: json['scouted'],
+      isFinished: json['finished'],
       red1: MatchScheduleTeamInfo.fromJson(json['team1'], Alliance.red),
       red2: MatchScheduleTeamInfo.fromJson(json['team2'], Alliance.red),
       red3: MatchScheduleTeamInfo.fromJson(json['team3'], Alliance.red),

@@ -85,9 +85,6 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
 
       final matches = await lovatAPI.getMatches(
         tournament.key,
-        isScouted: completionFilter == CompletionFilter.any
-            ? null
-            : completionFilter == CompletionFilter.finished,
         teamNumbers: _teamsFilter.isEmpty
             ? null
             : _teamsFilter.map((e) => e.number).toList(),
@@ -229,8 +226,6 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                               completionFilter = CompletionFilter.upcoming;
                             });
                           }
-
-                          fetchData();
                         },
                       ),
                       const SizedBox(width: 8),
@@ -247,8 +242,6 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                               completionFilter = CompletionFilter.finished;
                             });
                           }
-
-                          fetchData();
                         },
                       ),
                       const Spacer(),
@@ -346,7 +339,16 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         child: Matches(
                           onRefresh: () => fetchData(indicator: false),
                           scrollController: scrollController,
-                          matches: matches,
+                          matches: matches!.where((match) {
+                            if (completionFilter == CompletionFilter.finished) {
+                              return match.isFinished;
+                            } else if (completionFilter ==
+                                CompletionFilter.upcoming) {
+                              return !match.isFinished;
+                            }
+
+                            return true;
+                          }).toList(),
                           nextMatch: nextMatch,
                           nextMatchKey: nextMatchKey,
                           isScoutingLead: isScoutingLead,
