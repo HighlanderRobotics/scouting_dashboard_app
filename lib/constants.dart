@@ -29,7 +29,10 @@ final List<PicklistWeight> picklistWeights = [
   PicklistWeight("level3", "L3 Coral"),
   PicklistWeight("level4", "L4 Coral"),
   PicklistWeight("coralpickup", "Coral pick-ups"),
-  PicklistWeight("feeds", "Feeds"),
+  PicklistWeight("algaeProcessor", "Processor algae"),
+  PicklistWeight("algaeNet", "Net algae"),
+  PicklistWeight("algaePickups", "Algae pick-ups"),
+  PicklistWeight("feeds", "Algae feeds"),
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
