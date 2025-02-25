@@ -281,18 +281,4 @@ List<BreakdownData> breakdowns = [
       ),
     ],
   ),
-  BreakdownData(
-    localizedName: "Coral levels",
-    path: "corallevels",
-    segments: [
-      BreakdownSegmentData(
-        localizedNameSingular: "Yes",
-        path: "True",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "No",
-        path: "False",
-      ),
-    ],
-  ),
 ];
