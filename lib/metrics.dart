@@ -60,7 +60,7 @@ class BreakdownData {
 String numberVizualizationBuilder(num? num) {
   return num == null
       ? "--"
-      : num.toStringAsFixed(2).replaceAll(RegExp("\\.?0+\$"), "");
+      : num.toStringAsFixed(1).replaceAll(RegExp("\\.?0+\$"), "");
 }
 
 final List<MetricCategoryData> metricCategories = [
