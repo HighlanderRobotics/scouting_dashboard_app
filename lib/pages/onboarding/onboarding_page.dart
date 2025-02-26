@@ -39,7 +39,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   String? teamEmail;
 
   Future<void> init() async {
-    try {
+    if (await auth0.credentialsManager.hasValidCredentials()) {
       final profile = await lovatAPI.getUserProfile();
 
       if (profile.team != null) {
@@ -49,16 +49,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
           phase = OnboardingPagePhase.teamSelection;
         });
       }
-    } on CredentialsManagerException catch (e) {
-      if (e.code == "NO_CREDENTIALS" ||
-          e.code == "NO_REFRESH_TOKEN" ||
-          e.code == "No Credentials were previously set.") {
-        setState(() {
-          phase = OnboardingPagePhase.welcome;
-        });
-      } else {
-        debugPrint(e.toString());
-      }
+    } else {
+      setState(() {
+        phase = OnboardingPagePhase.welcome;
+      });
     }
   }
 
