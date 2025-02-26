@@ -57,6 +57,7 @@ const darkColorScheme = ColorScheme(
   surface: Color(0xFF1F1F1F),
   onSurface: Color(0xFFE8E0E5),
   surfaceVariant: Color(0xFF292929),
+  surfaceContainerHighest: Color(0xFF292929),
   onSurfaceVariant: Color(0xFFCCCCCC),
   outline: Color(0xFF978E98),
   onInverseSurface: Color(0xFF1D1B1E),
