@@ -23,6 +23,7 @@ final List<PicklistWeight> picklistWeights = [
   PicklistWeight("autopoints", "Auto points"),
   PicklistWeight("teleoppoints", "Teleop points"),
   PicklistWeight("driverability", "Driver ability"),
+  PicklistWeight("defends", "Defends"),
   PicklistWeight("bargeresult", "Barge result"),
   PicklistWeight("level1", "L1 Coral"),
   PicklistWeight("level2", "L2 Coral"),
