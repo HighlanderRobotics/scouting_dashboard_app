@@ -92,6 +92,18 @@ final List<MetricCategoryData> metricCategories = [
       path: "processorScores",
     ),
     CategoryMetric(
+      localizedName: "Net scores",
+      abbreviatedLocalizedName: "Net scores",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "netScores",
+    ),
+    CategoryMetric(
+      localizedName: "Net fails",
+      abbreviatedLocalizedName: "Net fails",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "netFails",
+    ),
+    CategoryMetric(
       localizedName: "Drops",
       abbreviatedLocalizedName: "Drops",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
