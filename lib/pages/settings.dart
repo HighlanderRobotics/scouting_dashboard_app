@@ -656,9 +656,10 @@ class _TournamentSourceSelectorSettingsPageState
 }
 
 class DataExportDrawer extends StatefulWidget {
-  const DataExportDrawer(this.exportMode, {super.key});
+  const DataExportDrawer(this.exportMode, this.exportFilter, {super.key});
 
-  final CSVExportMode exportMode;
+  final CSVExportFormat exportMode;
+  final CSVExportFilter exportFilter;
 
   @override
   State<DataExportDrawer> createState() => _DataExportDrawerState();
@@ -676,7 +677,8 @@ class _DataExportDrawerState extends State<DataExportDrawer> {
         });
         return;
       }
-      final csv = await lovatAPI.getCSVExport(tournament, widget.exportMode);
+      final csv = await lovatAPI.getCSVExport(
+          tournament, widget.exportMode, widget.exportFilter);
 
       final csvFile = XFile.fromData(
         utf8.encode(csv),
@@ -1249,7 +1251,8 @@ class _DataExportPageState extends State<DataExportPage> {
   Tournament? tournament;
   String? errorText;
 
-  CSVExportMode? exportMode;
+  CSVExportFormat? exportFormat;
+  CSVExportFilter? exportFilter;
 
   void loadData() async {
     Tournament? tournament = await Tournament.getCurrent();
@@ -1277,33 +1280,55 @@ class _DataExportPageState extends State<DataExportPage> {
     }
 
     return PageBody(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Stack(
       children: [
-        Text(
-          "Download a file containing data collected at ${tournament?.localized ?? 'your tournament'}, by all teams in your data set.",
+        SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 56),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  "Download a file containing data collected at ${tournament?.localized ?? 'your tournament'}, by all teams in your data set.",
+                ),
+                InsetPicker(
+                  CSVExportFormat.values,
+                  titleBuilder: (mode) => mode.localizedDescription,
+                  descriptionBuilder: (mode) => mode.longLocalizedDescription,
+                  selectedItem: exportFormat,
+                  onChanged: (value) => setState(() => exportFormat = value),
+                ),
+                InsetPicker(
+                  CSVExportFilter.values,
+                  titleBuilder: (mode) => mode.localizedDescription,
+                  descriptionBuilder: (mode) => mode.longLocalizedDescription,
+                  selectedItem: exportFilter,
+                  onChanged: (value) => setState(() => exportFilter = value),
+                ),
+              ].withSpaceBetween(height: 14),
+            ),
+          ),
         ),
-        InsetPicker(
-          CSVExportMode.values,
-          titleBuilder: (mode) => mode.localizedDescription,
-          descriptionBuilder: (mode) => mode.longLocalizedDescription,
-          selectedItem: exportMode,
-          onChanged: (value) => setState(() => exportMode = value),
-        ),
-        const Spacer(),
-        FilledButton.icon(
-          onPressed: exportMode == null
-              ? null
-              : () {
-                  showModalBottomSheet(
-                    context: context,
-                    builder: (context) => DataExportDrawer(exportMode!),
-                  );
-                },
-          icon: const Icon(Icons.download),
-          label: const Text("Export"),
-        ),
-      ].withSpaceBetween(height: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Spacer(),
+            FilledButton.icon(
+              onPressed: exportFormat == null || exportFilter == null
+                  ? null
+                  : () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (context) =>
+                            DataExportDrawer(exportFormat!, exportFilter!),
+                      );
+                    },
+              icon: const Icon(Icons.download),
+              label: const Text("Export"),
+            ),
+          ],
+        )
+      ],
     ));
   }
 

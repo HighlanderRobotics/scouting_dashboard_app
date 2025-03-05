@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 
 class InsetPicker<T> extends StatelessWidget {
@@ -31,7 +32,9 @@ class InsetPicker<T> extends StatelessWidget {
         }
       },
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: description != null
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           Radio(
             value: item,
@@ -46,7 +49,8 @@ class InsetPicker<T> extends StatelessWidget {
             flex: 1,
             fit: FlexFit.tight,
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 10).copyWith(right: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -57,7 +61,8 @@ class InsetPicker<T> extends StatelessWidget {
                   if (description != null)
                     Text(
                       description,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                          color: Theme.of(context).colorScheme.bodyText),
                     ),
                 ],
               ),
