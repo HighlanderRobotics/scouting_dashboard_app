@@ -65,7 +65,9 @@ class _ScoutersPageState extends State<ScoutersPage> {
             .map(
               (scouterOverview) => ListTile(
                 leading: Monogram(
-                  scouterOverview.scout.name.substring(0, 1).toUpperCase(),
+                  scouterOverview.scout.name.isNotEmpty
+                      ? scouterOverview.scout.name.substring(0, 1).toUpperCase()
+                      : "",
                 ),
                 title: Text(scouterOverview.scout.name),
                 subtitle: Text(
@@ -185,7 +187,7 @@ class _AddScouterDialogState extends State<AddScouterDialog> {
           child: const Text("Cancel"),
         ),
         FilledButton(
-          onPressed: submitting
+          onPressed: submitting || name.isEmpty
               ? null
               : () async {
                   setState(() {
@@ -466,7 +468,7 @@ class _RenameScouterDialogState extends State<RenameScouterDialog> {
           child: const Text("Cancel"),
         ),
         FilledButton(
-          onPressed: submitting
+          onPressed: submitting || name.isEmpty
               ? null
               : () async {
                   setState(() {
