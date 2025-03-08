@@ -15,6 +15,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/join_team_b
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/register_team.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/registration_status.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/resend_verification_email.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/send_team_code.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/set_not_on_team.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/onboarding/set_team_website.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/set_username.dart';
@@ -1682,43 +1683,8 @@ class _TeamCodePageState extends State<TeamCodePage> {
                             Theme.of(context).colorScheme.surfaceVariant,
                         elevation: 0,
                         context: context,
-                        builder: (context) => SafeArea(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  "Where do I find my team's code?",
-                                  style:
-                                      Theme.of(context).textTheme.headlineSmall,
-                                ),
-                                const SizedBox(height: 10),
-                                Text(
-                                  "Your team already uses Lovat and has a 6-character code used to invite members. Ask your scouting leadership for it, or reach out to us if you still can't find it.",
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                                const SizedBox(height: 10),
-                                FilledButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text("Close"),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    launchUrl(
-                                      Uri.parse("https://lovat.app/support"),
-                                      mode: LaunchMode.externalApplication,
-                                    );
-                                  },
-                                  child: const Text("Get help"),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        builder: (context) =>
+                            LostTeamCodeSheet(team: widget.team),
                       );
                     },
                     child: const Text("I don't have a code"),
@@ -1729,6 +1695,136 @@ class _TeamCodePageState extends State<TeamCodePage> {
           ].withSpaceBetween(height: 14),
         ),
       ),
+    );
+  }
+}
+
+class LostTeamCodeSheet extends StatefulWidget {
+  const LostTeamCodeSheet({
+    super.key,
+    required this.team,
+  });
+
+  final Team team;
+
+  @override
+  State<LostTeamCodeSheet> createState() => _LostTeamCodeSheetState();
+}
+
+class _LostTeamCodeSheetState extends State<LostTeamCodeSheet> {
+  String? codeSentEmail;
+  bool isLoading = false;
+  bool hasError = false;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget body = defaultBody(context);
+
+    if (codeSentEmail != null) {
+      body = codeSentBody(context);
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: body,
+      ),
+    );
+  }
+
+  Column defaultBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          hasError ? "An error occured" : "Where do I find my team's code?",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          hasError
+              ? "We weren't able to send your team's code."
+              : "Your team already uses Lovat and has a 6-character code used to invite members. You can try asking your scouting leadership for it, or we can send it to your team's email.",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: isLoading
+              ? null
+              : () async {
+                  try {
+                    setState(() {
+                      isLoading = true;
+                      hasError = false;
+                    });
+
+                    String email = await lovatAPI.sendTeamCode(
+                        teamNumber: widget.team.number);
+
+                    setState(() {
+                      isLoading = false;
+                      codeSentEmail = email;
+                    });
+                  } catch (_) {
+                    setState(() {
+                      isLoading = false;
+                      hasError = true;
+                    });
+                  }
+                },
+          child: Text(isLoading
+              ? "Sending..."
+              : hasError
+                  ? "Try again"
+                  : "Send us the code"),
+        ),
+        if (hasError) getSupportButton(),
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Close"),
+        ),
+      ],
+    );
+  }
+
+  Column codeSentBody(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          "Code sent",
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 10),
+        Text(
+          "We sent your team's code to $codeSentEmail. If you're still unable to get access, please let us know.",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 24),
+        FilledButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: const Text("Close"),
+        ),
+        getSupportButton(),
+      ],
+    );
+  }
+
+  TextButton getSupportButton() {
+    return TextButton(
+      onPressed: () async {
+        launchUrl(
+          Uri.parse("https://lovat.app/support"),
+          mode: LaunchMode.externalApplication,
+        );
+      },
+      child: const Text("Get support"),
     );
   }
 }
