@@ -1638,6 +1638,11 @@ class _TeamCodePageState extends State<TeamCodePage> {
                   error = null;
                 });
               },
+              inputFormatters: [
+                TextInputFormatter.withFunction(
+                  (v1, v2) => v2.copyWith(text: v2.text.toUpperCase()),
+                )
+              ],
               decoration: InputDecoration(
                 filled: true,
                 label: const Text("Code"),
