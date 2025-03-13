@@ -17,6 +17,6 @@ extension SendTeamCode on LovatAPI {
       throw const LovatAPIException('Failed to send team code');
     }
 
-    return jsonDecode(response!.body)['teamEmail'];
+    return jsonDecode(response!.body)['email'];
   }
 }
