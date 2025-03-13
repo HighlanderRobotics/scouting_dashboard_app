@@ -751,98 +751,118 @@ class _MatchesState extends State<Matches> {
       onRefresh: () => widget.onRefresh(),
       child: SingleChildScrollView(
         controller: widget.scrollController,
-        child: Column(
-            children: widget.matches!.map((match) {
-          return Padding(
-            key: match.identity.toMediumKey() == widget.nextMatch?.toMediumKey()
-                ? widget.nextMatchKey
-                : null,
-            padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-            child: ClipRRect(
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-              child: Container(
-                color: Theme.of(context).colorScheme.surfaceVariant,
-                child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
+        child: SafeArea(
+          left: false,
+          right: false,
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Column(
+                children: widget.matches!.map((match) {
+              return Padding(
+                key: match.identity.toMediumKey() ==
+                        widget.nextMatch?.toMediumKey()
+                    ? widget.nextMatchKey
+                    : null,
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.all(Radius.circular(8)),
+                  child: Container(
+                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 13, 10, 13),
-                            child: Text(
-                              match.identity.getLocalizedDescription(
-                                  includeTournament: false),
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
-                          ),
-                          if (match.isScouted) const ScoutedFlag(),
-                          const Spacer(),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                "/match_predictor",
-                                arguments: {
-                                  'red1': match.red1.teamNumber.toString(),
-                                  'red2': match.red2.teamNumber.toString(),
-                                  'red3': match.red3.teamNumber.toString(),
-                                  'blue1': match.blue1.teamNumber.toString(),
-                                  'blue2': match.blue2.teamNumber.toString(),
-                                  'blue3': match.blue3.teamNumber.toString(),
+                          Row(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.fromLTRB(10, 13, 10, 13),
+                                child: Text(
+                                  match.identity.getLocalizedDescription(
+                                      includeTournament: false),
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
+                                ),
+                              ),
+                              if (match.isScouted) const ScoutedFlag(),
+                              const Spacer(),
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed(
+                                    "/match_predictor",
+                                    arguments: {
+                                      'red1': match.red1.teamNumber.toString(),
+                                      'red2': match.red2.teamNumber.toString(),
+                                      'red3': match.red3.teamNumber.toString(),
+                                      'blue1':
+                                          match.blue1.teamNumber.toString(),
+                                      'blue2':
+                                          match.blue2.teamNumber.toString(),
+                                      'blue3':
+                                          match.blue3.teamNumber.toString(),
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                            icon: const Icon(Icons.psychology),
-                            tooltip: "Match Predictor",
+                                icon: const Icon(Icons.psychology),
+                                tooltip: "Match Predictor",
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      AllianceRow(
-                        alliance: Alliance.red,
-                        isScoutingLead: widget.isScoutingLead,
-                        items: [
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_0",
-                            teamInfo: match.red1,
+                          AllianceRow(
+                            alliance: Alliance.red,
+                            isScoutingLead: widget.isScoutingLead,
+                            items: [
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_0",
+                                teamInfo: match.red1,
+                              ),
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_1",
+                                teamInfo: match.red2,
+                              ),
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_2",
+                                teamInfo: match.red3,
+                              ),
+                            ],
                           ),
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_1",
-                            teamInfo: match.red2,
+                          AllianceRow(
+                            alliance: Alliance.blue,
+                            isScoutingLead: widget.isScoutingLead,
+                            items: [
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_3",
+                                teamInfo: match.blue1,
+                              ),
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_4",
+                                teamInfo: match.blue2,
+                              ),
+                              AllianceRowItem(
+                                matchIdentity: match.identity,
+                                longMatchKey:
+                                    "${match.identity.toMediumKey()}_5",
+                                teamInfo: match.blue3,
+                              ),
+                            ],
                           ),
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_2",
-                            teamInfo: match.red3,
-                          ),
-                        ],
-                      ),
-                      AllianceRow(
-                        alliance: Alliance.blue,
-                        isScoutingLead: widget.isScoutingLead,
-                        items: [
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_3",
-                            teamInfo: match.blue1,
-                          ),
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_4",
-                            teamInfo: match.blue2,
-                          ),
-                          AllianceRowItem(
-                            matchIdentity: match.identity,
-                            longMatchKey: "${match.identity.toMediumKey()}_5",
-                            teamInfo: match.blue3,
-                          ),
-                        ],
-                      ),
-                    ]),
-              ),
-            ),
-          );
-        }).toList()),
+                        ]),
+                  ),
+                ),
+              );
+            }).toList()),
+          ),
+        ),
       ),
     );
   }
