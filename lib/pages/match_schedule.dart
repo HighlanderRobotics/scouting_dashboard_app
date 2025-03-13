@@ -91,7 +91,9 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
       );
 
       GameMatchIdentity? nextMatch = this.nextMatch;
-      if (_teamsFilter.isEmpty && completionFilter == CompletionFilter.any) {
+      if (_teamsFilter.isEmpty &&
+          completionFilter == CompletionFilter.any &&
+          matches.isNotEmpty) {
         final MatchScheduleMatch? lastScouted = matches.cast().lastWhere(
               (match) => match.isScouted,
               orElse: () => null,
@@ -245,32 +247,25 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                         },
                       ),
                       const Spacer(),
-                      GestureDetector(
-                        onTap: isDataFetched && nextMatch != null
-                            ? jumpToNextMatch
-                            : null,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              "Up next",
-                              style: Theme.of(context).textTheme.labelMedium,
-                            ),
-                            const SizedBox(height: 5),
-                            isDataFetched
-                                ? Text(
-                                    nextMatch?.getShortLocalizedDescription() ??
-                                        "No more",
-                                  )
-                                : const SkeletonLine(
-                                    style: SkeletonLineStyle(
-                                      width: 50,
-                                      height: 20,
-                                    ),
-                                  ),
-                          ],
+                      if (isDataFetched && nextMatch != null)
+                        GestureDetector(
+                          onTap: isDataFetched && nextMatch != null
+                              ? jumpToNextMatch
+                              : null,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                "Up next",
+                                style: Theme.of(context).textTheme.labelMedium,
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                nextMatch!.getShortLocalizedDescription(),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
                     ])
                   ],
                 ),
@@ -309,7 +304,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
         bottom: false,
         padding: EdgeInsets.zero,
         child: noScheduleTournament != null
-            ? NoScheduleMessage(noScheduleTournament!)
+            ? TournamentMissingMessage(noScheduleTournament!)
             : initialError != null
                 ? FriendlyErrorView(
                     errorMessage: initialError,
@@ -322,38 +317,42 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                   )
                 : (matches == null)
                     ? const SkeletonMatches()
-                    : NotificationListener<ScrollUpdateNotification>(
-                        onNotification: (notification) {
-                          final FocusScopeNode focusScope =
-                              FocusScope.of(context);
-                          if (notification.dragDetails != null &&
-                              focusScope.hasFocus &&
-                              !focusScope.hasPrimaryFocus) {
-                            FocusManager.instance.primaryFocus?.unfocus();
-                          }
+                    : matches!.isEmpty
+                        ? NoMatchesMessage(
+                            noScheduleTournament ?? 'your tournament')
+                        : NotificationListener<ScrollUpdateNotification>(
+                            onNotification: (notification) {
+                              final FocusScopeNode focusScope =
+                                  FocusScope.of(context);
+                              if (notification.dragDetails != null &&
+                                  focusScope.hasFocus &&
+                                  !focusScope.hasPrimaryFocus) {
+                                FocusManager.instance.primaryFocus?.unfocus();
+                              }
 
-                          updateFabVisibility(notification);
+                              updateFabVisibility(notification);
 
-                          return false;
-                        },
-                        child: Matches(
-                          onRefresh: () => fetchData(indicator: false),
-                          scrollController: scrollController,
-                          matches: matches!.where((match) {
-                            if (completionFilter == CompletionFilter.finished) {
-                              return match.isFinished;
-                            } else if (completionFilter ==
-                                CompletionFilter.upcoming) {
-                              return !match.isFinished;
-                            }
+                              return false;
+                            },
+                            child: Matches(
+                              onRefresh: () => fetchData(indicator: false),
+                              scrollController: scrollController,
+                              matches: matches!.where((match) {
+                                if (completionFilter ==
+                                    CompletionFilter.finished) {
+                                  return match.isFinished;
+                                } else if (completionFilter ==
+                                    CompletionFilter.upcoming) {
+                                  return !match.isFinished;
+                                }
 
-                            return true;
-                          }).toList(),
-                          nextMatch: nextMatch,
-                          nextMatchKey: nextMatchKey,
-                          isScoutingLead: isScoutingLead,
-                        ),
-                      ),
+                                return true;
+                              }).toList(),
+                              nextMatch: nextMatch,
+                              nextMatchKey: nextMatchKey,
+                              isScoutingLead: isScoutingLead,
+                            ),
+                          ),
       ),
       drawer: const GlobalNavigationDrawer(),
     );
@@ -880,8 +879,8 @@ class _MatchesState extends State<Matches> {
   }
 }
 
-class NoScheduleMessage extends StatelessWidget {
-  const NoScheduleMessage(this.tournament, {super.key});
+class TournamentMissingMessage extends StatelessWidget {
+  const TournamentMissingMessage(this.tournament, {super.key});
 
   final String tournament;
 
@@ -898,6 +897,32 @@ class NoScheduleMessage extends StatelessWidget {
           ),
           Text(
             "The Lovat team may have deleted the tournament in the process of removing test data. Open settings to select a tournament that exists.",
+            style: Theme.of(context).textTheme.bodyMedium,
+          )
+        ].withSpaceBetween(height: 10),
+      ),
+    );
+  }
+}
+
+class NoMatchesMessage extends StatelessWidget {
+  const NoMatchesMessage(this.tournament, {super.key});
+
+  final String tournament;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(30),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'No matches found for $tournament',
+            style: Theme.of(context).textTheme.headlineMedium,
+          ),
+          Text(
+            "Lovat sources match schedules from The\u{00A0}Blue\u{00A0}Alliance. Once posted, matches will be visible here.",
             style: Theme.of(context).textTheme.bodyMedium,
           )
         ].withSpaceBetween(height: 10),
