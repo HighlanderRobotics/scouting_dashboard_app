@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -6,7 +8,11 @@ import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:skeletons_forked/skeletons_forked.dart';
@@ -30,74 +36,98 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
         .settings
         .arguments as Map<String, dynamic>)['onChanged'];
 
+    final analysisFunction = MyPicklistAnalysis(picklist: picklist);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(picklist.title),
         actions: [
-          IconButton(
-            onPressed: () async {
-              final scaffoldMessengeState = ScaffoldMessenger.of(context);
-              final themeData = Theme.of(context);
+          PopupMenuButton(
+            icon: const Icon(Icons.more_vert),
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                child: const ListTile(
+                  title: Text("Edit"),
+                  leading: Icon(Icons.edit_outlined),
+                ),
+                onTap: () {
+                  Navigator.of(context).pushNamed("/edit_picklist", arguments: {
+                    'picklist': picklist,
+                    'onChanged': () async {
+                      await onChanged();
 
-              try {
-                scaffoldMessengeState.showSnackBar(
-                  const SnackBar(
-                    content: Text("Uploading..."),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
+                      setState(() {});
+                    }
+                  });
+                },
+              ),
+              PopupMenuItem(
+                child: const ListTile(
+                  title: Text("Share with team"),
+                  leading: Icon(Icons.upload_outlined),
+                ),
+                onTap: () async {
+                  final scaffoldMessengeState = ScaffoldMessenger.of(context);
+                  final themeData = Theme.of(context);
 
-                await picklist.upload();
+                  try {
+                    scaffoldMessengeState.showSnackBar(
+                      const SnackBar(
+                        content: Text("Uploading..."),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
 
-                scaffoldMessengeState.hideCurrentSnackBar();
+                    await picklist.upload();
 
-                scaffoldMessengeState.showSnackBar(
-                  const SnackBar(
-                    content: Text("Successfully uploaded picklist."),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              } catch (error) {
-                debugPrint((error as TypeError).stackTrace.toString());
+                    scaffoldMessengeState.hideCurrentSnackBar();
 
-                scaffoldMessengeState.hideCurrentSnackBar();
+                    scaffoldMessengeState.showSnackBar(
+                      const SnackBar(
+                        content: Text("Successfully uploaded picklist."),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  } catch (error) {
+                    debugPrint((error as TypeError).stackTrace.toString());
 
-                scaffoldMessengeState.showSnackBar(SnackBar(
-                  content: Text(
-                    "Error uploading picklist: $error",
-                    style: TextStyle(
-                      color: themeData.colorScheme.onErrorContainer,
-                    ),
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: themeData.colorScheme.errorContainer,
-                ));
-              }
-            },
-            icon: const Icon(Icons.upload),
-            tooltip: "Share picklist with your team",
+                    scaffoldMessengeState.hideCurrentSnackBar();
+
+                    scaffoldMessengeState.showSnackBar(SnackBar(
+                      content: Text(
+                        "Error uploading picklist: $error",
+                        style: TextStyle(
+                          color: themeData.colorScheme.onErrorContainer,
+                        ),
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                      backgroundColor: themeData.colorScheme.errorContainer,
+                    ));
+                  }
+                },
+              ),
+              PopupMenuItem(
+                child: const ListTile(
+                  title: Text("Export CSV"),
+                  leading: Icon(Icons.download_outlined),
+                ),
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) =>
+                        PicklistExportDrawer(analysisFunction),
+                  );
+                },
+              ),
+            ],
           ),
-          IconButton(
-            onPressed: () {
-              Navigator.of(context).pushNamed("/edit_picklist", arguments: {
-                'picklist': picklist,
-                'onChanged': () async {
-                  await onChanged();
-
-                  setState(() {});
-                }
-              });
-            },
-            icon: const Icon(Icons.edit_outlined),
-            tooltip: "Edit picklist",
-          )
         ],
       ),
       body: PageBody(
         padding: EdgeInsets.zero,
         bottom: false,
         child: PicklistVisuzlization(
-          analysisFunction: MyPicklistAnalysis(picklist: picklist),
+          analysisFunction: analysisFunction,
           key: picklistVisualizationKey,
         ),
       ),
@@ -294,4 +324,80 @@ Future<int?> getRank(int team) async {
   }
 
   return int.tryParse(response.body);
+}
+
+class PicklistExportDrawer extends StatefulWidget {
+  const PicklistExportDrawer(this.analysisFunction, {super.key});
+
+  final PicklistAnalysis analysisFunction;
+
+  @override
+  State<PicklistExportDrawer> createState() => _PicklistExportDrawerState();
+}
+
+class _PicklistExportDrawerState extends State<PicklistExportDrawer> {
+  String? errorMessage;
+
+  Future<void> export() async {
+    try {
+      final tournament = await Tournament.getCurrent();
+      if (tournament == null) {
+        setState(() {
+          errorMessage = "No tournament selected";
+        });
+        return;
+      }
+      final csv = await lovatAPI.getPicklistCSV(widget.analysisFunction);
+
+      final csvFile = XFile.fromData(
+        utf8.encode(csv),
+        mimeType: "text/csv",
+      );
+
+      if (mounted) {
+        Share.shareXFiles([csvFile],
+            subject: widget.analysisFunction.picklistMeta.title);
+        Navigator.of(context).pop();
+      }
+    } on LovatAPIException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    } catch (e) {
+      debugPrint(e.toString());
+
+      setState(() {
+        errorMessage = "Failed to export data";
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    export();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (errorMessage != null) {
+      return FriendlyErrorView(errorMessage: errorMessage, onRetry: export);
+    }
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              "Exporting data...",
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
