@@ -66,20 +66,20 @@ String numberVizualizationBuilder(num? num) {
 final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Score", [
     CategoryMetric(
-      localizedName: "Average total",
-      abbreviatedLocalizedName: "Avg total",
+      localizedName: "Total",
+      abbreviatedLocalizedName: "Total",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "totalPoints",
     ),
     CategoryMetric(
-      localizedName: "Average auto",
-      abbreviatedLocalizedName: "Avg auto",
+      localizedName: "Auto",
+      abbreviatedLocalizedName: "Auto",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "autoPoints",
     ),
     CategoryMetric(
-      localizedName: "Average teleop",
-      abbreviatedLocalizedName: "Avg teleop",
+      localizedName: "Teleop",
+      abbreviatedLocalizedName: "Teleop",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "teleopPoints",
     ),
