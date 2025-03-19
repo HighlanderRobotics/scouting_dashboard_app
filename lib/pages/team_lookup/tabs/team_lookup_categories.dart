@@ -193,12 +193,13 @@ class MetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Widget contents = Container(
+      constraints: const BoxConstraints(minWidth: 70),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
         borderRadius: const BorderRadius.all(Radius.circular(5)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         child: Column(
           children: [
             Text(
