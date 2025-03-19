@@ -58,6 +58,17 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                               }
                             })(),
                             label: metric.abbreviatedLocalizedName,
+                            onTap: metric.hideDetails
+                                ? null
+                                : () {
+                                    Navigator.of(context).pushNamed(
+                                        "/team_lookup_details",
+                                        arguments: {
+                                          'category': category,
+                                          'metric': metric.path,
+                                          'team': function.team,
+                                        });
+                                  },
                           ),
                         )
                         .toList(),
@@ -172,14 +183,16 @@ class MetricTile extends StatelessWidget {
     Key? key,
     required this.value,
     required this.label,
+    this.onTap,
   }) : super(key: key);
 
   final String value;
   final String label;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final Widget contents = Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.primary,
         borderRadius: const BorderRadius.all(Radius.circular(5)),
@@ -203,6 +216,13 @@ class MetricTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    if (onTap == null) return contents;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: contents,
     );
   }
 }

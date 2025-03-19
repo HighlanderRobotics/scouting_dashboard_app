@@ -29,8 +29,14 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
     List<CategoryMetric> metricsToShow =
         category.metrics.where(((metric) => !metric.hideDetails)).toList();
 
+    int selectedMetricIndex =
+        metricsToShow.indexWhere((m) => m.path == routeArgs['metric']);
+
+    debugPrint(routeArgs['metric']);
+
     return DefaultTabController(
       length: metricsToShow.length,
+      initialIndex: selectedMetricIndex == -1 ? 0 : selectedMetricIndex,
       child: Scaffold(
         appBar: AppBar(
           title: Text("$teamNumber - ${category.localizedName}"),
