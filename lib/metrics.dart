@@ -118,6 +118,12 @@ final List<MetricCategoryData> metricCategories = [
   ]),
   MetricCategoryData("Coral", [
     CategoryMetric(
+      localizedName: "Total coral",
+      abbreviatedLocalizedName: "Total",
+      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
+      path: "totalCoral",
+    ),
+    CategoryMetric(
       localizedName: "L1 Score",
       abbreviatedLocalizedName: "L1",
       valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
