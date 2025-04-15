@@ -57,8 +57,6 @@ void main() async {
       '/team_lookup': (context) => const TeamLookupPage(),
       '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),
       '/team_lookup_details': (context) => const TeamLookupDetailsPage(),
-      '/team_lookup_breakdown_details': (context) =>
-          const TeamLookupBreakdownDetailsPage(),
       '/display_qr_codes': (context) => const DisplayQRCodesPage(),
       '/edit_scout_schedule': (context) => const EditScoutSchedulePage(),
       '/match_predictor': (context) => const MatchPredictorPage(),

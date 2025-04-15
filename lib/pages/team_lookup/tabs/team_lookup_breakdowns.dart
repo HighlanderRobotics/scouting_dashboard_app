@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
+import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
@@ -67,75 +69,90 @@ class Breakdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: const BorderRadius.all(Radius.circular(10)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  dataIdentity.localizedName,
-                  style: Theme.of(context).textTheme.titleMedium!.merge(
-                        TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushWidget(
+          BreakdownDetailsPage(team: team, breakdownIdentity: dataIdentity)),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surfaceVariant,
+              borderRadius: const BorderRadius.all(Radius.circular(10)),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        dataIdentity.localizedName,
+                        style: Theme.of(context).textTheme.titleMedium!.merge(
+                              TextStyle(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                            ),
                       ),
-                ),
-                const SizedBox(height: 10),
-                data[dataIdentity.path] == null ||
-                        data[dataIdentity.path]!.isEmpty
-                    ? Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(6),
-                          color: Theme.of(context).colorScheme.background,
-                        ),
-                        height: 64,
-                        child: const Center(child: Text("None recorded")),
-                      )
-                    : ClipRRect(
-                        borderRadius:
-                            const BorderRadius.all(Radius.circular(6)),
-                        child: IntrinsicHeight(
-                          child: Row(
-                              children: dataIdentity.segments
-                                  .where((segmentData) =>
-                                      (data.cast()[dataIdentity.path]
-                                              [segmentData.path] ??
-                                          0) !=
-                                      0)
-                                  .map((BreakdownSegmentData segmentData) {
-                            double analyzedSegmentValue =
-                                data[dataIdentity.path]?[segmentData.path]
-                                        ?.toDouble() ??
-                                    0;
+                      Icon(
+                        Icons.navigate_next,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 7),
+                  data[dataIdentity.path] == null ||
+                          data[dataIdentity.path]!.isEmpty
+                      ? Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(6),
+                            color: Theme.of(context).colorScheme.background,
+                          ),
+                          height: 64,
+                          child: const Center(child: Text("None recorded")),
+                        )
+                      : ClipRRect(
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(6)),
+                          child: IntrinsicHeight(
+                            child: Row(
+                                children: dataIdentity.segments
+                                    .where((segmentData) =>
+                                        (data.cast()[dataIdentity.path]
+                                                [segmentData.path] ??
+                                            0) !=
+                                        0)
+                                    .map((BreakdownSegmentData segmentData) {
+                              double analyzedSegmentValue =
+                                  data[dataIdentity.path]?[segmentData.path]
+                                          ?.toDouble() ??
+                                      0;
 
-                            return segment(
-                              context,
-                              analyzedSegmentValue == 1
-                                  ? segmentData.localizedNameSingular
-                                  : (segmentData.localizedNamePlural ??
-                                      segmentData.localizedNameSingular),
-                              analyzedSegmentValue,
-                              (dataIdentity.segments.indexOf(segmentData) /
-                                          dataIdentity.segments.length) *
-                                      0.7 +
-                                  0.3,
-                            );
-                          }).toList()),
+                              return segment(
+                                context,
+                                analyzedSegmentValue == 1
+                                    ? segmentData.localizedNameSingular
+                                    : (segmentData.localizedNamePlural ??
+                                        segmentData.localizedNameSingular),
+                                analyzedSegmentValue,
+                                (dataIdentity.segments.indexOf(segmentData) /
+                                            dataIdentity.segments.length) *
+                                        0.7 +
+                                    0.3,
+                              );
+                            }).toList()),
+                          ),
                         ),
-                      ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 10),
-      ],
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 

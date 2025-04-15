@@ -1,72 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
+import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
+import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_details.dart';
+import 'package:scouting_dashboard_app/reusable/models/match_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
-class TeamLookupBreakdownDetailsPage extends StatelessWidget {
-  const TeamLookupBreakdownDetailsPage({super.key});
+class BreakdownDetailsPage extends StatefulWidget {
+  const BreakdownDetailsPage({
+    super.key,
+    required this.team,
+    required this.breakdownIdentity,
+  });
+
+  final int team;
+  final BreakdownData breakdownIdentity;
+
+  @override
+  State<BreakdownDetailsPage> createState() => _BreakdownDetailsPageState();
+}
+
+class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
+  BreakdownDetailsResponse? response;
+  bool hasError = false;
+
+  Future<void> loadData() async {
+    try {
+      setState(() {
+        hasError = false;
+      });
+
+      final data = await lovatAPI.getBreakdownDetails(
+        widget.team,
+        widget.breakdownIdentity.path,
+      );
+
+      setState(() {
+        response = data;
+      });
+    } catch (_) {
+      setState(() {
+        hasError = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
-    Map<String, dynamic> routeArgs =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    Widget body = const Column(children: [LinearProgressIndicator()]);
 
-    List<dynamic> rawMatchData = routeArgs['matches'];
+    if (hasError) body = FriendlyErrorView(onRetry: loadData);
 
-    Map<GameMatchIdentity, String> matches = rawMatchData.asMap().map(
-          (key, value) => MapEntry(
-            GameMatchIdentity.fromLongKey(value['match']),
-            value['value'],
-          ),
-        );
-    BreakdownData breakdownData = routeArgs['breakdownData'];
-    int team = routeArgs['team'];
+    if (response != null) {
+      body = ScrollablePageBody(
+          children: response!.matchesWithSegments
+              .map((segment) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SectionTitle(segment.segmentName),
+                    const SizedBox(height: 8),
+                    ...segment.matches
+                        .map((match) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(match.matchIdentity.shortNameWithTournament),
+                              Text(match.sourceDescription),
+                            ],
+                          );
+                        })
+                        .toList()
+                        .withSpaceBetween(height: 7)
+                  ],
+                );
+              })
+              .toList()
+              .withWidgetBetween(const Padding(
+                padding: EdgeInsets.only(top: 14),
+                child: Divider(height: 1),
+              )));
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("$team - ${breakdownData.localizedName}"),
+        title:
+            Text("${widget.team} - ${widget.breakdownIdentity.localizedName}"),
       ),
-      body: ScrollablePageBody(children: [
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text("Matches"),
-                  ...(matches
-                      .map((match, value) => MapEntry(
-                          match,
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                match.getLocalizedDescription(
-                                  includeTournament: false,
-                                ),
-                              ),
-                              Text(
-                                breakdownData.segments
-                                    .firstWhere((e) => e.path == value)
-                                    .localizedNameSingular,
-                              ),
-                            ],
-                          )))
-                      .values
-                      .toList()),
-                  if (matches.isEmpty)
-                    const Text(
-                      "No data in any matches",
-                      textAlign: TextAlign.center,
-                    ),
-                ]),
-          ),
-        )
-      ]),
+      body: body,
     );
   }
 }

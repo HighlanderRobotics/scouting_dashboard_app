@@ -320,14 +320,14 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
-        sectionTitle("Auto"),
+        const SectionTitle("Auto"),
         AnimatedAutoPath(analysis: reportAnalysis),
         ValueTile(
           value: Text(reportAnalysis.autoPath.scores[0].toString()),
           label: const Text("Path score"),
           colorCombination: ColorCombination.colored,
         ),
-        sectionTitle("Coral scoring"),
+        const SectionTitle("Coral scoring"),
         Row(
           children: [
             Flexible(
@@ -364,7 +364,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
-        sectionTitle("Algae scoring"),
+        const SectionTitle("Algae scoring"),
         Row(
           children: [
             Flexible(
@@ -394,7 +394,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
-        sectionTitle("Driving"),
+        const SectionTitle("Driving"),
         Row(
           children: [
             Flexible(
@@ -410,7 +410,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
-        sectionTitle("Endgame"),
+        const SectionTitle("Endgame"),
         Row(
           children: [
             Flexible(
@@ -467,18 +467,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ],
           ),
       ].withSpaceBetween(height: 10),
-    );
-  }
-
-  Widget sectionTitle(String title) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
-            ),
-      ),
     );
   }
 
@@ -1031,6 +1019,25 @@ class _DeleteReportDialogState extends State<DeleteReportDialog> {
               : const Text("Delete"),
         ),
       ],
+    );
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.title, {super.key});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+              color: Theme.of(context).colorScheme.onBackground,
+            ),
+      ),
     );
   }
 }

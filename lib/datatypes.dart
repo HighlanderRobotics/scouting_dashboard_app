@@ -86,12 +86,15 @@ Future<Map<String, String?>> getScoutedStatuses() async {
 }
 
 extension ListSpaceBetweenExtension on List<Widget> {
-  List<Widget> withSpaceBetween({double? width, double? height}) => [
+  List<Widget> withWidgetBetween(Widget separator) => [
         for (int i = 0; i < length; i++) ...[
-          if (i > 0) SizedBox(width: width, height: height),
+          if (i > 0) separator,
           this[i],
         ],
       ];
+
+  List<Widget> withSpaceBetween({double? width, double? height}) =>
+      withWidgetBetween(SizedBox(width: width, height: height));
 }
 
 String minutesAndSeconds(Duration duration) =>
