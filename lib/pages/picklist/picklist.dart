@@ -25,7 +25,8 @@ class MyPicklistPage extends StatefulWidget {
 }
 
 class _MyPicklistPageState extends State<MyPicklistPage> {
-  final picklistVisualizationKey = GlobalKey<AnalysisVisualizationState>();
+  GlobalKey<AnalysisVisualizationState> picklistVisualizationKey =
+      GlobalKey<AnalysisVisualizationState>();
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,10 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
                     'onChanged': () async {
                       await onChanged();
 
-                      setState(() {});
+                      setState(() {
+                        picklistVisualizationKey =
+                            GlobalKey<AnalysisVisualizationState>();
+                      });
                     }
                   });
                 },
