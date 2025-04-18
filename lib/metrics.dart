@@ -188,7 +188,7 @@ List<BreakdownData> breakdowns = [
     path: "coralpickup",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Ground",
+        localizedNameSingular: "None",
         path: "NONE",
       ),
       BreakdownSegmentData(
