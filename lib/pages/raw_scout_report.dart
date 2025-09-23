@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
+import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/delete_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_events_for_scout_report.dart';
@@ -320,6 +321,8 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
+        if (reportAnalysis.robotBrokeDescription != null)
+          robotBrokeBox(reportAnalysis.robotBrokeDescription!),
         const SectionTitle("Auto"),
         AnimatedAutoPath(analysis: reportAnalysis),
         ValueTile(
@@ -467,6 +470,59 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ],
           ),
       ].withSpaceBetween(height: 10),
+    );
+  }
+
+  Widget robotBrokeBox(String description) {
+    final backgroundColor = HSLColor.fromColor(Colors.amber)
+        .withSaturation(1)
+        .withLightness(0.2)
+        .toColor();
+
+    final foregroundColor = HSLColor.fromColor(Colors.amber)
+        .withSaturation(1)
+        .withLightness(0.8)
+        .toColor();
+
+    const double iconSize = 24;
+    const double horizontalSpacing = 6;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 8),
+      child: EmphasizedContainer(
+        color: backgroundColor,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(children: [
+              Icon(
+                Icons.warning_rounded,
+                color: foregroundColor,
+                size: iconSize,
+              ),
+              const SizedBox(width: horizontalSpacing),
+              Text(
+                "Robot broke",
+                style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                    color: foregroundColor, fontWeight: FontWeight.w600),
+              )
+            ]),
+            if (description.trim().isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(
+                  left: iconSize + horizontalSpacing,
+                ),
+                child: Text(
+                  description,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodyMedium!
+                      .copyWith(color: foregroundColor),
+                ),
+              ),
+          ],
+        ),
+      ),
     );
   }
 

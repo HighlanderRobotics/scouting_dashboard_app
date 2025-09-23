@@ -38,6 +38,7 @@ class SingleScoutReportAnalysis {
     required this.netFails,
     required this.autoPath,
     this.notes,
+    this.robotBrokeDescription,
   });
 
   final int totalPoints;
@@ -47,6 +48,7 @@ class SingleScoutReportAnalysis {
   final int defense;
   final AutoPath autoPath;
   final String? notes;
+  final String? robotBrokeDescription;
   final int coralL1;
   final int coralL2;
   final int coralL3;
@@ -71,6 +73,9 @@ class SingleScoutReportAnalysis {
       netFails: json['netFails'],
       autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
       notes: (json['note'] as String).isEmpty ? null : json['note'],
+      // robotBrokeDescription: (json['robotBrokeDescription']),
+      robotBrokeDescription:
+          "Hard-coded breaking text that might, on occasion, span multiple lines.",
     );
   }
 }
