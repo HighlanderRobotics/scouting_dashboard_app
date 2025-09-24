@@ -73,9 +73,7 @@ class SingleScoutReportAnalysis {
       netFails: json['netFails'],
       autoPath: AutoPath.fromMapSingleMatch(json['autoPath']),
       notes: (json['note'] as String).isEmpty ? null : json['note'],
-      // robotBrokeDescription: (json['robotBrokeDescription']),
-      robotBrokeDescription:
-          "Hard-coded breaking text that might, on occasion, span multiple lines.",
+      robotBrokeDescription: (json['robotBrokeDescription']),
     );
   }
 }

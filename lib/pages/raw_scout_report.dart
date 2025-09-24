@@ -305,6 +305,8 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
   Widget overviewTab(SingleScoutReportAnalysis reportAnalysis) {
     return ScrollablePageBody(
       children: [
+        if (reportAnalysis.robotBrokeDescription != null)
+          robotBrokeBox(reportAnalysis.robotBrokeDescription!),
         Row(
           children: [
             Flexible(
@@ -321,8 +323,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ].withSpaceBetween(width: 10),
         ),
-        if (reportAnalysis.robotBrokeDescription != null)
-          robotBrokeBox(reportAnalysis.robotBrokeDescription!),
         const SectionTitle("Auto"),
         AnimatedAutoPath(analysis: reportAnalysis),
         ValueTile(
@@ -485,10 +485,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
         .toColor();
 
     const double iconSize = 24;
-    const double horizontalSpacing = 6;
+    const double horizontalSpacing = 7;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.only(bottom: 6),
       child: EmphasizedContainer(
         color: backgroundColor,
         child: Column(
@@ -517,7 +517,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                   style: Theme.of(context)
                       .textTheme
                       .bodyMedium!
-                      .copyWith(color: foregroundColor),
+                      .copyWith(color: foregroundColor.withAlpha(225)),
                 ),
               ),
           ],
