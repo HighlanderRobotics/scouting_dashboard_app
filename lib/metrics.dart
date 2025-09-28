@@ -161,6 +161,7 @@ final List<MetricCategoryData> metricCategories = [
       valueVizualizationBuilder: ((rating) =>
           "${numberVizualizationBuilder(rating)}/5"),
       path: "driverAbility",
+      max: 5,
     ),
     CategoryMetric(
       localizedName: "Defends",

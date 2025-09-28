@@ -529,7 +529,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
   Widget driverAbilityContainer(SingleScoutReportAnalysis reportAnalysis) {
     return ValueTile(
       label: const Text("Driver ability"),
-      value: Text("${reportAnalysis.driverAbility.index}/5"),
+      value: Text("${reportAnalysis.driverAbility.index + 1}/5"),
     );
   }
 
