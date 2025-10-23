@@ -23,6 +23,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
   List<ScouterOverview>? scouterOverviews;
   String? error;
 
+  String filterText = '';
   Future<void> fetchData() async {
     try {
       setState(() {
@@ -54,6 +55,9 @@ class _ScoutersPageState extends State<ScoutersPage> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredScouters = scouterOverviews!.where((scout) =>
+        scout.scout.name.toLowerCase().contains(filterText.toLowerCase()));
+
     Widget body = SkeletonListView(
       itemBuilder: (context, index) => SkeletonListTile(),
     );
@@ -61,7 +65,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
     if (scouterOverviews != null) {
       body = ScrollablePageBody(
         padding: EdgeInsets.zero,
-        children: scouterOverviews!
+        children: filteredScouters
             .map(
               (scouterOverview) => ListTile(
                 leading: Monogram(
@@ -92,7 +96,25 @@ class _ScoutersPageState extends State<ScoutersPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Scouters")),
+      appBar: AppBar(
+          title: const Text("Scouters"),
+          bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(80),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  onChanged: (text) {
+                    setState(() {
+                      filterText = text;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    filled: true,
+                    labelText: "Search",
+                  ),
+                  autofocus: true,
+                ),
+              ))),
       drawer: const GlobalNavigationDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
