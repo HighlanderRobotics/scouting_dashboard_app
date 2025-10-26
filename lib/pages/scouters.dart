@@ -23,6 +23,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
   List<ScouterOverview>? scouterOverviews;
   String? error;
 
+  String filterText = '';
   Future<void> fetchData() async {
     try {
       setState(() {
@@ -54,37 +55,81 @@ class _ScoutersPageState extends State<ScoutersPage> {
 
   @override
   Widget build(BuildContext context) {
+    final filteredScouters = scouterOverviews!.where((scout) =>
+        scout.scout.name.toLowerCase().contains(filterText.toLowerCase()));
+
     Widget body = SkeletonListView(
       itemBuilder: (context, index) => SkeletonListTile(),
     );
 
     if (scouterOverviews != null) {
-      body = ScrollablePageBody(
-        padding: EdgeInsets.zero,
-        children: scouterOverviews!
-            .map(
-              (scouterOverview) => ListTile(
-                leading: Monogram(
-                  scouterOverview.scout.name.isNotEmpty
-                      ? scouterOverview.scout.name.substring(0, 1).toUpperCase()
-                      : "",
-                ),
-                title: Text(scouterOverview.scout.name),
-                subtitle: Text(
-                  "${scouterOverview.totalMatches} match${scouterOverview.totalMatches == 1 ? '' : 'es'} scouted, ${scouterOverview.missedMatches} missed",
-                ),
-                trailing: const Icon(Icons.arrow_right),
-                onTap: () {
-                  Navigator.of(context).pushWidget(
-                    ScouterDetailsPage(
-                        scouterOverview: scouterOverview,
-                        onChanged: () => fetchData()),
-                  );
-                },
+      if (scouterOverviews!.isEmpty) {
+        body = PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/no_scouters.png", width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "No scouters found",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
               ),
-            )
-            .toList(),
-      );
+              const SizedBox(height: 2),
+              Text(
+                "Tap + to create one.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
+        );
+      } else if (filteredScouters.isEmpty) {
+        body = PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/no_scouters.png", width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "No results found",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+            ],
+          ),
+        );
+      } else {
+        body = ScrollablePageBody(
+          padding: EdgeInsets.zero,
+          children: filteredScouters
+              .map(
+                (scouterOverview) => ListTile(
+                  leading: Monogram(
+                    scouterOverview.scout.name.isNotEmpty
+                        ? scouterOverview.scout.name
+                            .substring(0, 1)
+                            .toUpperCase()
+                        : "",
+                  ),
+                  title: Text(scouterOverview.scout.name),
+                  subtitle: Text(
+                    "${scouterOverview.totalMatches} match${scouterOverview.totalMatches == 1 ? '' : 'es'} scouted, ${scouterOverview.missedMatches} missed",
+                  ),
+                  trailing: const Icon(Icons.arrow_right),
+                  onTap: () {
+                    Navigator.of(context).pushWidget(
+                      ScouterDetailsPage(
+                          scouterOverview: scouterOverview,
+                          onChanged: () => fetchData()),
+                    );
+                  },
+                ),
+              )
+              .toList(),
+        );
+      }
     }
 
     if (error != null) {
@@ -92,7 +137,25 @@ class _ScoutersPageState extends State<ScoutersPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Scouters")),
+      appBar: AppBar(
+          title: const Text("Scouters"),
+          bottom: PreferredSize(
+              preferredSize: const Size.fromHeight(80),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: TextField(
+                  onChanged: (text) {
+                    setState(() {
+                      filterText = text;
+                    });
+                  },
+                  decoration: const InputDecoration(
+                    filled: true,
+                    labelText: "Search",
+                  ),
+                  autofocus: true,
+                ),
+              ))),
       drawer: const GlobalNavigationDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
