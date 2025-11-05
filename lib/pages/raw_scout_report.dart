@@ -668,8 +668,6 @@ extension BargeResultExtension on BargeResult {
         return "Deep, success";
       case BargeResult.deepFail:
         return "Deep, fail";
-      default:
-        return "Unknown";
     }
   }
 
@@ -718,8 +716,6 @@ extension DriverAbilityExtension on DriverAbility {
         return "Good";
       case DriverAbility.great:
         return "Great";
-      default:
-        return "Unknown";
     }
   }
 }
