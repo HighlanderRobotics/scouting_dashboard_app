@@ -11,7 +11,6 @@ class Debouncer {
   void run(VoidCallback action) {
     _timer?.cancel();
     _timer = Timer(delay, action);
-    // action();
   }
 
   void dispose() {
