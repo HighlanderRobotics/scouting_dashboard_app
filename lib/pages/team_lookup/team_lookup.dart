@@ -207,17 +207,18 @@ class _TeamLookupFlagState extends State<TeamLookupFlag> {
   Widget build(BuildContext context) {
     if (loadingTeam != widget.team) load();
 
-    return prefs == null || int.tryParse(widget.team) == null
-        ? Container()
-        : prefs!.getString('team_lookup_flag') == null
-            ? Container()
-            : NetworkFlag(
-                team: int.parse(widget.team),
-                flag: FlagConfiguration.fromJson(
-                  jsonDecode(
-                    prefs!.getString('team_lookup_flag')!,
-                  ),
-                ),
-              );
+    if (prefs == null ||
+        int.tryParse(widget.team) == null ||
+        prefs!.getString('team_lookup_flag') == null) {
+      return Container();
+    }
+    return NetworkFlag(
+      team: int.parse(widget.team),
+      flag: FlagConfiguration.fromJson(
+        jsonDecode(
+          prefs!.getString('team_lookup_flag')!,
+        ),
+      ),
+    );
   }
 }
