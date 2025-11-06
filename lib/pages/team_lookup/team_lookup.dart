@@ -8,6 +8,7 @@ import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.d
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_breakdowns.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_categories.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_notes.dart';
+import 'package:scouting_dashboard_app/reusable/debouncer.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +23,7 @@ class TeamLookupPage extends StatefulWidget {
 }
 
 class _TeamLookupPageState extends State<TeamLookupPage> {
+  final debouncer = Debouncer(delay: const Duration(milliseconds: 200));
   String teamFieldValue = "";
   TextEditingController? teamFieldController;
   int? teamNumberForAnalysis;
@@ -70,12 +72,16 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                         ),
                         keyboardType: TextInputType.number,
                         onChanged: (value) {
-                          setState(() {
-                            teamFieldValue = value;
-                            if (int.tryParse(value) != null) {
-                              teamNumberForAnalysis = int.parse(value);
-                            }
-                            updateIncrement++;
+                          debouncer.run(() {
+                            setState(() {
+                              teamFieldValue = value;
+                              if (int.tryParse(value) != null) {
+                                teamNumberForAnalysis = int.parse(value);
+                              } else {
+                                teamNumberForAnalysis = null;
+                              }
+                              updateIncrement++;
+                            });
                           });
                         },
                         controller: teamFieldController,
@@ -201,15 +207,18 @@ class _TeamLookupFlagState extends State<TeamLookupFlag> {
   Widget build(BuildContext context) {
     if (loadingTeam != widget.team) load();
 
-    return prefs == null || int.tryParse(widget.team) == null
-        ? Container()
-        : NetworkFlag(
-            team: int.parse(widget.team),
-            flag: FlagConfiguration.fromJson(
-              jsonDecode(
-                prefs!.getString('team_lookup_flag')!,
-              ),
-            ),
-          );
+    if (prefs == null ||
+        int.tryParse(widget.team) == null ||
+        prefs!.getString('team_lookup_flag') == null) {
+      return Container();
+    }
+    return NetworkFlag(
+      team: int.parse(widget.team),
+      flag: FlagConfiguration.fromJson(
+        jsonDecode(
+          prefs!.getString('team_lookup_flag')!,
+        ),
+      ),
+    );
   }
 }

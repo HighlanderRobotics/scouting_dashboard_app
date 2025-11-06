@@ -1,7 +1,7 @@
 {
-    "diffEditor.codeLens": true,
-    "editor.tabCompletion": "on",
-    "discord.enabled": true,
-    "cmake.configureOnOpen": false,
-    "java.configuration.updateBuildConfiguration": "automatic"
+  "diffEditor.codeLens": true,
+  "editor.tabCompletion": "on",
+  "discord.enabled": true,
+  "cmake.configureOnOpen": false,
+  "java.configuration.updateBuildConfiguration": "automatic"
 }
