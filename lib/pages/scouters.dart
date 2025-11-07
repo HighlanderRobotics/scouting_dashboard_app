@@ -22,6 +22,7 @@ class ScoutersPage extends StatefulWidget {
 class _ScoutersPageState extends State<ScoutersPage> {
   List<ScouterOverview>? scouterOverviews;
   String? error;
+  Tournament? tournament;
 
   String filterText = '';
   Future<void> fetchData() async {
@@ -30,11 +31,12 @@ class _ScoutersPageState extends State<ScoutersPage> {
         scouterOverviews = null;
         error = null;
       });
-
+      final t = await Tournament.getCurrent();
       final data = await lovatAPI.getScouterOverviews();
 
       setState(() {
         scouterOverviews = data;
+        tournament = t;
       });
     } on LovatAPIException catch (e) {
       setState(() {
@@ -114,9 +116,9 @@ class _ScoutersPageState extends State<ScoutersPage> {
                         : "",
                   ),
                   title: Text(scouterOverview.scout.name),
-                  subtitle: Text(
-                    "${scouterOverview.totalMatches} match${scouterOverview.totalMatches == 1 ? '' : 'es'} scouted, ${scouterOverview.missedMatches} missed",
-                  ),
+                  subtitle: Text(tournament == null
+                      ? "${scouterOverview.totalMatches} match${scouterOverview.totalMatches == 1 ? '' : 'es'} scouted"
+                      : "${scouterOverview.totalMatches} match${scouterOverview.totalMatches == 1 ? '' : 'es'} scouted, ${scouterOverview.missedMatches} missed"),
                   trailing: const Icon(Icons.arrow_right),
                   onTap: () {
                     Navigator.of(context).pushWidget(
