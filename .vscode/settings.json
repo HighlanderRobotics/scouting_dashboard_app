@@ -3,5 +3,6 @@
   "editor.tabCompletion": "on",
   "discord.enabled": true,
   "cmake.configureOnOpen": false,
-  "java.configuration.updateBuildConfiguration": "automatic"
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "cSpell.words": ["scouterspage"]
 }
