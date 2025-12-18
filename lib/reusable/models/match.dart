@@ -24,7 +24,12 @@ class GameMatchIdentity {
     includeType = true,
     includeNumber = true,
     includeTournament = true,
+    abbreviateName = false,
   }) {
+    final typedMatchName = abbreviateName
+        ? getShortLocalizedDescription()
+        : "${type.localizedDescriptionSingular} $number";
+
     if (includeType && !includeNumber && !includeTournament) {
       return "${type.localizedDescriptionPlural} match";
     }
@@ -32,7 +37,7 @@ class GameMatchIdentity {
       return "${type.localizedDescriptionPlural} match at $localizedTournament";
     }
     if (includeType && includeNumber && !includeTournament) {
-      return "${type.localizedDescriptionSingular} $number";
+      return typedMatchName;
     }
     if (!includeType && includeNumber && includeTournament) {
       return "Match #$number at $localizedTournament";
@@ -45,7 +50,7 @@ class GameMatchIdentity {
     }
     if (!includeType && !includeNumber && !includeTournament) return "Match";
     if (includeType && includeNumber && includeTournament) {
-      return "${type.localizedDescriptionSingular} $number at $localizedTournament";
+      return "$typedMatchName at $localizedTournament";
     }
 
     return "Match";

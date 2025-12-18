@@ -5,7 +5,6 @@ import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_details.dart';
-import 'package:scouting_dashboard_app/reusable/models/match_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 class BreakdownDetailsPage extends StatefulWidget {
@@ -73,7 +72,8 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(match.matchIdentity.shortNameWithTournament),
+                              Text(match.matchIdentity.getLocalizedDescription(
+                                  abbreviateName: true)),
                               Text(match.sourceDescription),
                             ],
                           );
