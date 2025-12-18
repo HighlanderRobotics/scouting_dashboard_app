@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension DeleteScouterScheduleShift on LovatAPI {
   Future<void> deleteScoutScheduleShiftById(String id) async {

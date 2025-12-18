@@ -2,14 +2,13 @@ import 'dart:math';
 
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:duration/duration.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
+import 'package:scouting_dashboard_app/reusable/models/match.dart';
 
 class TeamAutoPaths extends StatefulWidget {
   const TeamAutoPaths({

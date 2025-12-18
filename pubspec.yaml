@@ -39,8 +39,6 @@ dependencies:
   shared_preferences: ^2.0.15
   dropdown_search: ^5.0.5
   mobile_scanner: ^3.0.0
-  frc_8033_scouting_shared:
-    git: https://github.com/HighlanderRobotics/frc_8033_scouting_shared.git
   fl_chart: ^0.70.2
   custom_qr_generator: ^0.1.2
   skeletons_forked: ^0.0.3

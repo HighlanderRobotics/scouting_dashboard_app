@@ -30,7 +30,6 @@ import 'package:scouting_dashboard_app/pages/set_api_url.dart';
 import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
-import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 

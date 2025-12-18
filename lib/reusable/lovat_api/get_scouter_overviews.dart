@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:frc_8033_scouting_shared/frc_8033_scouting_shared.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension GetScouterOverviews on LovatAPI {
   Future<List<ScouterOverview>> getScouterOverviews() async {
