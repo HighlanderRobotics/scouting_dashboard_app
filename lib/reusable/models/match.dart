@@ -48,7 +48,7 @@ class GameMatchIdentity {
       return "${type.localizedDescriptionSingular} $number at $localizedTournament";
     }
 
-    return "this should never happen";
+    return "Match";
   }
 
   /// Create a match from a long match key such as `2022cc_qm14_1`
