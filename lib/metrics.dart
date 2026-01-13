@@ -2,7 +2,7 @@ class CategoryMetric {
   CategoryMetric({
     required this.localizedName,
     required this.abbreviatedLocalizedName,
-    required this.valueVizualizationBuilder,
+    this.valueToString,
     required this.path,
     this.hideDetails = false,
     this.hideOverview = false,
@@ -19,7 +19,19 @@ class CategoryMetric {
 
   String path;
 
-  String Function(dynamic) valueVizualizationBuilder;
+  String Function(dynamic)? valueToString;
+
+  String valueVizualizationBuilder(dynamic val) {
+    if (valueToString != null) {
+      return valueToString!(val);
+    }
+
+    if (val is num) {
+      return numberVizualizationBuilder(val);
+    }
+
+    return "--";
+  }
 }
 
 class MetricCategoryData {
@@ -68,159 +80,157 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Total",
       abbreviatedLocalizedName: "Total",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "totalPoints",
     ),
     CategoryMetric(
       localizedName: "Auto",
       abbreviatedLocalizedName: "Auto",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "autoPoints",
     ),
     CategoryMetric(
       localizedName: "Teleop",
       abbreviatedLocalizedName: "Teleop",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
       path: "teleopPoints",
     ),
   ]),
-  MetricCategoryData("Algae", [
+  MetricCategoryData("Hub", [
     CategoryMetric(
-      localizedName: "Processor scores",
-      abbreviatedLocalizedName: "Processor",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "processorScores",
+      localizedName: "Scoring Rate (Fuel / Second)",
+      abbreviatedLocalizedName: "Scoring Rate",
+      valueToString: ((p0) => "$p0 fuel/sec"),
+      path: "fuelPerSecond",
     ),
     CategoryMetric(
-      localizedName: "Net scores",
-      abbreviatedLocalizedName: "Net scores",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "netScores",
+      localizedName: "Accuracy when shooting fuel",
+      abbreviatedLocalizedName: "Accuracy",
+      valueToString: ((p0) => "$p0%"),
+      path: "accuracy",
     ),
     CategoryMetric(
-      localizedName: "Net fails",
-      abbreviatedLocalizedName: "Net fails",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "netFails",
-    ),
-    CategoryMetric(
-      localizedName: "Drops",
-      abbreviatedLocalizedName: "Drops",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "algaeDrops",
-    ),
-    CategoryMetric(
-      localizedName: "Feeds",
-      abbreviatedLocalizedName: "Feeds",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "feeds",
-    ),
+      localizedName: "Volleys per match",
+      abbreviatedLocalizedName: "Volleys/Match",
+      path: "volleysPerMatch",
+    )
   ]),
-  MetricCategoryData("Coral", [
+  MetricCategoryData("Feeding", [
     CategoryMetric(
-      localizedName: "Total coral",
-      abbreviatedLocalizedName: "Total",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "totalCoral",
+      localizedName: "Time Spent Feeding",
+      abbreviatedLocalizedName: "Time Feeding",
+      valueToString: ((p0) => "${p0}s"),
+      path: "timeFeeding",
     ),
     CategoryMetric(
-      localizedName: "L1 Score",
-      abbreviatedLocalizedName: "L1",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coralL1",
+      localizedName: "Feeding Rate (Fuel / Second)",
+      abbreviatedLocalizedName: "Feeding Rate",
+      valueToString: ((p0) => "$p0 fuel/sec"),
+      path: "feedingRate",
     ),
     CategoryMetric(
-      localizedName: "L2 Score",
-      abbreviatedLocalizedName: "L2",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coralL2",
+      localizedName: "Feeds per match",
+      abbreviatedLocalizedName: "Feeds/Match",
+      path: "feedsPerMatch",
+    )
+  ]),
+  MetricCategoryData("Driving & Defense", [
+    CategoryMetric(
+      localizedName: "Driver Ability",
+      abbreviatedLocalizedName: "Driver Ability",
+      valueToString: ((p0) => "$p0/5"),
+      path: "driverAbility",
     ),
     CategoryMetric(
-      localizedName: "L3 Score",
-      abbreviatedLocalizedName: "L3",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coralL3",
+      localizedName: "Contact Defense Time",
+      abbreviatedLocalizedName: "Contact Defense Time",
+      valueToString: ((p0) => "${p0}s"),
+      path: "contactDefenseTime",
     ),
     CategoryMetric(
-      localizedName: "L4 Score",
-      abbreviatedLocalizedName: "L4",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coralL4",
+      localizedName: "Defense effectiveness",
+      abbreviatedLocalizedName: "Defense effectiveness",
+      valueToString: ((p0) => "$p0/5"),
+      path: "defenseEffectiveness",
     ),
     CategoryMetric(
-      localizedName: "Drops",
-      abbreviatedLocalizedName: "Drops",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "coralDrops",
+      localizedName: "Camping Defense Time",
+      abbreviatedLocalizedName: "Camping Defense Time",
+      valueToString: ((p0) => "${p0}s"),
+      path: "campingDefenseTime",
+    ),
+    CategoryMetric(
+      localizedName: "Total Defense Time (Camping + Contact)",
+      abbreviatedLocalizedName: "Total Defense Time",
+      valueToString: ((p0) => "${p0}s"),
+      path: "totalDefenseTime",
+    )
+  ]),
+  MetricCategoryData("Climb", [
+    CategoryMetric(
+      localizedName: "Seconds left when starting to climb L1",
+      abbreviatedLocalizedName: "L1 Time",
+      valueToString: ((p0) => "${p0}s left"),
+      path: "l1StartTime",
+    ),
+    CategoryMetric(
+      localizedName: "Seconds left when starting to climb L2",
+      abbreviatedLocalizedName: "L2 Time",
+      valueToString: ((p0) => "${p0}s left"),
+      path: "l2StartTime",
+    ),
+    CategoryMetric(
+      localizedName: "Seconds left when starting to climb L3",
+      abbreviatedLocalizedName: "L3 Time",
+      valueToString: ((p0) => "${p0}s left"),
+      path: "l3StartTime",
+    ),
+    CategoryMetric(
+      localizedName: "Seconds left in auto when starting to climb in auto",
+      abbreviatedLocalizedName: "Auto Time",
+      valueToString: ((p0) => "${p0}s left"),
+      path: "autoClimbStartTime",
     ),
   ]),
   MetricCategoryData("Other", [
     CategoryMetric(
-      localizedName: "Driver ability",
-      abbreviatedLocalizedName: "Driver ability",
-      valueVizualizationBuilder: ((rating) =>
-          "${numberVizualizationBuilder(rating)}/5"),
-      path: "driverAbility",
-      max: 5,
+      localizedName: "Total fuel outputted between both feeding and scoring",
+      abbreviatedLocalizedName: "Fuel Outputted",
+      path: "totalFuelOutputted",
     ),
     CategoryMetric(
-      localizedName: "Defends",
-      abbreviatedLocalizedName: "Defends",
-      valueVizualizationBuilder: ((p0) => numberVizualizationBuilder(p0)),
-      path: "defends",
-      hideDetails: true,
-    ),
-  ]),
+      localizedName: "Outpost Intakes",
+      abbreviatedLocalizedName: "Outpost Intakes",
+      path: "outpostIntakes",
+    )
+  ])
 ];
 
 List<BreakdownData> breakdowns = [
   BreakdownData(
-    localizedName: "Role",
-    path: "robotrole",
+    localizedName: "Roles",
+    path: "robotRole",
     segments: [
-      BreakdownSegmentData(localizedNameSingular: "Offense", path: "OFFENSE"),
-      BreakdownSegmentData(localizedNameSingular: "Defense", path: "DEFENSE"),
-      BreakdownSegmentData(localizedNameSingular: "Feeder", path: "FEEDER"),
+      BreakdownSegmentData(localizedNameSingular: "Cycling", path: "CYCLING"),
+      BreakdownSegmentData(localizedNameSingular: "Scoring", path: "SCORING"),
+      BreakdownSegmentData(localizedNameSingular: "Feeding", path: "FEEDING"),
+      BreakdownSegmentData(
+          localizedNameSingular: "Defending", path: "Defending"),
       BreakdownSegmentData(localizedNameSingular: "Immobile", path: "IMMOBILE"),
     ],
   ),
   BreakdownData(
-    localizedName: "Coral intake",
-    path: "coralpickup",
+    localizedName: "Traversal",
+    path: "fieldTraversal",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "None",
         path: "NONE",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Ground",
-        path: "GROUND",
+        localizedNameSingular: "Trench",
+        path: "TRENCH",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Station",
-        path: "STATION",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Both",
-        path: "BOTH",
-      ),
-    ],
-  ),
-  BreakdownData(
-    localizedName: "Algae intake",
-    path: "algaepickup",
-    segments: [
-      BreakdownSegmentData(
-        localizedNameSingular: "Ground",
-        path: "NONE",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Ground",
-        path: "GROUND",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Reef",
-        path: "REEF",
+        localizedNameSingular: "Bump",
+        path: "BUMP",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "Both",
@@ -229,75 +239,117 @@ List<BreakdownData> breakdowns = [
     ],
   ),
   BreakdownData(
-    localizedName: "Barge result",
-    path: "bargeresult",
+    localizedName: "Climb Result",
+    path: "climbResult",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Not attempted",
+        localizedNameSingular: "Not Attempted",
         path: "NOT_ATTEMPTED",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Parked",
-        path: "PARKED",
+        localizedNameSingular: "Failed",
+        path: "FAILED",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Shallow",
-        path: "SHALLOW",
+        localizedNameSingular: "L1",
+        path: "L1",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Shallow, failed",
-        path: "FAILED_SHALLOW",
+        localizedNameSingular: "L2",
+        path: "L2",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Deep",
-        path: "DEEP",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "Deep, failed",
-        path: "FAILED_DEEP",
+        localizedNameSingular: "L3",
+        path: "L3",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Knocks algae",
-    path: "knocksalgae",
+    localizedName: "Beaching",
+    path: "beached",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "On Fuel",
+        path: "ON_FUEL",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "On Bump",
+        path: "ON_BUMP",
+      )
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Scores While Moving",
+    path: "scoresWhileMoving",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Yes",
-        path: "True",
+        path: "TRUE",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "No",
-        path: "False",
+        path: "FALSE",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Traverses under cage",
-    path: "Undershallowcage",
+    localizedName: "Disrupts Fuel in Auto",
+    path: "disrupts",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Yes",
-        path: "True",
+        path: "TRUE",
       ),
       BreakdownSegmentData(
         localizedNameSingular: "No",
-        path: "False",
+        path: "FALSE",
       ),
     ],
   ),
   BreakdownData(
-    localizedName: "Leaves during auto",
-    path: "leavesauto",
+    localizedName: "Intake Type",
+    path: "intakeType",
     segments: [
       BreakdownSegmentData(
-        localizedNameSingular: "Yes",
-        path: "True",
+        localizedNameSingular: "Ground",
+        path: "GROUND",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "No",
-        path: "False",
+        localizedNameSingular: "Outpost",
+        path: "OUTPOST",
       ),
     ],
   ),
+  BreakdownData(
+    localizedName: "Disrupts Fuel in Auto",
+    path: "disrupts",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Yes",
+        path: "TRUE",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "No",
+        path: "FALSE",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Feeder Type",
+    path: "feederType",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "Continuous",
+        path: "CONTINUOUS",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Stop to Shoot",
+        path: "STOP_TO_SHOOT",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Dump",
+        path: "DUMP",
+      ),
+    ],
+  )
 ];
