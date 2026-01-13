@@ -4,7 +4,6 @@ import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/pages/auto_path_selector.dart';
 import 'package:scouting_dashboard_app/pages/initial_loader.dart';
 import 'package:scouting_dashboard_app/pages/match_predictor_opener.dart';
-import 'package:scouting_dashboard_app/pages/match_suggestions.dart';
 import 'package:scouting_dashboard_app/pages/match_suggestions_opener.dart';
 import 'package:scouting_dashboard_app/pages/my_alliance.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
@@ -62,7 +61,6 @@ void main() async {
       '/edit_scout_schedule': (context) => const EditScoutSchedulePage(),
       '/match_predictor': (context) => const MatchPredictorPage(),
       '/match_predictor_opener': (context) => const MatchPredictorOpenerPage(),
-      '/match_suggestions': (context) => const MatchSuggestionsPage(),
       '/match_suggestions_opener': (context) =>
           const MatchSuggestionsOpenerPage(),
       '/alliance': (context) => const AlliancePage(),

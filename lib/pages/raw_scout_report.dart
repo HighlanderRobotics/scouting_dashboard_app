@@ -429,7 +429,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
               flex: 1,
               fit: FlexFit.tight,
               child: ValueTile(
-                  value: Text("${reportAnalysis.driverAbility.index}/5"),
+                  value: Text("${reportAnalysis.driverAbility}/5"),
                   label: const Text("Driver Ability")),
             ),
           ].withSpaceBetween(width: 10),
@@ -842,7 +842,7 @@ extension ScoutReportEventActionExtension on ScoutReportEventAction {
       case ScoutReportEventAction.startScoring:
         return "Started scoring";
       case ScoutReportEventAction.stopScoring:
-        return "Stopped scoring";
+        return "Finished scoring";
       case ScoutReportEventAction.startMatch:
         return "Started the match";
       case ScoutReportEventAction.startCamping:
@@ -866,7 +866,7 @@ extension ScoutReportEventActionExtension on ScoutReportEventAction {
       case ScoutReportEventAction.startFeeding:
         return "Started feeding";
       case ScoutReportEventAction.stopFeeding:
-        return "Stopped feeding";
+        return "Finished feeding";
     }
   }
 }
@@ -903,7 +903,7 @@ extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
       case ScoutReportEventPosition.outpost:
         return "the outpost";
       case ScoutReportEventPosition.none:
-        return "nowhere";
+        return "";
     }
   }
 }
