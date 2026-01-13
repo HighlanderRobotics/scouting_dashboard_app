@@ -315,8 +315,8 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
                       ),
                 ),
                 Text(
-                  numberVizualizationBuilder((data['${alliance}Alliance']
-                          ['auto'] as List<dynamic>)
+                  numToStringRounded((data['${alliance}Alliance']['auto']
+                          as List<dynamic>)
                       .where((e) => e['path'].isNotEmpty)
                       .map((e) =>
                           ((e['path']['score'] as List<dynamic>).cast<num>())

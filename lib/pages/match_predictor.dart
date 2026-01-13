@@ -270,8 +270,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                       ),
                                     ),
                                     Text(
-                                      numberVizualizationBuilder(
-                                          e['averagePoints']),
+                                      numToStringRounded(e['averagePoints']),
                                       style: Theme.of(context)
                                           .textTheme
                                           .titleMedium,
@@ -305,7 +304,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               Text(
                 allianceData['totalPoints'] == null
                     ? "--"
-                    : numberVizualizationBuilder(
+                    : numToStringRounded(
                         allianceData['totalPoints'],
                       ),
               ),
@@ -336,7 +335,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                 colorCombination: allianceColor.colorCombination,
                 value: Text(allianceData['net'] == null
                     ? "--"
-                    : numberVizualizationBuilder(allianceData['net'])),
+                    : numToStringRounded(allianceData['net'])),
                 label: const Text("Net"),
               ),
             ),
@@ -346,7 +345,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                 colorCombination: allianceColor.colorCombination,
                 value: Text(allianceData['processor'] == null
                     ? "--"
-                    : numberVizualizationBuilder(allianceData['processor'])),
+                    : numToStringRounded(allianceData['processor'])),
                 label: const Text("Processor"),
               ),
             ),

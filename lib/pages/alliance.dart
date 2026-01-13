@@ -92,8 +92,7 @@ class AllianceVizualization extends AnalysisVisualization {
             Text(
               analysisMap['totalPoints'] == null
                   ? '--'
-                  : numberVizualizationBuilder(
-                      analysisMap['totalPoints'] as num),
+                  : numToStringRounded(analysisMap['totalPoints'] as num),
               style: Theme.of(context).textTheme.titleMedium!.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   )),
@@ -109,14 +108,14 @@ class AllianceVizualization extends AnalysisVisualization {
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value: Text(numberVizualizationBuilder(analysisMap['processor'])),
+              value: Text(numToStringRounded(analysisMap['processor'])),
               label: const Text('Processor'),
             ),
           ),
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value: Text(numberVizualizationBuilder(analysisMap['net'])),
+              value: Text(numToStringRounded(analysisMap['net'])),
               label: const Text('Net'),
             ),
           ),
@@ -261,12 +260,12 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                                   .indexOf(e)] ==
                                               null
                                           ? "--"
-                                          : numberVizualizationBuilder(
-                                              selectedPaths[widget.data['teams']
+                                          : numToStringRounded(selectedPaths[
+                                                  widget.data['teams']
                                                       .indexOf(e)]!
-                                                  .scores
-                                                  .cast<num>()
-                                                  .average()),
+                                              .scores
+                                              .cast<num>()
+                                              .average()),
                                       style: Theme.of(context)
                                           .textTheme
                                           .bodyLarge!
@@ -429,7 +428,7 @@ Container reefStack(
                       child: Text(
                         analysisMap['totalPoints'] == null
                             ? '--'
-                            : numberVizualizationBuilder(row as num),
+                            : numToStringRounded(row as num),
                         style: Theme.of(context)
                             .textTheme
                             .titleLarge!

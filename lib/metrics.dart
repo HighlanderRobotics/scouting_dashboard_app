@@ -1,3 +1,5 @@
+import 'dart:math';
+
 class CategoryMetric {
   CategoryMetric({
     required this.localizedName,
@@ -21,13 +23,22 @@ class CategoryMetric {
 
   String Function(dynamic)? valueToString;
 
+  num roundToPlaces(num val, num places) {
+    num mod = pow(10.0, places);
+    return ((val * mod).round().toDouble() / mod);
+  }
+
   String valueVizualizationBuilder(dynamic val) {
     if (valueToString != null) {
-      return valueToString!(val);
+      if (val is num) {
+        return valueToString!((roundToPlaces(val, 1)));
+      } else {
+        return valueToString!(val);
+      }
     }
 
     if (val is num) {
-      return numberVizualizationBuilder(val);
+      return numToStringRounded(val);
     }
 
     return "--";
@@ -69,7 +80,7 @@ class BreakdownData {
   List<BreakdownSegmentData> segments;
 }
 
-String numberVizualizationBuilder(num? num) {
+String numToStringRounded(num? num) {
   return num == null
       ? "--"
       : num.toStringAsFixed(1).replaceAll(RegExp("\\.?0+\$"), "");
@@ -97,7 +108,7 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Scoring Rate (Fuel / Second)",
       abbreviatedLocalizedName: "Scoring Rate",
-      valueToString: ((p0) => "$p0 fuel/sec"),
+      valueToString: ((p0) => "$p0 bps"),
       path: "fuelPerSecond",
     ),
     CategoryMetric(
@@ -122,7 +133,7 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Feeding Rate (Fuel / Second)",
       abbreviatedLocalizedName: "Feeding Rate",
-      valueToString: ((p0) => "$p0 fuel/sec"),
+      valueToString: ((p0) => "$p0 bps"),
       path: "feedingRate",
     ),
     CategoryMetric(
@@ -136,6 +147,7 @@ final List<MetricCategoryData> metricCategories = [
       localizedName: "Driver Ability",
       abbreviatedLocalizedName: "Driver Ability",
       valueToString: ((p0) => "$p0/5"),
+      max: 5,
       path: "driverAbility",
     ),
     CategoryMetric(

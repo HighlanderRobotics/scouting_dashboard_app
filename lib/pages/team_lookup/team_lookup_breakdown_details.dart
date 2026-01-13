@@ -38,6 +38,7 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
 
       setState(() {
         response = data;
+        print(response);
       });
     } catch (_) {
       setState(() {

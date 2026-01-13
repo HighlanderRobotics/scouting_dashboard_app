@@ -154,7 +154,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                       padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
                       radius: 7,
                       child: Text(
-                        "Score: ${numberVizualizationBuilder(selectedPath!.scores[selectedPath!.matches.indexOf(e)])}",
+                        "Score: ${numToStringRounded(selectedPath!.scores[selectedPath!.matches.indexOf(e)])}",
                         style: Theme.of(context).textTheme.bodyMedium!.merge(
                               TextStyle(
                                 color: Theme.of(context)
@@ -183,8 +183,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
         child: valueBox(
           context,
           Text(
-            numberVizualizationBuilder(
-                selectedPath!.scores.cast<num>().average()),
+            numToStringRounded(selectedPath!.scores.cast<num>().average()),
             style: Theme.of(context).textTheme.titleLarge!.merge(
                   TextStyle(
                     color: Theme.of(context).colorScheme.onPrimaryContainer,
@@ -246,7 +245,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                   padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
                   radius: 7,
                   child: Text(
-                    "Score: ${numberVizualizationBuilder(item.scores.cast<num>().average())}",
+                    "Score: ${numToStringRounded(item.scores.cast<num>().average())}",
                     style: Theme.of(context).textTheme.bodyMedium!.merge(
                           TextStyle(
                             color:
