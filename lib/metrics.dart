@@ -23,15 +23,10 @@ class CategoryMetric {
 
   String Function(dynamic)? valueToString;
 
-  num roundToPlaces(num val, num places) {
-    num mod = pow(10.0, places);
-    return ((val * mod).round().toDouble() / mod);
-  }
-
   String valueVizualizationBuilder(dynamic val) {
     if (valueToString != null) {
       if (val is num) {
-        return valueToString!((roundToPlaces(val, 1)));
+        return valueToString!(numToStringRounded(val));
       } else {
         return valueToString!(val);
       }
@@ -293,20 +288,6 @@ List<BreakdownData> breakdowns = [
   BreakdownData(
     localizedName: "Scores While Moving",
     path: "scoresWhileMoving",
-    segments: [
-      BreakdownSegmentData(
-        localizedNameSingular: "Yes",
-        path: "TRUE",
-      ),
-      BreakdownSegmentData(
-        localizedNameSingular: "No",
-        path: "FALSE",
-      ),
-    ],
-  ),
-  BreakdownData(
-    localizedName: "Disrupts Fuel in Auto",
-    path: "disrupts",
     segments: [
       BreakdownSegmentData(
         localizedNameSingular: "Yes",

@@ -20,22 +20,23 @@ List<Tournament> tournamentList = <Tournament>[
 // Picklists
 
 final List<PicklistWeight> picklistWeights = [
-  PicklistWeight("totalpoints", "Total points"),
-  PicklistWeight("autopoints", "Auto points"),
-  PicklistWeight("teleoppoints", "Teleop points"),
-  PicklistWeight("driverability", "Driver ability"),
-  PicklistWeight("defends", "Defends"),
-  PicklistWeight("bargeresult", "Barge result"),
-  PicklistWeight("totalCoral", "Total coral"),
-  PicklistWeight("level1", "L1 Coral"),
-  PicklistWeight("level2", "L2 Coral"),
-  PicklistWeight("level3", "L3 Coral"),
-  PicklistWeight("level4", "L4 Coral"),
-  PicklistWeight("coralpickup", "Coral pick-ups"),
-  PicklistWeight("algaeProcessor", "Processor algae"),
-  PicklistWeight("algaeNet", "Net algae"),
-  PicklistWeight("algaePickups", "Algae pick-ups"),
-  PicklistWeight("feeds", "Algae feeds"),
+  PicklistWeight("totalPoints", "Total Points"),
+  PicklistWeight("autoPoints", "Auto Points"),
+  PicklistWeight("teleopPoints", "Teleop Points"),
+  PicklistWeight("driverAbility", "Driver Ability"),
+  PicklistWeight("climbResult", "Climb Result"),
+  PicklistWeight("autoClimb", "Auto Climb"),
+  PicklistWeight("defenseEffectiveness", "Defense Effectiveness"),
+  PicklistWeight("contactDefenseTime", "Contact Defense Time"),
+  PicklistWeight("campingDefenseTime", "Camping Defense Time"),
+  PicklistWeight("totalDefensiveTime", "Total Defensive Time"),
+  PicklistWeight("totalFuelThroughput", "Total Fuel Throughput"),
+  PicklistWeight("totalFuelFed", "Total Fuel Fed"),
+  PicklistWeight("feedingRate", "Feeding Rate"),
+  PicklistWeight("scoringRate", "Scoring Rate"),
+  PicklistWeight(
+      "estimatedSuccessfulFuelRate", "Estimated Successful Fuel Rate"),
+  PicklistWeight("estimatedTotalFuelScored", "Estimated Total Fuel Scored"),
 ];
 
 List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
