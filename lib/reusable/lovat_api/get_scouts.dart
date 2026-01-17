@@ -5,8 +5,14 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension GetScouts on LovatAPI {
-  Future<List<Scout>> getScouts() async {
-    final response = await get('/v1/manager/scoutershift/scouters');
+  /// archivedScouters - true: show archived scouters only, false: show unarchived scouters only
+  Future<List<Scout>> getScouts({bool archivedScouters = false}) async {
+    final response = await get(
+      '/v1/manager/scoutershift/scouters',
+      query: {
+        'archived': archivedScouters.toString(),
+      },
+    );
 
     if (response?.statusCode != 200) {
       debugPrint(response?.body ?? '');
