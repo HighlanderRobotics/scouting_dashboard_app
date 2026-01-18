@@ -299,7 +299,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Welcome to the lovely",
+              const Text("Welcome to",
                   style: TextStyle(
                     fontSize: 20,
                     height: 1,
