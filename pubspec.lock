@@ -60,10 +60,9 @@ packages:
   chips_input:
     dependency: "direct main"
     description:
-      name: chips_input
-      sha256: "85722407c84faf0cc20c53dc7021f6eae6d6d3361d46bf1de5650d83c967db32"
-      url: "https://pub.dev"
-    source: hosted
+      path: "packages/chips_input"
+      relative: true
+    source: path
     version: "0.1.0"
   clock:
     dependency: transitive

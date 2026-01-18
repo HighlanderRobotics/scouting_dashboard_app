@@ -42,7 +42,8 @@ dependencies:
   fl_chart: ^0.70.2
   custom_qr_generator: ^0.1.2
   skeletons_forked: ^0.0.3
-  chips_input: ^0.1.0
+  chips_input:
+    path: packages/chips_input
   duration: ^3.0.12
 
   flutter_svg: ^2.2.3
