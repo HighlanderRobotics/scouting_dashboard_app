@@ -492,8 +492,8 @@ class _MatchSuggestionsPageState extends State<MatchSuggestionsPage> {
           .map((team) => Row(
                 children: [
                   Tooltip(
-                    message: RobotRole.values[team['role']].name,
-                    child: Icon(RobotRole.values[team['role']].littleEmblem),
+                    message: RobotRoles.values[team['role']].name,
+                    child: Icon(RobotRoles.values[team['role']].littleEmblem),
                   ),
                   InkWell(
                     onTap: () {

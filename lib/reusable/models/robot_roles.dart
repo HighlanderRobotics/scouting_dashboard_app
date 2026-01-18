@@ -1,35 +1,40 @@
 import 'package:flutter/material.dart';
 
-enum RobotRole {
-  offense,
-  defense,
-  feeder,
+enum RobotRoles {
+  cycling,
+  scoring,
+  feeding,
+  defending,
   immobile,
 }
 
-extension RobotRoleExtension on RobotRole {
+extension RobotRoleExtension on RobotRoles {
   String get name {
     switch (this) {
-      case RobotRole.offense:
-        return "Offense";
-      case RobotRole.defense:
-        return "Defense";
-      case RobotRole.feeder:
-        return "Feeder";
-      case RobotRole.immobile:
+      case RobotRoles.cycling:
+        return "Cycling";
+      case RobotRoles.scoring:
+        return "Scoring";
+      case RobotRoles.feeding:
+        return "Feeding";
+      case RobotRoles.defending:
+        return "Defending";
+      case RobotRoles.immobile:
         return "Immobile";
     }
   }
 
   IconData get littleEmblem {
     switch (this) {
-      case RobotRole.offense:
-        return Icons.sports_score;
-      case RobotRole.defense:
+      case RobotRoles.cycling:
+        return Icons.loop_rounded;
+      case RobotRoles.defending:
         return Icons.shield_outlined;
-      case RobotRole.feeder:
+      case RobotRoles.feeding:
         return Icons.conveyor_belt;
-      case RobotRole.immobile:
+      case RobotRoles.scoring:
+        return Icons.sports_score;
+      case RobotRoles.immobile:
         return Icons.dangerous;
     }
   }

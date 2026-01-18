@@ -308,132 +308,149 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       children: [
         if (reportAnalysis.robotBrokeDescription != null)
           robotBrokeBox(reportAnalysis.robotBrokeDescription!),
+        const SectionTitle("Roles"),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: reportAnalysis.robotRoles.map((role) {
+                return SizedBox(
+                  width: (constraints.maxWidth - 10) / 2,
+                  height: 60,
+                  child: roleContainer(role),
+                );
+              }).toList(),
+            );
+          },
+        ),
+        const SectionTitle("Score"),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
           children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                colorCombination: ColorCombination.colored,
-                label: const Text("Score"),
-                value: Text(reportAnalysis.totalPoints.toString()),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: roleContainer(reportAnalysis),
-            ),
-          ].withSpaceBetween(width: 10),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.totalPoints}"),
+                    label: const Text("Score"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${(() {
+                      switch (reportAnalysis.accuracy) {
+                        case 0:
+                          return "<50";
+                        case 1:
+                          return "50-60";
+                        case 2:
+                          return "60-70";
+                        case 3:
+                          return "70-80";
+                        case 4:
+                          return "80-90";
+                        case 5:
+                          return "90-100";
+                        default:
+                          return "-";
+                      }
+                    })()} "),
+                    label: const Text("% Accuracy"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.scoringRate}"),
+                    label: const Text("BPS")))
+          ],
         ),
         const SectionTitle("Auto"),
         AnimatedAutoPath(analysis: reportAnalysis),
-        ValueTile(
-          value: Text(reportAnalysis.autoPath.scores[0].toString()),
-          label: const Text("Path score"),
+        const ValueTile(
+          value: Text("aaaa"),
+          label: Text("Path score"),
           colorCombination: ColorCombination.colored,
         ),
-        const SectionTitle("Coral scoring"),
+        const SectionTitle("Driving & Defense"),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
           children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("L1"),
-                value: Text(reportAnalysis.coralL1.toString()),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("L2"),
-                value: Text(reportAnalysis.coralL2.toString()),
-              ),
-            ),
-          ].withSpaceBetween(width: 10),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.campingDefenseTime}s"),
+                    label: const Text("Camping Defense"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.contactDefenseTime}s"),
+                    label: const Text("Contact Defense")))
+          ],
         ),
         Row(
           children: [
             Flexible(
               fit: FlexFit.tight,
+              flex: 2,
               child: ValueTile(
-                label: const Text("L3"),
-                value: Text(reportAnalysis.coralL3.toString()),
+                label: const Text("Defense Effectiveness"),
+                value: Text("${reportAnalysis.defenseEffectiveness} / 5"),
               ),
             ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("L4"),
-                value: Text(reportAnalysis.coralL4.toString()),
-              ),
-            ),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.driverAbility.index}/5"),
+                    label: const Text("Driver Ability"))),
           ].withSpaceBetween(width: 10),
         ),
-        const SectionTitle("Algae scoring"),
+        const SectionTitle("Feeding"),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
           children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Net, success"),
-                value: Text(reportAnalysis.netScores.toString()),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Net, fail"),
-                value: Text(reportAnalysis.netFails.toString()),
-              ),
-            ),
-          ].withSpaceBetween(width: 10),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.feeds} "),
+                    label: const Text("Feeds"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.feedingRate}"),
+                    label: const Text("BPS")))
+          ],
         ),
-        Row(
-          children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Processor"),
-                value: Text(reportAnalysis.processorScores.toString()),
-              ),
-            ),
-          ].withSpaceBetween(width: 10),
-        ),
-        const SectionTitle("Driving"),
-        Row(
-          children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: driverAbilityContainer(reportAnalysis),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Defense"),
-                value: Text(reportAnalysis.defense.toString()),
-              ),
-            ),
-          ].withSpaceBetween(width: 10),
+        const SectionTitle("Feeder Types"),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            return Wrap(
+              spacing: 10,
+              runSpacing: 10,
+              children: reportAnalysis.feederType.map((type) {
+                return SizedBox(
+                  width: (constraints.maxWidth - 10) / 2,
+                  height: 60,
+                  child: EmphasizedContainer(
+                    child: Center(
+                      child: Text(
+                        type.description,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
+            );
+          },
         ),
         const SectionTitle("Endgame"),
         Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
           children: [
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Barge result"),
-                value:
-                    Text(reportAnalysis.bargeResult.descriptionWithoutAccuracy),
-              ),
-            ),
-            Flexible(
-              fit: FlexFit.tight,
-              child: ValueTile(
-                label: const Text("Climb success"),
-                value: Text(
-                    reportAnalysis.bargeResult.isSuccess ? "Success" : "Fail"),
-              ),
-            ),
-          ].withSpaceBetween(width: 10),
+            Expanded(
+                child: ValueTile(
+                    value: Text(
+                        "${reportAnalysis.climbResult.localizedDescription} "),
+                    label: const Text("Climb Result"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.climbStartTime}s"),
+                    label: const Text("time left")))
+          ],
         ),
         if (reportAnalysis.notes != null)
           Column(
@@ -527,30 +544,20 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     );
   }
 
-  Widget driverAbilityContainer(SingleScoutReportAnalysis reportAnalysis) {
-    return ValueTile(
-      label: const Text("Driver ability"),
-      value: Text("${reportAnalysis.driverAbility.index + 1}/5"),
-    );
-  }
-
-  Widget roleContainer(SingleScoutReportAnalysis reportAnalysis) {
-    return ValueTile(
-      colorCombination: ColorCombination.colored,
-      label: const Text(
-        "Role",
-      ),
-      value: Row(
-        mainAxisSize: MainAxisSize.min,
+  Widget roleContainer(RobotRoles role) {
+    return EmphasizedContainer(
+      color: ColorCombination.colored.getBackgroundColor(context),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
-            reportAnalysis.robotRole.littleEmblem,
+            role.littleEmblem,
             size: 32,
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
           const SizedBox(width: 5),
           Text(
-            reportAnalysis.robotRole.name,
+            role.name,
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: Theme.of(context).colorScheme.onPrimaryContainer,
                 ),
@@ -585,7 +592,8 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: Theme.of(context).colorScheme.surfaceVariant,
+                      color:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
                       width: 1,
                     ),
                   ),
@@ -645,58 +653,65 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       );
 }
 
-enum BargeResult {
-  none,
-  parked,
-  shallowSuccess,
-  shallowFail,
-  deepSuccess,
-  deepFail,
+enum EndgameClimbResult {
+  notAttempted,
+  failed,
+  l1,
+  l2,
+  l3,
 }
 
-extension BargeResultExtension on BargeResult {
+extension EndgameClimbResultExtension on EndgameClimbResult {
   String get localizedDescription {
     switch (this) {
-      case BargeResult.none:
+      case EndgameClimbResult.notAttempted:
         return "None";
-      case BargeResult.parked:
-        return "Parked";
-      case BargeResult.shallowSuccess:
-        return "Shallow, success";
-      case BargeResult.shallowFail:
-        return "Shallow, fail";
-      case BargeResult.deepSuccess:
-        return "Deep, success";
-      case BargeResult.deepFail:
-        return "Deep, fail";
+      case EndgameClimbResult.failed:
+        return "Failed";
+      case EndgameClimbResult.l1:
+        return "L2";
+      case EndgameClimbResult.l2:
+        return "L2";
+      case EndgameClimbResult.l3:
+        return "L3";
     }
   }
+}
 
-  String get descriptionWithoutAccuracy {
-    switch (this) {
-      case BargeResult.shallowSuccess:
-      case BargeResult.shallowFail:
-        return "Shallow";
-      case BargeResult.deepSuccess:
-      case BargeResult.deepFail:
-        return "Deep";
-      default:
-        return localizedDescription;
-    }
-  }
+enum FeederType {
+  continuous,
+  stopToShoot,
+  dump,
+}
 
-  bool get isSuccess {
+extension FeederTypeName on FeederType {
+  String get description {
     switch (this) {
-      case BargeResult.shallowFail:
-      case BargeResult.deepFail:
-        return false;
-      default:
-        return true;
+      case FeederType.continuous:
+        return "Continuous";
+      case FeederType.dump:
+        return "Dump";
+      case FeederType.stopToShoot:
+        return "Stop to Shoot";
     }
   }
+}
+
+enum AutoClimbResult {
+  notAttempted,
+  failed,
+  succeeded,
 }
 
 enum DriverAbility {
+  terrible,
+  poor,
+  average,
+  good,
+  great,
+}
+
+enum DefenseEffectiveness {
   terrible,
   poor,
   average,
@@ -722,24 +737,29 @@ extension DriverAbilityExtension on DriverAbility {
 }
 
 class ScoutReportEvent {
-  const ScoutReportEvent({
-    required this.timestamp,
-    required this.action,
-    required this.position,
-  });
+  const ScoutReportEvent(
+      {required this.timestamp,
+      required this.action,
+      required this.position,
+      this.quantity});
 
   final Duration timestamp;
   final ScoutReportEventAction action;
   final ScoutReportEventPosition position;
+  final num? quantity;
 
   factory ScoutReportEvent.fromList(List<int> list) => ScoutReportEvent(
-        timestamp: Duration(seconds: list[0]),
-        action: ScoutReportEventAction.values[list[1]],
-        position: ScoutReportEventPosition.values[list[2]],
-      );
+      timestamp: Duration(seconds: list[0]),
+      action: ScoutReportEventAction.values[list[1]],
+      position: ScoutReportEventPosition.values[list[2]],
+      quantity: list.length >= 4 ? list[3] : 0);
 
   String get localizedDescription {
     String output = action.localizedPastTense;
+
+    if (quantity != null && quantity! > 0) {
+      output += " $quantity fuel";
+    }
 
     if (position != ScoutReportEventPosition.none) {
       output += " at ${position.localizedDescription}";
@@ -749,136 +769,100 @@ class ScoutReportEvent {
   }
 }
 
+enum Accuracy {
+  underFifty,
+  fifty,
+  sixty,
+  seventy,
+  eighty,
+  ninetyPlus,
+}
+
 enum ScoutReportEventAction {
-  intakeCoral,
-  intakeAlgae,
-  feedAlgae,
-  leave,
-  defend,
-  scoreNetSuccess,
-  scoreNetFail,
-  scoreProcessor,
-  scoreCoral,
-  dropAlgae,
-  dropCoral,
-  startingPosition,
+  startScoring,
+  stopScoring,
+  startMatch,
+  startCamping,
+  stopCamping,
+  startDefending,
+  stopDefending,
+  intake,
+  outtake,
+  disrupt,
+  cross,
+  climb,
+  startFeeding,
+  stopFeeding
 }
 
 extension ScoutReportEventActionExtension on ScoutReportEventAction {
   String get localizedPastTense {
     switch (this) {
-      case ScoutReportEventAction.leave:
-        return "Left the starting zone";
-      case ScoutReportEventAction.intakeCoral:
-        return "Collected a coral";
-      case ScoutReportEventAction.intakeAlgae:
-        return "Collected an algae";
-      case ScoutReportEventAction.dropAlgae:
-        return "Dropped an algae";
-      case ScoutReportEventAction.dropCoral:
-        return "Dropped a coral";
-      case ScoutReportEventAction.scoreCoral:
-        return "Scored a coral";
-      case ScoutReportEventAction.scoreNetSuccess:
-        return "Successfully scored an algae in the net";
-      case ScoutReportEventAction.scoreNetFail:
-        return "Failed to score an algae in the net";
-      case ScoutReportEventAction.scoreProcessor:
-        return "Scored an algae in the processor";
-      case ScoutReportEventAction.defend:
-        return "Made a defensive action";
-      case ScoutReportEventAction.feedAlgae:
-        return "Fed an algae";
-      case ScoutReportEventAction.startingPosition:
+      case ScoutReportEventAction.startScoring:
+        return "Started scoring";
+      case ScoutReportEventAction.stopScoring:
+        return "Stopped scoring";
+      case ScoutReportEventAction.startMatch:
         return "Started the match";
+      case ScoutReportEventAction.startCamping:
+        return "Started camping";
+      case ScoutReportEventAction.stopCamping:
+        return "Stopped camping";
+      case ScoutReportEventAction.startDefending:
+        return "Started contact defending";
+      case ScoutReportEventAction.stopDefending:
+        return "Stopped contact defending";
+      case ScoutReportEventAction.intake:
+        return "Took in fuel";
+      case ScoutReportEventAction.outtake:
+        return "Outtaked fuel";
+      case ScoutReportEventAction.disrupt:
+        return "Disrupt neutral zone fuel";
+      case ScoutReportEventAction.cross:
+        return "Crossed into the neutral zone";
+      case ScoutReportEventAction.climb:
+        return "Started climbing";
+      case ScoutReportEventAction.startFeeding:
+        return "Started feeding";
+      case ScoutReportEventAction.stopFeeding:
+        return "Stopped feeding";
     }
   }
 }
 
 enum ScoutReportEventPosition {
+  leftTrench,
+  leftBump,
+  hub,
+  rightTrench,
+  rightBump,
+  neutralZone,
+  depot,
+  outpost,
   none,
-  startOne,
-  startTwo,
-  startThree,
-  startFour,
-  reefL1,
-  reefL2,
-  reefL3,
-  reefL4,
-  reefL1A,
-  reefL1B,
-  reefL1C,
-  reefL2A,
-  reefL2B,
-  reefL2C,
-  reefL3A,
-  reefL3B,
-  reefL3C,
-  reefL4A,
-  reefL4B,
-  reefL4C,
-  groundPieceA,
-  groundPieceB,
-  groundPieceC,
-  coralStationOne,
-  coralStationTwo,
 }
 
 extension ScoutReportEventPositionExtension on ScoutReportEventPosition {
   String get localizedDescription {
     switch (this) {
+      case ScoutReportEventPosition.leftTrench:
+        return "the left trench";
+      case ScoutReportEventPosition.leftBump:
+        return "the left bump";
+      case ScoutReportEventPosition.hub:
+        return "the hub";
+      case ScoutReportEventPosition.rightTrench:
+        return "the right trench";
+      case ScoutReportEventPosition.rightBump:
+        return "the right bump";
+      case ScoutReportEventPosition.neutralZone:
+        return "the neutral zone";
+      case ScoutReportEventPosition.depot:
+        return "the depot";
+      case ScoutReportEventPosition.outpost:
+        return "the outpost";
       case ScoutReportEventPosition.none:
         return "nowhere";
-      case ScoutReportEventPosition.startOne:
-        return "the starting line, far left";
-      case ScoutReportEventPosition.startTwo:
-        return "the starting line, mid left";
-      case ScoutReportEventPosition.startThree:
-        return "the starting line, mid right";
-      case ScoutReportEventPosition.startFour:
-        return "the starting line, far right";
-      case ScoutReportEventPosition.reefL1:
-        return "L1 on the reef";
-      case ScoutReportEventPosition.reefL2:
-        return "L2 on the reef";
-      case ScoutReportEventPosition.reefL3:
-        return "L3 on the reef";
-      case ScoutReportEventPosition.reefL4:
-        return "L4 on the reef";
-      case ScoutReportEventPosition.reefL1A:
-        return "L1 on the reef, drivers' right";
-      case ScoutReportEventPosition.reefL1B:
-        return "L1 on the reef, drivers' left";
-      case ScoutReportEventPosition.reefL1C:
-        return "L1 on the reef, far side from drivers";
-      case ScoutReportEventPosition.reefL2A:
-        return "L2 on the reef, drivers' right";
-      case ScoutReportEventPosition.reefL2B:
-        return "L2 on the reef, drivers' left";
-      case ScoutReportEventPosition.reefL2C:
-        return "L2 on the reef, far side from drivers";
-      case ScoutReportEventPosition.reefL3A:
-        return "L3 on the reef, drivers' right";
-      case ScoutReportEventPosition.reefL3B:
-        return "L3 on the reef, drivers' left";
-      case ScoutReportEventPosition.reefL3C:
-        return "L3 on the reef, far side from drivers";
-      case ScoutReportEventPosition.reefL4A:
-        return "L4 on the reef, drivers' right";
-      case ScoutReportEventPosition.reefL4B:
-        return "L4 on the reef, drivers' left";
-      case ScoutReportEventPosition.reefL4C:
-        return "L4 on the reef, far side from drivers";
-      case ScoutReportEventPosition.groundPieceA:
-        return "the ground piece, drivers' left";
-      case ScoutReportEventPosition.groundPieceB:
-        return "the ground piece, drivers' center";
-      case ScoutReportEventPosition.groundPieceC:
-        return "the ground piece, drivers' right";
-      case ScoutReportEventPosition.coralStationOne:
-        return "the coral station on the left";
-      case ScoutReportEventPosition.coralStationTwo:
-        return "the coral station on the right";
     }
   }
 }

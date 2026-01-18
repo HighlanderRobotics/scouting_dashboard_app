@@ -216,7 +216,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
           : Row(
               children: (allianceData['teams']
                       .map((e) {
-                        final role = RobotRole.values[e['role']];
+                        final role = RobotRoles.values[e['role']];
 
                         return Flexible(
                           flex: 1,

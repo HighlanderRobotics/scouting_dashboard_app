@@ -50,10 +50,10 @@ class AllianceVizualization extends AnalysisVisualization {
                     Tooltip(
                       message: teamData['role'] == null
                           ? "No data"
-                          : RobotRole.values[teamData['role']].name,
+                          : RobotRoles.values[teamData['role']].name,
                       child: Icon(teamData['role'] == null
                           ? Icons.question_mark
-                          : RobotRole
+                          : RobotRoles
                               .values[teamData['role'] as int].littleEmblem),
                     ),
                     const SizedBox(width: 3),

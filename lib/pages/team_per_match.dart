@@ -80,7 +80,7 @@ class TeamPerMatchResponse {
   final AutoPath? autoPath;
 
   final int driverAbility;
-  final RobotRole role;
+  final RobotRoles role;
   final List<NoteData> notes;
   final int teleopScore;
 
@@ -103,7 +103,7 @@ class TeamPerMatchResponse {
           ? null
           : AutoPath.fromMap(metrics['autoPath']),
       driverAbility: metrics['driverAbility'],
-      role: RobotRole.values[metrics['role']],
+      role: RobotRoles.values[metrics['role']],
       notes: (metrics['notes'] as List<dynamic>)
           .map((n) => NoteData.fromJson(n))
           .toList(),

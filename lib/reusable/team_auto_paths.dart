@@ -292,7 +292,7 @@ class AutoPathField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AspectRatio(
-      aspectRatio: 522 / 489,
+      aspectRatio: 489 / 491,
       child: Stack(children: [
         fieldBackground(context),
         ...paths,
@@ -504,37 +504,37 @@ class AutoPath {
   }
 
   String get shortDescription {
-    final coralCount = timeline
-        .where((event) => event.type == AutoPathEventType.scoreCoral)
-        .length;
+    // final coralCount = timeline
+    //     .where((event) => event.type == AutoPathEventType.scoreCoral)
+    //     .length;
 
-    final netCount = timeline
-        .where((event) => event.type == AutoPathEventType.scoreNet)
-        .length;
+    // final netCount = timeline
+    //     .where((event) => event.type == AutoPathEventType.scoreNet)
+    //     .length;
 
-    final processorCount = timeline
-        .where((event) => event.type == AutoPathEventType.scoreProcessor)
-        .length;
+    // final processorCount = timeline
+    //     .where((event) => event.type == AutoPathEventType.scoreProcessor)
+    //     .length;
 
-    bool left = timeline.any((event) => event.type == AutoPathEventType.leave);
+    // bool left = timeline.any((event) => event.type == AutoPathEventType.leave);
 
-    String name = <String>[
-      if (coralCount > 0) "$coralCount Coral",
-      if (processorCount > 0) "$processorCount Coral",
-      if (netCount > 0) "$netCount Net",
-      if (left && coralCount + netCount + processorCount == 0) "Leave",
-    ].join(", ");
+    // String name = <String>[
+    //   if (coralCount > 0) "$coralCount Coral",
+    //   if (processorCount > 0) "$processorCount Coral",
+    //   if (netCount > 0) "$netCount Net",
+    //   if (left && coralCount + netCount + processorCount == 0) "Leave",
+    // ].join(", ");
 
-    name = "${{
-      AutoPathLocation.startOne: "Far left",
-      AutoPathLocation.startTwo: "Mid left",
-      AutoPathLocation.startThree: "Mid right",
-      AutoPathLocation.startFour: "Far right",
-    }[timeline.first.location]} $name";
+    // name = "${{
+    //   AutoPathLocation.startOne: "Far left",
+    //   AutoPathLocation.startTwo: "Mid left",
+    //   AutoPathLocation.startThree: "Mid right",
+    //   AutoPathLocation.startFour: "Far right",
+    // }[timeline.first.location]} $name";
 
-    if (name.isEmpty) name = "Nothing";
+    // if (name.isEmpty) name = "Nothing";
 
-    return name;
+    return "Auto Path";
   }
 
   List<Offset> get offsets => timeline.map((e) => e.offset).toList();
@@ -627,79 +627,14 @@ class AutoPath {
   }
 
   List<GamePiece> inventoryAtTimestamp(Duration timestamp) {
-    final currentTimeline =
-        timeline.where((event) => event.timestamp <= timestamp);
-
-    List<GamePiece> inventory = [];
-
-    for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.intakeAlgae) {
-        inventory.add(GamePiece.algae);
-      }
-
-      if (event.type == AutoPathEventType.intakeCoral) {
-        inventory.add(GamePiece.coral);
-      }
-
-      if (event.type == AutoPathEventType.scoreCoral) {
-        inventory.remove(inventory.lastWhere((p) => p == GamePiece.coral));
-      }
-
-      if (event.type == AutoPathEventType.scoreNet) {
-        inventory.remove(inventory.lastWhere((p) => p == GamePiece.algae));
-      }
-
-      if (event.type == AutoPathEventType.scoreProcessor) {
-        inventory.remove(inventory.lastWhere((p) => p == GamePiece.algae));
-      }
-    }
-
-    return inventory;
+    return [];
   }
 
   List<PositionedGamePiece> gamePiecePositionsAtTimestamp(Duration timestamp) {
-    List<PositionedGamePiece> gamePieces = [];
+    // final currentTimeline =
+    //     timeline.where((event) => event.timestamp <= timestamp);
 
-    // Initial field
-    gamePieces.addAll([
-      AutoPathLocation.groundCoralA,
-      AutoPathLocation.groundCoralB,
-      AutoPathLocation.groundCoralC,
-      AutoPathLocation.groundAlgaeA,
-      AutoPathLocation.groundAlgaeB,
-      AutoPathLocation.groundAlgaeC,
-    ].map((location) => PositionedGamePiece(
-          location.gamePiece!,
-          location.offset,
-        )));
-
-    // What's there now
-    final currentTimeline =
-        timeline.where((event) => event.timestamp <= timestamp);
-
-    for (var event in currentTimeline) {
-      if (event.type == AutoPathEventType.intakeAlgae ||
-          event.type == AutoPathEventType.intakeCoral) {
-        final elementToRemove = gamePieces.cast().firstWhere(
-              (element) =>
-                  event.location.offset.dx == element.position.dx &&
-                  event.location.offset.dy == element.position.dy &&
-                  event.location.isGroundPiece &&
-                  element.gamePiece == event.location.gamePiece,
-              orElse: () => null,
-            );
-
-        if (elementToRemove != null) {
-          gamePieces.remove(elementToRemove);
-        }
-      }
-
-      if (event.type == AutoPathEventType.scoreCoral) {
-        gamePieces.add(PositionedGamePiece(GamePiece.coral, event.offset));
-      }
-    }
-
-    return gamePieces;
+    return [];
   }
 }
 
@@ -711,25 +646,26 @@ class PositionedGamePiece {
 }
 
 class AutoPathEvent {
-  const AutoPathEvent({
-    required this.timestamp,
-    required this.type,
-    required this.location,
-  });
+  const AutoPathEvent(
+      {required this.timestamp,
+      required this.type,
+      required this.location,
+      this.quantity});
 
   final Duration timestamp;
   final AutoPathEventType type;
   final AutoPathLocation location;
+  final num? quantity;
 
   /// `x` and `y` are between `0` and `100`, starting from the top right of the field.
   Offset get offset => location.offset;
   Offset get randomVariance => location.randomVariance;
 
   factory AutoPathEvent.fromMap(Map<String, dynamic> map) => AutoPathEvent(
-        timestamp: Duration(seconds: map['time']),
-        type: AutoPathEventType.values[map['event']],
-        location: AutoPathLocation.values[map['location']],
-      );
+      timestamp: Duration(seconds: map['time']),
+      type: AutoPathEventType.values[map['event']],
+      location: AutoPathLocation.values[map['location']],
+      quantity: map['quantity']);
 
   Widget indicator(Color? teamColor) {
     switch (type) {
@@ -832,18 +768,16 @@ class AnimatedAutoPathControls extends StatelessWidget {
 }
 
 enum AutoPathEventType {
-  intakeCoral,
-  intakeAlgae,
-  unused2,
-  leave,
-  unused4,
-  scoreNet,
-  unused6,
-  scoreProcessor,
-  scoreCoral,
-  unused9,
-  unused10,
+  startScoring,
+  stopScoring,
   startMatch,
+  intake,
+  outtake,
+  disrupt,
+  cross,
+  climb,
+  startFeeding,
+  stopFeeding
 }
 
 enum GamePiece {
@@ -939,101 +873,40 @@ Widget iconAutoPathEventIndicator(
     );
 
 enum AutoPathLocation {
+  leftTrench,
+  leftBump,
+  hub,
+  rightTrench,
+  rightBump,
+  neutralZone,
+  depot,
+  outpost,
+  tower,
   none,
-
-  /// LO - LI based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
-  startOne,
-
-  /// LI - LM based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
-  startTwo,
-
-  /// RM - RI based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
-  startThree,
-
-  /// RI - RO based on [this](https://github.com/HighlanderRobotics/Reefscape/blob/main/notes/leftStartingLabels.PNG)
-  startFour,
-
-  reefL1,
-  reefL2,
-  reefL3,
-  reefL4,
-
-  reefL1A,
-  reefL1B,
-  reefL1C,
-
-  reefL2A,
-  reefL2B,
-  reefL2C,
-
-  reefL3A,
-  reefL3B,
-  reefL3C,
-
-  reefL4A,
-  reefL4B,
-  reefL4C,
-
-  groundCoralA,
-  groundCoralB,
-  groundCoralC,
-
-  coralStationOne,
-  coralStationTwo,
-
-  groundAlgaeA,
-  groundAlgaeB,
-  groundAlgaeC,
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
-  /// `x` and `y` are between `0` and `100`, starting from the top right of the field.
+  /// `x` and `y` are between `0` and `100`, starting from the top left of the field.
   Offset get offset {
     switch (this) {
-      case AutoPathLocation.startOne:
-        return const Offset(13.5, 85);
-      case AutoPathLocation.startTwo:
-        return const Offset(13.5, 65);
-      case AutoPathLocation.startThree:
-        return const Offset(13.5, 35);
-      case AutoPathLocation.startFour:
-        return const Offset(13.5, 15);
-      case AutoPathLocation.reefL1:
-      case AutoPathLocation.reefL2:
-      case AutoPathLocation.reefL3:
-      case AutoPathLocation.reefL4:
-        return const Offset(48.3, 50.2);
-      case AutoPathLocation.reefL1A:
-      case AutoPathLocation.reefL2A:
-      case AutoPathLocation.reefL3A:
-      case AutoPathLocation.reefL4A:
-        return const Offset(56, 42.7);
-      case AutoPathLocation.reefL1B:
-      case AutoPathLocation.reefL2B:
-      case AutoPathLocation.reefL3B:
-      case AutoPathLocation.reefL4B:
-        return const Offset(56, 58);
-      case AutoPathLocation.reefL1C:
-      case AutoPathLocation.reefL2C:
-      case AutoPathLocation.reefL3C:
-      case AutoPathLocation.reefL4C:
-        return const Offset(39.5, 50.2);
-      case AutoPathLocation.groundAlgaeA:
-        return const Offset(85.2 + 3, 71.9);
-      case AutoPathLocation.groundAlgaeB:
-        return const Offset(85.2 + 3, 50);
-      case AutoPathLocation.groundAlgaeC:
-        return const Offset(85.2 + 3, 28.1);
-      case AutoPathLocation.groundCoralA:
-        return const Offset(85.2 - 3, 71.9);
-      case AutoPathLocation.groundCoralB:
-        return const Offset(85.2 - 3, 50);
-      case AutoPathLocation.groundCoralC:
-        return const Offset(85.2 - 3, 28.1);
-      case AutoPathLocation.coralStationOne:
-        return const Offset(89, 90);
-      case AutoPathLocation.coralStationTwo:
-        return const Offset(89, 10);
+      case AutoPathLocation.leftTrench:
+        return const Offset(45, 10);
+      case AutoPathLocation.leftBump:
+        return const Offset(45, 25);
+      case AutoPathLocation.hub:
+        return const Offset(57.5, 50);
+      case AutoPathLocation.rightTrench:
+        return const Offset(45, 90);
+      case AutoPathLocation.rightBump:
+        return const Offset(45, 75);
+      case AutoPathLocation.neutralZone:
+        return const Offset(30, 50);
+      case AutoPathLocation.depot:
+        return const Offset(93, 72.5);
+      case AutoPathLocation.outpost:
+        return const Offset(93, 10);
+      case AutoPathLocation.tower:
+        return const Offset(92, 45);
       default:
         return const Offset(0, 0);
     }
@@ -1041,47 +914,25 @@ extension AutoPathLocationExtension on AutoPathLocation {
 
   Offset get randomVariance {
     switch (this) {
-      case AutoPathLocation.reefL1A:
-      case AutoPathLocation.reefL2A:
-      case AutoPathLocation.reefL3A:
-      case AutoPathLocation.reefL4A:
-      case AutoPathLocation.reefL1B:
-      case AutoPathLocation.reefL2B:
-      case AutoPathLocation.reefL3B:
-      case AutoPathLocation.reefL4B:
-      case AutoPathLocation.reefL1C:
-      case AutoPathLocation.reefL2C:
-      case AutoPathLocation.reefL3C:
-      case AutoPathLocation.reefL4C:
-        return const Offset(5, 5);
-      default:
+      case AutoPathLocation.leftTrench:
+      case AutoPathLocation.leftBump:
+      case AutoPathLocation.hub:
+      case AutoPathLocation.rightTrench:
+      case AutoPathLocation.rightBump:
         return const Offset(0, 0);
+      case AutoPathLocation.outpost:
+      case AutoPathLocation.depot:
+      case AutoPathLocation.tower:
+        return const Offset(0, 15);
+      default:
+        return const Offset(10, 10);
     }
   }
 
-  bool get isGroundPiece => [
-        AutoPathLocation.groundCoralA,
-        AutoPathLocation.groundCoralB,
-        AutoPathLocation.groundCoralC,
-        AutoPathLocation.groundAlgaeA,
-        AutoPathLocation.groundAlgaeB,
-        AutoPathLocation.groundAlgaeC,
-      ].contains(this);
+  bool get isGroundPiece => false;
 
   GamePiece? get gamePiece {
     switch (this) {
-      case AutoPathLocation.groundCoralA:
-        return GamePiece.coral;
-      case AutoPathLocation.groundCoralB:
-        return GamePiece.coral;
-      case AutoPathLocation.groundCoralC:
-        return GamePiece.coral;
-      case AutoPathLocation.groundAlgaeA:
-        return GamePiece.algae;
-      case AutoPathLocation.groundAlgaeB:
-        return GamePiece.algae;
-      case AutoPathLocation.groundAlgaeC:
-        return GamePiece.algae;
       default:
         return null;
     }
