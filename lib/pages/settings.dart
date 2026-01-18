@@ -1109,6 +1109,7 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
                   } catch (e) {
                     setState(() {
                       errorMessage = "Failed to delete configuration";
+                      loading = false;
                     });
                     return;
                   }
