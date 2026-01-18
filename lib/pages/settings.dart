@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -1091,20 +1092,30 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
                     final prefs = await SharedPreferences.getInstance();
 
                     await prefs.clear();
-                    await auth0.credentialsManager.clearCredentials();
+                    if (kIsWeb) {
+                      // Logout redirects the browser to Auth0, then back to our origin
+                      // Keep loading state and don't navigate - the redirect reloads the app
+                      final origin = Uri.base.origin;
+                      auth0Web.logout(returnToUrl: origin);
+                      // Keep dialog open with loading spinner until redirect happens
+                      // (don't await - logout triggers redirect, no meaningful return)
+                      return;
+                    } else {
+                      await auth0.credentialsManager.clearCredentials();
+                    }
 
                     navigatorState.pushNamedAndRemoveUntil(
                         "/loading", (route) => false);
                   } catch (e) {
                     setState(() {
                       errorMessage = "Failed to delete configuration";
-                    });
-                    return;
-                  } finally {
-                    setState(() {
                       loading = false;
                     });
+                    return;
                   }
+                  setState(() {
+                    loading = false;
+                  });
                 },
           style: ButtonStyle(
             elevation: MaterialStateProperty.all(0),

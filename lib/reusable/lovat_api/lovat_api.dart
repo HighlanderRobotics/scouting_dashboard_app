@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/constants.dart';
 
@@ -9,36 +9,92 @@ class LovatAPI {
   LovatAPI(this.baseUrl);
 
   String baseUrl;
-  bool isAuthenticating = false;
+  bool _isAuthenticating = false;
+
+  // Track if Auth0 Web SDK has been initialized
+  bool _webSdkInitialized = false;
+  Future<Credentials?>? _initializationFuture;
+
+  /// Ensure the Auth0 Web SDK is initialized (must be called before any web auth operations)
+  Future<Credentials?> ensureWebSdkInitialized() async {
+    if (!kIsWeb) return null;
+    if (_webSdkInitialized) return null;
+
+    // Prevent concurrent initialization
+    if (_initializationFuture != null) {
+      return _initializationFuture;
+    }
+
+    _initializationFuture = _doInitialize();
+    return _initializationFuture;
+  }
+
+  Future<Credentials?> _doInitialize() async {
+    final credentials = await auth0Web.onLoad(
+      audience: "https://api.lovat.app",
+      scopes: {'openid', 'profile', 'email', 'offline_access'},
+    );
+    _webSdkInitialized = true;
+    return credentials;
+  }
 
   Future<Credentials> login() async {
-    if (isAuthenticating) {
+    if (_isAuthenticating) {
       // Wait for the current login to finish
-      while (isAuthenticating) {
+      while (_isAuthenticating) {
         await Future.delayed(const Duration(milliseconds: 100));
       }
 
-      return await auth0.credentialsManager.credentials();
+      if (kIsWeb) {
+        return await auth0Web.credentials();
+      } else {
+        return await auth0.credentialsManager.credentials();
+      }
     }
 
-    isAuthenticating = true;
+    _isAuthenticating = true;
 
     try {
-      final newCredentials = await auth0
-          .webAuthentication(scheme: "com.frc8033.lovatdashboard")
-          .login(
-            audience: "https://api.lovat.app",
-          );
+      if (kIsWeb) {
+        await ensureWebSdkInitialized();
 
-      await auth0.credentialsManager.storeCredentials(newCredentials);
+        final credentials = await auth0Web.loginWithPopup(
+          audience: "https://api.lovat.app",
+          scopes: {'openid', 'profile', 'email', 'offline_access'},
+        );
 
-      return newCredentials;
+        return credentials;
+      } else {
+        final newCredentials = await auth0
+            .webAuthentication(scheme: "com.frc8033.lovatdashboard")
+            .login(
+          audience: "https://api.lovat.app",
+          scopes: {'openid', 'profile', 'email', 'offline_access'},
+        );
+
+        await auth0.credentialsManager.storeCredentials(newCredentials);
+
+        return newCredentials;
+      }
     } finally {
-      isAuthenticating = false;
+      _isAuthenticating = false;
     }
   }
 
   Future<String?> getAccessToken() async {
+    if (kIsWeb) {
+      await ensureWebSdkInitialized();
+
+      final hasCredentials = await auth0Web.hasValidCredentials();
+      if (!hasCredentials) {
+        return (await login()).accessToken;
+      }
+
+      final credentials = await auth0Web.credentials();
+      return credentials.accessToken;
+    }
+
+    // Mobile/Desktop path
     try {
       final credentials = await auth0.credentialsManager.credentials();
 
@@ -48,7 +104,7 @@ class LovatAPI {
         }
 
         final newCredentials = await auth0.api
-            .renewCredentials(refreshToken: credentials.accessToken);
+            .renewCredentials(refreshToken: credentials.refreshToken!);
 
         await auth0.credentialsManager.storeCredentials(newCredentials);
 
@@ -63,8 +119,6 @@ class LovatAPI {
 
   Future<http.Response?> get(String path, {Map<String, String>? query}) async {
     final token = await getAccessToken();
-
-    debugPrint(token);
 
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
@@ -131,7 +185,6 @@ class LovatAPIException implements Exception {
   String toString() => message;
 }
 
-const kProductionBaseUrl = "https://api.lovat.app";
-// const kProductionBaseUrl = "https://lovat-server-staging.up.railway.app";
+const kProductionBaseUrl = "https://lovat-server-staging.up.railway.app";
 
 final lovatAPI = LovatAPI(kProductionBaseUrl);

@@ -21,8 +21,6 @@ PODS:
     - Flutter
     - FlutterMacOS
   - SimpleKeychain (1.1.0)
-  - soundpool_macos (1.0.0):
-    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
 
@@ -33,7 +31,6 @@ DEPENDENCIES:
   - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/darwin`)
   - share_plus (from `Flutter/ephemeral/.symlinks/plugins/share_plus/macos`)
   - shared_preferences_foundation (from `Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin`)
-  - soundpool_macos (from `Flutter/ephemeral/.symlinks/plugins/soundpool_macos/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
 
 SPEC REPOS:
@@ -55,22 +52,19 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/share_plus/macos
   shared_preferences_foundation:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_foundation/darwin
-  soundpool_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/soundpool_macos/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
 
 SPEC CHECKSUMS:
   Auth0: 28cb24cb19ebd51f0b07751f16d83b59f4019532
   auth0_flutter: f085572268059bc194c7b023d7f432f5ebb72413
-  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
   JWTDecode: 3eaab1e06b6f4dcbdd6716aff09ba4c2104ca8b7
   mobile_scanner: 54ceceae0c8da2457e26a362a6be5c61154b1829
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   share_plus: 76dd39142738f7a68dd57b05093b5e8193f220f7
   shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
   SimpleKeychain: f8707c8e97b38c6a6e687b17732afc9bcef06439
-  soundpool_macos: 3bc0b8b238407516ad9b8afc2647670ff58124f9
   url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
 
 PODFILE CHECKSUM: 8d40c19d3cbdb380d870685c3a564c989f1efa52

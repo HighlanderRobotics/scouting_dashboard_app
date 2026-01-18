@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -38,20 +39,66 @@ class _OnboardingPageState extends State<OnboardingPage> {
   String? teamEmail;
 
   Future<void> init() async {
-    if (await auth0.credentialsManager.hasValidCredentials()) {
-      final profile = await lovatAPI.getUserProfile();
+    // For web, initialize the Auth0 SDK and check for existing session
+    if (kIsWeb) {
+      try {
+        // Initialize SDK and get any existing credentials (e.g., from redirect)
+        final credentials = await lovatAPI.ensureWebSdkInitialized();
+        if (credentials != null) {
+          // User already has valid credentials
+          toRegistrationStatusView(null);
+          return;
+        }
+      } catch (e) {
+        debugPrint('Auth0 web init error: $e');
+      }
 
-      if (profile.team != null) {
-        toRegistrationStatusView(null);
-      } else {
+      // Check if we have valid credentials cached
+      try {
+        final hasCredentials = await auth0Web.hasValidCredentials();
+        if (hasCredentials) {
+          final profile = await lovatAPI.getUserProfile();
+          if (profile.team != null) {
+            toRegistrationStatusView(null);
+          } else {
+            setState(() {
+              phase = OnboardingPagePhase.teamSelection;
+            });
+          }
+        } else {
+          setState(() {
+            phase = OnboardingPagePhase.welcome;
+          });
+        }
+      } catch (e) {
+        debugPrint('Init error (web): $e');
         setState(() {
-          phase = OnboardingPagePhase.teamSelection;
+          phase = OnboardingPagePhase.welcome;
         });
       }
     } else {
-      setState(() {
-        phase = OnboardingPagePhase.welcome;
-      });
+      try {
+        if (await auth0.credentialsManager.hasValidCredentials()) {
+          final profile = await lovatAPI.getUserProfile();
+
+          if (profile.team != null) {
+            toRegistrationStatusView(null);
+          } else {
+            setState(() {
+              phase = OnboardingPagePhase.teamSelection;
+            });
+          }
+        } else {
+          setState(() {
+            phase = OnboardingPagePhase.welcome;
+          });
+        }
+      } catch (e) {
+        debugPrint('Init error (mobile): $e');
+        setState(() {
+          phase = OnboardingPagePhase.welcome;
+        });
+      }
     }
   }
 
@@ -238,7 +285,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         });
       }
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('toRegistrationStatusView error: $e');
       setState(() {
         phase = OnboardingPagePhase.error;
       });
@@ -297,13 +344,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
         phase = OnboardingPagePhase.loading;
       });
 
-      await auth0.webAuthentication(scheme: "com.frc8033.lovatdashboard").login(
-            audience: "https://api.lovat.app",
-          );
+      // Use lovatAPI.login() to ensure credentials are properly cached
+      await lovatAPI.login();
 
       toRegistrationStatusView(null);
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint('Login error: $e');
 
       setState(() {
         phase = OnboardingPagePhase.welcome;
