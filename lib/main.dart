@@ -35,6 +35,8 @@ import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 
 void main() async {
   runApp(MaterialApp(
+    title: 'Lovat',
+    onGenerateTitle: (context) => 'Lovat Dashboard',
     initialRoute: "/loading",
     routes: {
       '/loading': (context) => const InitialLoaderPage(),
