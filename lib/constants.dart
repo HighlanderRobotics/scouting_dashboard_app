@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
+import 'package:auth0_flutter/auth0_flutter_web.dart';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
@@ -115,7 +116,9 @@ Future<String?> getServerAuthority() async {
   return prefs.getString("serverAuthority");
 }
 
-final auth0 = kDebugMode
-    ? Auth0('lovat.us.auth0.com', 'PaUUK4Sjmcdy5oueW7geI2rgMfuWd1G4')
-    : Auth0('lovat.us.auth0.com',
-        'PaUUK4Sjmcdy5oueW7geI2rgMfuWd1G4'); // TODO: Change this to the production Auth0 client ID when we're ready to deploy
+const auth0Domain = 'lovat.us.auth0.com';
+const auth0ClientId =
+    'FR7SUG9t0wXb5ZVo51G0ewnsK7PPSyJ9'; // TODO: Change this to the production Auth0 client ID when we're ready to deploy
+
+final auth0 = Auth0(auth0Domain, auth0ClientId);
+final auth0Web = Auth0Web(auth0Domain, auth0ClientId);

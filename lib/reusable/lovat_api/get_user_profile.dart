@@ -8,7 +8,7 @@ extension GetUserProfile on LovatAPI {
     final response = await get('/v1/manager/profile');
 
     if (response?.statusCode != 200) {
-      throw Exception('Failed to get user profile');
+      throw Exception('Failed to get user profile: ${response?.statusCode}');
     }
 
     final json = jsonDecode(response!.body) as Map<String, dynamic>;
