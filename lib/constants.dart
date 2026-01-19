@@ -118,8 +118,6 @@ Future<String?> getServerAuthority() async {
 }
 
 const auth0Domain = 'lovat.us.auth0.com';
-const auth0ClientId =
-    'FR7SUG9t0wXb5ZVo51G0ewnsK7PPSyJ9'; // TODO: Change this to the production Auth0 client ID when we're ready to deploy
 
-final auth0 = Auth0(auth0Domain, auth0ClientId);
-final auth0Web = Auth0Web(auth0Domain, auth0ClientId);
+final auth0 = Auth0(auth0Domain, "PaUUK4Sjmcdy5oueW7geI2rgMfuWd1G4");
+final auth0Web = Auth0Web(auth0Domain, "FR7SUG9t0wXb5ZVo51G0ewnsK7PPSyJ9");
