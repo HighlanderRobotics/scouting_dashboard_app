@@ -27,6 +27,8 @@ class CategoryMetric {
     if (valueToString != null) {
       if (val is num) {
         return valueToString!(numToStringRounded(val));
+      } else if (val == null) {
+        return "--";
       } else {
         return valueToString!(val);
       }
