@@ -27,6 +27,7 @@ class ValueTile extends StatelessWidget {
           child: value,
         ),
         DefaultTextStyle(
+          textAlign: TextAlign.center,
           style: Theme.of(context)
               .textTheme
               .labelLarge!

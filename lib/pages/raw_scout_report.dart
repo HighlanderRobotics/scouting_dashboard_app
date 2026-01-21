@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 import 'package:scouting_dashboard_app/reusable/color_combination.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
@@ -308,6 +309,26 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
       children: [
         if (reportAnalysis.robotBrokeDescription != null)
           robotBrokeBox(reportAnalysis.robotBrokeDescription!),
+        const SectionTitle("Score"),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
+          children: [
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.totalPoints}"),
+                    label: const Text("Total"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text(
+                        "${reportAnalysis.totalPoints - reportAnalysis.autoScore}"),
+                    label: const Text("Teleop"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.autoScore}"),
+                    label: const Text("Auto")))
+          ],
+        ),
         const SectionTitle("Roles"),
         LayoutBuilder(
           builder: (context, constraints) {
@@ -324,18 +345,29 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             );
           },
         ),
-        const SectionTitle("Score"),
+        const SectionTitle("Shooting"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           spacing: 8.0,
           children: [
             Expanded(
                 child: ValueTile(
-                    value: Text("${reportAnalysis.totalPoints}"),
-                    label: const Text("Score"))),
+                    value: Text((() {
+                      switch (reportAnalysis.climbResult) {
+                        case EndgameClimbResult.l1:
+                          return "${reportAnalysis.totalPoints - 10}";
+                        case EndgameClimbResult.l2:
+                          return "${reportAnalysis.totalPoints - 20}";
+                        case EndgameClimbResult.l3:
+                          return "${reportAnalysis.totalPoints - 30}";
+                        default:
+                          return "${reportAnalysis.totalPoints}";
+                      }
+                    })()),
+                    label: const Text("Fuel Scored"))),
             Expanded(
                 child: ValueTile(
-                    value: Text("${(() {
+                    value: Text((() {
                       switch (reportAnalysis.accuracy) {
                         case 0:
                           return "<50";
@@ -352,7 +384,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                         default:
                           return "-";
                       }
-                    })()} "),
+                    })()),
                     label: const Text("% Accuracy"))),
             Expanded(
                 child: ValueTile(
@@ -362,9 +394,9 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
         ),
         const SectionTitle("Auto"),
         AnimatedAutoPath(analysis: reportAnalysis),
-        const ValueTile(
-          value: Text("aaaa"),
-          label: Text("Path score"),
+        ValueTile(
+          value: Text("${reportAnalysis.autoScore}"),
+          label: const Text("Path score"),
           colorCombination: ColorCombination.colored,
         ),
         const SectionTitle("Driving & Defense"),
@@ -383,19 +415,23 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           ],
         ),
         Row(
+          mainAxisSize: MainAxisSize.max,
           children: [
             Flexible(
-              fit: FlexFit.tight,
               flex: 2,
+              fit: FlexFit.tight,
               child: ValueTile(
                 label: const Text("Defense Effectiveness"),
-                value: Text("${reportAnalysis.defenseEffectiveness} / 5"),
+                value: Text("${reportAnalysis.defenseEffectiveness}/5"),
               ),
             ),
-            Expanded(
-                child: ValueTile(
-                    value: Text("${reportAnalysis.driverAbility.index}/5"),
-                    label: const Text("Driver Ability"))),
+            Flexible(
+              flex: 1,
+              fit: FlexFit.tight,
+              child: ValueTile(
+                  value: Text("${reportAnalysis.driverAbility.index}/5"),
+                  label: const Text("Driver Ability")),
+            ),
           ].withSpaceBetween(width: 10),
         ),
         const SectionTitle("Feeding"),
@@ -405,8 +441,13 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           children: [
             Expanded(
                 child: ValueTile(
-                    value: Text("${reportAnalysis.feeds} "),
-                    label: const Text("Feeds"))),
+                    value:
+                        Text(numToStringRounded(reportAnalysis.ballsPerFeed)),
+                    label: const Text("Balls/Feed"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text("${reportAnalysis.ballsFed}"),
+                    label: const Text("Balls Fed"))),
             Expanded(
                 child: ValueTile(
                     value: Text("${reportAnalysis.feedingRate}"),
@@ -546,20 +587,20 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
 
   Widget roleContainer(RobotRoles role) {
     return EmphasizedContainer(
-      color: ColorCombination.colored.getBackgroundColor(context),
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             role.littleEmblem,
             size: 32,
-            color: Theme.of(context).colorScheme.onPrimaryContainer,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(width: 5),
           Text(
             role.name,
             style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
           ),
         ],
