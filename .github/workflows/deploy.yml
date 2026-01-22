@@ -1,0 +1,142 @@
+name: Deploy to Netlify and Build Mobile
+
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history for changelog
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2.16.0
+        with:
+          channel: stable
+          flutter-version: 3.35.4
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Extract current version
+        id: version
+        run: |
+          CURRENT_VERSION=$(grep "version:" pubspec.yaml | cut -d+ -f1 | cut -d: -f2 | xargs)
+          CURRENT_BUILD=$(grep "version:" pubspec.yaml | cut -d+ -f2)
+          NEW_BUILD=$((CURRENT_BUILD + 1))
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "current_build=$CURRENT_BUILD" >> $GITHUB_OUTPUT
+          echo "new_build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "full_version=$CURRENT_VERSION+$NEW_BUILD" >> $GITHUB_OUTPUT
+
+      - name: Update version in pubspec.yaml
+        run: |
+          sed -i "s/version: .*/version: ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}/" pubspec.yaml
+          # Update local.properties as well to keep in sync
+          echo "flutter.versionName=${{ steps.version.outputs.current_version }}" > android/local.properties
+          echo "flutter.versionCode=${{ steps.version.outputs.new_build }}" >> android/local.properties
+          echo "flutter.buildMode=release" >> android/local.properties
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # Get commits since last production deployment
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            CHANGELOG=$(git log $LAST_TAG..HEAD --oneline --pretty=format:"- %s" | head -20)
+          else
+            CHANGELOG=$(git log --oneline --pretty=format:"- %s" | head -20)
+          fi
+          
+          # Create changelog content
+          cat << EOF > changelog.md
+          # Release ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}
+
+          ## Changes
+          $CHANGELOG
+
+          ---
+          *Automatically generated from production branch deployment*
+          EOF
+          
+          echo "changelog_file=changelog.md" >> $GITHUB_OUTPUT
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3.0
+        with:
+          publish-dir: './build/web'
+          production-branch: production
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions - ${{ github.sha }} (v${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }})"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 5
+
+      - name: Create or Update Draft Release
+        run: |
+          APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
+          APK_NAME="app-release.apk"
+          
+          # Check if there's an existing draft release
+          EXISTING_DRAFT=$(gh release list --draft --limit 1 --json tagName,name 2>/dev/null || echo "")
+          
+          if [ -n "$EXISTING_DRAFT" ]; then
+            echo "Found existing draft release, updating..."
+            RELEASE_TAG=$(echo "$EXISTING_DRAFT" | jq -r '.[0].tagName')
+            
+            # Delete old APK asset if exists
+            OLD_ASSET_ID=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[] | select(.name | contains("app-")) | .id' 2>/dev/null || echo "")
+            if [ -n "$OLD_ASSET_ID" ]; then
+              gh release delete-asset "$RELEASE_TAG" "$OLD_ASSET_ID" --yes
+            fi
+            
+            # Update release with new APK and changelog
+            gh release edit "$RELEASE_TAG" \
+              --title "Release ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}" \
+              --notes-file "${{ steps.changelog.outputs.changelog_file }}" \
+              --draft
+              
+            # Upload new APK
+            gh release upload "$RELEASE_TAG" "$APK_PATH" --name "$APK_NAME"
+          else
+            echo "Creating new draft release..."
+            NEW_TAG="v${{ steps.version.outputs.current_version }}-build${{ steps.version.outputs.new_build }}"
+            
+            # Create new draft release
+            gh release create "$NEW_TAG" \
+              "$APK_PATH#$APK_NAME" \
+              --title "Release ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}" \
+              --notes-file "${{ steps.changelog.outputs.changelog_file }}" \
+              --draft
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version changes
+        if: success()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml android/local.properties
+          # Only commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No version changes to commit"
+          else
+            git commit -m "Auto-bump version to ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }} [skip ci]"
+            # Use skip ci in commit message to prevent workflow trigger
+            git push origin production
+          fi
