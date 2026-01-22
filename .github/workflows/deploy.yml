@@ -38,10 +38,6 @@ jobs:
       - name: Update version in pubspec.yaml
         run: |
           sed -i "s/version: .*/version: ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}/" pubspec.yaml
-          # Update local.properties as well to keep in sync
-          echo "flutter.versionName=${{ steps.version.outputs.current_version }}" > android/local.properties
-          echo "flutter.versionCode=${{ steps.version.outputs.new_build }}" >> android/local.properties
-          echo "flutter.buildMode=release" >> android/local.properties
 
       - name: Build web
         run: flutter build web --release
@@ -131,7 +127,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add pubspec.yaml android/local.properties
+          git add pubspec.yaml
           # Only commit if there are changes
           if git diff --staged --quiet; then
             echo "No version changes to commit"
