@@ -89,7 +89,7 @@ jobs:
       - name: Create or Update Draft Release
         run: |
           APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
-          APK_NAME="app-${{ steps.version.outputs.current_version }}-${{ steps.version.outputs.new_build }}.apk"
+          APK_NAME="app-release.apk"
           
           # Check if there's an existing draft release
           EXISTING_DRAFT=$(gh release list --draft --limit 1 --json tagName,name 2>/dev/null || echo "")
