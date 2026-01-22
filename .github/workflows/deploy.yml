@@ -20,9 +20,13 @@ jobs:
         with:
           channel: stable
           flutter-version: 3.35.4
+          architecture: x64
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Flutter version check
+        run: flutter --version
 
       - name: Extract current version
         id: version
