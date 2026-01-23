@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/onboarding/onboarding_page.dart';
@@ -106,49 +107,70 @@ class _SettingsPageState extends State<SettingsPage> {
               const ResetAppButton(),
               if (lovatAPI.baseUrl != kProductionBaseUrl) ...[
                 const SizedBox(height: 20),
-                EmphasizedContainer(
-                    child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // const SizedBox(width: 7),
-                    Text(
-                      "URL",
-                      style: Theme.of(context).textTheme.labelLarge,
-                    ),
-                    Text(
-                      lovatAPI.baseUrl,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          ),
-                    ),
-                    const SizedBox(height: 10),
-                    FilledButton(
-                      onPressed: () async {
-                        final prefs = await SharedPreferences.getInstance();
-
-                        await prefs.setString(
-                            'api_base_url', kProductionBaseUrl);
-
-                        lovatAPI.baseUrl = kProductionBaseUrl;
-
-                        Navigator.of(context).pushNamedAndRemoveUntil(
-                            "/loading", (route) => false);
-                      },
-                      style: const ButtonStyle(
-                          visualDensity: VisualDensity.compact),
-                      child: const Text("Use production"),
-                    ),
-                  ],
-                ))
+                customApiConfig(context)
               ],
+              versionText(),
             ],
           ),
         ],
       ),
     );
+  }
+
+  SizedBox versionText() {
+    return SizedBox(
+      height: 42,
+      child: Center(
+        child: FutureBuilder(
+            future: PackageInfo.fromPlatform(),
+            builder: (context, snapshot) => snapshot.hasData
+                ? Text(
+                    "Version ${snapshot.data!.version} • Build ${snapshot.data!.buildNumber}",
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: const Color(0xFFB8B8B8),
+                        ),
+                    textAlign: TextAlign.center,
+                  )
+                : Container()),
+      ),
+    );
+  }
+
+  EmphasizedContainer customApiConfig(BuildContext context) {
+    return EmphasizedContainer(
+        child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // const SizedBox(width: 7),
+        Text(
+          "URL",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        Text(
+          lovatAPI.baseUrl,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+        ),
+        const SizedBox(height: 10),
+        FilledButton(
+          onPressed: () async {
+            final prefs = await SharedPreferences.getInstance();
+
+            await prefs.setString('api_base_url', kProductionBaseUrl);
+
+            lovatAPI.baseUrl = kProductionBaseUrl;
+
+            Navigator.of(context)
+                .pushNamedAndRemoveUntil("/loading", (route) => false);
+          },
+          style: const ButtonStyle(visualDensity: VisualDensity.compact),
+          child: const Text("Use production"),
+        ),
+      ],
+    ));
   }
 }
 
