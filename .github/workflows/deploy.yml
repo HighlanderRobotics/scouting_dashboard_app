@@ -4,11 +4,14 @@ on:
   push:
     branches:
       - production
+    paths-ignore:
+      - '.github/workflows/**'
 
 jobs:
   build-and-deploy:
     name: Build and Deploy
     runs-on: ubuntu-latest
+    if: github.event.head_commit.author.username != 'github-actions[bot]'
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
