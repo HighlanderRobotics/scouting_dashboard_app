@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 
 class LovatAPI {
@@ -117,14 +119,22 @@ class LovatAPI {
     }
   }
 
-  Future<http.Response?> get(String path, {Map<String, String>? query}) async {
+  Future<Map<String, String>> _getHeaders() async {
     final token = await getAccessToken();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
+    return {
+      if (token != null) 'Authorization': 'Bearer $token',
+      'X-Operating-System': Platform.operatingSystem,
+      'X-App-Version': packageInfo.version,
+      'X-Build-Number': packageInfo.buildNumber,
+    };
+  }
+
+  Future<http.Response?> get(String path, {Map<String, String>? query}) async {
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
-    return await http.get(uri, headers: {
-      if (token != null) 'Authorization': 'Bearer $token',
-    });
+    return await http.get(uri, headers: await _getHeaders());
   }
 
   Future<http.Response?> post(
@@ -132,15 +142,13 @@ class LovatAPI {
     Map<String, dynamic>? body,
     Map<String, String>? query,
   }) async {
-    final token = await getAccessToken();
-
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
-    return await http
-        .post(uri, body: body != null ? jsonEncode(body) : null, headers: {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    });
+    return await http.post(
+      uri,
+      body: body != null ? jsonEncode(body) : null,
+      headers: await _getHeaders(),
+    );
   }
 
   Future<http.Response?> put(
@@ -148,15 +156,13 @@ class LovatAPI {
     Map<String, dynamic>? body,
     Map<String, String>? query,
   }) async {
-    final token = await getAccessToken();
-
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
-    return await http
-        .put(uri, body: body != null ? jsonEncode(body) : null, headers: {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    });
+    return await http.put(
+      uri,
+      body: body != null ? jsonEncode(body) : null,
+      headers: await _getHeaders(),
+    );
   }
 
   Future<http.Response?> delete(
@@ -164,15 +170,13 @@ class LovatAPI {
     Map<String, dynamic>? body,
     Map<String, String>? query,
   }) async {
-    final token = await getAccessToken();
-
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
 
-    return await http
-        .delete(uri, body: body != null ? jsonEncode(body) : null, headers: {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    });
+    return await http.delete(
+      uri,
+      body: body != null ? jsonEncode(body) : null,
+      headers: await _getHeaders(),
+    );
   }
 }
 
@@ -185,6 +189,6 @@ class LovatAPIException implements Exception {
   String toString() => message;
 }
 
-const kProductionBaseUrl = "https://lovat-server-staging.up.railway.app";
+const kProductionBaseUrl = "https://api.lovat.app";
 
 final lovatAPI = LovatAPI(kProductionBaseUrl);
