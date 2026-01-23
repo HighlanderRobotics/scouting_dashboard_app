@@ -4,6 +4,7 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:duration/duration.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
@@ -504,37 +505,29 @@ class AutoPath {
   }
 
   String get shortDescription {
-    // final coralCount = timeline
-    //     .where((event) => event.type == AutoPathEventType.scoreCoral)
-    //     .length;
+    AutoPathEvent? startEvent =
+        timeline.any((event) => event.type == AutoPathEventType.startMatch)
+            ? timeline
+                .where((event) => event.type == AutoPathEventType.startMatch)
+                .toList()[0]
+            : null;
 
-    // final netCount = timeline
-    //     .where((event) => event.type == AutoPathEventType.scoreNet)
-    //     .length;
+    String start = startEvent?.location.name.hyphenated ?? "Unknown";
+    bool disrupts = timeline
+        .where((event) => event.type == AutoPathEventType.disrupt)
+        .isNotEmpty;
+    num fuelScored = 0;
+    timeline
+        .where((e) => e.type == AutoPathEventType.stopScoring)
+        .forEach((a) => fuelScored += a.quantity ?? 0);
 
-    // final processorCount = timeline
-    //     .where((event) => event.type == AutoPathEventType.scoreProcessor)
-    //     .length;
+    num fuelFed = 0;
+    timeline
+        .where((e) => e.type == AutoPathEventType.stopFeeding)
+        .forEach((a) => fuelFed += a.quantity ?? 0);
 
-    // bool left = timeline.any((event) => event.type == AutoPathEventType.leave);
-
-    // String name = <String>[
-    //   if (coralCount > 0) "$coralCount Coral",
-    //   if (processorCount > 0) "$processorCount Coral",
-    //   if (netCount > 0) "$netCount Net",
-    //   if (left && coralCount + netCount + processorCount == 0) "Leave",
-    // ].join(", ");
-
-    // name = "${{
-    //   AutoPathLocation.startOne: "Far left",
-    //   AutoPathLocation.startTwo: "Mid left",
-    //   AutoPathLocation.startThree: "Mid right",
-    //   AutoPathLocation.startFour: "Far right",
-    // }[timeline.first.location]} $name";
-
-    // if (name.isEmpty) name = "Nothing";
-
-    return "Auto Path";
+    bool climb = timeline.any((event) => event.type == AutoPathEventType.climb);
+    return "$start${fuelScored > 0 ? " $fuelScored fuel" : ""}${disrupts ? ", disrupt" : ""}${fuelFed > 0 ? ", $fuelFed feed" : ""} ${climb ? "+ climb" : ""}";
   }
 
   List<Offset> get offsets => timeline.map((e) => e.offset).toList();
@@ -661,47 +654,24 @@ class AutoPathEvent {
   Offset get offset => location.offset;
   Offset get randomVariance => location.randomVariance;
 
-  factory AutoPathEvent.fromMap(Map<String, dynamic> map) => AutoPathEvent(
+  factory AutoPathEvent.fromMap(Map<String, dynamic> map) {
+    AutoPathLocation loc;
+    if (AutoPathEventType.values[map['event']] == AutoPathEventType.climb) {
+      loc = AutoPathLocation.tower;
+    } else {
+      loc = AutoPathLocation.values[map['location']];
+    }
+
+    return AutoPathEvent(
       timestamp: Duration(seconds: map['time']),
       type: AutoPathEventType.values[map['event']],
-      location: AutoPathLocation.values[map['location']],
-      quantity: map['quantity']);
+      location: loc,
+      quantity: map['quantity'],
+    );
+  }
 
   Widget indicator(Color? teamColor) {
     switch (type) {
-      // case AutoPathEventType.dropRing:
-      //   return AutoPathEventIndicator(
-      //     teamColor: teamColor,
-      //     childBuilder: (context, teamColor, isHighlighted) =>
-      //         iconAutoPathEventIndicator(
-      //       context,
-      //       teamColor,
-      //       isHighlighted,
-      //       CupertinoIcons.bag_badge_minus,
-      //     ),
-      //   );
-      // case AutoPathEventType.pickUp:
-      //   return AutoPathEventIndicator(
-      //     teamColor: teamColor,
-      //     childBuilder: (context, teamColor, isHighlighted) =>
-      //         iconAutoPathEventIndicator(
-      //       context,
-      //       teamColor,
-      //       isHighlighted,
-      //       CupertinoIcons.bag_badge_plus,
-      //     ),
-      //   );
-      // case AutoPathEventType.score:
-      //   return AutoPathEventIndicator(
-      //     teamColor: teamColor,
-      //     childBuilder: (context, teamColor, isHighlighted) =>
-      //         iconAutoPathEventIndicator(
-      //       context,
-      //       teamColor,
-      //       isHighlighted,
-      //       Icons.sports_score,
-      //     ),
-      //   );
       default:
         return Container();
     }
@@ -885,8 +855,8 @@ enum AutoPathLocation {
   neutralZone,
   depot,
   outpost,
-  tower,
   none,
+  tower,
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
@@ -933,12 +903,28 @@ extension AutoPathLocationExtension on AutoPathLocation {
     }
   }
 
-  bool get isGroundPiece => false;
-
-  GamePiece? get gamePiece {
+  String get name {
     switch (this) {
+      case AutoPathLocation.leftTrench:
+        return "Left trench";
+      case AutoPathLocation.leftBump:
+        return "Left bump";
+      case AutoPathLocation.hub:
+        return "Hub";
+      case AutoPathLocation.rightTrench:
+        return "Right trench";
+      case AutoPathLocation.rightBump:
+        return "Right bump";
+      case AutoPathLocation.neutralZone:
+        return "Neutral Zone";
+      case AutoPathLocation.depot:
+        return "Depot";
+      case AutoPathLocation.outpost:
+        return "Outpost";
+      case AutoPathLocation.tower:
+        return "Tower";
       default:
-        return null;
+        return "Unknown";
     }
   }
 }
