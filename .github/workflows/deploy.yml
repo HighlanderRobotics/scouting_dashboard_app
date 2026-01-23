@@ -87,33 +87,34 @@ jobs:
           APK_PATH="build/app/outputs/flutter-apk/app-release.apk"
           APK_NAME="app-release.apk"
           
-          # Check if there's an existing draft release
-          EXISTING_DRAFT=$(gh release list --draft --limit 1 --json tagName,name 2>/dev/null || echo "")
+          # Use a consistent tag for the current version to avoid multiple drafts
+          TARGET_TAG="v${{ steps.version.outputs.current_version }}"
           
-          if [ -n "$EXISTING_DRAFT" ]; then
-            echo "Found existing draft release, updating..."
-            RELEASE_TAG=$(echo "$EXISTING_DRAFT" | jq -r '.[0].tagName')
+          # Check if release with our target tag exists
+          EXISTING_RELEASE=$(gh release view "$TARGET_TAG" --json tagName,draft 2>/dev/null || echo "")
+          
+          if [ -n "$EXISTING_RELEASE" ]; then
+            echo "Found existing release for current version, updating..."
             
             # Delete old APK asset if exists
-            OLD_ASSET_ID=$(gh release view "$RELEASE_TAG" --json assets --jq '.assets[] | select(.name | contains("app-")) | .id' 2>/dev/null || echo "")
+            OLD_ASSET_ID=$(gh release view "$TARGET_TAG" --json assets --jq '.assets[] | select(.name == "app-release.apk") | .id' 2>/dev/null || echo "")
             if [ -n "$OLD_ASSET_ID" ]; then
-              gh release delete-asset "$RELEASE_TAG" "$OLD_ASSET_ID" --yes
+              gh release delete-asset "$TARGET_TAG" "$OLD_ASSET_ID" --yes
             fi
             
             # Update release with new APK and changelog
-            gh release edit "$RELEASE_TAG" \
+            gh release edit "$TARGET_TAG" \
               --title "Release ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}" \
               --notes-file "${{ steps.changelog.outputs.changelog_file }}" \
               --draft
               
             # Upload new APK
-            gh release upload "$RELEASE_TAG" "$APK_PATH" --name "$APK_NAME"
+            gh release upload "$TARGET_TAG" "$APK_PATH" --name "$APK_NAME"
           else
-            echo "Creating new draft release..."
-            NEW_TAG="v${{ steps.version.outputs.current_version }}-build${{ steps.version.outputs.new_build }}"
+            echo "Creating new draft release for current version..."
             
-            # Create new draft release
-            gh release create "$NEW_TAG" \
+            # Create new draft release with consistent tag
+            gh release create "$TARGET_TAG" \
               "$APK_PATH#$APK_NAME" \
               --title "Release ${{ steps.version.outputs.current_version }}+${{ steps.version.outputs.new_build }}" \
               --notes-file "${{ steps.changelog.outputs.changelog_file }}" \
