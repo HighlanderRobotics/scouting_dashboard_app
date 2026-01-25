@@ -315,7 +315,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       const SizedBox(height: 15),
       reefStack(
         context,
-        allianceData,
+        data,
         backgroundColor: [
           Theme.of(context).colorScheme.onRedAlliance,
           Theme.of(context).colorScheme.onBlueAlliance
@@ -332,24 +332,20 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                colorCombination: allianceColor.colorCombination,
-                value: Text(allianceData['net'] == null
-                    ? "--"
-                    : numToStringRounded(allianceData['net'])),
-                label: const Text("Net"),
+                value: Text(
+                    numToStringRounded(allianceData['totalBallThroughput'])),
+                label: const Text('Total output'),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                colorCombination: allianceColor.colorCombination,
-                value: Text(allianceData['processor'] == null
-                    ? "--"
-                    : numToStringRounded(allianceData['processor'])),
-                label: const Text("Processor"),
+                value: Text(
+                    numToStringRounded(allianceData['totalFuelOutputted'])),
+                label: const Text('Hub shots'),
               ),
             ),
-          ].withSpaceBetween(width: 15),
+          ].withSpaceBetween(width: 10),
         ),
       ),
     ]);
