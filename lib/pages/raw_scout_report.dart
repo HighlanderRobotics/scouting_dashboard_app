@@ -61,6 +61,7 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
         error = e.message;
       });
     } catch (e) {
+      debugPrint("$e");
       setState(() {
         error = "Failed to get reports";
       });
@@ -212,6 +213,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
         error = e.message;
       });
     } catch (e) {
+      debugPrint("$e");
       setState(() {
         error = "Failed to get report";
       });
@@ -454,29 +456,31 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     label: const Text("BPS")))
           ],
         ),
-        const SectionTitle("Feeder Types"),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            return Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: reportAnalysis.feederType.map((type) {
-                return SizedBox(
-                  width: (constraints.maxWidth - 10) / 2,
-                  height: 60,
-                  child: EmphasizedContainer(
-                    child: Center(
-                      child: Text(
-                        type.description,
-                        style: Theme.of(context).textTheme.headlineSmall,
+        if (reportAnalysis.robotRoles.contains(RobotRoles.feeding)) ...[
+          const SectionTitle("Feeder Types"),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: reportAnalysis.feederType.map((type) {
+                  return SizedBox(
+                    width: (constraints.maxWidth - 10) / 2,
+                    height: 60,
+                    child: EmphasizedContainer(
+                      child: Center(
+                        child: Text(
+                          type.description,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
+                  );
+                }).toList(),
+              );
+            },
+          )
+        ],
         const SectionTitle("Endgame"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
