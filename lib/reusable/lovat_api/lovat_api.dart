@@ -119,7 +119,7 @@ class LovatAPI {
     }
   }
 
-  Future<Map<String, String>> _getHeaders() async {
+  Future<Map<String, String>> _getHeaders({bool jsonBody = false}) async {
     final token = await getAccessToken();
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
 
@@ -128,6 +128,7 @@ class LovatAPI {
       'X-Operating-System': Platform.operatingSystem,
       'X-App-Version': packageInfo.version,
       'X-Build-Number': packageInfo.buildNumber,
+      if (jsonBody) 'Content-Type': "application/json",
     };
   }
 
@@ -147,7 +148,7 @@ class LovatAPI {
     return await http.post(
       uri,
       body: body != null ? jsonEncode(body) : null,
-      headers: await _getHeaders(),
+      headers: await _getHeaders(jsonBody: body != null),
     );
   }
 
@@ -161,7 +162,7 @@ class LovatAPI {
     return await http.put(
       uri,
       body: body != null ? jsonEncode(body) : null,
-      headers: await _getHeaders(),
+      headers: await _getHeaders(jsonBody: body != null),
     );
   }
 
@@ -175,7 +176,7 @@ class LovatAPI {
     return await http.delete(
       uri,
       body: body != null ? jsonEncode(body) : null,
-      headers: await _getHeaders(),
+      headers: await _getHeaders(jsonBody: body != null),
     );
   }
 }
