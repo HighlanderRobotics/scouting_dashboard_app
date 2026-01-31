@@ -188,7 +188,8 @@ class _ScoutersPageState extends State<ScoutersPage> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => AddScouterDialog(onAdd: fetchData),
+            builder: (context) =>
+                AddScouterDialog(onAdd: (name) => fetchData()),
           );
         },
         child: const Icon(Icons.add),
@@ -232,7 +233,7 @@ class AddScouterDialog extends StatefulWidget {
     this.onAdd,
   });
 
-  final Function()? onAdd;
+  final Function(String name)? onAdd;
 
   @override
   State<AddScouterDialog> createState() => _AddScouterDialogState();
@@ -288,8 +289,8 @@ class _AddScouterDialogState extends State<AddScouterDialog> {
 
                   try {
                     await lovatAPI.addScouter(name);
-                    widget.onAdd?.call();
-                    navigatorState.pop();
+                    await widget.onAdd?.call(name);
+                    navigatorState.pop(name);
                   } on LovatAPIException catch (e) {
                     setState(() {
                       error = e.message;
