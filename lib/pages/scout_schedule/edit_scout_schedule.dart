@@ -6,7 +6,7 @@ import 'package:scouting_dashboard_app/pages/scouters.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scouts.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
-import 'package:scouting_dashboard_app/reusable/lovat_api/scouter.dart';
+
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/create_scout_schedule_shift.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/delete_scouter_schedule_shift.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/get_scouter_schedule.dart';
@@ -580,7 +580,7 @@ class _ScoutSelectorState extends State<ScoutSelector> {
                 ),
                 TextButton(
                     onPressed: () async {
-                      final addedName = await showDialog<String?>(
+                      final addedId = await showDialog<String?>(
                         context: context,
                         useRootNavigator: true,
                         barrierDismissible: false,
@@ -591,8 +591,7 @@ class _ScoutSelectorState extends State<ScoutSelector> {
                         ),
                       );
 
-                      if (addedName != null) {
-                        // Refresh local cache reference
+                      if (addedId != null) {
                         final list = lovatAPI.cachedScouts ??
                             await (() async {
                               try {
@@ -602,9 +601,8 @@ class _ScoutSelectorState extends State<ScoutSelector> {
                               }
                             })();
 
-                        // Find the newly added scouter by name
                         final found = list.cast<Scout?>().firstWhere(
-                              (s) => s?.name == addedName,
+                              (s) => s?.id == addedId,
                               orElse: () => list.isNotEmpty ? list.first : null,
                             );
 
@@ -616,7 +614,6 @@ class _ScoutSelectorState extends State<ScoutSelector> {
 
                           widget.onChanged?.call(found);
 
-                          // Close the dropdown popup so selection is visible
                           Navigator.of(context).pop();
                         } else {
                           setState(() {
