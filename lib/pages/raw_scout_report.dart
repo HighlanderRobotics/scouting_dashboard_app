@@ -509,12 +509,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       "Notes",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                     ),
                   ),
                   IconButton(

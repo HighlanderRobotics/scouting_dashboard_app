@@ -1728,8 +1728,9 @@ class _TeamCodePageState extends State<TeamCodePage> {
                       FocusManager.instance.primaryFocus?.unfocus();
 
                       showModalBottomSheet(
-                        backgroundColor:
-                            Theme.of(context).colorScheme.surfaceContainerHighest,
+                        backgroundColor: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         elevation: 0,
                         context: context,
                         builder: (context) =>
