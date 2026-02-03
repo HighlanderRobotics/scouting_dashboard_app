@@ -150,7 +150,7 @@ class _TournamentKeyPickerState extends State<TournamentKeyPicker> {
                   constraints: const BoxConstraints.expand(),
                   modalBottomSheetProps: ModalBottomSheetProps(
                     backgroundColor:
-                        Theme.of(context).colorScheme.surfaceVariant,
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                   ),
                   fit: FlexFit.loose,
                   showSearchBox: true,

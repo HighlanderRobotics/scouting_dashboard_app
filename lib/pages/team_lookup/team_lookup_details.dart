@@ -243,7 +243,7 @@ class AnalysisOverview
           child: Container(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(10)),
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             child: snapshot.data['array'].isEmpty
                 ? const Center(
@@ -272,8 +272,8 @@ class AnalysisOverview
                           },
                         )),
                         titlesData: FlTitlesData(
-                          bottomTitles: AxisTitles(),
-                          topTitles: AxisTitles(),
+                          bottomTitles: const AxisTitles(),
+                          topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
                             axisNameWidget: Text(analysisFunction
                                 .metric.abbreviatedLocalizedName),
@@ -289,7 +289,7 @@ class AnalysisOverview
                                     ),
                                 reservedSize: 50),
                           ),
-                          rightTitles: AxisTitles(),
+                          rightTitles: const AxisTitles(),
                         ),
                         borderData: FlBorderData(
                           border: Border.all(

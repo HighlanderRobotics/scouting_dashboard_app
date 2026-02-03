@@ -34,7 +34,7 @@ class _ScannerBodyState extends State<ScannerBody> {
           ),
           ColorFiltered(
             colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.8), BlendMode.srcOut),
+                Colors.black.withValues(alpha: 0.8), BlendMode.srcOut),
             child: Stack(children: [
               Container(
                 decoration: const BoxDecoration(

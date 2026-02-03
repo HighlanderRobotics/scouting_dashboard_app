@@ -97,13 +97,13 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                 ],
               ),
               Divider(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               SectionHeader(
                   title: selectedTournament?.localized ??
                       "No tournament selected"),
               Divider(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               if (selectedTournament != null ||
                   (userProfile?.role == UserRole.scoutingLead &&

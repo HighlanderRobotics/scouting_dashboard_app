@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:chips_input/chips_input.dart';
 
 void main() {
-  final allContacts = const [
+  const allContacts = [
     'John Doe',
     'Jane Doe',
     'John Smith',
@@ -23,7 +23,7 @@ void main() {
                     .toList()
                 : const [],
             onChanged: (contacts) {
-              print(contacts);
+              // Debug output for testing
             },
             chipBuilder: (context, state, contact) {
               return InputChip(
@@ -56,7 +56,7 @@ void main() {
                     .toList()
                 : const [],
             onChanged: (contacts) {
-              print(contacts);
+              // Debug output for testing
             },
             chipBuilder: (context, state, contact) {
               return InputChip(
@@ -71,10 +71,10 @@ void main() {
                 alignment: Alignment.topLeft,
                 child: Material(
                   elevation: 4.0,
-                  child: Container(
+                  child: SizedBox(
                     height: 200.0,
                     child: ListView.builder(
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       itemCount: options.length,
                       itemBuilder: (BuildContext context, int index) {
                         final option = options.elementAt(index);

@@ -174,7 +174,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       child: AnimatedBuilder(

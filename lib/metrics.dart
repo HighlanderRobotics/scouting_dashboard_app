@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class CategoryMetric {
   CategoryMetric({
     required this.localizedName,

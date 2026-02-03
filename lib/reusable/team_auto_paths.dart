@@ -73,7 +73,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
         if (selectedPath != null) ...[
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
@@ -117,7 +117,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
   Container matchList(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -151,7 +151,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                       ),
                     ),
                     EmphasizedContainer(
-                      color: Theme.of(context).colorScheme.background,
+                      color: Theme.of(context).colorScheme.surface,
                       padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
                       radius: 7,
                       child: Text(
@@ -784,7 +784,7 @@ class AnimatedAutoPathControls extends StatelessWidget {
             },
             min: 0,
             max: 1,
-            inactiveColor: Theme.of(context).colorScheme.background,
+            inactiveColor: Theme.of(context).colorScheme.surface,
           ),
         ),
         Text(prettyDuration(

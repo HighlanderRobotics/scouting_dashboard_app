@@ -272,7 +272,7 @@ class TeamPerMatchVizualization extends StatelessWidget {
           context,
           analysis.cargoStackAnalysisMap,
           foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
-          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
         if (analysis.notes.isNotEmpty) ...[
           headline(context, "Notes"),

@@ -1729,7 +1729,7 @@ class _TeamCodePageState extends State<TeamCodePage> {
 
                       showModalBottomSheet(
                         backgroundColor:
-                            Theme.of(context).colorScheme.surfaceVariant,
+                            Theme.of(context).colorScheme.surfaceContainerHighest,
                         elevation: 0,
                         context: context,
                         builder: (context) =>

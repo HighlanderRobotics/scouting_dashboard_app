@@ -22,7 +22,7 @@ class EmphasizedContainer extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
       ),
       child: Material(
-        color: color ?? Theme.of(context).colorScheme.surfaceVariant,
+        color: color ?? Theme.of(context).colorScheme.surfaceContainerHighest,
         child: Padding(
           padding: padding,
           child: child,

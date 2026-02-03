@@ -163,8 +163,10 @@ class _SettingsPageState extends State<SettingsPage> {
 
             lovatAPI.baseUrl = kProductionBaseUrl;
 
-            Navigator.of(context)
-                .pushNamedAndRemoveUntil("/loading", (route) => false);
+            if (mounted && context.mounted) {
+              Navigator.of(context)
+                  .pushNamedAndRemoveUntil("/loading", (route) => false);
+            }
           },
           style: const ButtonStyle(visualDensity: VisualDensity.compact),
           child: const Text("Use production"),
@@ -240,7 +242,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
     if (isLoading && errorMesssage != null) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(50),
         ),
         height: 48,
@@ -424,7 +426,7 @@ class _TournamentSourceSelectorState extends State<TournamentSourceSelector> {
     if (isLoading && errorMessage != null) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(4),
         ),
         height: 60,
@@ -436,7 +438,7 @@ class _TournamentSourceSelectorState extends State<TournamentSourceSelector> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(4),
       ),
       height: 60,
@@ -818,7 +820,7 @@ class _AnalystsBoxState extends State<AnalystsBox> {
     if (!loaded && errorMessage != null) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(4),
         ),
         height: 60,
@@ -844,7 +846,7 @@ class _AnalystsBoxState extends State<AnalystsBox> {
         Container(
           height: 60,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Padding(
@@ -1031,9 +1033,9 @@ class ResetAppButton extends StatelessWidget {
         );
       },
       style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.resolveWith(
+        backgroundColor: WidgetStateProperty.resolveWith(
             (states) => Theme.of(context).colorScheme.error),
-        foregroundColor: MaterialStateProperty.resolveWith(
+        foregroundColor: WidgetStateProperty.resolveWith(
             (states) => Theme.of(context).colorScheme.onError),
       ),
       child: const Text("Reset app and delete settings"),
@@ -1140,10 +1142,10 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
                   });
                 },
           style: ButtonStyle(
-            elevation: MaterialStateProperty.all(0),
-            backgroundColor: MaterialStateProperty.resolveWith(
+            elevation: WidgetStateProperty.all(0),
+            backgroundColor: WidgetStateProperty.resolveWith(
                 (states) => Theme.of(context).colorScheme.error),
-            foregroundColor: MaterialStateProperty.resolveWith(
+            foregroundColor: WidgetStateProperty.resolveWith(
                 (states) => Theme.of(context).colorScheme.onError),
           ),
           child: const Text("Delete"),
@@ -1228,7 +1230,7 @@ class CodeViewerPage extends StatelessWidget {
         Column(children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Padding(

@@ -99,7 +99,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
             ],
           ),
         );
-      } else if (filteredScouters!.isEmpty) {
+      } else if (filteredScouters.isEmpty) {
         body = PageBody(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
