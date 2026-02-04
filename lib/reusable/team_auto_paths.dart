@@ -724,7 +724,7 @@ class AutoPathEvent {
     }
 
     return AutoPathEvent(
-      timestamp: Duration(seconds: map['time']),
+      timestamp: Duration(milliseconds: map['time'] * 1000),
       type: AutoPathEventType.values[map['event']],
       location: loc,
       quantity: map['quantity'],
