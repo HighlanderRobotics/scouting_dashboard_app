@@ -556,7 +556,8 @@ class _ScoutSelectorState extends State<ScoutSelector> {
       popupProps: PopupProps.modalBottomSheet(
         constraints: const BoxConstraints.expand(),
         modalBottomSheetProps: ModalBottomSheetProps(
-          backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
         ),
         fit: FlexFit.loose,
         showSearchBox: true,
