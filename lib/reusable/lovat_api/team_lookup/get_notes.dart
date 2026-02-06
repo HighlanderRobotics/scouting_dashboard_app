@@ -37,7 +37,7 @@ class Note {
   factory Note.fromJson(Map<String, dynamic> json) => Note(
         body: json['notes'],
         matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
-            tournamentName: json['tounramentName']),
+            tournamentName: json['tournamentName']),
         author: json['scouterName'],
         uuid: json['uuid'],
       );
