@@ -452,12 +452,14 @@ class AutoPath {
     required this.timeline,
     required this.matches,
   }) {
-    trajectories = timeline.any((e) => e.type == AutoPathEventType.stopScoring)
+    List<BallTrajectory> scoringTrajectories = timeline
+            .any((e) => e.type == AutoPathEventType.stopScoring)
         ? timeline
             .where((e) => e.type == AutoPathEventType.stopScoring)
             .map(
               (e) {
                 List<BallTrajectory> list = [];
+
                 AutoPathEvent startEvent = timeline.lastWhere((event) =>
                     event.type == AutoPathEventType.startScoring &&
                     event.timestamp < e.timestamp);
@@ -471,10 +473,11 @@ class AutoPath {
                                         startEvent.timestamp.inMicroseconds))
                             .round());
                     list.add(BallTrajectory(
-                        endPos: AutoPathLocation.hub.offset,
-                        startPos: Offset(positionAtTimestamp(startTime).dx,
-                            positionAtTimestamp(startTime).dy),
-                        startTime: startTime));
+                      endPos: AutoPathLocation.hub.offset,
+                      startPos: Offset(positionAtTimestamp(startTime).dx,
+                          positionAtTimestamp(startTime).dy),
+                      startTime: startTime,
+                    ));
                   }
                   return list;
                 } else {
@@ -485,6 +488,43 @@ class AutoPath {
             .expand((i) => i)
             .toList()
         : [];
+
+    List<BallTrajectory> feedingTrajectories = timeline
+            .any((e) => e.type == AutoPathEventType.stopFeeding)
+        ? timeline
+            .where((e) => e.type == AutoPathEventType.stopFeeding)
+            .map(
+              (e) {
+                List<BallTrajectory> list = [];
+
+                AutoPathEvent startEvent = timeline.lastWhere((event) =>
+                    event.type == AutoPathEventType.startFeeding &&
+                    event.timestamp <= e.timestamp);
+                if (e.quantity != null && e.quantity! > 0) {
+                  for (int i = 1; i <= e.quantity!; i++) {
+                    Duration startTime = Duration(
+                        microseconds: (startEvent.timestamp.inMicroseconds +
+                                i /
+                                    e.quantity! *
+                                    (e.timestamp.inMicroseconds -
+                                        startEvent.timestamp.inMicroseconds))
+                            .round());
+                    list.add(BallTrajectory(
+                      endPos: Offset(77.8, positionAtTimestamp(startTime).dy),
+                      startPos: positionAtTimestamp(startTime),
+                      startTime: startTime,
+                    ));
+                  }
+                  return list;
+                } else {
+                  return <BallTrajectory>[];
+                }
+              },
+            )
+            .expand((i) => i)
+            .toList()
+        : [];
+    trajectories = [...scoringTrajectories, ...feedingTrajectories];
   }
 
   final int frequency;
