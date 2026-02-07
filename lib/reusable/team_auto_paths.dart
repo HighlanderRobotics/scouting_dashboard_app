@@ -575,7 +575,7 @@ class AutoPath {
                 .where((event) => event.type == AutoPathEventType.startMatch)
                 .toList()[0]
             : null;
-
+    debugPrint(startEvent!.location.name.toString());
     String start = startEvent?.location.name.hyphenated ?? "Unknown";
     bool disrupts = timeline
         .where((event) => event.type == AutoPathEventType.disrupt)
@@ -1025,14 +1025,19 @@ extension AutoPathLocationExtension on AutoPathLocation {
   String get name {
     switch (this) {
       case AutoPathLocation.leftTrench:
+      case AutoPathLocation.startLeftTrench:
         return "Left trench";
       case AutoPathLocation.leftBump:
+      case AutoPathLocation.startLeftBump:
         return "Left bump";
       case AutoPathLocation.hub:
+      case AutoPathLocation.startHub:
         return "Hub";
       case AutoPathLocation.rightTrench:
+      case AutoPathLocation.startRightTrench:
         return "Right trench";
       case AutoPathLocation.rightBump:
+      case AutoPathLocation.startRightBump:
         return "Right bump";
       case AutoPathLocation.neutralZone:
         return "Neutral Zone";
