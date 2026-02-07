@@ -78,7 +78,8 @@ class SingleScoutReportAnalysis {
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
       totalPoints: json['totalPoints'],
-      driverAbility: DriverAbility.values[(json['driverAbility'])].index + 1,
+      driverAbility:
+          DriverAbility.values[(json['driverAbility'] - 1)].index + 1,
       robotRoles: ((json['robotRoles'] as List<dynamic>).cast<int>())
           .map<RobotRoles>((elem) => RobotRoles.values[elem])
           .toList(),
@@ -97,27 +98,6 @@ class SingleScoutReportAnalysis {
       climbResult: EndgameClimbResult.values[(json['climbResult'] as int)],
       autoClimb: AutoClimbResult.values[(json['autoClimb'] as int)],
       autoPath: AutoPath.fromMapSingleMatch(json["autoPath"]),
-      // autoPath: AutoPath(frequency: 1, scores: [
-      //   100
-      // ], timeline: [
-      //   const AutoPathEvent(
-      //       timestamp: Duration(milliseconds: 0),
-      //       type: AutoPathEventType.startMatch,
-      //       location: AutoPathLocation.leftBump),
-      //   const AutoPathEvent(
-      //       timestamp: Duration(seconds: 3),
-      //       type: AutoPathEventType.startScoring,
-      //       location: AutoPathLocation.none),
-      //   const AutoPathEvent(
-      //       timestamp: Duration(seconds: 10),
-      //       type: AutoPathEventType.stopScoring,
-      //       location: AutoPathLocation.none,
-      //       quantity: 50),
-      //   const AutoPathEvent(
-      //       timestamp: Duration(seconds: 13),
-      //       type: AutoPathEventType.stopScoring,
-      //       location: AutoPathLocation.tower),
-      // ], matches: []),
       autoScore: json["autoPath"]["autoPoints"],
       volleys: json["volleys"],
       ballsFed: json["totalBallsFed"],

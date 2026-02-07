@@ -1,9 +1,10 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension Scouter on LovatAPI {
-  Future<void> addScouter(String name) async {
+  Future<Scout> addScouter(String name) async {
     final response = await lovatAPI.post(
       '/v1/manager/scouterdashboard',
       body: {
@@ -11,7 +12,7 @@ extension Scouter on LovatAPI {
       },
     );
 
-    if (response?.statusCode != 200) {
+    if (response?.statusCode != 201) {
       try {
         throw LovatAPIException(jsonDecode(response!.body)['displayError']);
       } on LovatAPIException {
@@ -20,6 +21,8 @@ extension Scouter on LovatAPI {
         throw Exception('Failed to add scouter');
       }
     }
+
+    return Scout.fromJson(jsonDecode(response!.body));
   }
 
   Future<void> deleteScouter(String id) async {
