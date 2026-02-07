@@ -439,6 +439,7 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
         ),
         ...scouts.map(
           (scout) => ScoutSelector(
+            key: Key(scout.id),
             allScouts: allScouts,
             initialScout: scout,
             onChanged: (newScout) {
@@ -457,6 +458,7 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
           ),
         ),
         ScoutSelector(
+          key: GlobalKey(),
           allScouts: allScouts,
           onChanged: (newScout) {
             final newScouts = scouts.toList();
@@ -493,56 +495,21 @@ class ScoutSelector extends StatefulWidget {
 
 class _ScoutSelectorState extends State<ScoutSelector> {
   Scout? selectedScout;
-  TextEditingController searchController = TextEditingController();
 
   final GlobalKey<DropdownSearchState<Scout>> dropdownKey = GlobalKey();
-
-  late List<Scout> scouters;
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     selectedScout = widget.initialScout;
-    scouters = widget.allScouts;
-  }
-
-  @override
-  void didUpdateWidget(covariant ScoutSelector oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.allScouts != widget.allScouts) {
-      setState(() {
-        scouters = widget.allScouts;
-      });
-    }
-
-    if (oldWidget.initialScout != widget.initialScout) {
-      setState(() {
-        selectedScout = widget.initialScout;
-      });
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("${scouters.length} pppp");
     return DropdownSearch(
       key: dropdownKey,
-      asyncItems: (String? filter) async {
-        // Prefer cached list if available, otherwise fetch from server.
-        List<Scout>? list = lovatAPI.cachedScouts;
-        if (list == null) {
-          try {
-            list = await lovatAPI.getScouts();
-          } catch (_) {
-            list = widget.allScouts;
-          }
-        }
-
-        if (filter == null || filter.isEmpty) return list;
-
-        final f = filter.toLowerCase();
-        return list.where((s) => s.name.toLowerCase().contains(f)).toList();
-      },
+      items: widget.allScouts,
       selectedItem: selectedScout,
       onChanged: (scout) {
         setState(() {
@@ -581,46 +548,22 @@ class _ScoutSelectorState extends State<ScoutSelector> {
                 ),
                 TextButton(
                     onPressed: () async {
-                      final addedId = await showDialog<String?>(
+                      NavigatorState navigatorState = Navigator.of(context);
+
+                      final newScouter = await showDialog<Scout?>(
                         context: context,
-                        useRootNavigator: true,
-                        barrierDismissible: false,
                         builder: (context) => AddScouterDialog(
+                          initialText: searchController.text,
                           onAdd: (name) async {
                             await widget.onScouterAdded();
                           },
                         ),
                       );
 
-                      if (addedId != null) {
-                        final list = lovatAPI.cachedScouts ??
-                            await (() async {
-                              try {
-                                return await lovatAPI.getScouts();
-                              } catch (_) {
-                                return widget.allScouts;
-                              }
-                            })();
+                      if (newScouter != null) {
+                        widget.onChanged?.call(newScouter);
 
-                        final found = list.cast<Scout?>().firstWhere(
-                              (s) => s?.id == addedId,
-                              orElse: () => list.isNotEmpty ? list.first : null,
-                            );
-
-                        if (found != null) {
-                          setState(() {
-                            scouters = list;
-                            selectedScout = found;
-                          });
-
-                          widget.onChanged?.call(found);
-
-                          Navigator.of(context).pop();
-                        } else {
-                          setState(() {
-                            scouters = list;
-                          });
-                        }
+                        navigatorState.pop();
                       }
                     },
                     child: const Text("Add a scouter"))
@@ -656,7 +599,7 @@ class _ScoutSelectorState extends State<ScoutSelector> {
           hintText: "Add...",
         ),
       ),
-      clearButtonProps: const ClearButtonProps(isVisible: true),
+      clearButtonProps: ClearButtonProps(isVisible: selectedScout != null),
     );
   }
 }
