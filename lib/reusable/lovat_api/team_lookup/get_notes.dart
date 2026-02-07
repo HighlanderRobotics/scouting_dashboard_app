@@ -21,18 +21,22 @@ extension GetNotes on LovatAPI {
   }
 }
 
+enum NoteType { note, breakDescription }
+
 class Note {
   const Note({
     required this.body,
     required this.matchIdentity,
     this.author,
     this.uuid,
+    this.type = NoteType.note,
   });
 
   final String body;
   final GameMatchIdentity matchIdentity;
   final String? author;
   final String? uuid;
+  final NoteType type;
 
   factory Note.fromJson(Map<String, dynamic> json) => Note(
         body: json['notes'],

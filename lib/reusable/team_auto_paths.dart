@@ -208,7 +208,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                   ),
                 ),
           ),
-          "Times used",
+          selectedPath!.frequency == 1 ? "Time used" : "Times used",
           true,
         ),
       )
@@ -452,6 +452,9 @@ class AutoPath {
     required this.timeline,
     required this.matches,
   }) {
+    timeline.sort((a, b) =>
+        a.timestamp.inMicroseconds.compareTo(b.timestamp.inMicroseconds));
+
     List<BallTrajectory> scoringTrajectories = timeline
             .any((e) => e.type == AutoPathEventType.stopScoring)
         ? timeline
@@ -481,7 +484,12 @@ class AutoPath {
                   }
                   return list;
                 } else {
-                  return <BallTrajectory>[];
+                  return <BallTrajectory>[
+                    BallTrajectory(
+                        endPos: Offset(1, 1),
+                        startPos: Offset(6, 7),
+                        startTime: Duration(seconds: 1000))
+                  ];
                 }
               },
             )
