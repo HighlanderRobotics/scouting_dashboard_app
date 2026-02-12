@@ -30,7 +30,6 @@ import 'package:scouting_dashboard_app/pages/settings.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_details.dart';
-import 'package:scouting_dashboard_app/pages/team_per_match.dart';
 
 void main() async {
   runApp(MaterialApp(
@@ -53,7 +52,6 @@ void main() async {
             onDeleted: (ModalRoute.of(context)!.settings.arguments
                 as Map<String, dynamic>)['onDeleted'],
           ),
-      '/team_per_match': (context) => const TeamPerMatchPage(),
       '/team_lookup': (context) => const TeamLookupPage(),
       '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),
       '/team_lookup_details': (context) => const TeamLookupDetailsPage(),

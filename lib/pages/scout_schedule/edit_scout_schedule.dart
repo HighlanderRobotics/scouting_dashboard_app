@@ -2,9 +2,11 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
+import 'package:scouting_dashboard_app/pages/scouters.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scouts.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/create_scout_schedule_shift.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/delete_scouter_schedule_shift.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/get_scouter_schedule.dart';
@@ -334,6 +336,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
                 shift!.team1 = newValue;
               });
             },
+            onScouterAdded: () async {
+              await fetchData();
+            },
           ),
           ScheduleShiftTeamScouts(
             label: "Red 2",
@@ -343,6 +348,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
               setState(() {
                 shift!.team2 = newValue;
               });
+            },
+            onScouterAdded: () async {
+              await fetchData();
             },
           ),
           ScheduleShiftTeamScouts(
@@ -354,6 +362,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
                 shift!.team3 = newValue;
               });
             },
+            onScouterAdded: () async {
+              await fetchData();
+            },
           ),
           ScheduleShiftTeamScouts(
             label: "Blue 1",
@@ -363,6 +374,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
               setState(() {
                 shift!.team4 = newValue;
               });
+            },
+            onScouterAdded: () async {
+              await fetchData();
             },
           ),
           ScheduleShiftTeamScouts(
@@ -374,6 +388,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
                 shift!.team5 = newValue;
               });
             },
+            onScouterAdded: () async {
+              await fetchData();
+            },
           ),
           ScheduleShiftTeamScouts(
             label: "Blue 3",
@@ -383,6 +400,9 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
               setState(() {
                 shift!.team6 = newValue;
               });
+            },
+            onScouterAdded: () async {
+              await fetchData();
             },
           ),
         ].withSpaceBetween(height: 14),
@@ -398,15 +418,18 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
     required this.scouts,
     required this.allScouts,
     this.onChanged,
+    this.onScouterAdded,
   });
 
   final List<Scout> allScouts;
   final String label;
   final List<Scout> scouts;
   final dynamic Function(List<Scout>)? onChanged;
+  final dynamic Function()? onScouterAdded;
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(allScouts.length.toString());
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -416,6 +439,7 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
         ),
         ...scouts.map(
           (scout) => ScoutSelector(
+            key: Key(scout.id),
             allScouts: allScouts,
             initialScout: scout,
             onChanged: (newScout) {
@@ -427,15 +451,25 @@ class ScheduleShiftTeamScouts extends StatelessWidget {
               }
               onChanged?.call(newScouts);
             },
+            onScouterAdded: () async {
+              await onScouterAdded?.call();
+              return allScouts;
+            },
           ),
         ),
         ScoutSelector(
-            allScouts: allScouts,
-            onChanged: (newScout) {
-              final newScouts = scouts.toList();
-              newScouts.add(newScout!);
-              onChanged?.call(newScouts);
-            }),
+          key: GlobalKey(),
+          allScouts: allScouts,
+          onChanged: (newScout) {
+            final newScouts = scouts.toList();
+            newScouts.add(newScout!);
+            onChanged?.call(newScouts);
+          },
+          onScouterAdded: () async {
+            await onScouterAdded?.call();
+            return allScouts;
+          },
+        ),
       ].withSpaceBetween(height: 7),
     );
   }
@@ -447,11 +481,13 @@ class ScoutSelector extends StatefulWidget {
     required this.allScouts,
     this.initialScout,
     this.onChanged,
+    required this.onScouterAdded,
   });
 
   final List<Scout> allScouts;
   final Scout? initialScout;
   final dynamic Function(Scout?)? onChanged;
+  final Future<List<Scout>> Function() onScouterAdded;
 
   @override
   State<ScoutSelector> createState() => _ScoutSelectorState();
@@ -459,6 +495,9 @@ class ScoutSelector extends StatefulWidget {
 
 class _ScoutSelectorState extends State<ScoutSelector> {
   Scout? selectedScout;
+
+  final GlobalKey<DropdownSearchState<Scout>> dropdownKey = GlobalKey();
+  final TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
@@ -469,9 +508,9 @@ class _ScoutSelectorState extends State<ScoutSelector> {
   @override
   Widget build(BuildContext context) {
     return DropdownSearch(
-      key: Key(selectedScout?.id ?? "null"),
+      key: dropdownKey,
       items: widget.allScouts,
-      selectedItem: widget.initialScout,
+      selectedItem: selectedScout,
       onChanged: (scout) {
         setState(() {
           selectedScout = scout;
@@ -481,13 +520,86 @@ class _ScoutSelectorState extends State<ScoutSelector> {
       },
       itemAsString: (scout) => scout.name,
       compareFn: (item1, item2) => item1.id == item2.id,
+      popupProps: PopupProps.modalBottomSheet(
+        constraints: const BoxConstraints.expand(),
+        modalBottomSheetProps: ModalBottomSheetProps(
+          backgroundColor:
+              Theme.of(context).colorScheme.surfaceContainerHighest,
+        ),
+        fit: FlexFit.loose,
+        showSearchBox: true,
+        searchFieldProps: TextFieldProps(
+          controller: searchController,
+          autofocus: true,
+          textCapitalization: TextCapitalization.words,
+          decoration: const InputDecoration(
+            border: OutlineInputBorder(),
+            label: Text("Search"),
+          ),
+        ),
+        emptyBuilder: (context, searchEntry) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
+          child: Center(
+            child: Column(
+              children: [
+                Text(
+                  "Scouter “$searchEntry” not found.",
+                  textAlign: TextAlign.center,
+                ),
+                TextButton(
+                    onPressed: () async {
+                      NavigatorState navigatorState = Navigator.of(context);
+
+                      final newScouter = await showDialog<Scout?>(
+                        context: context,
+                        builder: (context) => AddScouterDialog(
+                          initialText: searchController.text,
+                          onAdd: (name) async {
+                            await widget.onScouterAdded();
+                          },
+                        ),
+                      );
+
+                      if (newScouter != null) {
+                        widget.onChanged?.call(newScouter);
+
+                        navigatorState.pop();
+                      }
+                    },
+                    child: const Text("Add a scouter"))
+              ],
+            ),
+          ),
+        ),
+        containerBuilder: (context, popupWidget) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Stack(children: [
+              Column(children: [
+                const SizedBox(height: 40),
+                Expanded(child: popupWidget),
+              ]),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: IconButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.expand_more),
+                  tooltip: "Close",
+                  visualDensity: VisualDensity.comfortable,
+                ),
+              )
+            ]),
+          ),
+        ),
+        searchDelay: Duration.zero,
+      ),
       dropdownDecoratorProps: const DropDownDecoratorProps(
         dropdownSearchDecoration: InputDecoration(
           filled: true,
           hintText: "Add...",
         ),
       ),
-      clearButtonProps: const ClearButtonProps(isVisible: true),
+      clearButtonProps: ClearButtonProps(isVisible: selectedScout != null),
     );
   }
 }

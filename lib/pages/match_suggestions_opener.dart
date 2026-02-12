@@ -134,7 +134,9 @@ class _MatchSuggestionsOpenerPageState
       blue1FieldValue,
       blue2FieldValue,
       blue3FieldValue,
-    ].any((element) => int.tryParse(element) == null)) return false;
+    ].any((element) => int.tryParse(element) == null)) {
+      return false;
+    }
 
     return true;
   }

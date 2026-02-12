@@ -143,7 +143,7 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                 ),
               )
             : Container(
-                color: Theme.of(context).colorScheme.background,
+                color: Theme.of(context).colorScheme.surface,
                 child: TabBarView(
                   children: [
                     TeamLookupCategoriesVizualization(

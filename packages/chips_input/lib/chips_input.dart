@@ -38,7 +38,7 @@ class ChipsInput<T extends Object> extends StatefulWidget {
     this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
-    ToolbarOptions? toolbarOptions,
+    // ToolbarOptions? toolbarOptions, // Deprecated - use contextMenuBuilder instead
     this.showCursor,
     this.autofocus = false,
     this.obscuringCharacter = '•',
@@ -104,18 +104,18 @@ class ChipsInput<T extends Object> extends StatefulWidget {
             'Use keyboardType TextInputType.multiline when using TextInputAction.newline on a multiline TextField.'),
         keyboardType = keyboardType ??
             (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
-        toolbarOptions = toolbarOptions ??
-            (obscureText
-                ? const ToolbarOptions(
-                    selectAll: true,
-                    paste: true,
-                  )
-                : const ToolbarOptions(
-                    copy: true,
-                    cut: true,
-                    selectAll: true,
-                    paste: true,
-                  )),
+        // toolbarOptions = toolbarOptions ??
+        //     (obscureText
+        //         ? const ToolbarOptions(
+        //             selectAll: true,
+        //             paste: true,
+        //           )
+        //         : const ToolbarOptions(
+        //             copy: true,
+        //             cut: true,
+        //             selectAll: true,
+        //             paste: true,
+        //           )),
         super(key: key);
 
   final ChipsInputSuggestions<T> findSuggestions;
@@ -250,7 +250,7 @@ class ChipsInput<T extends Object> extends StatefulWidget {
   /// If not set, select all and paste will default to be enabled. Copy and cut
   /// will be disabled if [obscureText] is true. If [readOnly] is true,
   /// paste and cut will be disabled regardless.
-  final ToolbarOptions toolbarOptions;
+  // final ToolbarOptions toolbarOptions; // Deprecated - use contextMenuBuilder instead
 
   /// {@macro flutter.widgets.editableText.showCursor}
   final bool? showCursor;
@@ -402,15 +402,15 @@ class ChipsInput<T extends Object> extends StatefulWidget {
   /// The cursor for a mouse pointer when it enters or is hovering over the
   /// widget.
   ///
-  /// If [mouseCursor] is a [MaterialStateProperty<MouseCursor>],
-  /// [MaterialStateProperty.resolve] is used for the following [MaterialState]s:
+  /// If [mouseCursor] is a [WidgetStateProperty<MouseCursor>],
+  /// [WidgetStateProperty.resolve] is used for the following [WidgetState]s:
   ///
-  ///  * [MaterialState.error].
-  ///  * [MaterialState.hovered].
-  ///  * [MaterialState.focused].
-  ///  * [MaterialState.disabled].
+  ///  * [WidgetState.error].
+  ///  * [WidgetState.hovered].
+  ///  * [WidgetState.focused].
+  ///  * [WidgetState.disabled].
   ///
-  /// If this property is null, [MaterialStateMouseCursor.textable] will be used.
+  /// If this property is null, [WidgetStateMouseCursor.textable] will be used.
   ///
   /// The [mouseCursor] is the only property of [TextField] that controls the
   /// appearance of the mouse pointer. All other properties related to "cursor"
@@ -502,7 +502,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
   void initState() {
     super.initState();
     _chips.addAll(widget.initialValue);
-    String chipSpaces = _chips.map((e) => "$space").join();
+    String chipSpaces = _chips.map((e) => space).join();
     if (widget.controller == null) {
       _createLocalController(TextEditingValue(text: chipSpaces));
     } else {
@@ -557,8 +557,9 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
     setState(() {
       _chips = [..._chips, newValue];
     });
-    if (widget.onChanged != null)
+    if (widget.onChanged != null) {
       widget.onChanged!(_chips.toList(growable: false));
+    }
   }
 
   void _deleteLastChips(int numKeepChips) {
@@ -568,8 +569,9 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
     setState(() {
       _chips = _chips.take(numKeepChips).toList();
     });
-    if (widget.onChanged != null)
+    if (widget.onChanged != null) {
       widget.onChanged!(_chips.toList(growable: false));
+    }
   }
 
   void deleteChip(T data) {
@@ -580,8 +582,9 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
         _effectiveController.selection = TextSelection.fromPosition(
             TextPosition(offset: _effectiveController.text.length));
       });
-      if (widget.onChanged != null)
+      if (widget.onChanged != null) {
         widget.onChanged!(_chips.toList(growable: false));
+      }
     }
   }
 
@@ -601,7 +604,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
     final theme = Theme.of(context);
     final TextStyle style =
         theme.textTheme.titleSmall!.copyWith(height: 1.5).merge(widget.style);
-    Widget _defaultOptionsViewBuilder(BuildContext context,
+    Widget defaultOptionsViewBuilder(BuildContext context,
         AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
       return _DefaultOptionsViewBuilder(
         onSelected: onSelected,
@@ -610,14 +613,14 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
       );
     }
 
-    Widget _emptyOptionsViewBuilder(BuildContext context,
+    Widget emptyOptionsViewBuilder(BuildContext context,
         AutocompleteOnSelected<T> onSelected, Iterable<T> options) {
       return Container();
     }
 
     final maxReached = (widget.maxChips != null &&
         widget.maxChips! <= _chips.length &&
-        _chips.length > 0);
+        _chips.isNotEmpty);
 
     return RawAutocomplete<T>(
         focusNode: focusNode,
@@ -627,7 +630,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
             _deleteLastChips(textEditingValue.text.length);
           }
           final options = await widget
-              .findSuggestions(textEditingValue.text.replaceAll("$space", ""));
+              .findSuggestions(textEditingValue.text.replaceAll(space, ""));
           final notUsedOptions =
               options.where((r) => !_chips.contains(r)).toList(growable: false);
           return notUsedOptions;
@@ -636,7 +639,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
           _addChip(option);
         },
         displayStringForOption: (T option) {
-          return [..._chips.map((e) => "$space"), "$space"].join();
+          return [..._chips.map((e) => space), space].join();
         },
         fieldViewBuilder: (BuildContext context,
             TextEditingController textEditingController,
@@ -663,7 +666,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
                 textAlignVertical: widget.textAlignVertical,
                 textDirection: widget.textDirection,
                 readOnly: widget.readOnly,
-                toolbarOptions: widget.toolbarOptions,
+                // toolbarOptions: widget.toolbarOptions, // Deprecated - use contextMenuBuilder instead
                 showCursor: widget.showCursor,
                 cursorWidth: widget.cursorWidth,
                 cursorHeight: widget.cursorHeight,
@@ -694,7 +697,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
                     hintText: widget.decoration?.hintText,
                     counterText: "",
                     isDense: true,
-                    contentPadding: EdgeInsets.symmetric(vertical: 5)),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 5)),
               ),
             )
           ];
@@ -708,7 +711,7 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
               builder: (context, child) => InputDecorator(
                 isFocused: focusNode.hasFocus,
                 isEmpty: textEditingController.value.text.isEmpty,
-                decoration: widget.decoration ?? InputDecoration(),
+                decoration: widget.decoration ?? const InputDecoration(),
                 expands: widget.expands,
                 child: child,
               ),
@@ -721,8 +724,8 @@ class ChipsInputState<T extends Object> extends State<ChipsInput<T>>
           );
         },
         optionsViewBuilder: maxReached
-            ? _emptyOptionsViewBuilder
-            : widget.optionsViewBuilder ?? _defaultOptionsViewBuilder);
+            ? emptyOptionsViewBuilder
+            : widget.optionsViewBuilder ?? defaultOptionsViewBuilder);
   }
 }
 
@@ -747,10 +750,10 @@ class _DefaultOptionsViewBuilder<T extends Object> extends StatelessWidget {
       alignment: Alignment.topLeft,
       child: Material(
         elevation: 4.0,
-        child: Container(
+        child: SizedBox(
           height: 200.0,
           child: ListView.builder(
-            padding: EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(8.0),
             itemCount: options.length,
             itemBuilder: (BuildContext context, int index) {
               final T option = options.elementAt(index);

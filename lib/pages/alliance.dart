@@ -3,7 +3,6 @@ import 'package:scouting_dashboard_app/analysis_functions/alliance_analysis.dart
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
-import 'package:scouting_dashboard_app/reusable/models/reef_level.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
@@ -108,15 +107,17 @@ class AllianceVizualization extends AnalysisVisualization {
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value: Text(numToStringRounded(analysisMap['processor'])),
-              label: const Text('Processor'),
+              value:
+                  Text(numToStringRounded(analysisMap['totalBallThroughput'])),
+              label: const Text('Total output'),
             ),
           ),
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value: Text(numToStringRounded(analysisMap['net'])),
-              label: const Text('Net'),
+              value:
+                  Text(numToStringRounded(analysisMap['totalFuelOutputted'])),
+              label: const Text('Hub shots'),
             ),
           ),
         ].withSpaceBetween(width: 10),
@@ -173,7 +174,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: const BorderRadius.all(Radius.circular(10)),
       ),
       child: AnimatedBuilder(
@@ -382,72 +383,102 @@ Container reefStack(
   Color? backgroundColor,
   Color? foregroundColor,
 }) {
-  int index = 0;
-
   return Container(
     decoration: BoxDecoration(
-      color: backgroundColor ?? Theme.of(context).colorScheme.surfaceVariant,
+      color: backgroundColor ??
+          Theme.of(context).colorScheme.surfaceContainerHighest,
       borderRadius: const BorderRadius.all(Radius.circular(10)),
     ),
-    padding: const EdgeInsets.all(10),
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: ([
-        analysisMap['coralL1'],
-        analysisMap['coralL2'],
-        analysisMap['coralL3'],
-        analysisMap['coralL4']
-      ])
-          .map((row) {
-            index++;
-            return Row(
+      children: [
+        Table(
+          border: TableBorder(
+            horizontalInside: BorderSide(
+              color: foregroundColor?.withValues(alpha: 0.5) ??
+                  Theme.of(context)
+                      .colorScheme
+                      .onSurfaceVariant
+                      .withValues(alpha: 0.2),
+              width: 1,
+            ),
+          ),
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: [
+            TableRow(
               children: [
-                Text(
-                  ReefLevel.values[index].localizedDescripton,
-                  style:
-                      Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
-                            color: foregroundColor ??
-                                Theme.of(context).colorScheme.onSurfaceVariant,
-                          )),
-                ),
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: Container(
-                    height: 1,
-                    decoration: BoxDecoration(
-                      color: (foregroundColor ??
-                              Theme.of(context).colorScheme.onSurfaceVariant)
-                          .withValues(alpha: 0.2),
+                const SizedBox(), // Top-left empty cell
+                for (int col = 0; col < 3; col++)
+                  SizedBox(
+                    height: 38,
+                    child: Center(
+                      child: Text(
+                        (analysisMap['teams'] != null &&
+                                (analysisMap['teams'] as List).length > col)
+                            ? (analysisMap['teams'][col]['team']?.toString() ??
+                                '--')
+                            : '--',
+                        style: Theme.of(context).textTheme.labelLarge!.merge(
+                              TextStyle(
+                                color: foregroundColor ??
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                              ),
+                            ),
+                      ),
                     ),
                   ),
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 55,
-                      child: Text(
-                        analysisMap['totalPoints'] == null
-                            ? '--'
-                            : numToStringRounded(row as num),
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleLarge!
-                            .merge(TextStyle(
+              ],
+            ),
+            // L1, L2, L3 rows
+            for (var row = 0; row < 3; row++)
+              TableRow(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    height: 38,
+                    child: Text(
+                      'L${row + 1} Start',
+                      style: Theme.of(context).textTheme.labelLarge!.merge(
+                            TextStyle(
                               color: foregroundColor ??
                                   Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,
-                            )),
+                            ),
+                          ),
+                    ),
+                  ),
+                  for (int col = 0; col < 3; col++)
+                    Center(
+                      child: Text(
+                        (() {
+                          final key = 'l${row + 1}StartTime';
+                          final list = analysisMap[key] as List?;
+                          if (list == null ||
+                              list.length <= col ||
+                              list[col] == null) {
+                            return '--';
+                          }
+                          return '${numToStringRounded(list[col])}s';
+                        })(),
+                        style: Theme.of(context).textTheme.labelLarge!.merge(
+                              TextStyle(
+                                color: foregroundColor ??
+                                    Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                              ),
+                            ),
                       ),
                     ),
-                  ],
-                ),
-              ].withSpaceBetween(width: 7),
-            );
-          })
-          .toList()
-          .reversed
-          .toList(),
+                ],
+              ),
+          ],
+        ),
+      ],
     ),
   );
 }

@@ -4,7 +4,11 @@ import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
+List<Scout>? cachedScouters;
+
 extension GetScouts on LovatAPI {
+  List<Scout>? get cachedScouts => cachedScouters;
+
   /// archivedScouters - true: show archived scouters only, false: show unarchived scouters only
   Future<List<Scout>> getScouts({bool archivedScouters = false}) async {
     final response = await get(
@@ -21,6 +25,8 @@ extension GetScouts on LovatAPI {
 
     final json = jsonDecode(response!.body) as List<dynamic>;
 
-    return json.map((e) => Scout.fromJson(e)).toList();
+    cachedScouters = json.map((e) => Scout.fromJson(e)).toList();
+    cachedScouters?.sort((a, b) => a.name.trim().compareTo(b.name.trim()));
+    return cachedScouters!;
   }
 }

@@ -99,7 +99,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
             ],
           ),
         );
-      } else if (filteredScouters!.isEmpty) {
+      } else if (filteredScouters.isEmpty) {
         body = PageBody(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -188,7 +188,8 @@ class _ScoutersPageState extends State<ScoutersPage> {
           showDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => AddScouterDialog(onAdd: fetchData),
+            builder: (context) =>
+                AddScouterDialog(onAdd: (name) => fetchData()),
           );
         },
         child: const Icon(Icons.add),
@@ -230,18 +231,30 @@ class AddScouterDialog extends StatefulWidget {
   const AddScouterDialog({
     super.key,
     this.onAdd,
+    this.initialText = "",
   });
 
-  final Function()? onAdd;
+  final Function(String name)? onAdd;
+  final String initialText;
 
   @override
   State<AddScouterDialog> createState() => _AddScouterDialogState();
 }
 
 class _AddScouterDialogState extends State<AddScouterDialog> {
+  late final TextEditingController textEditingController;
+
   String name = '';
   bool submitting = false;
   String? error;
+
+  @override
+  void initState() {
+    debugPrint(widget.initialText);
+    super.initState();
+    textEditingController = TextEditingController(text: widget.initialText);
+    name = widget.initialText;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -251,6 +264,7 @@ class _AddScouterDialogState extends State<AddScouterDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
+            controller: textEditingController,
             autofocus: true,
             decoration: InputDecoration(
               labelText: "Name",
@@ -287,9 +301,9 @@ class _AddScouterDialogState extends State<AddScouterDialog> {
                   final navigatorState = Navigator.of(context);
 
                   try {
-                    await lovatAPI.addScouter(name);
-                    widget.onAdd?.call();
-                    navigatorState.pop();
+                    final Scout scouter = await lovatAPI.addScouter(name);
+                    await widget.onAdd?.call(name);
+                    navigatorState.pop(scouter);
                   } on LovatAPIException catch (e) {
                     setState(() {
                       error = e.message;

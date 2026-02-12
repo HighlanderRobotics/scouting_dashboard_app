@@ -76,7 +76,7 @@ class Breakdown extends StatelessWidget {
         children: [
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
@@ -109,7 +109,7 @@ class Breakdown extends StatelessWidget {
                       ? Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
-                            color: Theme.of(context).colorScheme.background,
+                            color: Theme.of(context).colorScheme.surface,
                           ),
                           height: 64,
                           child: const Center(child: Text("None recorded")),

@@ -105,7 +105,7 @@ class _PopupMenuSliderState extends State<PopupMenuSlider> {
               value = val;
             });
           },
-          inactiveColor: Theme.of(context).colorScheme.background,
+          inactiveColor: Theme.of(context).colorScheme.surface,
           min: widget.min,
           max: widget.max,
           onChangeEnd: widget.onChangeEnd,
@@ -334,7 +334,8 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
             Flexible(
               child: Container(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(18),
                       topRight: Radius.circular(18),
@@ -387,7 +388,7 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
                                               BorderRadius.circular(7),
                                           color: Theme.of(context)
                                               .colorScheme
-                                              .background,
+                                              .surface,
                                         ),
                                         height: 40,
                                         width: 40,
@@ -428,7 +429,7 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
       builder: (context, candidateData, rejectedData) {
         return const SizedBox(height: 50, width: 50);
       },
-      onWillAccept: (d) {
+      onWillAcceptWithDetails: (details) {
         HapticFeedback.lightImpact();
         willAccept(index);
         return true;
@@ -438,7 +439,8 @@ class _EditPicklistFlagsPageState extends State<EditPicklistFlagsPage> {
           willAcceptIndex = null;
         });
       },
-      onAccept: (flag) {
+      onAcceptWithDetails: (details) {
+        final flag = details.data;
         setState(() {
           if (draggingFromIndex != null) {
             selectedFlags!.remove(flag);
