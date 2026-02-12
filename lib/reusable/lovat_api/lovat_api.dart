@@ -125,7 +125,7 @@ class LovatAPI {
 
     return {
       if (token != null) 'Authorization': 'Bearer $token',
-      'X-Operating-System': Platform.operatingSystem,
+      'X-Operating-System': kIsWeb ? "web" : Platform.operatingSystem,
       'X-App-Version': packageInfo.version,
       'X-Build-Number': packageInfo.buildNumber,
       if (jsonBody) 'Content-Type': "application/json",
