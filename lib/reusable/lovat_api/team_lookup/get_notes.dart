@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_notes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 
@@ -17,7 +18,13 @@ extension GetNotes on LovatAPI {
 
     final json = jsonDecode(response!.body) as List<dynamic>;
 
-    return json.map((e) => Note.fromJson(e)).toList();
+    List<Note> notes = [];
+
+    for (final map in json) {
+      notes.addAll(Note.fromJoinedMap(map));
+    }
+
+    return notes;
   }
 }
 
@@ -45,4 +52,28 @@ class Note {
         author: json['scouterName'],
         uuid: json['uuid'],
       );
+  static List<Note> fromJoinedMap(Map<String, dynamic> json) {
+    return [
+      if (json.containsKey("notes") &&
+          json["notes"].runtimeType == String &&
+          (json["notes"] as String).isNotEmpty)
+        Note(
+          body: json['notes'],
+          matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
+              tournamentName: json['tournamentName']),
+          author: json['scouterName'],
+          uuid: json['uuid'],
+        ),
+      if (json.containsKey("robotBrokeDescription") &&
+          json["robotBrokeDescription"].runtimeType == String &&
+          (json["robotBrokeDescription"] as String).isNotEmpty)
+        Note(
+            body: json['robotBrokeDescription'],
+            matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
+                tournamentName: json['tournamentName']),
+            author: json['scouterName'],
+            uuid: json['uuid'],
+            type: NoteType.breakDescription),
+    ];
+  }
 }

@@ -21,10 +21,10 @@ class GameMatchIdentity {
 
   /// Create a user-readable description of the match
   String getLocalizedDescription({
-    includeType = true,
-    includeNumber = true,
-    includeTournament = true,
-    abbreviateName = false,
+    bool includeType = true,
+    bool includeNumber = true,
+    bool includeTournament = true,
+    bool abbreviateName = false,
   }) {
     final typedMatchName = abbreviateName
         ? getShortLocalizedDescription()

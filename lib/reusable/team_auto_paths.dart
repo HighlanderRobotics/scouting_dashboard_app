@@ -465,7 +465,7 @@ class AutoPath {
 
                 AutoPathEvent startEvent = timeline.lastWhere((event) =>
                     event.type == AutoPathEventType.startScoring &&
-                    event.timestamp < e.timestamp);
+                    event.timestamp <= e.timestamp);
                 if (e.quantity != null && e.quantity! > 0) {
                   for (int i = 1; i <= e.quantity!; i++) {
                     Duration startTime = Duration(
@@ -484,12 +484,7 @@ class AutoPath {
                   }
                   return list;
                 } else {
-                  return <BallTrajectory>[
-                    BallTrajectory(
-                        endPos: Offset(1, 1),
-                        startPos: Offset(6, 7),
-                        startTime: Duration(seconds: 1000))
-                  ];
+                  return <BallTrajectory>[];
                 }
               },
             )
