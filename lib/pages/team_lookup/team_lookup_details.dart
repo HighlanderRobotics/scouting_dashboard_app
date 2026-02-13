@@ -220,7 +220,8 @@ class AnalysisOverview
               ),
             ),
         ]),
-        if (analysisMap.containsKey('array')) ...[
+        if (analysisMap.containsKey('array') &&
+            analysisMap['array'] != null) ...[
           const SizedBox(height: 10),
           sparkline(context, snapshot, analysisFunction.metric.max),
         ],

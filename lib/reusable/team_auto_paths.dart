@@ -578,7 +578,6 @@ class AutoPath {
                 .where((event) => event.type == AutoPathEventType.startMatch)
                 .toList()[0]
             : null;
-    debugPrint(startEvent!.location.name.toString());
     String start = startEvent?.location.name.hyphenated ?? "Unknown";
     bool disrupts = timeline
         .where((event) => event.type == AutoPathEventType.disrupt)
