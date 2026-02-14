@@ -315,7 +315,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       const SizedBox(height: 15),
       reefStack(
         context,
-        data,
+        allianceData,
         backgroundColor: [
           Theme.of(context).colorScheme.onRedAlliance,
           Theme.of(context).colorScheme.onBlueAlliance
