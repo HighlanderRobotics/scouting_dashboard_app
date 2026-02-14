@@ -41,7 +41,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
     super.initState();
 
     controller = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 20),
       vsync: this,
     );
 
@@ -90,7 +90,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                                   ? null
                                   : Duration(
                                       milliseconds:
-                                          (controller.value * 15 * 1000)
+                                          (controller.value * 20 * 1000)
                                               .round(),
                                     ),
                               autoPath: selectedPath!,
@@ -831,7 +831,7 @@ class AnimatedAutoPathControls extends StatelessWidget {
         ),
         Text(prettyDuration(
           Duration(
-            milliseconds: (controller.value * 15 * 1000).round(),
+            milliseconds: (controller.value * 20 * 1000).round(),
           ),
           abbreviated: true,
         ))

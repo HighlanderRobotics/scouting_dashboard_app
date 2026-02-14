@@ -27,7 +27,7 @@ class _AnimatedAutoPathState extends State<AnimatedAutoPath>
     super.initState();
 
     controller = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 20),
       vsync: this,
     );
 
@@ -59,7 +59,7 @@ class _AnimatedAutoPathState extends State<AnimatedAutoPath>
                   animationProgress: controller.value == 0
                       ? null
                       : Duration(
-                          milliseconds: (controller.value * 15 * 1000).round(),
+                          milliseconds: (controller.value * 20 * 1000).round(),
                         ),
                   autoPath: analysis.autoPath,
                   teamColor: Colors.blue[600],

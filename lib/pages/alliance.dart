@@ -160,7 +160,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
 
     controller = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 20),
     );
 
     playPauseController = AnimationController(
@@ -299,7 +299,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                             : Duration(
                                                 milliseconds:
                                                     (controller.value *
-                                                            15 *
+                                                            20 *
                                                             1000)
                                                         .round()),
                                         autoPath: path!,
