@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
 import '../analysis_functions/analysis.dart';
 
@@ -67,28 +68,67 @@ class AnalysisVisualizationState extends State<AnalysisVisualization> {
     }
 
     if (error != null) {
-      return Center(
-        child: IconButton(
-          icon: const Icon(Icons.sentiment_dissatisfied_outlined),
-          tooltip: "Show error details",
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                      title: const Text("Error"),
-                      content: Text(error.toString()),
-                      actions: [
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text("Dismiss"),
-                        ),
-                      ],
-                    ));
-          },
-        ),
-      );
+      if (error.toString().contains("NO_DATA_FOR_TEAM")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/no_scouters.png", width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "No data found",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "Try using data from more teams or tournaments.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
+        );
+      } else if (error.toString().contains("TEAM_DOES_NOT_EXIST")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/awaiting_verification.png",
+                  width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "Team does not exist",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      } else {
+        return Center(
+          child: IconButton(
+            icon: const Icon(Icons.sentiment_dissatisfied_outlined),
+            tooltip: "Show error details",
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                        title: const Text("Error"),
+                        content: Text(error.toString()),
+                        actions: [
+                          FilledButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: const Text("Dismiss"),
+                          ),
+                        ],
+                      ));
+            },
+          ),
+        );
+      }
     }
 
     return widget.loadedData(context, analysis);
