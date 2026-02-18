@@ -199,7 +199,7 @@ final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Other", [
     CategoryMetric(
       localizedName: "Total fuel outputted between both feeding and scoring",
-      abbreviatedLocalizedName: "Fuel Outputted",
+      abbreviatedLocalizedName: "Total Fuel Throughput",
       path: "totalFuelOutputted",
     ),
     CategoryMetric(

@@ -41,7 +41,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
     super.initState();
 
     controller = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 20),
       vsync: this,
     );
 
@@ -90,7 +90,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                                   ? null
                                   : Duration(
                                       milliseconds:
-                                          (controller.value * 15 * 1000)
+                                          (controller.value * 20 * 1000)
                                               .round(),
                                     ),
                               autoPath: selectedPath!,
@@ -465,7 +465,7 @@ class AutoPath {
 
                 AutoPathEvent startEvent = timeline.lastWhere((event) =>
                     event.type == AutoPathEventType.startScoring &&
-                    event.timestamp < e.timestamp);
+                    event.timestamp <= e.timestamp);
                 if (e.quantity != null && e.quantity! > 0) {
                   for (int i = 1; i <= e.quantity!; i++) {
                     Duration startTime = Duration(
@@ -484,12 +484,7 @@ class AutoPath {
                   }
                   return list;
                 } else {
-                  return <BallTrajectory>[
-                    BallTrajectory(
-                        endPos: Offset(1, 1),
-                        startPos: Offset(6, 7),
-                        startTime: Duration(seconds: 1000))
-                  ];
+                  return <BallTrajectory>[];
                 }
               },
             )
@@ -583,7 +578,6 @@ class AutoPath {
                 .where((event) => event.type == AutoPathEventType.startMatch)
                 .toList()[0]
             : null;
-    debugPrint(startEvent!.location.name.toString());
     String start = startEvent?.location.name.hyphenated ?? "Unknown";
     bool disrupts = timeline
         .where((event) => event.type == AutoPathEventType.disrupt)
@@ -837,7 +831,7 @@ class AnimatedAutoPathControls extends StatelessWidget {
         ),
         Text(prettyDuration(
           Duration(
-            milliseconds: (controller.value * 15 * 1000).round(),
+            milliseconds: (controller.value * 20 * 1000).round(),
           ),
           abbreviated: true,
         ))
