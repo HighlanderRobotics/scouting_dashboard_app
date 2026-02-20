@@ -179,7 +179,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
                     filled: true,
                     labelText: "Search",
                   ),
-                  autofocus: true,
+                  autofocus: false,
                 ),
               ))),
       drawer: const GlobalNavigationDrawer(),
