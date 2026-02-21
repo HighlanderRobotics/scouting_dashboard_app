@@ -791,11 +791,18 @@ class ScoutReportEvent {
   final ScoutReportEventPosition position;
   final num? quantity;
 
-  factory ScoutReportEvent.fromList(List<int> list) => ScoutReportEvent(
-      timestamp: Duration(seconds: list[0]),
-      action: ScoutReportEventAction.values[list[1]],
-      position: ScoutReportEventPosition.values[list[2]],
-      quantity: list.length >= 4 ? list[3] : 0);
+  factory ScoutReportEvent.fromList(List<num> list) {
+    final actualList = list.cast<num>();
+    double time = actualList[0].toDouble();
+    int action = actualList[1].toInt();
+    int position = actualList[2].toInt();
+
+    return ScoutReportEvent(
+        timestamp: Duration(milliseconds: ((time * 1000)).round()),
+        action: ScoutReportEventAction.values[action],
+        position: ScoutReportEventPosition.values[position],
+        quantity: list.length >= 4 ? list[3] : 0);
+  }
 
   String get localizedDescription {
     String output = action.localizedPastTense;

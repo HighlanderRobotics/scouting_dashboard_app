@@ -692,8 +692,15 @@ class AutoPath {
   }
 
   List<PositionedGamePiece> gamePiecePositionsAtTimestamp(Duration timestamp) {
+    final Duration disruptTime =
+        timeline.any((element) => element.type == AutoPathEventType.disrupt)
+            ? timeline
+                .where((element) => element.type == AutoPathEventType.disrupt)
+                .first
+                .timestamp
+            : const Duration(days: 1);
     if (trajectories.isNotEmpty) {
-      return trajectories
+      final ballTrajectories = trajectories
           .where(
         (t) => t != null && t.startTime <= timestamp && timestamp <= t.endTime,
       )
@@ -706,8 +713,25 @@ class AutoPath {
             progress * (t.endPos.dy - t.startPos.dy) + t.startPos.dy);
         return PositionedGamePiece(GamePiece.fuel, position);
       }).toList();
+
+      if (timestamp > disruptTime) {
+        return [
+          ...ballTrajectories,
+          PositionedGamePiece(
+              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+        ];
+      } else {
+        return ballTrajectories;
+      }
     } else {
-      return [];
+      if (timestamp > disruptTime) {
+        return [
+          PositionedGamePiece(
+              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+        ];
+      } else {
+        return [];
+      }
     }
   }
 }
@@ -766,7 +790,7 @@ class AutoPathEvent {
     }
 
     return AutoPathEvent(
-      timestamp: Duration(milliseconds: map['time'] * 1000),
+      timestamp: Duration(milliseconds: (map['time'] * 1000).round()),
       type: AutoPathEventType.values[map['event']],
       location: loc,
       quantity: map['quantity'],
@@ -857,24 +881,41 @@ enum AutoPathEventType {
   stopFeeding
 }
 
-enum GamePiece { fuel }
+enum GamePiece { fuel, disrupt }
 
 extension GamePieceExtension on GamePiece {
   Widget icon(
       {Color color = const Color.from(alpha: 1, red: 1, green: 1, blue: 1)}) {
-    return Transform.scale(
-        scale: 2 / 3,
-        child: SvgPicture.asset(
-          'assets/images/frc_fuel.svg',
-          colorFilter: ColorFilter.mode(
-            color,
-            BlendMode.srcIn,
-          ),
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.center,
-          height: 16,
-          width: 16,
-        ));
+    switch (this) {
+      case GamePiece.fuel:
+        return Transform.scale(
+            scale: 2 / 3,
+            child: SvgPicture.asset(
+              'assets/images/frc_fuel.svg',
+              colorFilter: ColorFilter.mode(
+                color,
+                BlendMode.srcIn,
+              ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              height: 16,
+              width: 16,
+            ));
+      case GamePiece.disrupt:
+        return Transform.scale(
+            scale: 4 / 3,
+            child: SvgPicture.asset(
+              'assets/images/bomb.svg',
+              colorFilter: ColorFilter.mode(
+                color,
+                BlendMode.srcIn,
+              ),
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.center,
+              height: 16,
+              width: 16,
+            ));
+    }
   }
 }
 
@@ -973,7 +1014,7 @@ extension AutoPathLocationExtension on AutoPathLocation {
       case AutoPathLocation.startRightBump:
         return const Offset(45, 75);
       case AutoPathLocation.neutralZone:
-        return const Offset(30, 50);
+        return const Offset(20, 50);
       case AutoPathLocation.depot:
         return const Offset(93, 72.5);
       case AutoPathLocation.outpost:
