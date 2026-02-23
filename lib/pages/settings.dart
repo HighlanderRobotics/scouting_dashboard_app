@@ -941,7 +941,7 @@ class _EmailBoxState extends State<EmailBox> {
     if (!loaded && errorMessage != null) {
       return Container(
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(4),
         ),
         height: 60,
@@ -967,7 +967,7 @@ class _EmailBoxState extends State<EmailBox> {
         Container(
           height: 60,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(4),
           ),
           child: Padding(
@@ -1602,6 +1602,5 @@ class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
         ],
       );
     }
-    ;
   }
 }

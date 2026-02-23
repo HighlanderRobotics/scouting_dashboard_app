@@ -112,7 +112,6 @@ class RobotBrokeBox extends StatelessWidget {
         .toColor();
 
     const double iconSize = 24;
-    const double horizontalSpacing = 7;
 
     final String description =
         "View ${breakDescriptions.length} ${breakDescriptions.length > 1 ? "reports" : "report"}";
