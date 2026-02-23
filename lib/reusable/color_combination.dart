@@ -17,7 +17,7 @@ extension ColorCombinationExtension on ColorCombination {
 
     switch (this) {
       case ColorCombination.plain:
-        return colorScheme.surfaceVariant;
+        return colorScheme.surfaceContainerHighest;
       case ColorCombination.colored:
         return colorScheme.primaryContainer;
       case ColorCombination.emphasis:

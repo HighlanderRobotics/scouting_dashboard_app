@@ -276,7 +276,9 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                     ? const LinearProgressIndicator()
                     : Divider(
                         height: 1,
-                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                       ),
               ),
             ],
@@ -391,7 +393,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
           child: InputChip(
             label: Text(data.number.toString()),
             onDeleted: () => state.deleteChip(data),
-            backgroundColor: Theme.of(context).colorScheme.background,
+            backgroundColor: Theme.of(context).colorScheme.surface,
             labelStyle: Theme.of(context).textTheme.labelLarge!.merge(TextStyle(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 )),
@@ -767,7 +769,8 @@ class _MatchesState extends State<Matches> {
                 child: ClipRRect(
                   borderRadius: const BorderRadius.all(Radius.circular(8)),
                   child: Container(
-                    color: Theme.of(context).colorScheme.surfaceVariant,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [

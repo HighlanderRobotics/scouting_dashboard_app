@@ -19,8 +19,8 @@ extension GetScoutReportAnalysis on LovatAPI {
     }
 
     final json = jsonDecode(response!.body);
-    // final json = jsonDecode(
-    //     '{"totalPoints":200,"driverAbility":0,"robotRoles":[0,1,2,3,4],"climb":3,"autoClimb":0,"autoClimbStartTime":0,"contactDefenseTime":0,"campingDefenseTime":0,"scoringRate":12.3,"feedingRate":10.7,"defenseEffectiveness":0,"feeds":0, "volleys": 3, "ballsFed": 23, "accuracy":4,"feederType":[0],"climbResult":0,"climbStartTime":0,"autoPath":{"autoPoints":60,"positions":[{"location":2,"event":0,"time":2},{"location":2,"event":1,"time":7},{"location":0,"event":2,"time":0},{"location":5,"event":7,"time":1},{"location":7,"event":1,"time":13},{"location":5,"event":4,"time":0},{"location":7,"event":7,"time":0}],"match":"2025casf_qm3_5","tournamentName":"San Francisco Regional"},"note":"this is a test disregard","robotBrokeDescription":"robot go boom","timeStamp":"1970-01-01T00:00:00.000Z"}');
+    //final json = jsonDecode(
+    //    '{"totalPoints":200,"driverAbility":0,"robotRoles":[0,1,2,3,4],"climb":3,"autoClimb":0,"autoClimbStartTime":0,"contactDefenseTime":0,"campingDefenseTime":0,"scoringRate":12.3,"feedingRate":10.7,"defenseEffectiveness":0,"feeds":0, "volleys": 3, "ballsFed": 23, "accuracy":4,"feederType":[0],"climbResult":0,"climbStartTime":0,"autoPath":{"autoPoints":60,"positions":[{"location":2,"event":0,"time":2},{"location":2,"event":1,"time":7},{"location":0,"event":2,"time":0},{"location":5,"event":7,"time":1},{"location":7,"event":1,"time":13},{"location":5,"event":4,"time":0},{"location":7,"event":7,"time":0}],"match":"2025casf_qm3_5","tournamentName":"San Francisco Regional"},"note":"this is a test disregard","robotBrokeDescription":"robot go boom","timeStamp":"1970-01-01T00:00:00.000Z"}');
 
     return SingleScoutReportAnalysis.fromJson(json);
   }
@@ -78,7 +78,8 @@ class SingleScoutReportAnalysis {
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
       totalPoints: json['totalPoints'],
-      driverAbility: DriverAbility.values[(json['driverAbility'])].index + 1,
+      driverAbility:
+          DriverAbility.values[(json['driverAbility'] - 1)].index + 1,
       robotRoles: ((json['robotRoles'] as List<dynamic>).cast<int>())
           .map<RobotRoles>((elem) => RobotRoles.values[elem])
           .toList(),

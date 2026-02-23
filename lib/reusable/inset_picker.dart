@@ -36,15 +36,7 @@ class InsetPicker<T> extends StatelessWidget {
             ? CrossAxisAlignment.start
             : CrossAxisAlignment.center,
         children: [
-          Radio(
-            value: item,
-            groupValue: selectedItem,
-            onChanged: (value) {
-              if (onChanged != null) {
-                onChanged!(value);
-              }
-            },
-          ),
+          Radio<T>(value: item),
           Flexible(
             flex: 1,
             fit: FlexFit.tight,
@@ -77,11 +69,16 @@ class InsetPicker<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return EmphasizedContainer(
       padding: EdgeInsets.zero,
-      child: Column(
-        children: items
-            .map((item) =>
-                itemSelector(context, item, selected: item == selectedItem))
-            .toList(),
+      child: RadioGroup<T>(
+        groupValue: selectedItem,
+        onChanged:
+            onChanged != null ? (value) => onChanged!(value) : (value) {},
+        child: Column(
+          children: items
+              .map((item) =>
+                  itemSelector(context, item, selected: item == selectedItem))
+              .toList(),
+        ),
       ),
     );
   }

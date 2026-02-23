@@ -11,6 +11,11 @@ class TeamLookupNotesAnalysis extends AnalysisFunction {
 
   @override
   Future<List<Note>> getOnlineAnalysis() async {
-    return await lovatAPI.getNotesByTeamNumber(team);
+    final List<Note> notes = await lovatAPI.getNotesByTeamNumber(team);
+
+    return [
+      ...notes.where((e) => e.type == NoteType.breakDescription),
+      ...notes.where((e) => e.type != NoteType.breakDescription),
+    ];
   }
 }

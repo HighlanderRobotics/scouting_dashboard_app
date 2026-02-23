@@ -315,7 +315,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       const SizedBox(height: 15),
       reefStack(
         context,
-        data,
+        allianceData,
         backgroundColor: [
           Theme.of(context).colorScheme.onRedAlliance,
           Theme.of(context).colorScheme.onBlueAlliance
@@ -367,7 +367,7 @@ class WinningPrediction extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: const BorderRadius.all(Radius.circular(7)),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       clipBehavior: Clip.antiAlias,
       child: SizedBox(

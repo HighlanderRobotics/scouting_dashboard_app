@@ -101,7 +101,7 @@ class MatchesWithSegment {
           .firstWhere((segment) => segment.path == segmentPath)
           .localizedNameSingular;
     } on StateError {
-      return breakdownPath;
+      return segmentPath;
     }
   }
 }

@@ -211,7 +211,9 @@ class _MyPicklistsState extends State<MyPicklists> {
                           },
                         ),
                         Divider(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           height: 0,
                         ),
                       ],
@@ -343,7 +345,9 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                         },
                       ),
                       Divider(
-                        color: Theme.of(context).colorScheme.surfaceVariant,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
                         height: 0,
                       ),
                     ],
@@ -537,7 +541,9 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                           },
                         ),
                         Divider(
-                          color: Theme.of(context).colorScheme.surfaceVariant,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                           height: 0,
                         ),
                       ],

@@ -61,6 +61,7 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
         error = e.message;
       });
     } catch (e) {
+      debugPrint("$e");
       setState(() {
         error = "Failed to get reports";
       });
@@ -212,6 +213,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
         error = e.message;
       });
     } catch (e) {
+      debugPrint("$e");
       setState(() {
         error = "Failed to get report";
       });
@@ -454,29 +456,31 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     label: const Text("BPS")))
           ],
         ),
-        const SectionTitle("Feeder Types"),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            return Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: reportAnalysis.feederType.map((type) {
-                return SizedBox(
-                  width: (constraints.maxWidth - 10) / 2,
-                  height: 60,
-                  child: EmphasizedContainer(
-                    child: Center(
-                      child: Text(
-                        type.description,
-                        style: Theme.of(context).textTheme.headlineSmall,
+        if (reportAnalysis.robotRoles.contains(RobotRoles.feeding)) ...[
+          const SectionTitle("Feeder Types"),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: reportAnalysis.feederType.map((type) {
+                  return SizedBox(
+                    width: (constraints.maxWidth - 10) / 2,
+                    height: 60,
+                    child: EmphasizedContainer(
+                      child: Center(
+                        child: Text(
+                          type.description,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
+                  );
+                }).toList(),
+              );
+            },
+          )
+        ],
         const SectionTitle("Endgame"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -505,12 +509,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       "Notes",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(
-                            color: Theme.of(context).colorScheme.onBackground,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineMedium!.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                     ),
                   ),
                   IconButton(
@@ -789,11 +791,18 @@ class ScoutReportEvent {
   final ScoutReportEventPosition position;
   final num? quantity;
 
-  factory ScoutReportEvent.fromList(List<int> list) => ScoutReportEvent(
-      timestamp: Duration(seconds: list[0]),
-      action: ScoutReportEventAction.values[list[1]],
-      position: ScoutReportEventPosition.values[list[2]],
-      quantity: list.length >= 4 ? list[3] : 0);
+  factory ScoutReportEvent.fromList(List<num> list) {
+    final actualList = list.cast<num>();
+    double time = actualList[0].toDouble();
+    int action = actualList[1].toInt();
+    int position = actualList[2].toInt();
+
+    return ScoutReportEvent(
+        timestamp: Duration(milliseconds: ((time * 1000)).round()),
+        action: ScoutReportEventAction.values[action],
+        position: ScoutReportEventPosition.values[position],
+        quantity: list.length >= 4 ? list[3] : 0);
+  }
 
   String get localizedDescription {
     String output = action.localizedPastTense;
@@ -1113,7 +1122,7 @@ class SectionTitle extends StatelessWidget {
       child: Text(
         title,
         style: Theme.of(context).textTheme.headlineMedium!.copyWith(
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
     );

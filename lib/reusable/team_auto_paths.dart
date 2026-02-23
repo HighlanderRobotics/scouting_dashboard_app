@@ -41,7 +41,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
     super.initState();
 
     controller = AnimationController(
-      duration: const Duration(seconds: 15),
+      duration: const Duration(seconds: 20),
       vsync: this,
     );
 
@@ -73,7 +73,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
         if (selectedPath != null) ...[
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: const BorderRadius.all(Radius.circular(10)),
             ),
             child: Padding(
@@ -90,7 +90,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                                   ? null
                                   : Duration(
                                       milliseconds:
-                                          (controller.value * 15 * 1000)
+                                          (controller.value * 20 * 1000)
                                               .round(),
                                     ),
                               autoPath: selectedPath!,
@@ -117,7 +117,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
   Container matchList(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceVariant,
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
           borderRadius: const BorderRadius.all(Radius.circular(10))),
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -151,7 +151,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                       ),
                     ),
                     EmphasizedContainer(
-                      color: Theme.of(context).colorScheme.background,
+                      color: Theme.of(context).colorScheme.surface,
                       padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
                       radius: 7,
                       child: Text(
@@ -208,7 +208,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                   ),
                 ),
           ),
-          "Times used",
+          selectedPath!.frequency == 1 ? "Time used" : "Times used",
           true,
         ),
       )
@@ -377,25 +377,14 @@ class AutoPathWidget extends StatelessWidget {
       return Stack(
         children: [
           Positioned(
-            left: robotOffset.dx / 100 * constraints.maxWidth - 24,
-            top: robotOffset.dy / 100 * constraints.maxHeight - 12,
-            child: AutoPathEventIndicator(
-              // width: max(24, inventory.length * 24),
-              width: 48,
-              teamColor: teamColor,
-              isHighlighted: false,
-              childBuilder: (context, teamColor, isHighlighted) => Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: inventory
-                    .map((e) => SizedBox(
-                          child: e.icon(),
-                          height: 24,
-                          width: 24,
-                        ))
-                    .toList(),
-              ),
-            ),
-          ),
+              left: robotOffset.dx / 100 * constraints.maxWidth - 12,
+              top: robotOffset.dy / 100 * constraints.maxHeight - 12,
+              child: AutoPathEventIndicator(
+                teamColor: teamColor,
+                isHighlighted: false,
+                childBuilder: (context, teamColor, isHighlighted) =>
+                    inventory.isEmpty ? Container() : inventory.last.icon(),
+              )),
           ...(gamePieces
               .map(
                 (piece) => Positioned(
@@ -457,17 +446,95 @@ class AutoPathChargeSuccessRate {
 }
 
 class AutoPath {
-  const AutoPath({
+  AutoPath({
     required this.frequency,
     required this.scores,
     required this.timeline,
     required this.matches,
-  });
+  }) {
+    timeline.sort((a, b) =>
+        a.timestamp.inMicroseconds.compareTo(b.timestamp.inMicroseconds));
+
+    List<BallTrajectory> scoringTrajectories = timeline
+            .any((e) => e.type == AutoPathEventType.stopScoring)
+        ? timeline
+            .where((e) => e.type == AutoPathEventType.stopScoring)
+            .map(
+              (e) {
+                List<BallTrajectory> list = [];
+
+                AutoPathEvent startEvent = timeline.lastWhere((event) =>
+                    event.type == AutoPathEventType.startScoring &&
+                    event.timestamp <= e.timestamp);
+                if (e.quantity != null && e.quantity! > 0) {
+                  for (int i = 1; i <= e.quantity!; i++) {
+                    Duration startTime = Duration(
+                        microseconds: (startEvent.timestamp.inMicroseconds +
+                                i /
+                                    e.quantity! *
+                                    (e.timestamp.inMicroseconds -
+                                        startEvent.timestamp.inMicroseconds))
+                            .round());
+                    list.add(BallTrajectory(
+                      endPos: AutoPathLocation.hub.offset,
+                      startPos: Offset(positionAtTimestamp(startTime).dx,
+                          positionAtTimestamp(startTime).dy),
+                      startTime: startTime,
+                    ));
+                  }
+                  return list;
+                } else {
+                  return <BallTrajectory>[];
+                }
+              },
+            )
+            .expand((i) => i)
+            .toList()
+        : [];
+
+    List<BallTrajectory> feedingTrajectories = timeline
+            .any((e) => e.type == AutoPathEventType.stopFeeding)
+        ? timeline
+            .where((e) => e.type == AutoPathEventType.stopFeeding)
+            .map(
+              (e) {
+                List<BallTrajectory> list = [];
+
+                AutoPathEvent startEvent = timeline.lastWhere((event) =>
+                    event.type == AutoPathEventType.startFeeding &&
+                    event.timestamp <= e.timestamp);
+                if (e.quantity != null && e.quantity! > 0) {
+                  for (int i = 1; i <= e.quantity!; i++) {
+                    Duration startTime = Duration(
+                        microseconds: (startEvent.timestamp.inMicroseconds +
+                                i /
+                                    e.quantity! *
+                                    (e.timestamp.inMicroseconds -
+                                        startEvent.timestamp.inMicroseconds))
+                            .round());
+                    list.add(BallTrajectory(
+                      endPos: Offset(77.8, positionAtTimestamp(startTime).dy),
+                      startPos: positionAtTimestamp(startTime),
+                      startTime: startTime,
+                    ));
+                  }
+                  return list;
+                } else {
+                  return <BallTrajectory>[];
+                }
+              },
+            )
+            .expand((i) => i)
+            .toList()
+        : [];
+    trajectories = [...scoringTrajectories, ...feedingTrajectories];
+  }
 
   final int frequency;
   final List<int> scores;
   final List<AutoPathEvent> timeline;
   final List<GameMatchIdentity> matches;
+  late final List<BallTrajectory?> trajectories;
 
   factory AutoPath.fromMap(Map<String, dynamic> map) {
     AutoPath output = AutoPath(
@@ -511,7 +578,6 @@ class AutoPath {
                 .where((event) => event.type == AutoPathEventType.startMatch)
                 .toList()[0]
             : null;
-
     String start = startEvent?.location.name.hyphenated ?? "Unknown";
     bool disrupts = timeline
         .where((event) => event.type == AutoPathEventType.disrupt)
@@ -535,7 +601,9 @@ class AutoPath {
   List<Offset> get randomizedOffsets {
     Random random = Random(timeline.hashCode);
 
-    List<Offset> offsets = timeline
+    List<Offset> baseOffsets = timeline
+        .where((e) => e.location != AutoPathLocation.none)
+        .toList()
         .map((event) => Offset(
             event.offset.dx +
                 (((random.nextDouble() * 2) - 0.5) * event.randomVariance.dx),
@@ -543,65 +611,65 @@ class AutoPath {
                 (((random.nextDouble() * 2) - 0.5) * event.randomVariance.dy)))
         .toList();
 
-    for (var i = 0; i < offsets.length; i++) {
+    List<Offset> offsets = [];
+    for (var i = 0; i < timeline.length; i++) {
       final event = timeline[i];
-
-      if (event.location == AutoPathLocation.none) {
-        if (offsets.length - 1 > i) {
-          offsets[i] = Offset(
-            (offsets[i - 1].dx + offsets[i + 1].dx) / 2,
-            (offsets[i - 1].dy + offsets[i + 1].dy) / 2,
-          );
-        } else {
-          offsets[i] = Offset(offsets[i - 1].dx, offsets[i - 1].dy - 5);
-        }
-      }
+      offsets.add(positionAtTimestamp(event.timestamp, offsets: baseOffsets));
     }
 
     return offsets;
   }
 
-  AutoPathEvent previousEventAtTimestamp(Duration timestamp) {
+  AutoPathEvent previousEventAtTimestamp(Duration timestamp,
+      {List<AutoPathEvent>? filteredTimeline}) {
     late final AutoPathEvent previousEvent;
-
-    final progress = timestamp > timeline.last.timestamp
-        ? timeline.last.timestamp
+    final betterTimeline = filteredTimeline ?? timeline;
+    final progress = timestamp > betterTimeline.last.timestamp
+        ? betterTimeline.last.timestamp
         : timestamp;
 
     try {
-      previousEvent = timeline[
-          timeline.indexWhere((event) => event.timestamp >= progress) - 1];
+      previousEvent = betterTimeline[
+          betterTimeline.indexWhere((event) => event.timestamp >= progress) -
+              1];
     } catch (e) {
-      previousEvent = timeline[0];
+      previousEvent = betterTimeline[0];
     }
 
     return previousEvent;
   }
 
-  AutoPathEvent nextEventAtTimestamp(Duration timestamp) {
-    final progress = timestamp > timeline.last.timestamp
-        ? timeline.last.timestamp
+  AutoPathEvent nextEventAtTimestamp(Duration timestamp,
+      {List<AutoPathEvent>? filteredTimeline}) {
+    final betterTimeline = filteredTimeline ?? timeline;
+    final progress = timestamp > betterTimeline.last.timestamp
+        ? betterTimeline.last.timestamp
         : timestamp;
 
-    final nextEvent = timeline.firstWhere(
+    final nextEvent = betterTimeline.firstWhere(
       (event) => event.timestamp >= progress,
-      orElse: () => timeline.last,
+      orElse: () => betterTimeline.last,
     );
 
     return nextEvent;
   }
 
-  Offset positionAtTimestamp(Duration timestamp) {
-    final previousEvent = previousEventAtTimestamp(timestamp);
+  Offset positionAtTimestamp(Duration timestamp, {List<Offset>? offsets}) {
+    final ourOffsets = offsets ?? randomizedOffsets;
+    final filteredTimeline =
+        timeline.where((e) => e.location != AutoPathLocation.none).toList();
+    final previousEvent =
+        previousEventAtTimestamp(timestamp, filteredTimeline: filteredTimeline);
 
-    final progress = timestamp > timeline.last.timestamp
-        ? timeline.last.timestamp
+    final progress = timestamp > filteredTimeline.last.timestamp
+        ? filteredTimeline.last.timestamp
         : timestamp;
 
-    final nextEvent = nextEventAtTimestamp(timestamp);
+    final nextEvent =
+        nextEventAtTimestamp(timestamp, filteredTimeline: filteredTimeline);
 
-    final previousOffset = randomizedOffsets[timeline.indexOf(previousEvent)];
-    final nextOffset = randomizedOffsets[timeline.indexOf(nextEvent)];
+    final previousOffset = ourOffsets[filteredTimeline.indexOf(previousEvent)];
+    final nextOffset = ourOffsets[filteredTimeline.indexOf(nextEvent)];
 
     double interpolationProgress =
         (progress - previousEvent.timestamp).inMilliseconds /
@@ -624,11 +692,62 @@ class AutoPath {
   }
 
   List<PositionedGamePiece> gamePiecePositionsAtTimestamp(Duration timestamp) {
-    // final currentTimeline =
-    //     timeline.where((event) => event.timestamp <= timestamp);
+    final Duration disruptTime =
+        timeline.any((element) => element.type == AutoPathEventType.disrupt)
+            ? timeline
+                .where((element) => element.type == AutoPathEventType.disrupt)
+                .first
+                .timestamp
+            : const Duration(days: 1);
+    if (trajectories.isNotEmpty) {
+      final ballTrajectories = trajectories
+          .where(
+        (t) => t != null && t.startTime <= timestamp && timestamp <= t.endTime,
+      )
+          .map((t) {
+        double progress = ((timestamp - t!.startTime).inMilliseconds /
+            (t.endTime - t.startTime).inMilliseconds);
 
-    return [];
+        Offset position = Offset(
+            progress * (t.endPos.dx - t.startPos.dx) + t.startPos.dx,
+            progress * (t.endPos.dy - t.startPos.dy) + t.startPos.dy);
+        return PositionedGamePiece(GamePiece.fuel, position);
+      }).toList();
+
+      if (timestamp > disruptTime) {
+        return [
+          ...ballTrajectories,
+          PositionedGamePiece(
+              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+        ];
+      } else {
+        return ballTrajectories;
+      }
+    } else {
+      if (timestamp > disruptTime) {
+        return [
+          PositionedGamePiece(
+              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+        ];
+      } else {
+        return [];
+      }
+    }
   }
+}
+
+class BallTrajectory {
+  const BallTrajectory({
+    required this.endPos,
+    required this.startPos,
+    required this.startTime,
+  });
+
+  final Offset startPos;
+  final Offset endPos;
+  final Duration startTime;
+
+  Duration get endTime => startTime + const Duration(milliseconds: 400);
 }
 
 class PositionedGamePiece {
@@ -658,12 +777,20 @@ class AutoPathEvent {
     AutoPathLocation loc;
     if (AutoPathEventType.values[map['event']] == AutoPathEventType.climb) {
       loc = AutoPathLocation.tower;
+    } else if (AutoPathEventType.values[map['event']] ==
+            AutoPathEventType.startScoring ||
+        AutoPathEventType.values[map['event']] ==
+            AutoPathEventType.stopScoring) {
+      loc = AutoPathLocation.none;
+    } else if (AutoPathEventType.values[map['event']] ==
+        AutoPathEventType.startMatch) {
+      loc = AutoPathLocation.values[map['location']].adjacentStartingLocation;
     } else {
       loc = AutoPathLocation.values[map['location']];
     }
 
     return AutoPathEvent(
-      timestamp: Duration(seconds: map['time']),
+      timestamp: Duration(milliseconds: (map['time'] * 1000).round()),
       type: AutoPathEventType.values[map['event']],
       location: loc,
       quantity: map['quantity'],
@@ -723,12 +850,12 @@ class AnimatedAutoPathControls extends StatelessWidget {
             },
             min: 0,
             max: 1,
-            inactiveColor: Theme.of(context).colorScheme.background,
+            inactiveColor: Theme.of(context).colorScheme.surface,
           ),
         ),
         Text(prettyDuration(
           Duration(
-            milliseconds: (controller.value * 15 * 1000).round(),
+            milliseconds: (controller.value * 20 * 1000).round(),
           ),
           abbreviated: true,
         ))
@@ -754,19 +881,17 @@ enum AutoPathEventType {
   stopFeeding
 }
 
-enum GamePiece {
-  coral,
-  algae,
-}
+enum GamePiece { fuel, disrupt }
 
 extension GamePieceExtension on GamePiece {
-  Widget icon({Color color = Colors.white}) {
+  Widget icon(
+      {Color color = const Color.from(alpha: 1, red: 1, green: 1, blue: 1)}) {
     switch (this) {
-      case GamePiece.coral:
+      case GamePiece.fuel:
         return Transform.scale(
             scale: 2 / 3,
             child: SvgPicture.asset(
-              'assets/images/frc_coral.svg',
+              'assets/images/frc_fuel.svg',
               colorFilter: ColorFilter.mode(
                 color,
                 BlendMode.srcIn,
@@ -776,11 +901,11 @@ extension GamePieceExtension on GamePiece {
               height: 16,
               width: 16,
             ));
-      case GamePiece.algae:
+      case GamePiece.disrupt:
         return Transform.scale(
-            scale: 2 / 3,
+            scale: 4 / 3,
             child: SvgPicture.asset(
-              'assets/images/frc_algae.svg',
+              'assets/images/bomb.svg',
               colorFilter: ColorFilter.mode(
                 color,
                 BlendMode.srcIn,
@@ -857,6 +982,11 @@ enum AutoPathLocation {
   outpost,
   none,
   tower,
+  startLeftTrench,
+  startLeftBump,
+  startHub,
+  startRightTrench,
+  startRightBump
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
@@ -864,17 +994,27 @@ extension AutoPathLocationExtension on AutoPathLocation {
   Offset get offset {
     switch (this) {
       case AutoPathLocation.leftTrench:
-        return const Offset(45, 10);
+        return const Offset(35, 10);
       case AutoPathLocation.leftBump:
-        return const Offset(45, 25);
+        return const Offset(35, 25);
       case AutoPathLocation.hub:
-        return const Offset(57.5, 50);
+        return const Offset(42, 50);
       case AutoPathLocation.rightTrench:
-        return const Offset(45, 90);
+        return const Offset(35, 90);
       case AutoPathLocation.rightBump:
+        return const Offset(35, 75);
+      case AutoPathLocation.startLeftTrench:
+        return const Offset(45, 10);
+      case AutoPathLocation.startLeftBump:
+        return const Offset(45, 25);
+      case AutoPathLocation.startHub:
+        return const Offset(57.5, 50);
+      case AutoPathLocation.startRightTrench:
+        return const Offset(45, 90);
+      case AutoPathLocation.startRightBump:
         return const Offset(45, 75);
       case AutoPathLocation.neutralZone:
-        return const Offset(30, 50);
+        return const Offset(20, 50);
       case AutoPathLocation.depot:
         return const Offset(93, 72.5);
       case AutoPathLocation.outpost:
@@ -886,6 +1026,23 @@ extension AutoPathLocationExtension on AutoPathLocation {
     }
   }
 
+  AutoPathLocation get adjacentStartingLocation {
+    switch (this) {
+      case AutoPathLocation.leftTrench:
+        return AutoPathLocation.startLeftTrench;
+      case AutoPathLocation.leftBump:
+        return AutoPathLocation.startLeftBump;
+      case AutoPathLocation.hub:
+        return AutoPathLocation.startHub;
+      case AutoPathLocation.rightTrench:
+        return AutoPathLocation.startRightTrench;
+      case AutoPathLocation.rightBump:
+        return AutoPathLocation.startRightBump;
+      default:
+        return AutoPathLocation.none;
+    }
+  }
+
   Offset get randomVariance {
     switch (this) {
       case AutoPathLocation.leftTrench:
@@ -893,11 +1050,16 @@ extension AutoPathLocationExtension on AutoPathLocation {
       case AutoPathLocation.hub:
       case AutoPathLocation.rightTrench:
       case AutoPathLocation.rightBump:
+      case AutoPathLocation.startLeftTrench:
+      case AutoPathLocation.startLeftBump:
+      case AutoPathLocation.startHub:
+      case AutoPathLocation.startRightBump:
+      case AutoPathLocation.startRightTrench:
         return const Offset(0, 0);
       case AutoPathLocation.outpost:
       case AutoPathLocation.depot:
       case AutoPathLocation.tower:
-        return const Offset(0, 15);
+        return const Offset(0, 5);
       default:
         return const Offset(10, 10);
     }
@@ -906,14 +1068,19 @@ extension AutoPathLocationExtension on AutoPathLocation {
   String get name {
     switch (this) {
       case AutoPathLocation.leftTrench:
+      case AutoPathLocation.startLeftTrench:
         return "Left trench";
       case AutoPathLocation.leftBump:
+      case AutoPathLocation.startLeftBump:
         return "Left bump";
       case AutoPathLocation.hub:
+      case AutoPathLocation.startHub:
         return "Hub";
       case AutoPathLocation.rightTrench:
+      case AutoPathLocation.startRightTrench:
         return "Right trench";
       case AutoPathLocation.rightBump:
+      case AutoPathLocation.startRightBump:
         return "Right bump";
       case AutoPathLocation.neutralZone:
         return "Neutral Zone";

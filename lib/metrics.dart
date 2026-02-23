@@ -1,5 +1,3 @@
-import 'dart:math';
-
 class CategoryMetric {
   CategoryMetric({
     required this.localizedName,
@@ -201,7 +199,7 @@ final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Other", [
     CategoryMetric(
       localizedName: "Total fuel outputted between both feeding and scoring",
-      abbreviatedLocalizedName: "Fuel Outputted",
+      abbreviatedLocalizedName: "Total Fuel Throughput",
       path: "totalFuelOutputted",
     ),
     CategoryMetric(
@@ -221,7 +219,7 @@ List<BreakdownData> breakdowns = [
       BreakdownSegmentData(localizedNameSingular: "Scoring", path: "SCORING"),
       BreakdownSegmentData(localizedNameSingular: "Feeding", path: "FEEDING"),
       BreakdownSegmentData(
-          localizedNameSingular: "Defending", path: "Defending"),
+          localizedNameSingular: "Defending", path: "DEFENDING"),
       BreakdownSegmentData(localizedNameSingular: "Immobile", path: "IMMOBILE"),
     ],
   ),
@@ -284,6 +282,14 @@ List<BreakdownData> breakdowns = [
       BreakdownSegmentData(
         localizedNameSingular: "On Bump",
         path: "ON_BUMP",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Neither",
+        path: "NEITHER",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Both",
+        path: "BOTH",
       )
     ],
   ),
@@ -312,6 +318,14 @@ List<BreakdownData> breakdowns = [
       BreakdownSegmentData(
         localizedNameSingular: "Outpost",
         path: "OUTPOST",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Both",
+        path: "BOTH",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "Neither",
+        path: "NEITHER",
       ),
     ],
   ),
