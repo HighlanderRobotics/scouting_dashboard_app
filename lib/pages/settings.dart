@@ -103,7 +103,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   label: const Text("Export CSV"),
                 ),
               ],
-              const EmailBox(),
+              if (cachedUserProfile?.role == UserRole.scoutingLead)
+                const EmailBox(),
               const AnalystsBox(),
               const SizedBox(height: 40),
               const ResetAppButton(),
@@ -929,12 +930,23 @@ class _EmailBoxState extends State<EmailBox> {
   @override
   Widget build(BuildContext context) {
     if (!loaded && errorMessage == null) {
-      return const SkeletonAvatar(
-        style: SkeletonAvatarStyle(
-          width: 200,
-          height: 60,
-          borderRadius: BorderRadius.all(Radius.circular(4)),
-        ),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 28),
+          Text(
+            "Team email",
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: 7),
+          const SkeletonAvatar(
+            style: SkeletonAvatarStyle(
+              width: 200,
+              height: 60,
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ),
+          ),
+        ],
       );
     }
 
