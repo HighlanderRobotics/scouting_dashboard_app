@@ -91,7 +91,8 @@ class _ScoutReportScannerPageState extends State<ScoutReportScannerPage> {
     if (report?.isComplete == true) {
       final json = jsonDecode(report!.data) as Map<String, dynamic>;
       final teamNumber = json['teamNumber'] as int;
-      final matchType = MatchType.values[json['matchType'] as int];
+      final matchType = MatchType
+          .values[MatchTypeExtension.fromOtherName(json['matchType']).index];
       final matchNumber = json['matchNumber'] as int;
 
       final localizedMatch = GameMatchIdentity(matchType, matchNumber, "")
@@ -237,6 +238,11 @@ class ChunkedScoutReport {
       throw Exception("Report is not complete");
     }
 
+    chunks.sort((a, b) => a.index.compareTo(b.index));
+    List<dynamic> a = chunks.map((chunk) => chunk.data).toList();
+    for (int i = 0; i < a.length; i++) {
+      debugPrint(a.toString());
+    }
     return chunks.map((chunk) => chunk.data).join();
   }
 

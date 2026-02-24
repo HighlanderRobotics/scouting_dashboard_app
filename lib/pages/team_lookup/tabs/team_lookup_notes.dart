@@ -114,7 +114,8 @@ class RobotBrokeBox extends StatelessWidget {
     const double iconSize = 24;
     const double horizontalSpacing = 7;
 
-    final String description = "${breakDescriptions.length} reports";
+    final String description =
+        "View ${breakDescriptions.length} ${breakDescriptions.length > 1 ? "reports" : "report"}";
 
     return GestureDetector(
       onTap: () {
@@ -123,35 +124,39 @@ class RobotBrokeBox extends StatelessWidget {
       },
       child: EmphasizedContainer(
         color: backgroundColor,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Row(children: [
-              Icon(
-                Icons.warning_rounded,
-                color: foregroundColor,
-                size: iconSize,
-              ),
-              const SizedBox(width: horizontalSpacing),
-              Text(
-                "Robot broke",
-                style: Theme.of(context).textTheme.labelLarge!.copyWith(
-                    color: foregroundColor, fontWeight: FontWeight.w600),
-              )
-            ]),
-            if (description.trim().isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(
-                  left: iconSize + horizontalSpacing,
+            Row(
+              spacing: 10,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(
+                  Icons.warning_rounded,
+                  color: foregroundColor,
+                  size: iconSize,
                 ),
-                child: Text(
-                  description,
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyMedium!
-                      .copyWith(color: foregroundColor.withAlpha(225)),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Robot broke",
+                      style: Theme.of(context).textTheme.labelLarge!.copyWith(
+                          color: foregroundColor, fontWeight: FontWeight.w600),
+                    ),
+                    Text(
+                      description,
+                      style: Theme.of(context)
+                          .textTheme
+                          .bodyMedium!
+                          .copyWith(color: foregroundColor.withAlpha(225)),
+                    ),
+                  ],
                 ),
-              ),
+              ],
+            ),
+            Icon(Icons.chevron_right, color: foregroundColor)
           ],
         ),
       ),

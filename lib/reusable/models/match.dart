@@ -79,6 +79,15 @@ enum MatchType {
 }
 
 extension MatchTypeExtension on MatchType {
+  String get otherName {
+    switch (this) {
+      case MatchType.qualifier:
+        return "QUALIFICATION";
+      case MatchType.elimination:
+        return "ELIMINATION";
+    }
+  }
+
   String get localizedDescriptionPlural {
     switch (this) {
       case MatchType.qualifier:
@@ -117,4 +126,7 @@ extension MatchTypeExtension on MatchType {
 
   static MatchType fromShortName(String shortName) =>
       MatchType.values.firstWhere((element) => element.shortName == shortName);
+
+  static MatchType fromOtherName(String name) =>
+      MatchType.values.firstWhere((element) => element.otherName == name);
 }
