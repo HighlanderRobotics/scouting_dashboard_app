@@ -11,6 +11,7 @@ import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/inset_picker.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/delete_account.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/edit_team_email.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_analysts.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_csv_export.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_team_code.dart';
@@ -102,6 +103,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   label: const Text("Export CSV"),
                 ),
               ],
+              if (cachedUserProfile?.role == UserRole.scoutingLead)
+                const EmailBox(),
               const AnalystsBox(),
               const SizedBox(height: 40),
               const ResetAppButton(),
@@ -190,7 +193,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
   bool thisTeamLoaded = false;
 
   bool get isLoading => mode == null || !thisTeamLoaded;
-  String? errorMesssage;
+  String? errorMessage;
 
   Future<void> load() async {
     try {
@@ -202,7 +205,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
       });
     } catch (e) {
       setState(() {
-        errorMesssage = "Failed to load source teams";
+        errorMessage = "Failed to load source teams";
       });
     }
 
@@ -216,7 +219,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
       });
     } catch (e) {
       setState(() {
-        errorMesssage = "Failed to load profile";
+        errorMessage = "Failed to load profile";
       });
     }
   }
@@ -229,7 +232,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading && errorMesssage == null) {
+    if (isLoading && errorMessage == null) {
       return const SkeletonAvatar(
         style: SkeletonAvatarStyle(
           width: 200,
@@ -239,7 +242,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
       );
     }
 
-    if (isLoading && errorMesssage != null) {
+    if (isLoading && errorMessage != null) {
       return Container(
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -247,7 +250,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
         ),
         height: 48,
         child: Center(
-          child: MediumErrorMessage(message: errorMesssage),
+          child: MediumErrorMessage(message: errorMessage),
         ),
       );
     }
@@ -293,7 +296,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
                   await load();
                 } catch (e) {
                   setState(() {
-                    errorMesssage = "Failed to save source team settings";
+                    errorMessage = "Failed to save source team settings";
                   });
                 }
               })();
@@ -323,7 +326,7 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
                       );
                     } catch (e) {
                       setState(() {
-                        errorMesssage = "Failed to save source team settings";
+                        errorMessage = "Failed to save source team settings";
                       });
                     }
                   },
@@ -332,10 +335,10 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
             }
           },
         ),
-        if (errorMesssage != null)
+        if (errorMessage != null)
           Padding(
             padding: const EdgeInsets.only(top: 10),
-            child: MediumErrorMessage(message: errorMesssage),
+            child: MediumErrorMessage(message: errorMessage),
           ),
       ],
     );
@@ -888,6 +891,136 @@ class _AnalystsBoxState extends State<AnalystsBox> {
   }
 }
 
+class EmailBox extends StatefulWidget {
+  const EmailBox({super.key});
+
+  @override
+  State<EmailBox> createState() => _EmailBoxState();
+}
+
+class _EmailBoxState extends State<EmailBox> {
+  String? email;
+  bool loaded = false;
+  String? errorMessage;
+
+  Future<void> load() async {
+    try {
+      final email = await lovatAPI.getTeamEmail();
+
+      setState(() {
+        this.email = email;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load email";
+      });
+    } finally {
+      setState(() {
+        loaded = true;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!loaded && errorMessage == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: 28),
+          Text(
+            "Team email",
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
+          const SizedBox(height: 7),
+          const SkeletonAvatar(
+            style: SkeletonAvatarStyle(
+              width: 200,
+              height: 60,
+              borderRadius: BorderRadius.all(Radius.circular(4)),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (!loaded && errorMessage != null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(4),
+        ),
+        height: 60,
+        child: Center(
+          child: MediumErrorMessage(message: errorMessage),
+        ),
+      );
+    }
+
+    if (loaded && email == null) {
+      return Container();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 28),
+        Text(
+          "Team email",
+          style: Theme.of(context).textTheme.labelLarge,
+        ),
+        const SizedBox(height: 7),
+        Container(
+          height: 60,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Text(
+                    email!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (context) => ChangeEmailDialog(onAdd: load),
+                    );
+                  },
+                  child: const Text("Change"),
+                ),
+              ],
+            ),
+          ),
+        ),
+        if (errorMessage != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 10),
+            child: MediumErrorMessage(message: errorMessage),
+          ),
+      ],
+    );
+  }
+}
+
 class AnalystPromotionPage extends StatefulWidget {
   const AnalystPromotionPage({super.key, this.onSubmit});
 
@@ -1373,5 +1506,113 @@ class _DataExportPageState extends State<DataExportPage> {
       appBar: AppBar(title: const Text("CSV Export")),
       body: body(context),
     );
+  }
+}
+
+class ChangeEmailDialog extends StatefulWidget {
+  const ChangeEmailDialog({
+    super.key,
+    this.onAdd,
+  });
+
+  final Function()? onAdd;
+
+  @override
+  State<ChangeEmailDialog> createState() => _ChangeEmailDialogState();
+}
+
+class _ChangeEmailDialogState extends State<ChangeEmailDialog> {
+  String email = '';
+  bool submitting = false;
+  bool submitted = false;
+  String? error;
+
+  @override
+  Widget build(BuildContext context) {
+    if (submitted) {
+      return AlertDialog(
+        title: const Text("Check the team's inbox"),
+        content: const Text(
+            "We've sent an email to your team with a link to verify that it belongs to your team."),
+        actions: [
+          TextButton(
+              child: const Text("Close"),
+              onPressed: () => Navigator.of(context).pop())
+        ],
+      );
+    } else {
+      return AlertDialog(
+        title: const Text("Change email"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              autofocus: true,
+              decoration: InputDecoration(
+                labelText: "New Email",
+                filled: true,
+                errorText: error,
+              ),
+              textCapitalization: TextCapitalization.none,
+              keyboardType: TextInputType.emailAddress,
+              onChanged: (value) {
+                setState(() {
+                  email = value;
+                });
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: submitting
+                ? null
+                : () {
+                    Navigator.of(context).pop();
+                  },
+            child: const Text("Cancel"),
+          ),
+          FilledButton(
+            onPressed: submitting || email.isEmpty
+                ? null
+                : () async {
+                    setState(() {
+                      submitting = true;
+                      error = null;
+                    });
+
+                    try {
+                      await lovatAPI.editTeamEmail(email);
+                      widget.onAdd?.call();
+                      setState(() {
+                        submitting = false;
+                        submitted = true;
+                      });
+                    } on LovatAPIException catch (e) {
+                      setState(() {
+                        error = e.message;
+                        submitting = false;
+                      });
+                    } catch (_) {
+                      setState(() {
+                        error = "Failed to update email";
+                        submitting = false;
+                      });
+                    }
+                  },
+            child: submitting
+                ? const SizedBox(
+                    height: 16,
+                    width: 16,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text("Update"),
+          ),
+        ],
+      );
+    }
   }
 }
