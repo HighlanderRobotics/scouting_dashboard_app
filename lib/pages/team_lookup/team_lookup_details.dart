@@ -276,18 +276,27 @@ class AnalysisOverview
                           bottomTitles: const AxisTitles(),
                           topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
-                            axisNameWidget: Text(analysisFunction
-                                .metric.abbreviatedLocalizedName),
+                            axisNameWidget: Text(
+                                "${analysisFunction.metric.abbreviatedLocalizedName} ${analysisFunction.metric.units != "" ? "(${analysisFunction.metric.units})" : ""}"),
                             sideTitles: SideTitles(
                                 showTitles: true,
-                                getTitlesWidget: (value, meta) =>
-                                    SideTitleWidget(
-                                      meta: meta,
-                                      child: Text(
-                                        analysisFunction.metric
-                                            .valueVizualizationBuilder(value),
-                                      ),
-                                    ),
+                                maxIncluded: true,
+                                getTitlesWidget: (value, meta) {
+                                  final interval = meta.appliedInterval;
+                                  final isAligned =
+                                      value % interval > interval / 2;
+
+                                  if (value == meta.max &&
+                                      !isAligned &&
+                                      max == null) {
+                                    return const Text("");
+                                  }
+
+                                  return SideTitleWidget(
+                                    meta: meta,
+                                    child: Text(numToStringRounded(value)),
+                                  );
+                                },
                                 reservedSize: 50),
                           ),
                           rightTitles: const AxisTitles(),
