@@ -85,9 +85,10 @@ String numToStringRounded(num? num) {
 final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Score", [
     CategoryMetric(
-        localizedName: "Total",
-        abbreviatedLocalizedName: "Total",
-        path: "totalPoints"),
+      localizedName: "Total",
+      abbreviatedLocalizedName: "Total",
+      path: "totalPoints",
+    ),
     CategoryMetric(
       localizedName: "Auto",
       abbreviatedLocalizedName: "Auto",
