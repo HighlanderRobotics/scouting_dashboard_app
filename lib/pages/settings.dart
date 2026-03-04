@@ -20,6 +20,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/get_user_profile.dart'
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_teams.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tournaments.dart';
+import 'package:scouting_dashboard_app/reusable/download_file.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -713,10 +714,25 @@ class _DataExportDrawerState extends State<DataExportDrawer> {
         mimeType: "text/csv",
       );
 
-      if (mounted) {
-        Share.shareXFiles([csvFile], subject: "${tournament.localized} data");
-        Navigator.of(context).pop();
+      if (!mounted) {
+        return;
       }
+
+      if (kIsWeb) {
+        await downloadFile(
+          "${tournament.localized} data.csv",
+          await csvFile.readAsBytes(),
+          "text/csv",
+        );
+
+        if (!mounted) {
+          return;
+        }
+      } else {
+        Share.shareXFiles([csvFile], subject: "${tournament.localized} data");
+      }
+
+      Navigator.of(context).pop();
     } on LovatAPIException catch (e) {
       setState(() {
         errorMessage = e.message;
