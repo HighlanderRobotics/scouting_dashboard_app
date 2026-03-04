@@ -277,10 +277,10 @@ class AnalysisOverview
                           topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
                             axisNameWidget: Text(
-                                "${analysisFunction.metric.abbreviatedLocalizedName} ${analysisFunction.metric.units != "" ? "(${analysisFunction.metric.units})" : ""}"),
+                              analysisFunction.metric.abbreviatedNameWithUnits,
+                            ),
                             sideTitles: SideTitles(
                                 showTitles: true,
-                                maxIncluded: true,
                                 getTitlesWidget: (value, meta) {
                                   final interval = meta.appliedInterval;
                                   final isAligned =
@@ -297,7 +297,7 @@ class AnalysisOverview
                                     child: Text(numToStringRounded(value)),
                                   );
                                 },
-                                reservedSize: 50),
+                                reservedSize: 40),
                           ),
                           rightTitles: const AxisTitles(),
                         ),
