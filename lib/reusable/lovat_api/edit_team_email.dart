@@ -23,4 +23,21 @@ extension EditTeamEmail on LovatAPI {
       }
     }
   }
+
+  Future<String> getTeamEmail() async {
+    final response = await lovatAPI.get('/v1/manager/settings/teamemail');
+
+    if (response?.statusCode != 200) {
+      debugPrint(response?.body ?? '');
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to get team email');
+      }
+    } else {
+      return response!.body;
+    }
+  }
 }

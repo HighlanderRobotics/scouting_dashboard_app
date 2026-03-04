@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
@@ -7,6 +8,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/download_file.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
@@ -359,11 +361,26 @@ class _PicklistExportDrawerState extends State<PicklistExportDrawer> {
         mimeType: "text/csv",
       );
 
-      if (mounted) {
+      if (!mounted) {
+        return;
+      }
+
+      if (kIsWeb) {
+        await downloadFile(
+          "${widget.analysisFunction.picklistMeta.title}.csv",
+          await csvFile.readAsBytes(),
+          "text/csv",
+        );
+
+        if (!mounted) {
+          return;
+        }
+      } else {
         Share.shareXFiles([csvFile],
             subject: widget.analysisFunction.picklistMeta.title);
-        Navigator.of(context).pop();
       }
+
+      Navigator.of(context).pop();
     } on LovatAPIException catch (e) {
       setState(() {
         errorMessage = e.message;
