@@ -111,6 +111,7 @@ class _RawScoutReportsPageState extends State<RawScoutReportsPage> {
                         'teamNumber': widget.teamNumber,
                         'matchIdentity': widget.matchIdentity,
                         'scoutName': report.scout.name,
+                        'canModify': report.canModify,
                         'onDeleted': () {
                           fetchData();
                         },
@@ -173,6 +174,7 @@ class RawScoutReportPage extends StatefulWidget {
     required this.teamNumber,
     required this.matchIdentity,
     required this.scoutName,
+    this.canModify = true,
     this.onDeleted,
   });
 
@@ -180,6 +182,7 @@ class RawScoutReportPage extends StatefulWidget {
   final int teamNumber;
   final GameMatchIdentity matchIdentity;
   final String scoutName;
+  final bool? canModify;
 
   final dynamic Function()? onDeleted;
 
@@ -191,7 +194,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
   SingleScoutReportAnalysis? reportAnalysis;
   List<ScoutReportEvent>? timeline;
   bool loading = false;
-
   String? error;
 
   Future<void> fetchData() async {
@@ -277,23 +279,24 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.delete),
-              tooltip: "Delete report",
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => DeleteReportDialog(
-                    uuid: widget.uuid,
-                    onDeleted: () {
-                      widget.onDeleted?.call();
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  barrierDismissible: false,
-                );
-              },
-            ),
+            if (widget.canModify == null || widget.canModify!)
+              IconButton(
+                icon: const Icon(Icons.delete),
+                tooltip: "Delete report",
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => DeleteReportDialog(
+                      uuid: widget.uuid,
+                      onDeleted: () {
+                        widget.onDeleted?.call();
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    barrierDismissible: false,
+                  );
+                },
+              ),
           ],
         ),
         body: TabBarView(
@@ -515,16 +518,17 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                               ),
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.edit),
-                    onPressed: () {
-                      Navigator.of(context).pushWidget(NotesEditor(
-                        initialNotes: reportAnalysis.notes,
-                        uuid: widget.uuid,
-                        onSubmitted: () => fetchData(),
-                      ));
-                    },
-                  ),
+                  if (widget.canModify == null || widget.canModify!)
+                    IconButton(
+                      icon: const Icon(Icons.edit),
+                      onPressed: () {
+                        Navigator.of(context).pushWidget(NotesEditor(
+                          initialNotes: reportAnalysis.notes,
+                          uuid: widget.uuid,
+                          onSubmitted: () => fetchData(),
+                        ));
+                      },
+                    ),
                 ],
               ),
               Text(reportAnalysis.notes!),

@@ -276,19 +276,28 @@ class AnalysisOverview
                           bottomTitles: const AxisTitles(),
                           topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
-                            axisNameWidget: Text(analysisFunction
-                                .metric.abbreviatedLocalizedName),
+                            axisNameWidget: Text(
+                              analysisFunction.metric.abbreviatedNameWithUnits,
+                            ),
                             sideTitles: SideTitles(
                                 showTitles: true,
-                                getTitlesWidget: (value, meta) =>
-                                    SideTitleWidget(
-                                      meta: meta,
-                                      child: Text(
-                                        analysisFunction.metric
-                                            .valueVizualizationBuilder(value),
-                                      ),
-                                    ),
-                                reservedSize: 50),
+                                getTitlesWidget: (value, meta) {
+                                  final interval = meta.appliedInterval;
+                                  final isAligned =
+                                      value % interval > interval / 2;
+
+                                  if (value == meta.max &&
+                                      !isAligned &&
+                                      max == null) {
+                                    return const Text("");
+                                  }
+
+                                  return SideTitleWidget(
+                                    meta: meta,
+                                    child: Text(numToStringRounded(value)),
+                                  );
+                                },
+                                reservedSize: 40),
                           ),
                           rightTitles: const AxisTitles(),
                         ),

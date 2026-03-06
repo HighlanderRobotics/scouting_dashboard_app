@@ -26,11 +26,13 @@ class MinimalScoutReportInfo {
     required this.uuid,
     required this.scout,
     required this.timestamp,
+    this.canModify = true,
   });
 
   final String uuid;
   final Scout scout;
   final DateTime timestamp;
+  final bool? canModify;
 
   factory MinimalScoutReportInfo.fromJson(Map<String, dynamic> json) {
     return MinimalScoutReportInfo(
@@ -39,6 +41,7 @@ class MinimalScoutReportInfo {
         id: json['scouterUuid'],
         name: json['scouter']['name'],
       ),
+      canModify: json['canModify'],
       timestamp: DateTime.parse(json['startTime']),
     );
   }

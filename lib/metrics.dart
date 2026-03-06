@@ -8,6 +8,7 @@ class CategoryMetric {
     this.hideOverview = false,
     this.hideFlag = false,
     this.max,
+    this.units,
   });
 
   String abbreviatedLocalizedName;
@@ -16,27 +17,38 @@ class CategoryMetric {
   bool hideOverview;
   bool hideFlag;
   double? max;
-
+  String? units;
   String path;
 
+  /// Optional override for completely custom formatting.
+  /// If null, default formatting is used (number + units).
   String Function(dynamic)? valueToString;
 
+  String get abbreviatedNameWithUnits {
+    if (units == null || units!.trim().isEmpty) {
+      return abbreviatedLocalizedName;
+    }
+    return "$abbreviatedLocalizedName (${units!.trim()})";
+  }
+
   String valueVizualizationBuilder(dynamic val) {
+    if (val == null) return "--";
+
+    // If a custom formatter is provided, use it
     if (valueToString != null) {
       if (val is num) {
         return valueToString!(numToStringRounded(val));
-      } else if (val == null) {
-        return "--";
-      } else {
-        return valueToString!(val);
       }
+      return valueToString!(val);
     }
 
+    // Default behavior: number + units (if present)
     if (val is num) {
-      return numToStringRounded(val);
+      final value = numToStringRounded(val);
+      return units != null ? "$value$units" : value;
     }
 
-    return "--";
+    return val.toString();
   }
 }
 
@@ -103,13 +115,14 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Scoring Rate (Fuel / Second)",
       abbreviatedLocalizedName: "Scoring Rate",
-      valueToString: ((p0) => "$p0 bps"),
+      units: " bps",
       path: "fuelPerSecond",
     ),
     CategoryMetric(
       localizedName: "Accuracy when shooting fuel",
       abbreviatedLocalizedName: "Accuracy",
-      valueToString: ((p0) => "$p0%"),
+      units: "%",
+      max: 100,
       path: "accuracy",
     ),
     CategoryMetric(
@@ -122,13 +135,13 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Time Spent Feeding",
       abbreviatedLocalizedName: "Time Feeding",
-      valueToString: ((p0) => "${p0}s"),
+      units: "s",
       path: "timeFeeding",
     ),
     CategoryMetric(
       localizedName: "Feeding Rate (Fuel / Second)",
       abbreviatedLocalizedName: "Feeding Rate",
-      valueToString: ((p0) => "$p0 bps"),
+      units: " bps",
       path: "feedingRate",
     ),
     CategoryMetric(
@@ -141,32 +154,33 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Driver Ability",
       abbreviatedLocalizedName: "Driver Ability",
-      valueToString: ((p0) => "$p0/5"),
       max: 5,
+      units: "1-5",
       path: "driverAbility",
     ),
     CategoryMetric(
       localizedName: "Contact Defense Time",
       abbreviatedLocalizedName: "Contact Defense Time",
-      valueToString: ((p0) => "${p0}s"),
+      units: "s",
       path: "contactDefenseTime",
     ),
     CategoryMetric(
       localizedName: "Defense effectiveness",
       abbreviatedLocalizedName: "Defense effectiveness",
-      valueToString: ((p0) => "$p0/5"),
+      units: "1-5",
+      max: 5,
       path: "defenseEffectiveness",
     ),
     CategoryMetric(
       localizedName: "Camping Defense Time",
       abbreviatedLocalizedName: "Camping Defense Time",
-      valueToString: ((p0) => "${p0}s"),
+      units: "s",
       path: "campingDefenseTime",
     ),
     CategoryMetric(
       localizedName: "Total Defense Time (Camping + Contact)",
       abbreviatedLocalizedName: "Total Defense Time",
-      valueToString: ((p0) => "${p0}s"),
+      units: "s",
       path: "totalDefenseTime",
     )
   ]),
@@ -174,25 +188,25 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Seconds left when starting to climb L1",
       abbreviatedLocalizedName: "L1 Time",
-      valueToString: ((p0) => "${p0}s left"),
+      units: "s left",
       path: "l1StartTime",
     ),
     CategoryMetric(
       localizedName: "Seconds left when starting to climb L2",
       abbreviatedLocalizedName: "L2 Time",
-      valueToString: ((p0) => "${p0}s left"),
+      units: "s left",
       path: "l2StartTime",
     ),
     CategoryMetric(
       localizedName: "Seconds left when starting to climb L3",
       abbreviatedLocalizedName: "L3 Time",
-      valueToString: ((p0) => "${p0}s left"),
+      units: "s left",
       path: "l3StartTime",
     ),
     CategoryMetric(
       localizedName: "Seconds left in auto when starting to climb in auto",
       abbreviatedLocalizedName: "Auto Time",
-      valueToString: ((p0) => "${p0}s left"),
+      units: "s left",
       path: "autoClimbStartTime",
     ),
   ]),
