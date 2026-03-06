@@ -499,7 +499,8 @@ class AllianceRowItem {
   final MatchScheduleTeamInfo teamInfo;
 
   bool get isScouted =>
-      teamInfo.scouters.where((s) => s.isScouted == true).isNotEmpty;
+      teamInfo.scouters.where((s) => s.isScouted == true).isNotEmpty ||
+      teamInfo.externalReportCount != 0;
 }
 
 class AllianceRow extends StatelessWidget {
@@ -564,7 +565,7 @@ class AllianceRow extends StatelessWidget {
                       });
                     },
                   ),
-                  if (item.isScouted && isScoutingLead == true)
+                  if (item.isScouted)
                     CupertinoContextMenuAction(
                       child: const Text("View report data"),
                       onPressed: () {
