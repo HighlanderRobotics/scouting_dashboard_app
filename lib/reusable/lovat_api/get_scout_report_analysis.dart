@@ -43,7 +43,7 @@ class SingleScoutReportAnalysis {
     required this.climbStartTime,
     required this.feederType,
     required this.autoPath,
-    required this.accuracy,
+    this.accuracy,
     required this.volleys,
     required this.ballsFed,
     required this.ballsPerFeed,
@@ -63,7 +63,7 @@ class SingleScoutReportAnalysis {
   final num feedingRate;
   final num defenseEffectiveness;
   final num feeds;
-  final num accuracy;
+  final num? accuracy;
   final EndgameClimbResult climbResult;
   final num climbStartTime;
   final List<FeederType> feederType;
