@@ -51,6 +51,8 @@ void main() async {
                 as Map<String, dynamic>)['scoutName'],
             onDeleted: (ModalRoute.of(context)!.settings.arguments
                 as Map<String, dynamic>)['onDeleted'],
+            canModify: (ModalRoute.of(context)!.settings.arguments
+                as Map<String, dynamic>)['canModify'],
           ),
       '/team_lookup': (context) => const TeamLookupPage(),
       '/edit_team_lookup_flag': (context) => const EditTeamLookupFlagPage(),
