@@ -155,7 +155,7 @@ final List<MetricCategoryData> metricCategories = [
       localizedName: "Driver Ability",
       abbreviatedLocalizedName: "Driver Ability",
       max: 5,
-      units: "1-5",
+      units: "/5",
       path: "driverAbility",
     ),
     CategoryMetric(
@@ -167,7 +167,7 @@ final List<MetricCategoryData> metricCategories = [
     CategoryMetric(
       localizedName: "Defense effectiveness",
       abbreviatedLocalizedName: "Defense effectiveness",
-      units: "1-5",
+      units: "/5",
       max: 5,
       path: "defenseEffectiveness",
     ),
