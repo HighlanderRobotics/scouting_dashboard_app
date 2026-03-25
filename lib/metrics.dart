@@ -235,6 +235,7 @@ List<BreakdownData> breakdowns = [
       BreakdownSegmentData(
           localizedNameSingular: "Defending", path: "DEFENDING"),
       BreakdownSegmentData(localizedNameSingular: "Immobile", path: "IMMOBILE"),
+      BreakdownSegmentData(localizedNameSingular: "Stealing", path: "STEALING"),
     ],
   ),
   BreakdownData(
@@ -370,8 +371,22 @@ List<BreakdownData> breakdowns = [
         path: "STOP_TO_SHOOT",
       ),
       BreakdownSegmentData(
-        localizedNameSingular: "Dump",
-        path: "DUMP",
+        localizedNameSingular: "Push",
+        path: "PUSH",
+      ),
+    ],
+  ),
+  BreakdownData(
+    localizedName: "Stealing Type",
+    path: "stealerType",
+    segments: [
+      BreakdownSegmentData(
+        localizedNameSingular: "To Alliance Zone",
+        path: "TO_ALLIANCE",
+      ),
+      BreakdownSegmentData(
+        localizedNameSingular: "To Neutral Zone",
+        path: "TO_NEUTRAL",
       ),
     ],
   )

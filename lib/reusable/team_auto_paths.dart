@@ -993,25 +993,25 @@ extension AutoPathLocationExtension on AutoPathLocation {
   /// `x` and `y` are between `0` and `100`, starting from the top left of the field.
   Offset get offset {
     switch (this) {
-      case AutoPathLocation.leftTrench:
+      case AutoPathLocation.rightTrench:
         return const Offset(35, 10);
-      case AutoPathLocation.leftBump:
+      case AutoPathLocation.rightBump:
         return const Offset(35, 25);
       case AutoPathLocation.hub:
         return const Offset(42, 50);
-      case AutoPathLocation.rightTrench:
+      case AutoPathLocation.leftTrench:
         return const Offset(35, 90);
-      case AutoPathLocation.rightBump:
+      case AutoPathLocation.leftBump:
         return const Offset(35, 75);
-      case AutoPathLocation.startLeftTrench:
+      case AutoPathLocation.startRightTrench:
         return const Offset(45, 10);
-      case AutoPathLocation.startLeftBump:
+      case AutoPathLocation.startRightBump:
         return const Offset(45, 25);
       case AutoPathLocation.startHub:
         return const Offset(57.5, 50);
-      case AutoPathLocation.startRightTrench:
+      case AutoPathLocation.startLeftTrench:
         return const Offset(45, 90);
-      case AutoPathLocation.startRightBump:
+      case AutoPathLocation.startLeftBump:
         return const Offset(45, 75);
       case AutoPathLocation.neutralZone:
         return const Offset(20, 50);
