@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -188,6 +191,8 @@ class RawScoutReportPage extends StatefulWidget {
 }
 
 class _RawScoutReportPageState extends State<RawScoutReportPage> {
+  static const Duration regulationMatchDuration = Duration(seconds: 150);
+
   SingleScoutReportAnalysis? reportAnalysis;
   List<ScoutReportEvent>? timeline;
   bool loading = false;
@@ -258,7 +263,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     }
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: appBarTitle,
@@ -270,6 +275,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                 const TabBar(tabs: [
                   Tab(text: "Overview"),
                   Tab(text: "Timeline"),
+                  Tab(text: "Scoring"),
                 ]),
                 if (loading) const LinearProgressIndicator(),
               ],
@@ -300,6 +306,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           children: [
             overviewTab(reportAnalysis!),
             timelineTab(timeline!, context),
+            scoringTab(timeline!, context),
           ],
         ),
       ),
@@ -692,6 +699,156 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     );
   }
 
+  Widget scoringTab(List<ScoutReportEvent> timeline, BuildContext context) {
+    final volleys = scoringVolleys(timeline);
+    final chartDuration = totalChartDuration(timeline);
+    final peakRate = volleys.isEmpty
+        ? 0.0
+        : volleys
+            .map((volley) => volley.ballsPerSecond)
+            .reduce((a, b) => math.max(a, b));
+
+    return ScrollablePageBody(
+      children: [
+        Text(
+          "Each rectangle is one scoring volley. Wider blocks lasted longer, and taller blocks scored faster.",
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        AspectRatio(
+          aspectRatio: 16 / 9,
+          child: EmphasizedContainer(
+            padding: const EdgeInsets.all(12),
+            child: volleys.isEmpty
+                ? Center(
+                    child: Text(
+                      "No completed scoring volleys in this report.",
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                : CustomPaint(
+                    painter: _ScoringRateChartPainter(
+                      volleys: volleys,
+                      totalDuration: chartDuration,
+                      maxRate: niceChartCeiling(peakRate),
+                      primaryColor: Theme.of(context).colorScheme.primary,
+                      outlineColor: Theme.of(context).colorScheme.outline,
+                      labelColor:
+                          Theme.of(context).colorScheme.onSurfaceVariant,
+                      gridColor:
+                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+          ),
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
+          children: [
+            Expanded(
+                child: ValueTile(
+                    value: Text("${volleys.length}"),
+                    label: const Text("Volleys"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text(numToStringRounded(peakRate)),
+                    label: const Text("Peak BPS"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text(
+                        "${numToStringRounded(chartDuration.inMilliseconds / 1000)}s"),
+                    label: const Text("Chart Span"))),
+          ],
+        ),
+      ].withSpaceBetween(height: 10),
+    );
+  }
+
+  List<_ScoringVolley> scoringVolleys(List<ScoutReportEvent> timeline) {
+    final sortedTimeline = [...timeline]
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+
+    final List<_ScoringVolley> volleys = [];
+    ScoutReportEvent? activeScoringStart;
+
+    for (final event in sortedTimeline) {
+      switch (event.action) {
+        case ScoutReportEventAction.startScoring:
+          activeScoringStart = event;
+          break;
+        case ScoutReportEventAction.stopScoring:
+          final start = activeScoringStart;
+
+          if (start == null || event.timestamp <= start.timestamp) {
+            activeScoringStart = null;
+            break;
+          }
+
+          final duration = event.timestamp - start.timestamp;
+          final durationSeconds = duration.inMilliseconds / 1000;
+
+          if (durationSeconds <= 0) {
+            activeScoringStart = null;
+            break;
+          }
+
+          final quantity = event.quantity?.toDouble() ?? 0;
+
+          volleys.add(_ScoringVolley(
+            start: start.timestamp,
+            end: event.timestamp,
+            quantity: quantity,
+          ));
+
+          activeScoringStart = null;
+          break;
+        default:
+          break;
+      }
+    }
+
+    return volleys;
+  }
+
+  Duration totalChartDuration(List<ScoutReportEvent> timeline) {
+    if (timeline.isEmpty) {
+      return regulationMatchDuration;
+    }
+
+    final lastTimestamp = timeline
+        .map((event) => event.timestamp.inMilliseconds)
+        .reduce((a, b) => math.max(a, b));
+
+    return Duration(
+      milliseconds:
+          math.max(lastTimestamp, regulationMatchDuration.inMilliseconds),
+    );
+  }
+
+  double niceChartCeiling(double value) {
+    if (value <= 1) {
+      return 1;
+    }
+
+    final magnitude = math.pow(10, math.log(value) ~/ math.ln10).toDouble();
+    final normalized = value / magnitude;
+
+    if (normalized <= 1) {
+      return magnitude;
+    }
+
+    if (normalized <= 2) {
+      return magnitude * 2;
+    }
+
+    if (normalized <= 5) {
+      return magnitude * 5;
+    }
+
+    return magnitude * 10;
+  }
+
   Widget field(String title, String value, {Widget? valueLeading}) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -712,6 +869,221 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           ),
         ],
       );
+}
+
+class _ScoringVolley {
+  const _ScoringVolley({
+    required this.start,
+    required this.end,
+    required this.quantity,
+  });
+
+  final Duration start;
+  final Duration end;
+  final double quantity;
+
+  Duration get duration => end - start;
+
+  double get ballsPerSecond {
+    final durationSeconds = duration.inMilliseconds / 1000;
+
+    if (durationSeconds <= 0) {
+      return 0;
+    }
+
+    return quantity / durationSeconds;
+  }
+}
+
+class _ScoringRateChartPainter extends CustomPainter {
+  const _ScoringRateChartPainter({
+    required this.volleys,
+    required this.totalDuration,
+    required this.maxRate,
+    required this.primaryColor,
+    required this.outlineColor,
+    required this.labelColor,
+    required this.gridColor,
+  });
+
+  final List<_ScoringVolley> volleys;
+  final Duration totalDuration;
+  final double maxRate;
+  final Color primaryColor;
+  final Color outlineColor;
+  final Color labelColor;
+  final Color gridColor;
+
+  static const double leftPadding = 42;
+  static const double topPadding = 12;
+  static const double rightPadding = 12;
+  static const double bottomPadding = 28;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final chartRect = Rect.fromLTRB(
+      leftPadding,
+      topPadding,
+      size.width - rightPadding,
+      size.height - bottomPadding,
+    );
+
+    final borderPaint = Paint()
+      ..color = outlineColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    final gridPaint = Paint()
+      ..color = gridColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1;
+
+    canvas.drawRect(chartRect, borderPaint);
+
+    const int horizontalSections = 4;
+    for (var i = 0; i <= horizontalSections; i++) {
+      final t = i / horizontalSections;
+      final y = chartRect.bottom - (chartRect.height * t);
+
+      if (i != 0 && i != horizontalSections) {
+        canvas.drawLine(
+          Offset(chartRect.left, y),
+          Offset(chartRect.right, y),
+          gridPaint,
+        );
+      }
+
+      final value = maxRate * t;
+      _paintLabel(
+        canvas,
+        size: size,
+        text: numToStringRounded(value),
+        offset: Offset(0, y - 9),
+        maxWidth: leftPadding - 8,
+        textAlign: TextAlign.right,
+      );
+    }
+
+    const int verticalSections = 5;
+    final totalSeconds = totalDuration.inMilliseconds / 1000;
+    for (var i = 0; i <= verticalSections; i++) {
+      final t = i / verticalSections;
+      final x = chartRect.left + (chartRect.width * t);
+
+      if (i != 0 && i != verticalSections) {
+        canvas.drawLine(
+          Offset(x, chartRect.top),
+          Offset(x, chartRect.bottom),
+          gridPaint,
+        );
+      }
+
+      _paintLabel(
+        canvas,
+        size: size,
+        text: numToStringRounded(totalSeconds * t),
+        offset: Offset(x - 14, chartRect.bottom + 6),
+        maxWidth: 28,
+        textAlign: TextAlign.center,
+      );
+    }
+
+    final fillPaint = Paint()
+      ..color = primaryColor.withAlpha(200)
+      ..style = PaintingStyle.fill;
+
+    final volleyBorderPaint = Paint()
+      ..color = primaryColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    final totalMilliseconds = totalDuration.inMilliseconds;
+
+    for (final volley in volleys) {
+      final startFraction = volley.start.inMilliseconds / totalMilliseconds;
+      final endFraction = volley.end.inMilliseconds / totalMilliseconds;
+      final heightFraction = maxRate == 0
+          ? 0.0
+          : (volley.ballsPerSecond / maxRate).clamp(0.0, 1.0);
+
+      final left = chartRect.left + (chartRect.width * startFraction);
+      final right = chartRect.left + (chartRect.width * endFraction);
+      final top = chartRect.bottom - (chartRect.height * heightFraction);
+
+      final rect = Rect.fromLTRB(
+        left,
+        top,
+        math.max(left + 1, right),
+        chartRect.bottom,
+      );
+
+      final roundedRect =
+          RRect.fromRectAndRadius(rect, const Radius.circular(4));
+
+      canvas.drawRRect(roundedRect, fillPaint);
+      canvas.drawRRect(roundedRect, volleyBorderPaint);
+    }
+
+    _paintLabel(
+      canvas,
+      size: size,
+      text: 'Time (s)',
+      offset: Offset(chartRect.center.dx - 28, size.height - 18),
+      maxWidth: 56,
+      textAlign: TextAlign.center,
+      fontWeight: FontWeight.w600,
+    );
+    _paintLabel(
+      canvas,
+      size: size,
+      text: 'BPS',
+      offset: const Offset(0, 0),
+      maxWidth: leftPadding - 8,
+      textAlign: TextAlign.right,
+      fontWeight: FontWeight.w600,
+    );
+  }
+
+  void _paintLabel(
+    Canvas canvas, {
+    required Size size,
+    required String text,
+    required Offset offset,
+    required double maxWidth,
+    required TextAlign textAlign,
+    FontWeight fontWeight = FontWeight.w500,
+  }) {
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          color: labelColor,
+          fontSize: 11,
+          fontWeight: fontWeight,
+        ),
+      ),
+      textDirection: ui.TextDirection.ltr,
+      textAlign: textAlign,
+    )..layout(maxWidth: maxWidth);
+
+    final clampedOffset = Offset(
+      offset.dx.clamp(0, size.width - textPainter.width).toDouble(),
+      offset.dy.clamp(0, size.height - textPainter.height).toDouble(),
+    );
+
+    textPainter.paint(canvas, clampedOffset);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScoringRateChartPainter oldDelegate) {
+    return oldDelegate.volleys != volleys ||
+        oldDelegate.totalDuration != totalDuration ||
+        oldDelegate.maxRate != maxRate ||
+        oldDelegate.primaryColor != primaryColor ||
+        oldDelegate.outlineColor != outlineColor ||
+        oldDelegate.labelColor != labelColor ||
+        oldDelegate.gridColor != gridColor;
+  }
 }
 
 enum EndgameClimbResult {
