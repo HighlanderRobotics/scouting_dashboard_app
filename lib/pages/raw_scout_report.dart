@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
@@ -19,7 +17,6 @@ import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
-import 'package:flutter_syntax_view/flutter_syntax_view.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
 class RawScoutReportsPage extends StatefulWidget {
@@ -404,6 +401,28 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           label: const Text("Path score"),
           colorCombination: ColorCombination.colored,
         ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8.0,
+          children: [
+            Expanded(
+                child: ValueTile(
+                    value: Text(
+                      reportAnalysis.autoClimb == AutoClimbResult.notAttempted
+                          ? "None"
+                          : reportAnalysis.autoClimb.localizedDescription,
+                    ),
+                    label: const Text("Climb Result"))),
+            Expanded(
+                child: ValueTile(
+                    value: Text(
+                      reportAnalysis.autoClimb == AutoClimbResult.notAttempted
+                          ? "--"
+                          : "${numToStringRounded(reportAnalysis.autoClimbStartTime)}s",
+                    ),
+                    label: const Text("time to climb")))
+          ],
+        ),
         const SectionTitle("Driving & Defense"),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -411,11 +430,13 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           children: [
             Expanded(
                 child: ValueTile(
-                    value: Text("${reportAnalysis.campingDefenseTime}s"),
+                    value: Text(
+                        "${numToStringRounded(reportAnalysis.campingDefenseTime)}s"),
                     label: const Text("Camping Defense"))),
             Expanded(
                 child: ValueTile(
-                    value: Text("${reportAnalysis.contactDefenseTime}s"),
+                    value: Text(
+                        "${numToStringRounded(reportAnalysis.contactDefenseTime)}s"),
                     label: const Text("Contact Defense")))
           ],
         ),
@@ -492,11 +513,20 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             Expanded(
                 child: ValueTile(
                     value: Text(
-                        "${reportAnalysis.climbResult.localizedDescription} "),
+                      reportAnalysis.climbResult ==
+                              EndgameClimbResult.notAttempted
+                          ? "None"
+                          : reportAnalysis.climbResult.localizedDescription,
+                    ),
                     label: const Text("Climb Result"))),
             Expanded(
                 child: ValueTile(
-                    value: Text("${reportAnalysis.climbStartTime}s"),
+                    value: Text(
+                      reportAnalysis.climbResult ==
+                              EndgameClimbResult.notAttempted
+                          ? "--"
+                          : "${numToStringRounded(reportAnalysis.climbStartTime)}s",
+                    ),
                     label: const Text("time left")))
           ],
         ),
@@ -614,22 +644,6 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
     );
   }
 
-  // The tabs are actually "Overview" and "Timeline"
-
-  SafeArea rawTab(AsyncSnapshot<Map<String, dynamic>> snapshot) {
-    return SafeArea(
-      child: SyntaxView(
-        code: const JsonEncoder.withIndent('    ').convert(<String, dynamic>{
-          ...snapshot.data!,
-          'scoutReport': jsonDecode(snapshot.data!['scoutReport']),
-        }),
-        syntax: Syntax.JAVASCRIPT,
-        syntaxTheme: SyntaxTheme.vscodeDark(),
-        expanded: true,
-      ),
-    );
-  }
-
   ScrollablePageBody timelineTab(
       List<ScoutReportEvent> timeline, BuildContext context) {
     return ScrollablePageBody(
@@ -655,7 +669,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     SizedBox(
                       width: 40,
                       child: Text(
-                        minutesAndSeconds(event.timestamp),
+                        "${numToStringRounded(event.timestamp.inMilliseconds / 1000)}s",
                         textAlign: TextAlign.end,
                         style: Theme.of(context)
                             .textTheme
@@ -748,6 +762,19 @@ enum AutoClimbResult {
   notAttempted,
   failed,
   succeeded,
+}
+
+extension AutoClimbResultExtension on AutoClimbResult {
+  String get localizedDescription {
+    switch (this) {
+      case AutoClimbResult.notAttempted:
+        return "None";
+      case AutoClimbResult.failed:
+        return "Failed";
+      case AutoClimbResult.succeeded:
+        return "Succeeded";
+    }
+  }
 }
 
 enum DriverAbility {
