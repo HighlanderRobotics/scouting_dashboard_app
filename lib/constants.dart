@@ -1,19 +1,7 @@
 import 'package:auth0_flutter/auth0_flutter.dart';
 import 'package:auth0_flutter/auth0_flutter_web.dart';
-import 'package:flutter/foundation.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-RegExp validServerAuthority = RegExp(
-    "^((((?!-))(xn--)?[a-zA-Z0-9][a-zA-Z0-9-_]{0,61}[a-zA-Z0-9]{0,1}\\.(xn--)?([a-zA-Z0-9\\-]{1,61}|[a-zA-Z0-9-]{1,30}\\.[a-zA-Z]{2,}))|(localhost)|((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.?\\b){4})(:\\d+)?\$");
-
-List<Tournament> tournamentList = <Tournament>[
-  if (kDebugMode) Tournament("2022cc", "Chezy 2022 (debug)"),
-  Tournament("2023week0", "2023 Week 0"),
-  Tournament("2023cafr", "Fresno"),
-  Tournament("2023camb", "Monterey"),
-];
 
 // Picklists
 
@@ -46,14 +34,6 @@ List<ConfiguredPicklist> defaultPicklists = <ConfiguredPicklist>[
         .toList(),
   ),
 ];
-
-Tournament? getTournamentByKey(String key) {
-  try {
-    return tournamentList.firstWhere((tournament) => tournament.key == key);
-  } on StateError {
-    return null;
-  }
-}
 
 Future<String?> getServerAuthority() async {
   final prefs = await SharedPreferences.getInstance();

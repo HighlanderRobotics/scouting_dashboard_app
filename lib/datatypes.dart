@@ -1,8 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/constants.dart';
-import 'package:http/http.dart' as http;
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_matches.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_teams_at_tournament.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
@@ -58,33 +54,6 @@ class Tournament {
   }
 }
 
-Future<List<String>> getScoutNames() async {
-  return ((jsonDecode(utf8.decode((await http.get(Uri.http(
-              (await getServerAuthority())!, '/API/manager/getScouters')))
-          .bodyBytes))) as List<dynamic>)
-      .map((e) => e.toString())
-      .toList();
-}
-
-Future<Map<String, String?>> getScoutedStatuses() async {
-  final List<Map<String, dynamic>> isScoutedResponse = (jsonDecode(utf8.decode(
-          (await http.get(Uri.http(
-                  (await getServerAuthority())!, '/API/manager/isScouted', {
-    'tournamentKey':
-        (await SharedPreferences.getInstance()).getString('tournament'),
-  })))
-              .bodyBytes)) as List<dynamic>)
-      .cast();
-
-  Map<String, String?> isScoutedElegante = {};
-
-  for (var response in isScoutedResponse) {
-    isScoutedElegante[response['key']] = response['name'];
-  }
-
-  return isScoutedElegante;
-}
-
 extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withWidgetBetween(Widget separator) => [
         for (int i = 0; i < length; i++) ...[
@@ -96,9 +65,6 @@ extension ListSpaceBetweenExtension on List<Widget> {
   List<Widget> withSpaceBetween({double? width, double? height}) =>
       withWidgetBetween(SizedBox(width: width, height: height));
 }
-
-String minutesAndSeconds(Duration duration) =>
-    "${duration.inMinutes}:${(duration.inSeconds.remainder(60).toString().padLeft(2, '0'))}";
 
 extension NumListExtension on List<num> {
   num sum() => isEmpty ? 0 : reduce((value, element) => value + element);
