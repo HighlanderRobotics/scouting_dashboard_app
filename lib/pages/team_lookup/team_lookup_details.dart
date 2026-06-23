@@ -187,21 +187,22 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
     return Column(
       children: [
         Row(children: [
-          valueBox(
-            context,
-            Text(
-              widget.metric.valueVizualizationBuilder(d.result),
-              style: Theme.of(context).textTheme.headlineSmall!.merge(
-                    TextStyle(
-                        color:
-                            Theme.of(context).colorScheme.onPrimaryContainer),
-                  ),
+          if (d.hasResult)
+            valueBox(
+              context,
+              Text(
+                widget.metric.valueVizualizationBuilder(d.result),
+                style: Theme.of(context).textTheme.headlineSmall!.merge(
+                      TextStyle(
+                          color:
+                              Theme.of(context).colorScheme.onPrimaryContainer),
+                    ),
+              ),
+              "This team",
+              false,
             ),
-            "This team",
-            false,
-          ),
-          const SizedBox(width: 10),
-          if (d.all != null)
+          if (d.hasResult) const SizedBox(width: 10),
+          if (d.hasAll)
             Flexible(
               flex: 5,
               fit: FlexFit.tight,
@@ -218,8 +219,8 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
                 true,
               ),
             ),
-          const SizedBox(width: 10),
-          if (d.difference != null)
+          if (d.hasAll) const SizedBox(width: 10),
+          if (d.hasDifference)
             Flexible(
               flex: 6,
               fit: FlexFit.tight,

@@ -36,6 +36,9 @@ class MetricDetails {
     this.team,
     this.array = const [],
     this.paths = const [],
+    this.hasResult = false,
+    this.hasAll = false,
+    this.hasDifference = false,
   });
 
   final dynamic result;
@@ -44,6 +47,9 @@ class MetricDetails {
   final int? team;
   final List<MetricDataPoint> array;
   final List<AutoPath> paths;
+  final bool hasResult;
+  final bool hasAll;
+  final bool hasDifference;
 
   factory MetricDetails.fromJson(Map<String, dynamic> json) {
     return MetricDetails(
@@ -57,6 +63,9 @@ class MetricDetails {
       paths: (json['paths'] as List<dynamic>? ?? [])
           .map((e) => AutoPath.fromMap(e as Map<String, dynamic>))
           .toList(),
+      hasResult: json.containsKey('result'),
+      hasAll: json.containsKey('all'),
+      hasDifference: json.containsKey('difference'),
     );
   }
 }
