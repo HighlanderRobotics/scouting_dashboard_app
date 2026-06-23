@@ -303,7 +303,7 @@ class AutoPathField extends StatelessWidget {
 
   Image fieldBackground(BuildContext context) {
     return Image.asset(
-      "assets/images/auto_background.png",
+      "assets/images/background.png",
       fit: BoxFit.cover,
       width: MediaQuery.of(context).size.width,
       height: MediaQuery.of(context).size.height,
@@ -451,84 +451,85 @@ class AutoPath {
     required this.scores,
     required this.timeline,
     required this.matches,
-  }) {
-    timeline.sort((a, b) =>
-        a.timestamp.inMicroseconds.compareTo(b.timestamp.inMicroseconds));
+  });
+  //{
+  //   timeline.sort((a, b) =>
+  //       a.timestamp.inMicroseconds.compareTo(b.timestamp.inMicroseconds));
 
-    List<BallTrajectory> scoringTrajectories = timeline
-            .any((e) => e.type == AutoPathEventType.stopScoring)
-        ? timeline
-            .where((e) => e.type == AutoPathEventType.stopScoring)
-            .map(
-              (e) {
-                List<BallTrajectory> list = [];
+  //   List<BallTrajectory> scoringTrajectories = timeline
+  //           .any((e) => e.type == AutoPathEventType.stopScoring)
+  //       ? timeline
+  //           .where((e) => e.type == AutoPathEventType.stopScoring)
+  //           .map(
+  //             (e) {
+  //               List<BallTrajectory> list = [];
 
-                AutoPathEvent startEvent = timeline.lastWhere((event) =>
-                    event.type == AutoPathEventType.startScoring &&
-                    event.timestamp <= e.timestamp);
-                if (e.quantity != null && e.quantity! > 0) {
-                  for (int i = 1; i <= e.quantity!; i++) {
-                    Duration startTime = Duration(
-                        microseconds: (startEvent.timestamp.inMicroseconds +
-                                i /
-                                    e.quantity! *
-                                    (e.timestamp.inMicroseconds -
-                                        startEvent.timestamp.inMicroseconds))
-                            .round());
-                    list.add(BallTrajectory(
-                      endPos: AutoPathLocation.hub.offset,
-                      startPos: Offset(positionAtTimestamp(startTime).dx,
-                          positionAtTimestamp(startTime).dy),
-                      startTime: startTime,
-                    ));
-                  }
-                  return list;
-                } else {
-                  return <BallTrajectory>[];
-                }
-              },
-            )
-            .expand((i) => i)
-            .toList()
-        : [];
+  //               AutoPathEvent startEvent = timeline.lastWhere((event) =>
+  //                   event.type == AutoPathEventType.startScoring &&
+  //                   event.timestamp <= e.timestamp);
+  //               if (e.quantity != null && e.quantity! > 0) {
+  //                 for (int i = 1; i <= e.quantity!; i++) {
+  //                   Duration startTime = Duration(
+  //                       microseconds: (startEvent.timestamp.inMicroseconds +
+  //                               i /
+  //                                   e.quantity! *
+  //                                   (e.timestamp.inMicroseconds -
+  //                                       startEvent.timestamp.inMicroseconds))
+  //                           .round());
+  //                   list.add(BallTrajectory(
+  //                     endPos: AutoPathLocation.hub.offset,
+  //                     startPos: Offset(positionAtTimestamp(startTime).dx,
+  //                         positionAtTimestamp(startTime).dy),
+  //                     startTime: startTime,
+  //                   ));
+  //                 }
+  //                 return list;
+  //               } else {
+  //                 return <BallTrajectory>[];
+  //               }
+  //             },
+  //           )
+  //           .expand((i) => i)
+  //           .toList()
+  //       : [];
 
-    List<BallTrajectory> feedingTrajectories = timeline
-            .any((e) => e.type == AutoPathEventType.stopFeeding)
-        ? timeline
-            .where((e) => e.type == AutoPathEventType.stopFeeding)
-            .map(
-              (e) {
-                List<BallTrajectory> list = [];
+  //   List<BallTrajectory> feedingTrajectories = timeline
+  //           .any((e) => e.type == AutoPathEventType.stopFeeding)
+  //       ? timeline
+  //           .where((e) => e.type == AutoPathEventType.stopFeeding)
+  //           .map(
+  //             (e) {
+  //               List<BallTrajectory> list = [];
 
-                AutoPathEvent startEvent = timeline.lastWhere((event) =>
-                    event.type == AutoPathEventType.startFeeding &&
-                    event.timestamp <= e.timestamp);
-                if (e.quantity != null && e.quantity! > 0) {
-                  for (int i = 1; i <= e.quantity!; i++) {
-                    Duration startTime = Duration(
-                        microseconds: (startEvent.timestamp.inMicroseconds +
-                                i /
-                                    e.quantity! *
-                                    (e.timestamp.inMicroseconds -
-                                        startEvent.timestamp.inMicroseconds))
-                            .round());
-                    list.add(BallTrajectory(
-                      endPos: Offset(77.8, positionAtTimestamp(startTime).dy),
-                      startPos: positionAtTimestamp(startTime),
-                      startTime: startTime,
-                    ));
-                  }
-                  return list;
-                } else {
-                  return <BallTrajectory>[];
-                }
-              },
-            )
-            .expand((i) => i)
-            .toList()
-        : [];
-    trajectories = [...scoringTrajectories, ...feedingTrajectories];
-  }
+  //               AutoPathEvent startEvent = timeline.lastWhere((event) =>
+  //                   event.type == AutoPathEventType.startFeeding &&
+  //                   event.timestamp <= e.timestamp);
+  //               if (e.quantity != null && e.quantity! > 0) {
+  //                 for (int i = 1; i <= e.quantity!; i++) {
+  //                   Duration startTime = Duration(
+  //                       microseconds: (startEvent.timestamp.inMicroseconds +
+  //                               i /
+  //                                   e.quantity! *
+  //                                   (e.timestamp.inMicroseconds -
+  //                                       startEvent.timestamp.inMicroseconds))
+  //                           .round());
+  //                   list.add(BallTrajectory(
+  //                     endPos: Offset(77.8, positionAtTimestamp(startTime).dy),
+  //                     startPos: positionAtTimestamp(startTime),
+  //                     startTime: startTime,
+  //                   ));
+  //                 }
+  //                 return list;
+  //               } else {
+  //                 return <BallTrajectory>[];
+  //               }
+  //             },
+  //           )
+  //           .expand((i) => i)
+  //           .toList()
+  //       : [];
+  //   trajectories = [...scoringTrajectories, ...feedingTrajectories];
+  // }
 
   final int frequency;
   final List<int> scores;
@@ -572,28 +573,29 @@ class AutoPath {
   }
 
   String get shortDescription {
-    AutoPathEvent? startEvent =
-        timeline.any((event) => event.type == AutoPathEventType.startMatch)
-            ? timeline
-                .where((event) => event.type == AutoPathEventType.startMatch)
-                .toList()[0]
-            : null;
-    String start = startEvent?.location.name.hyphenated ?? "Unknown";
-    bool disrupts = timeline
-        .where((event) => event.type == AutoPathEventType.disrupt)
-        .isNotEmpty;
-    num fuelScored = 0;
-    timeline
-        .where((e) => e.type == AutoPathEventType.stopScoring)
-        .forEach((a) => fuelScored += a.quantity ?? 0);
+    // AutoPathEvent? startEvent =
+    //     timeline.any((event) => event.type == AutoPathEventType.startMatch)
+    //         ? timeline
+    //             .where((event) => event.type == AutoPathEventType.startMatch)
+    //             .toList()[0]
+    //         : null;
+    // String start = startEvent?.location.name.hyphenated ?? "Unknown";
+    // bool disrupts = timeline
+    //     .where((event) => event.type == AutoPathEventType.disrupt)
+    //     .isNotEmpty;
+    // num fuelScored = 0;
+    // timeline
+    //     .where((e) => e.type == AutoPathEventType.stopScoring)
+    //     .forEach((a) => fuelScored += a.quantity ?? 0);
 
-    num fuelFed = 0;
-    timeline
-        .where((e) => e.type == AutoPathEventType.stopFeeding)
-        .forEach((a) => fuelFed += a.quantity ?? 0);
+    // num fuelFed = 0;
+    // timeline
+    //     .where((e) => e.type == AutoPathEventType.stopFeeding)
+    //     .forEach((a) => fuelFed += a.quantity ?? 0);
 
-    bool climb = timeline.any((event) => event.type == AutoPathEventType.climb);
-    return "$start${fuelScored > 0 ? " $fuelScored fuel" : ""}${disrupts ? ", disrupt" : ""}${fuelFed > 0 ? ", $fuelFed feed" : ""} ${climb ? "+ climb" : ""}";
+    // bool climb = timeline.any((event) => event.type == AutoPathEventType.climb);
+    // return "$start${fuelScored > 0 ? " $fuelScored fuel" : ""}${disrupts ? ", disrupt" : ""}${fuelFed > 0 ? ", $fuelFed feed" : ""} ${climb ? "+ climb" : ""}";
+    return "short description";
   }
 
   List<Offset> get offsets => timeline.map((e) => e.offset).toList();
@@ -692,47 +694,50 @@ class AutoPath {
   }
 
   List<PositionedGamePiece> gamePiecePositionsAtTimestamp(Duration timestamp) {
-    final Duration disruptTime =
-        timeline.any((element) => element.type == AutoPathEventType.disrupt)
-            ? timeline
-                .where((element) => element.type == AutoPathEventType.disrupt)
-                .first
-                .timestamp
-            : const Duration(days: 1);
-    if (trajectories.isNotEmpty) {
-      final ballTrajectories = trajectories
-          .where(
-        (t) => t != null && t.startTime <= timestamp && timestamp <= t.endTime,
-      )
-          .map((t) {
-        double progress = ((timestamp - t!.startTime).inMilliseconds /
-            (t.endTime - t.startTime).inMilliseconds);
+    // final Duration disruptTime =
+    //     timeline.any((element) => element.type == AutoPathEventType.disrupt)
+    //         ? timeline
+    //             .where((element) => element.type == AutoPathEventType.disrupt)
+    //             .first
+    //             .timestamp
+    //         : const Duration(days: 1);
+    // if (trajectories.isNotEmpty) {
+    //   final ballTrajectories = trajectories
+    //       .where(
+    //     (t) => t != null && t.startTime <= timestamp && timestamp <= t.endTime,
+    //   )
+    //       .map((t) {
+    //     double progress = ((timestamp - t!.startTime).inMilliseconds /
+    //         (t.endTime - t.startTime).inMilliseconds);
 
-        Offset position = Offset(
-            progress * (t.endPos.dx - t.startPos.dx) + t.startPos.dx,
-            progress * (t.endPos.dy - t.startPos.dy) + t.startPos.dy);
-        return PositionedGamePiece(GamePiece.fuel, position);
-      }).toList();
+    //     Offset position = Offset(
+    //         progress * (t.endPos.dx - t.startPos.dx) + t.startPos.dx,
+    //         progress * (t.endPos.dy - t.startPos.dy) + t.startPos.dy);
+    //     return PositionedGamePiece(GamePiece.fuel, position);
+    //   }).toList();
 
-      if (timestamp > disruptTime) {
-        return [
-          ...ballTrajectories,
-          PositionedGamePiece(
-              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
-        ];
-      } else {
-        return ballTrajectories;
-      }
-    } else {
-      if (timestamp > disruptTime) {
-        return [
-          PositionedGamePiece(
-              GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
-        ];
-      } else {
-        return [];
-      }
-    }
+    //   if (timestamp > disruptTime) {
+    //     return [
+    //       ...ballTrajectories,
+    //       PositionedGamePiece(
+    //           GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+    //     ];
+    //   } else {
+    //     return ballTrajectories;
+    //   }
+    // } else {
+    //   if (timestamp > disruptTime) {
+    //     return [
+    //       PositionedGamePiece(
+    //           GamePiece.disrupt, AutoPathLocation.neutralZone.offset)
+    //     ];
+    //   } else {
+    //     return [];
+    //   }
+    // }
+    return [
+      PositionedGamePiece(GamePiece.hatch, positionAtTimestamp(timestamp))
+    ];
   }
 }
 
@@ -775,19 +780,18 @@ class AutoPathEvent {
 
   factory AutoPathEvent.fromMap(Map<String, dynamic> map) {
     AutoPathLocation loc;
-    if (AutoPathEventType.values[map['event']] == AutoPathEventType.climb) {
-      loc = AutoPathLocation.tower;
-    } else if (AutoPathEventType.values[map['event']] ==
-            AutoPathEventType.startScoring ||
-        AutoPathEventType.values[map['event']] ==
-            AutoPathEventType.stopScoring) {
-      loc = AutoPathLocation.none;
-    } else if (AutoPathEventType.values[map['event']] ==
-        AutoPathEventType.startMatch) {
-      loc = AutoPathLocation.values[map['location']].adjacentStartingLocation;
-    } else {
-      loc = AutoPathLocation.values[map['location']];
-    }
+    // if (AutoPathEventType.values[map['event']] ==
+    //         AutoPathEventType.startScoring ||
+    //     AutoPathEventType.values[map['event']] ==
+    //         AutoPathEventType.stopScoring) {
+    //   loc = AutoPathLocation.none;
+    // // } else if (AutoPathEventType.values[map['event']] ==
+    // //     AutoPathEventType.startMatch) {
+    // //   loc = AutoPathLocation.values[map['location']].adjacentStartingLocation;
+    // // }
+    //  } else {
+    loc = AutoPathLocation.values[map['location']];
+    // }
 
     return AutoPathEvent(
       timestamp: Duration(milliseconds: (map['time'] * 1000).round()),
@@ -865,29 +869,20 @@ class AnimatedAutoPathControls extends StatelessWidget {
 }
 
 enum AutoPathEventType {
-  startScoring,
-  stopScoring,
   startMatch,
-  unused1,
-  unused2,
-  unused3,
-  unused4,
-  intake,
-  outtake,
-  disrupt,
-  cross,
-  climb,
-  startFeeding,
-  stopFeeding
+  scoreCargo,
+  scoreHatch,
+  pickupHatch,
+  pickupCargo,
+  climb
 }
 
-enum GamePiece { fuel, disrupt }
+enum GamePiece { cargo, hatch }
 
 extension GamePieceExtension on GamePiece {
-  Widget icon(
-      {Color color = const Color.from(alpha: 1, red: 1, green: 1, blue: 1)}) {
+  Widget icon({Color color = const Color.fromARGB(255, 244, 163, 0)}) {
     switch (this) {
-      case GamePiece.fuel:
+      case GamePiece.cargo:
         return Transform.scale(
             scale: 2 / 3,
             child: SvgPicture.asset(
@@ -901,19 +896,15 @@ extension GamePieceExtension on GamePiece {
               height: 16,
               width: 16,
             ));
-      case GamePiece.disrupt:
+      case GamePiece.hatch:
         return Transform.scale(
             scale: 4 / 3,
-            child: SvgPicture.asset(
-              'assets/images/bomb.svg',
-              colorFilter: ColorFilter.mode(
-                color,
-                BlendMode.srcIn,
-              ),
+            child: Image.asset(
+              'assets/images/hatch.png',
               fit: BoxFit.scaleDown,
               alignment: Alignment.center,
-              height: 16,
-              width: 16,
+              height: 20,
+              width: 20,
             ));
     }
   }
@@ -972,124 +963,86 @@ Widget iconAutoPathEventIndicator(
     );
 
 enum AutoPathLocation {
-  leftTrench,
-  leftBump,
-  hub,
-  rightTrench,
-  rightBump,
-  neutralZone,
-  depot,
-  outpost,
-  none,
-  tower,
-  startLeftTrench,
-  startLeftBump,
-  startHub,
-  startRightTrench,
-  startRightBump
+  hab, // 0
+  leftRocket, // 1
+  rightRocket, // 2
+  leftDepot, // 3
+  rightDepot, // 4
+  leftStation, // 5
+  rightStation, // 6
+  centerStart, // 7
+  leftStart, // 8
+  rightStart, // 9
+  cargoShip, // 10
+  none
 }
 
 extension AutoPathLocationExtension on AutoPathLocation {
   /// `x` and `y` are between `0` and `100`, starting from the top left of the field.
   Offset get offset {
     switch (this) {
-      case AutoPathLocation.rightTrench:
-        return const Offset(35, 10);
-      case AutoPathLocation.rightBump:
-        return const Offset(35, 25);
-      case AutoPathLocation.hub:
-        return const Offset(42, 50);
-      case AutoPathLocation.leftTrench:
-        return const Offset(35, 90);
-      case AutoPathLocation.leftBump:
-        return const Offset(35, 75);
-      case AutoPathLocation.startRightTrench:
-        return const Offset(45, 10);
-      case AutoPathLocation.startRightBump:
-        return const Offset(45, 25);
-      case AutoPathLocation.startHub:
-        return const Offset(57.5, 50);
-      case AutoPathLocation.startLeftTrench:
-        return const Offset(45, 90);
-      case AutoPathLocation.startLeftBump:
-        return const Offset(45, 75);
-      case AutoPathLocation.neutralZone:
+      case AutoPathLocation.hab:
+        return const Offset(75, 50);
+      case AutoPathLocation.leftRocket:
+        return const Offset(25, 90);
+      case AutoPathLocation.rightRocket:
+        return const Offset(25, 10);
+      case AutoPathLocation.leftDepot:
+        return const Offset(80, 70);
+      case AutoPathLocation.rightDepot:
+        return const Offset(80, 30);
+      case AutoPathLocation.leftStation:
+        return const Offset(90, 85);
+      case AutoPathLocation.rightStation:
+        return const Offset(90, 15);
+      case AutoPathLocation.centerStart:
+        return const Offset(80, 50);
+      case AutoPathLocation.leftStart:
+        return const Offset(80, 40);
+      case AutoPathLocation.rightStart:
+        return const Offset(80, 60);
+      case AutoPathLocation.cargoShip:
         return const Offset(20, 50);
-      case AutoPathLocation.depot:
-        return const Offset(93, 72.5);
-      case AutoPathLocation.outpost:
-        return const Offset(93, 10);
-      case AutoPathLocation.tower:
-        return const Offset(92, 45);
       default:
         return const Offset(0, 0);
-    }
-  }
-
-  AutoPathLocation get adjacentStartingLocation {
-    switch (this) {
-      case AutoPathLocation.leftTrench:
-        return AutoPathLocation.startLeftTrench;
-      case AutoPathLocation.leftBump:
-        return AutoPathLocation.startLeftBump;
-      case AutoPathLocation.hub:
-        return AutoPathLocation.startHub;
-      case AutoPathLocation.rightTrench:
-        return AutoPathLocation.startRightTrench;
-      case AutoPathLocation.rightBump:
-        return AutoPathLocation.startRightBump;
-      default:
-        return AutoPathLocation.none;
     }
   }
 
   Offset get randomVariance {
     switch (this) {
-      case AutoPathLocation.leftTrench:
-      case AutoPathLocation.leftBump:
-      case AutoPathLocation.hub:
-      case AutoPathLocation.rightTrench:
-      case AutoPathLocation.rightBump:
-      case AutoPathLocation.startLeftTrench:
-      case AutoPathLocation.startLeftBump:
-      case AutoPathLocation.startHub:
-      case AutoPathLocation.startRightBump:
-      case AutoPathLocation.startRightTrench:
+      case AutoPathLocation.centerStart:
+      case AutoPathLocation.leftStart:
+      case AutoPathLocation.rightStart:
         return const Offset(0, 0);
-      case AutoPathLocation.outpost:
-      case AutoPathLocation.depot:
-      case AutoPathLocation.tower:
-        return const Offset(0, 5);
       default:
-        return const Offset(10, 10);
+        return const Offset(5, 5);
     }
   }
 
   String get name {
     switch (this) {
-      case AutoPathLocation.leftTrench:
-      case AutoPathLocation.startLeftTrench:
-        return "Left trench";
-      case AutoPathLocation.leftBump:
-      case AutoPathLocation.startLeftBump:
+      case AutoPathLocation.hab:
+        return "Hab";
+      case AutoPathLocation.leftRocket:
+        return "Left rocket";
+      case AutoPathLocation.rightRocket:
+        return "Right rocket";
+      case AutoPathLocation.rightDepot:
+        return "Right depot";
+      case AutoPathLocation.leftDepot:
+        return "Left depot";
+      case AutoPathLocation.leftStation:
+        return "Left station";
+      case AutoPathLocation.rightStation:
+        return "Right station";
+      case AutoPathLocation.centerStart:
+        return "Center start";
+      case AutoPathLocation.leftStart:
         return "Left bump";
-      case AutoPathLocation.hub:
-      case AutoPathLocation.startHub:
-        return "Hub";
-      case AutoPathLocation.rightTrench:
-      case AutoPathLocation.startRightTrench:
-        return "Right trench";
-      case AutoPathLocation.rightBump:
-      case AutoPathLocation.startRightBump:
-        return "Right bump";
-      case AutoPathLocation.neutralZone:
-        return "Neutral Zone";
-      case AutoPathLocation.depot:
-        return "Depot";
-      case AutoPathLocation.outpost:
-        return "Outpost";
-      case AutoPathLocation.tower:
-        return "Tower";
+      case AutoPathLocation.rightStart:
+        return "Right start";
+      case AutoPathLocation.cargoShip:
+        return "Cargo ship";
       default:
         return "Unknown";
     }

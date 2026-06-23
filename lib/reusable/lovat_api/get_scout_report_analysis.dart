@@ -19,8 +19,9 @@ extension GetScoutReportAnalysis on LovatAPI {
     }
 
     final json = jsonDecode(response!.body);
-    //final json = jsonDecode(
-    //    '{"totalPoints":200,"driverAbility":0,"robotRoles":[0,1,2,3,4],"climb":3,"autoClimb":0,"autoClimbStartTime":0,"contactDefenseTime":0,"campingDefenseTime":0,"scoringRate":12.3,"feedingRate":10.7,"defenseEffectiveness":0,"feeds":0, "volleys": 3, "ballsFed": 23, "accuracy":4,"feederType":[0],"climbResult":0,"climbStartTime":0,"autoPath":{"autoPoints":60,"positions":[{"location":2,"event":0,"time":2},{"location":2,"event":1,"time":7},{"location":0,"event":2,"time":0},{"location":5,"event":7,"time":1},{"location":7,"event":1,"time":13},{"location":5,"event":4,"time":0},{"location":7,"event":7,"time":0}],"match":"2025casf_qm3_5","tournamentName":"San Francisco Regional"},"note":"this is a test disregard","robotBrokeDescription":"robot go boom","timeStamp":"1970-01-01T00:00:00.000Z"}');
+
+    // final json = jsonDecode(
+    //     '{"totalPoints":200,"driverAbility":0,"robotRoles":[0,1,2,3,4],"climb":3,"autoClimb":0,"autoClimbStartTime":0,"contactDefenseTime":0,"campingDefenseTime":0,"scoringRate":12.3,"feedingRate":10.7,"defenseEffectiveness":0,"feeds":0, "volleys": 3, "ballsFed": 23, "accuracy":4,"feederType":[0],"climbResult":0,"climbStartTime":0,"autoPath":{"autoPoints":60,"positions":[{"location":2,"event":0,"time":2},{"location":2,"event":1,"time":7},{"location":0,"event":2,"time":0},{"location":5,"event":7,"time":1},{"location":7,"event":1,"time":13},{"location":5,"event":4,"time":0},{"location":7,"event":7,"time":0}],"match":"2025casf_qm3_5","tournamentName":"San Francisco Regional"},"note":"this is a test disregard","robotBrokeDescription":"robot go boom","timeStamp":"1970-01-01T00:00:00.000Z"}');
 
     return SingleScoutReportAnalysis.fromJson(json);
   }
@@ -43,7 +44,6 @@ class SingleScoutReportAnalysis {
     required this.climbStartTime,
     required this.feederType,
     required this.autoPath,
-    required this.stealerType,
     this.accuracy,
     required this.volleys,
     required this.ballsFed,
@@ -68,7 +68,6 @@ class SingleScoutReportAnalysis {
   final EndgameClimbResult climbResult;
   final num climbStartTime;
   final List<FeederType> feederType;
-  final List<StealerType> stealerType;
   final AutoPath autoPath;
   final num volleys;
   final num ballsFed;
@@ -93,18 +92,26 @@ class SingleScoutReportAnalysis {
       autoClimbStartTime: json['autoClimbStartTime'],
       contactDefenseTime: json['contactDefenseTime'],
       campingDefenseTime: json['campingDefenseTime'],
-      stealerType: ((json['stealerType'] as List<dynamic>).cast<int>())
-          .map<StealerType>((elem) => StealerType.values[elem])
-          .toList(),
       defenseEffectiveness: json["defenseEffectiveness"] != null
           ? json["defenseEffectiveness"] + 1
           : null,
       feeds: json["feeds"],
-      accuracy: json["accuracy"],
+      accuracy: 0,
       climbStartTime: json["climbStartTime"],
       climbResult: EndgameClimbResult.values[(json['climbResult'] as int)],
       autoClimb: AutoClimbResult.values[(json['autoClimb'] as int)],
-      autoPath: AutoPath.fromMapSingleMatch(json["autoPath"]),
+      // autoPath: AutoPath.fromMapSingleMatch(json["autoPath"]),
+      autoPath: AutoPath.fromMapSingleMatch({
+        "autoPoints": 60,
+        "match": "2022cc_qm14_1",
+        "positions": [
+          {"location": 7, "event": 0, "time": 0}, // center start
+          {"location": 10, "event": 2, "time": 4}, // cargo ship
+          {"location": 1, "event": 1, "time": 9}, // left rocket
+          {"location": 10, "event": 1, "time": 11}, // cargo ship
+          {"location": 2, "event": 2, "time": 13}, // right rocket
+        ]
+      }),
       autoScore: json["autoPath"]["autoPoints"],
       volleys: json["volleys"],
       ballsFed: json["totalBallsFed"],
