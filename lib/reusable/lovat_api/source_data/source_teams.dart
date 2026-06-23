@@ -33,31 +33,24 @@ extension SourceTeamSettings on LovatAPI {
     // body can be "THIS_TEAM", "ALL_TEAMS", or "[1, 2, 3]"
 
     if (response!.body == 'THIS_TEAM') {
-      return const SourceTeamSettingsResponse({
-        'mode': 'THIS_TEAM',
-      });
+      return const SourceTeamSettingsResponse(mode: SourceTeamSettingsMode.thisTeam);
     } else if (response.body == 'ALL_TEAMS') {
-      return const SourceTeamSettingsResponse({
-        'mode': 'ALL_TEAMS',
-      });
+      return const SourceTeamSettingsResponse(mode: SourceTeamSettingsMode.allTeams);
     } else {
-      return SourceTeamSettingsResponse({
-        'mode': 'SPECIFIC_TEAMS',
-        'teams': jsonDecode(response.body) as List<dynamic>,
-      });
+      return SourceTeamSettingsResponse(
+        mode: SourceTeamSettingsMode.specificTeams,
+        teams: (jsonDecode(response.body) as List<dynamic>).cast<int>(),
+      );
     }
   }
 }
 
 class SourceTeamSettingsResponse {
-  const SourceTeamSettingsResponse(this.data);
+  const SourceTeamSettingsResponse({
+    required this.mode,
+    this.teams,
+  });
 
-  final Map<String, dynamic> data;
-
-  SourceTeamSettingsMode get mode =>
-      SourceTeamSettingsModeExtension.fromIdentifier(data['mode']);
-
-  List<int>? get teams => mode == SourceTeamSettingsMode.specificTeams
-      ? (data['teams'] as List<dynamic>).cast<int>()
-      : null;
+  final SourceTeamSettingsMode mode;
+  final List<int>? teams;
 }

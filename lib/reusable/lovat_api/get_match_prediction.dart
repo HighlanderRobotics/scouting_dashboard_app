@@ -1,10 +1,38 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_alliance_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
+class MatchPrediction {
+  const MatchPrediction({
+    required this.redWinning,
+    required this.blueWinning,
+    required this.redAlliance,
+    required this.blueAlliance,
+  });
+
+  final num? redWinning;
+  final num? blueWinning;
+  final AllianceAnalysis redAlliance;
+  final AllianceAnalysis blueAlliance;
+
+  factory MatchPrediction.fromJson(Map<String, dynamic> json) {
+    return MatchPrediction(
+      redWinning: json['redWinning'] as num?,
+      blueWinning: json['blueWinning'] as num?,
+      redAlliance: AllianceAnalysis.fromJson(
+        json['redAlliance'] as Map<String, dynamic>,
+      ),
+      blueAlliance: AllianceAnalysis.fromJson(
+        json['blueAlliance'] as Map<String, dynamic>,
+      ),
+    );
+  }
+}
+
 extension GetMatchPrediction on LovatAPI {
-  Future<Map<String, dynamic>> getMatchPrediction(
+  Future<MatchPrediction> getMatchPrediction(
     int red1,
     int red2,
     int red3,
@@ -33,6 +61,8 @@ extension GetMatchPrediction on LovatAPI {
       throw const LovatAPIException('Not enough data');
     }
 
-    return jsonDecode(response!.body);
+    return MatchPrediction.fromJson(
+      jsonDecode(response!.body) as Map<String, dynamic>,
+    );
   }
 }

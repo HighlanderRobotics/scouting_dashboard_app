@@ -18,7 +18,7 @@ class TeamLookupCategoriesTab extends StatefulWidget {
 }
 
 class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
-  Map<String, dynamic>? data;
+  CategoryMetrics? data;
   String? error;
 
   Future<void> fetchData() async {
@@ -126,14 +126,14 @@ class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
                         .where((metric) => metric.hideOverview == false)
                         .map(
                           (metric) => MetricTile(
-                            value: (() {
-                              try {
-                                return metric.valueVizualizationBuilder(
-                                    data![metric.path]);
-                              } catch (_) {
-                                return "--";
-                              }
-                            })(),
+value: (() {
+                               try {
+                                 return metric.valueVizualizationBuilder(
+                                    data!.valueForMetric(metric));
+                               } catch (_) {
+                                 return "--";
+                               }
+                             })(),
                             label: metric.abbreviatedLocalizedName,
                             onTap: metric.hideDetails
                                 ? null

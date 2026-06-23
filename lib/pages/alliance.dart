@@ -17,7 +17,7 @@ class AlliancePage extends StatefulWidget {
 }
 
 class _AlliancePageState extends State<AlliancePage> {
-  Map<String, dynamic>? data;
+  AllianceAnalysis? data;
   String? error;
   late List<int> teams;
 
@@ -78,7 +78,7 @@ class _AlliancePageState extends State<AlliancePage> {
 class _AllianceContent extends StatefulWidget {
   const _AllianceContent({required this.data});
 
-  final Map<String, dynamic> data;
+  final AllianceAnalysis data;
 
   @override
   State<_AllianceContent> createState() => _AllianceContentState();
@@ -87,34 +87,33 @@ class _AllianceContent extends StatefulWidget {
 class _AllianceContentState extends State<_AllianceContent> {
   @override
   Widget build(BuildContext context) {
-    final analysisMap = widget.data;
+    final analysis = widget.data;
 
     return Column(children: [
       Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: (analysisMap['teams'] as List<dynamic>)
+        children: analysis.teams
             .map((teamData) => Row(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Tooltip(
-                      message: teamData['role'] == null
+                      message: teamData.role == null
                           ? "No data"
-                          : RobotRoles.values[teamData['role']].name,
-                      child: Icon(teamData['role'] == null
+                          : teamData.robotRole!.name,
+                      child: Icon(teamData.role == null
                           ? Icons.question_mark
-                          : RobotRoles
-                              .values[teamData['role'] as int].littleEmblem),
+                          : teamData.robotRole!.littleEmblem),
                     ),
                     const SizedBox(width: 3),
                     InkWell(
                       onTap: () => {
                         Navigator.of(context).pushNamed("/team_lookup",
                             arguments: <String, dynamic>{
-                              'team': int.parse(teamData['team'].toString())
+                              'team': teamData.team
                             })
                       },
                       child: Text(
-                        teamData['team'].toString(),
+                        teamData.team.toString(),
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ),
@@ -139,9 +138,9 @@ class _AllianceContentState extends State<_AllianceContent> {
                   )),
             ),
             Text(
-              analysisMap['totalPoints'] == null
+              analysis.totalPoints == null
                   ? '--'
-                  : numToStringRounded(analysisMap['totalPoints'] as num),
+                  : numToStringRounded(analysis.totalPoints),
               style: Theme.of(context).textTheme.titleMedium!.merge(TextStyle(
                     color: Theme.of(context).colorScheme.onPrimary,
                   )),
@@ -150,7 +149,7 @@ class _AllianceContentState extends State<_AllianceContent> {
         ),
       ),
       const SizedBox(height: 10),
-      reefStack(context, analysisMap),
+      reefStack(context, analysis),
       const SizedBox(height: 10),
       Row(
         children: [
@@ -158,7 +157,7 @@ class _AllianceContentState extends State<_AllianceContent> {
             fit: FlexFit.tight,
             child: ValueTile(
               value:
-                  Text(numToStringRounded(analysisMap['totalBallThroughput'])),
+                  Text(numToStringRounded(analysis.totalBallThroughput)),
               label: const Text('Total output'),
             ),
           ),
@@ -166,14 +165,14 @@ class _AllianceContentState extends State<_AllianceContent> {
             fit: FlexFit.tight,
             child: ValueTile(
               value:
-                  Text(numToStringRounded(analysisMap['totalFuelOutputted'])),
+                  Text(numToStringRounded(analysis.totalFuelOutputted)),
               label: const Text('Hub shots'),
             ),
           ),
         ].withSpaceBetween(width: 10),
       ),
       const SizedBox(height: 10),
-      AlllianceAutoPaths(data: analysisMap),
+      AlllianceAutoPaths(data: analysis),
     ]);
   }
 }
@@ -187,7 +186,7 @@ const autoPathColors = [
 class AlllianceAutoPaths extends StatefulWidget {
   const AlllianceAutoPaths({super.key, required this.data});
 
-  final Map<String, dynamic> data;
+  final AllianceAnalysis data;
 
   @override
   State<AlllianceAutoPaths> createState() => _AlllianceAutoPathsState();
@@ -238,7 +237,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: widget.data['teams']
+                        children: widget.data.teams
                             .map((e) => Column(
                                   children: [
                                     InkWell(
@@ -246,19 +245,14 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                         Navigator.of(context).pushNamed(
                                             "/auto_path_selector",
                                             arguments: <String, dynamic>{
-                                              'team': e['team'].toString(),
-                                              'autoPaths': (e['paths']
-                                                      as List<dynamic>)
-                                                  .map((path) =>
-                                                      AutoPath.fromMap(path))
-                                                  .toList(),
+                                              'team': e.team.toString(),
+                                              'autoPaths': e.paths,
                                               'currentPath': selectedPaths[
-                                                  widget.data['teams']
-                                                      .indexOf(e)],
+                                                  widget.data.teams.indexOf(e)],
                                               'onSubmit': (AutoPath? newPath) {
                                                 setState(() {
                                                   selectedPaths[widget
-                                                      .data['teams']
+                                                      .data.teams
                                                       .indexOf(e)] = newPath;
                                                 });
                                               }
@@ -274,14 +268,14 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                                   const BorderRadius.all(
                                                       Radius.circular(10)),
                                               color: autoPathColors[widget
-                                                  .data['teams']
+                                                  .data.teams
                                                   .indexOf(e)],
                                             ),
                                           ),
                                         ),
                                         const SizedBox(width: 5),
                                         Text(
-                                          e['team'].toString(),
+                                          e.team.toString(),
                                           style: Theme.of(context)
                                               .textTheme
                                               .labelMedium!
@@ -307,12 +301,12 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                                   .onSurfaceVariant)),
                                     ),
                                     Text(
-                                      selectedPaths[widget.data['teams']
+                                      selectedPaths[widget.data.teams
                                                   .indexOf(e)] ==
                                               null
                                           ? "--"
                                           : numToStringRounded(selectedPaths[
-                                                  widget.data['teams']
+                                                  widget.data.teams
                                                       .indexOf(e)]!
                                               .scores
                                               .cast<num>()
@@ -429,10 +423,12 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
 
 Container reefStack(
   BuildContext context,
-  Map<String, dynamic> analysisMap, {
+  AllianceAnalysis analysis, {
   Color? backgroundColor,
   Color? foregroundColor,
 }) {
+  final startTimeLists = [analysis.l1StartTime, analysis.l2StartTime, analysis.l3StartTime];
+
   return Container(
     decoration: BoxDecoration(
       color: backgroundColor ??
@@ -458,16 +454,14 @@ Container reefStack(
           children: [
             TableRow(
               children: [
-                const SizedBox(), // Top-left empty cell
+                const SizedBox(),
                 for (int col = 0; col < 3; col++)
                   SizedBox(
                     height: 38,
                     child: Center(
                       child: Text(
-                        (analysisMap['teams'] != null &&
-                                (analysisMap['teams'] as List).length > col)
-                            ? (analysisMap['teams'][col]['team']?.toString() ??
-                                '--')
+                        analysis.teams.length > col
+                            ? analysis.teams[col].team.toString()
                             : '--',
                         style: Theme.of(context).textTheme.labelLarge!.merge(
                               TextStyle(
@@ -504,10 +498,8 @@ Container reefStack(
                     Center(
                       child: Text(
                         (() {
-                          final key = 'l${row + 1}StartTime';
-                          final list = analysisMap[key] as List?;
-                          if (list == null ||
-                              list.length <= col ||
+                          final list = startTimeLists[row];
+                          if (list.length <= col ||
                               list[col] == null) {
                             return '--';
                           }

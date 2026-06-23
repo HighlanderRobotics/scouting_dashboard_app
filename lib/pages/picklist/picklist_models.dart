@@ -59,13 +59,11 @@ class ConfiguredPicklist {
   Future<List<int>> fetchTeamRankings() async {
     final analysis = await lovatAPI.getPicklistAnalysis([], weights);
 
-    if (analysis['result'] == null) {
+    if (analysis.isEmpty) {
       throw const LovatAPIException("Failed to fetch team rankings.");
     }
 
-    return (analysis['result'] as List<dynamic>)
-        .map((e) => e['team'] as int)
-        .toList();
+    return analysis.map((e) => e.teamNumber).toList();
   }
 
   Future<void> upload() async {

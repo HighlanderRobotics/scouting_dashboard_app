@@ -120,7 +120,7 @@ class SharedPicklistView extends StatefulWidget {
 }
 
 class _SharedPicklistViewState extends State<SharedPicklistView> {
-  Map<String, List<dynamic>>? data;
+  List<PicklistAnalysisTeam>? data;
   List<FlagConfiguration>? flags;
   String? error;
 
@@ -139,7 +139,7 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
           await lovatAPI.getPicklistAnalysis(flagPaths, picklist.weights);
       setState(() {
         flags = fetchedFlags;
-        data = {...result, 'flags': fetchedFlags};
+        data = result;
       });
     } on LovatAPIException catch (e) {
       setState(() => error = e.message);
@@ -166,28 +166,22 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
       );
     }
 
-    final result = data!['result']!;
+    final result = data!;
 
     return ListView(
       children: result
           .map((teamData) => ListTile(
-                title: Text(teamData['team'].toString()),
+                title: Text(teamData.teamNumber.toString()),
                 contentPadding: const EdgeInsets.only(left: 16, right: 4),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FlagRow(
                       flags!,
-                      teamData['flags']
-                          .asMap()
-                          .map(
-                            (k, value) => MapEntry(
-                              value['type'],
-                              value['result'],
-                            ),
-                          )
-                          .cast<String, dynamic>(),
-                      teamData['team'],
+                      Map.fromEntries(
+                        teamData.flags.map((e) => MapEntry(e.type, e.result)),
+                      ),
+                      teamData.teamNumber,
                       onEdit: fetchData,
                     ),
                     IconButton(
@@ -195,9 +189,9 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                         Navigator.of(context).pushNamed(
                             "/picklist_team_breakdown",
                             arguments: {
-                              'team': int.parse(teamData['team'].toString()),
-                              'breakdown': teamData['breakdown'],
-                              'unweighted': teamData['unweighted'],
+                              'team': teamData.teamNumber,
+                              'breakdown': teamData.zScoresWeighted,
+                              'unweighted': teamData.zScoresUnweighted,
                               'picklistTitle': widget.picklistMeta.title,
                             });
                       },
@@ -205,13 +199,13 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                         Icons.balance,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      tooltip: "View ${teamData['team']}'s z-scores",
+                      tooltip: "View ${teamData.teamNumber}'s z-scores",
                     ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)
                             .pushNamed("/team_lookup", arguments: {
-                          'team': int.parse(teamData['team'].toString()),
+                          'team': teamData.teamNumber,
                         });
                       },
                       icon: Icon(
@@ -219,7 +213,7 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       tooltip:
-                          "Open team lookup for ${teamData['team']}",
+                          "Open team lookup for ${teamData.teamNumber}",
                     ),
                   ],
                 ),

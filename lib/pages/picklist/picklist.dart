@@ -151,7 +151,7 @@ class PicklistView extends StatefulWidget {
 }
 
 class _PicklistViewState extends State<PicklistView> {
-  Map<String, List<dynamic>>? data;
+  List<PicklistAnalysisTeam>? data;
   List<FlagConfiguration>? flags;
   String? error;
 
@@ -169,7 +169,7 @@ class _PicklistViewState extends State<PicklistView> {
           flagPaths, widget.picklist.weights);
       setState(() {
         flags = fetchedFlags;
-        data = {...result, 'flags': fetchedFlags};
+        data = result;
       });
     } on LovatAPIException catch (e) {
       setState(() => error = e.message);
@@ -196,28 +196,22 @@ class _PicklistViewState extends State<PicklistView> {
       );
     }
 
-    final result = data!['result']!;
+    final result = data!;
 
     return ListView(
       children: result
           .map((teamData) => ListTile(
-                title: Text(teamData['team'].toString()),
+                title: Text(teamData.teamNumber.toString()),
                 contentPadding: const EdgeInsets.only(left: 16, right: 4),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FlagRow(
                       flags!,
-                      teamData['flags']
-                          .asMap()
-                          .map(
-                            (k, value) => MapEntry(
-                              value['type'],
-                              value['result'],
-                            ),
-                          )
-                          .cast<String, dynamic>(),
-                      teamData['team'],
+                      Map.fromEntries(
+                        teamData.flags.map((e) => MapEntry(e.type, e.result)),
+                      ),
+                      teamData.teamNumber,
                       onEdit: fetchData,
                     ),
                     IconButton(
@@ -225,9 +219,9 @@ class _PicklistViewState extends State<PicklistView> {
                         Navigator.of(context).pushNamed(
                             "/picklist_team_breakdown",
                             arguments: {
-                              'team': int.parse(teamData['team'].toString()),
-                              'breakdown': teamData['breakdown'],
-                              'unweighted': teamData['unweighted'],
+                              'team': teamData.teamNumber,
+                              'breakdown': teamData.zScoresWeighted,
+                              'unweighted': teamData.zScoresUnweighted,
                               'picklistTitle': widget.picklist.meta.title,
                             });
                       },
@@ -236,20 +230,20 @@ class _PicklistViewState extends State<PicklistView> {
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                       tooltip:
-                          "View ${teamData['team']}'s z-scores",
+                          "View ${teamData.teamNumber}'s z-scores",
                     ),
                     IconButton(
                       onPressed: () {
                         Navigator.of(context)
                             .pushNamed("/team_lookup", arguments: {
-                          'team': int.parse(teamData['team'].toString()),
+                          'team': teamData.teamNumber,
                         });
                       },
                       icon: Icon(
                         Icons.arrow_right,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      tooltip: "Open team lookup for ${teamData['team']}",
+                      tooltip: "Open team lookup for ${teamData.teamNumber}",
                     ),
                   ],
                 ),

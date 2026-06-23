@@ -20,7 +20,7 @@ class TeamLookupBreakdownsTab extends StatefulWidget {
 }
 
 class _TeamLookupBreakdownsTabState extends State<TeamLookupBreakdownsTab> {
-  Map<String, dynamic>? data;
+  BreakdownMetrics? data;
   String? error;
 
   Future<void> fetchData() async {
@@ -123,7 +123,7 @@ class _TeamLookupBreakdownsTabState extends State<TeamLookupBreakdownsTab> {
           .map(
             (BreakdownData breakdownData) => Breakdown(
               dataIdentity: breakdownData,
-              data: data!.cast(),
+              data: data!,
               team: widget.team,
             ),
           )
@@ -141,7 +141,7 @@ class Breakdown extends StatelessWidget {
   });
 
   final BreakdownData dataIdentity;
-  final Map<String, Map<String, dynamic>> data;
+  final BreakdownMetrics data;
   final int team;
 
   @override
@@ -181,8 +181,7 @@ class Breakdown extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 7),
-                  data[dataIdentity.path] == null ||
-                          data[dataIdentity.path]!.isEmpty
+                  data.isEmpty(dataIdentity.path)
                       ? Container(
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(6),
@@ -198,15 +197,14 @@ class Breakdown extends StatelessWidget {
                             child: Row(
                                 children: dataIdentity.segments
                                     .where((segmentData) =>
-                                        (data.cast()[dataIdentity.path]
-                                                [segmentData.path] ??
-                                            0) !=
+                                        data.segmentValue(
+                                                dataIdentity.path,
+                                                segmentData.path) !=
                                         0)
                                     .map((BreakdownSegmentData segmentData) {
-                              double analyzedSegmentValue =
-                                  data[dataIdentity.path]?[segmentData.path]
-                                          ?.toDouble() ??
-                                      0;
+                              final analyzedSegmentValue =
+                                  data.segmentValue(
+                                      dataIdentity.path, segmentData.path);
 
                               return segment(
                                 context,

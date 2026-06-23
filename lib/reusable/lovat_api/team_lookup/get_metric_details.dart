@@ -2,9 +2,67 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/match.dart';
+import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
+
+class MetricDataPoint {
+  const MetricDataPoint({
+    required this.match,
+    required this.tournamentName,
+    this.dataPoint,
+  });
+
+  final GameMatchIdentity match;
+  final String tournamentName;
+  final double? dataPoint;
+
+  factory MetricDataPoint.fromJson(Map<String, dynamic> json) {
+    return MetricDataPoint(
+      match: GameMatchIdentity.fromLongKey(
+        json['match'] as String,
+        tournamentName: json['tournamentName'] as String?,
+      ),
+      tournamentName: json['tournamentName'] as String? ?? '',
+      dataPoint: (json['dataPoint'] as num?)?.toDouble(),
+    );
+  }
+}
+
+class MetricDetails {
+  const MetricDetails({
+    this.result,
+    this.all,
+    this.difference,
+    this.team,
+    this.array = const [],
+    this.paths = const [],
+  });
+
+  final dynamic result;
+  final dynamic all;
+  final num? difference;
+  final int? team;
+  final List<MetricDataPoint> array;
+  final List<AutoPath> paths;
+
+  factory MetricDetails.fromJson(Map<String, dynamic> json) {
+    return MetricDetails(
+      result: json['result'],
+      all: json['all'],
+      difference: json['difference'] as num?,
+      team: json['team'] as int?,
+      array: (json['array'] as List<dynamic>? ?? [])
+          .map((e) => MetricDataPoint.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      paths: (json['paths'] as List<dynamic>? ?? [])
+          .map((e) => AutoPath.fromMap(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}
 
 extension GetMetricDetails on LovatAPI {
-  Future<Map<String, dynamic>> getMetricDetails(
+  Future<MetricDetails> getMetricDetails(
       int teamNumber, String metricPath) async {
     final response =
         await get('/v1/analysis/metric/$metricPath/team/$teamNumber');
@@ -14,6 +72,8 @@ extension GetMetricDetails on LovatAPI {
       throw Exception('Failed to get metric details');
     }
 
-    return jsonDecode(response!.body);
+    return MetricDetails.fromJson(
+      jsonDecode(response!.body) as Map<String, dynamic>,
+    );
   }
 }

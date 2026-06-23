@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
 class PicklistTeamBreakdownPage extends StatefulWidget {
@@ -23,18 +24,20 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
 
     String teamNumber = routeArgs['team'].toString();
     String picklistTitle = routeArgs['picklistTitle'];
-    List<Map<String, dynamic>> breakdown =
-        routeArgs['breakdown'].cast<Map<String, dynamic>>();
+    List<PicklistBreakdownEntry> breakdown =
+        (routeArgs['breakdown'] as List<dynamic>).cast<PicklistBreakdownEntry>();
 
-    List<Map<String, dynamic>> unweightedBreakdown =
-        routeArgs['unweighted'].cast<Map<String, dynamic>>();
+    List<PicklistBreakdownEntry> unweightedBreakdown =
+        (routeArgs['unweighted'] as List<dynamic>).cast<PicklistBreakdownEntry>();
 
     unweightedBreakdown
-        .removeWhere((e) => e['result'] == 0 || e['result'] == null);
-    unweightedBreakdown.sort((a, b) => b['result'].compareTo(a['result']));
+        .removeWhere((e) => e.result == 0);
+    unweightedBreakdown.sort((a, b) => b.result.compareTo(a.result));
 
-    breakdown.removeWhere((e) => e['result'] == 0 || e['result'] == null);
-    breakdown.sort((a, b) => (b['result'] as num).compareTo(a['result']));
+    breakdown.removeWhere((e) => e.result == 0);
+    breakdown.sort((a, b) => b.result.compareTo(a.result));
+
+    final activeList = weighted ? breakdown : unweightedBreakdown;
 
     return Scaffold(
       appBar: AppBar(
@@ -68,30 +71,22 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
         child: LayoutBuilder(builder: (context, constraints) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
-            children:
-                (weighted ? breakdown : unweightedBreakdown).map((weight) {
-              bool alternate = (weight['result'] as num).isNegative
-                  ? (weighted ? breakdown : unweightedBreakdown)
-                      .indexOf(weight)
-                      .isOdd
-                  : (weighted ? breakdown : unweightedBreakdown)
-                      .indexOf(weight)
-                      .isEven;
+            children: activeList.map((weight) {
+              bool alternate = weight.result.isNegative
+                  ? activeList.indexOf(weight).isOdd
+                  : activeList.indexOf(weight).isEven;
 
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOutCubicEmphasized,
-                key: Key(weight['type']),
+                key: Key(weight.type),
                 height: useSameHeights
-                    ? (1 /
-                            (weighted ? breakdown : unweightedBreakdown)
-                                .length) *
-                        constraints.maxHeight
-                    : ((weight['result'] as num).abs() /
-                            ((weighted ? breakdown : unweightedBreakdown)
-                                .map((e) => (e['result'] as num).abs())
+                    ? (1 / activeList.length) * constraints.maxHeight
+                    : (weight.result.abs() /
+                            activeList
+                                .map((e) => e.result.abs())
                                 .toList()
-                                .sum())) *
+                                .sum()) *
                         constraints.maxHeight,
                 color: alternate
                     ? Theme.of(context).colorScheme.primary
@@ -105,9 +100,9 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                       children: [
                         Text(
                           picklistWeights
-                              .firstWhere((e) => e.path == weight['type'],
+                              .firstWhere((e) => e.path == weight.type,
                                   orElse: () => PicklistWeight(
-                                      weight['type'], weight['type']))
+                                      weight.type, weight.type))
                               .localizedName,
                           overflow: TextOverflow.clip,
                           style: Theme.of(context).textTheme.titleMedium!.merge(
@@ -119,7 +114,7 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                                           .onPrimaryContainer)),
                         ),
                         Text(
-                          (weight['result'] as num).toStringAsFixed(2),
+                          weight.result.toStringAsFixed(2),
                           overflow: TextOverflow.clip,
                           style: Theme.of(context).textTheme.titleMedium!.merge(
                               TextStyle(

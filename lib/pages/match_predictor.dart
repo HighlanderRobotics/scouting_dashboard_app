@@ -3,7 +3,7 @@ import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
-import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_alliance_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_match_prediction.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
@@ -20,7 +20,7 @@ class MatchPredictorPage extends StatefulWidget {
 }
 
 class _MatchPredictorPageState extends State<MatchPredictorPage> {
-  Future<dynamic> _fetchPrediction(Map<String, dynamic> args) async {
+  Future<MatchPrediction> _fetchPrediction(Map<String, dynamic> args) async {
     try {
       return await lovatAPI.getMatchPrediction(
         int.parse(args['red1']),
@@ -31,7 +31,9 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
         int.parse(args['blue3']),
       );
     } on LovatAPIException catch (e) {
-      if (e.message == "Not enough data") return "not enough data";
+      if (e.message == "Not enough data") {
+        throw _NotEnoughDataException();
+      }
       rethrow;
     }
   }
@@ -43,27 +45,27 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
 
     return DefaultTabController(
       length: 2,
-      child: FutureBuilder(
+      child: FutureBuilder<MatchPrediction>(
           future: _fetchPrediction(args),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
+              if (snapshot.error is _NotEnoughDataException) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: const Text("Match Predictor"),
+                  ),
+                  body: notEnoughDataMessage(),
+                  drawer: (ModalRoute.of(context)!.settings.arguments == null)
+                      ? const GlobalNavigationDrawer()
+                      : null,
+                );
+              }
+
               return Scaffold(
                 appBar: AppBar(
                   title: const Text("Match Predictor"),
                 ),
                 body: PageBody(child: Text("Error: ${snapshot.error}")),
-                drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                    ? const GlobalNavigationDrawer()
-                    : null,
-              );
-            }
-
-            if (snapshot.data == "not enough data") {
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text("Match Predictor"),
-                ),
-                body: notEnoughDataMessage(),
                 drawer: (ModalRoute.of(context)!.settings.arguments == null)
                     ? const GlobalNavigationDrawer()
                     : null,
@@ -82,6 +84,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               );
             }
 
+            final prediction = snapshot.data!;
+
             return LayoutBuilder(builder: (context, constraints) {
               if (constraints.maxHeight > constraints.maxWidth) {
                 // Portrait
@@ -95,8 +99,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                           Padding(
                             padding: const EdgeInsets.all(16),
                             child: WinningPrediction(
-                              redWinning: snapshot.data['redWinning'],
-                              blueWinning: snapshot.data['blueWinning'],
+                              redWinning: prediction.redWinning,
+                              blueWinning: prediction.blueWinning,
                             ),
                           ),
                           const TabBar(tabs: [
@@ -119,10 +123,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                   ),
                   body: TabBarView(children: [
                     ScrollablePageBody(children: [
-                      allianceTab(0, snapshot.data),
+                      allianceTab(0, prediction.redAlliance),
                     ]),
                     ScrollablePageBody(children: [
-                      allianceTab(1, snapshot.data),
+                      allianceTab(1, prediction.blueAlliance),
                     ]),
                   ]),
                   drawer: (ModalRoute.of(context)!.settings.arguments == null)
@@ -139,8 +143,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: WinningPrediction(
-                          redWinning: snapshot.data['redWinning'],
-                          blueWinning: snapshot.data['blueWinning'],
+                          redWinning: prediction.redWinning,
+                          blueWinning: prediction.blueWinning,
                         ),
                       ),
                       Row(children: [
@@ -148,14 +152,14 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                           flex: 1,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: allianceTab(0, snapshot.data),
+                            child: allianceTab(0, prediction.redAlliance),
                           ),
                         ),
                         Flexible(
                           flex: 1,
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: allianceTab(1, snapshot.data),
+                            child: allianceTab(1, prediction.blueAlliance),
                           ),
                         ),
                       ]),
@@ -203,85 +207,82 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
     );
   }
 
-  Widget allianceTab(int alliance, Map<String, dynamic> data) {
-    Alliance allianceColor = Alliance.values[alliance];
-
-    Map<String, dynamic> allianceData = data["${allianceColor.name}Alliance"];
-
+  Widget allianceTab(int alliance, AllianceAnalysis allianceData) {
     return Column(children: [
-      allianceData['teams'] == null
+      allianceData.teams.isEmpty
           ? const Text("Not enough data")
           : Row(
-              children: (allianceData['teams']
-                      .map((e) {
-                        final role = RobotRoles.values[e['role']];
+              children: allianceData.teams
+                  .map((e) {
+                    final role = e.robotRole;
 
-                        return Flexible(
-                          flex: 1,
-                          child: InkWell(
-                            onTap: () => Navigator.of(context).pushNamed(
-                                "/team_lookup",
-                                arguments: <String, dynamic>{
-                                  'team':
-                                      int.parse(e['team'].toString().toString())
-                                }),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: [
-                                    Theme.of(context).colorScheme.redAlliance,
-                                    Theme.of(context).colorScheme.blueAlliance
-                                  ][alliance],
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(10))),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Column(
-                                  children: [
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Tooltip(
-                                            message: role.name,
-                                            child: Icon(role.littleEmblem),
-                                          ),
-                                          const SizedBox(width: 5),
-                                          Text(
-                                            e['team'].toString(),
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodyLarge,
-                                          ),
-                                        ]),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      "Avg score",
-                                      style: TextStyle(
-                                        color: [
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .onRedAlliance,
-                                          Theme.of(context)
-                                              .colorScheme
-                                              .onBlueAlliance
-                                        ][alliance],
+                    return Flexible(
+                      flex: 1,
+                      child: InkWell(
+                        onTap: () => Navigator.of(context).pushNamed(
+                            "/team_lookup",
+                            arguments: <String, dynamic>{
+                              'team': e.team
+                            }),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              color: [
+                                Theme.of(context).colorScheme.redAlliance,
+                                Theme.of(context).colorScheme.blueAlliance
+                              ][alliance],
+                              borderRadius: const BorderRadius.all(
+                                  Radius.circular(10))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                    children: [
+                                      if (role != null)
+                                        Tooltip(
+                                          message: role.name,
+                                          child: Icon(role.littleEmblem),
+                                        ),
+                                      if (role != null)
+                                        const SizedBox(width: 5),
+                                      Text(
+                                        e.team.toString(),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyLarge,
                                       ),
-                                    ),
-                                    Text(
-                                      numToStringRounded(e['averagePoints']),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                    )
-                                  ],
+                                    ]),
+                                const SizedBox(height: 10),
+                                Text(
+                                  "Avg score",
+                                  style: TextStyle(
+                                    color: [
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .onRedAlliance,
+                                      Theme.of(context)
+                                          .colorScheme
+                                          .onBlueAlliance
+                                    ][alliance],
+                                  ),
                                 ),
-                              ),
+                                Text(
+                                  numToStringRounded(e.averagePoints),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium,
+                                )
+                              ],
                             ),
                           ),
-                        );
-                      })
-                      .toList()
-                      .cast<Widget>() as List<Widget>)
+                        ),
+                      ),
+                    );
+                  })
+                  .toList()
+                  .cast<Widget>()
                   .withSpaceBetween(width: 15),
             ),
       const SizedBox(height: 15),
@@ -300,10 +301,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             children: [
               const Text("Teleop points"),
               Text(
-                allianceData['totalPoints'] == null
+                allianceData.totalPoints == null
                     ? "--"
                     : numToStringRounded(
-                        allianceData['totalPoints'],
+                        allianceData.totalPoints,
                       ),
               ),
             ],
@@ -331,7 +332,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               fit: FlexFit.tight,
               child: ValueTile(
                 value: Text(
-                    numToStringRounded(allianceData['totalBallThroughput'])),
+                    numToStringRounded(allianceData.totalBallThroughput)),
                 label: const Text('Total output'),
               ),
             ),
@@ -339,7 +340,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
               fit: FlexFit.tight,
               child: ValueTile(
                 value: Text(
-                    numToStringRounded(allianceData['totalFuelOutputted'])),
+                    numToStringRounded(allianceData.totalFuelOutputted)),
                 label: const Text('Hub shots'),
               ),
             ),
@@ -349,6 +350,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
     ]);
   }
 }
+
+class _NotEnoughDataException implements Exception {}
 
 class WinningPrediction extends StatelessWidget {
   const WinningPrediction({

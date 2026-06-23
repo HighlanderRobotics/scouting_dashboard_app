@@ -7,34 +7,57 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
+class PicklistBreakdownEntry {
+  const PicklistBreakdownEntry({
+    required this.type,
+    required this.result,
+  });
+
+  final String type;
+  final double result;
+
+  factory PicklistBreakdownEntry.fromJson(Map<String, dynamic> json) {
+    return PicklistBreakdownEntry(
+      type: json['type'] as String,
+      result: (json['result'] as num?)?.toDouble() ?? 0,
+    );
+  }
+}
+
 class PicklistAnalysisTeam {
   const PicklistAnalysisTeam({
     required this.teamNumber,
     required this.result,
     required this.zScoresWeighted,
     required this.zScoresUnweighted,
+    required this.flags,
   });
 
   final int teamNumber;
   final double result;
-  final Map<String, double> zScoresWeighted;
-  final Map<String, double> zScoresUnweighted;
+  final List<PicklistBreakdownEntry> zScoresWeighted;
+  final List<PicklistBreakdownEntry> zScoresUnweighted;
+  final List<PicklistBreakdownEntry> flags;
 
-  static PicklistAnalysisTeam fromJson(Map<String, dynamic> json) =>
-      PicklistAnalysisTeam(
-        teamNumber: json['team'],
-        result: (json['result'] as num).toDouble(),
-        zScoresWeighted: (json['breakdown'] as List<dynamic>).asMap().map(
-            (_, val) =>
-                MapEntry(val['type'], (val['result'] as num).toDouble())),
-        zScoresUnweighted: (json['unweighted'] as List<dynamic>).asMap().map(
-            (_, val) =>
-                MapEntry(val['type'], (val['result'] as num).toDouble())),
-      );
+  static PicklistAnalysisTeam fromJson(Map<String, dynamic> json) {
+    List<PicklistBreakdownEntry> parseEntries(String key) {
+      return (json[key] as List<dynamic>? ?? [])
+          .map((val) => PicklistBreakdownEntry.fromJson(val as Map<String, dynamic>))
+          .toList();
+    }
+
+    return PicklistAnalysisTeam(
+      teamNumber: json['team'] as int,
+      result: (json['result'] as num?)?.toDouble() ?? 0,
+      zScoresWeighted: parseEntries('breakdown'),
+      zScoresUnweighted: parseEntries('unweighted'),
+      flags: parseEntries('flags'),
+    );
+  }
 }
 
 extension GetPicklistAnalysis on LovatAPI {
-  Future<Map<String, List<dynamic>>> getPicklistAnalysis(
+  Future<List<PicklistAnalysisTeam>> getPicklistAnalysis(
     List<String> flags,
     List<PicklistWeight> weights,
   ) async {
@@ -58,9 +81,9 @@ extension GetPicklistAnalysis on LovatAPI {
 
     final json = jsonDecode(response!.body) as Map<String, dynamic>;
 
-    return {
-      'result': json['teams'] as List<dynamic>,
-    };
+    return (json['teams'] as List<dynamic>)
+        .map((team) => PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
+        .toList();
   }
 
   /// Fetches the full picklist analysis and returns it as a CSV string.
@@ -71,17 +94,13 @@ extension GetPicklistAnalysis on LovatAPI {
     required List<PicklistWeight> weights,
   }) async {
     final flagPaths = flags.map((e) => e.type.path).toList();
-    final json = await getPicklistAnalysis(flagPaths, weights);
-
-    final List<PicklistAnalysisTeam> teams = (json['result'] as List<dynamic>)
-        .map((team) => PicklistAnalysisTeam.fromJson(team))
-        .toList();
+    final teams = await getPicklistAnalysis(flagPaths, weights);
 
     final List<String> columns = [
       "teamNumber",
       "index",
-      ...teams.first.zScoresUnweighted.keys.map((e) => "${e}_unweighted"),
-      ...teams.first.zScoresWeighted.keys.map((e) => "${e}_weighted"),
+      ...teams.first.zScoresUnweighted.map((e) => "${e.type}_unweighted"),
+      ...teams.first.zScoresWeighted.map((e) => "${e.type}_weighted"),
     ];
 
     final List<List<String>> rows = [
@@ -89,8 +108,8 @@ extension GetPicklistAnalysis on LovatAPI {
       ...teams.map((team) => [
             team.teamNumber.toString(),
             team.result.toString(),
-            ...team.zScoresUnweighted.values.map((e) => e.toString()),
-            ...team.zScoresWeighted.values.map((e) => e.toString()),
+            ...team.zScoresUnweighted.map((e) => e.result.toString()),
+            ...team.zScoresWeighted.map((e) => e.result.toString()),
           ]),
     ];
 
