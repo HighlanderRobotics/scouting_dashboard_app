@@ -1,53 +1,130 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_metrics.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class TeamLookupBreakdownsVizualization extends AnalysisVisualization {
-  const TeamLookupBreakdownsVizualization({
-    super.key,
-    required this.function,
-    super.updateIncrement,
-  }) : super(analysisFunction: function);
+class TeamLookupBreakdownsTab extends StatefulWidget {
+  const TeamLookupBreakdownsTab({super.key, required this.team});
 
-  final TeamLookupBreakdownsAnalysis function;
+  final int team;
 
   @override
-  Widget loadingView() {
-    return PageBody(
-      bottom: false,
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-      child: SkeletonListView(
-        itemCount: breakdowns.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 10),
-          child: SizedBox(
-            height: 118,
-            child: SkeletonAvatar(
-              style: SkeletonAvatarStyle(
-                borderRadius: BorderRadius.circular(10),
+  State<TeamLookupBreakdownsTab> createState() =>
+      _TeamLookupBreakdownsTabState();
+}
+
+class _TeamLookupBreakdownsTabState extends State<TeamLookupBreakdownsTab> {
+  Map<String, dynamic>? data;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      error = null;
+    });
+
+    try {
+      final result =
+          await lovatAPI.getBreakdownMetricsByTeamNumber(widget.team);
+      setState(() => data = result);
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load breakdowns");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  @override
+  void didUpdateWidget(TeamLookupBreakdownsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.team != widget.team) fetchData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      if (error!.contains("NO_DATA_FOR_TEAM")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/no_scouters.png", width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "No data found",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "Try using data from more teams or tournaments.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+      if (error!.contains("TEAM_DOES_NOT_EXIST")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/awaiting_verification.png",
+                  width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "Team does not exist",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null) {
+      return PageBody(
+        bottom: false,
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+        child: SkeletonListView(
+          itemCount: breakdowns.length,
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: SizedBox(
+              height: 118,
+              child: SkeletonAvatar(
+                style: SkeletonAvatarStyle(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return ScrollablePageBody(
       children: breakdowns
           .map(
             (BreakdownData breakdownData) => Breakdown(
               dataIdentity: breakdownData,
-              data: (snapshot.data as Map<String, dynamic>).cast(),
-              team: function.team,
+              data: data!.cast(),
+              team: widget.team,
             ),
           )
           .toList(),
@@ -164,7 +241,6 @@ class Breakdown extends StatelessWidget {
       child: Tooltip(
         message: "$name - ${(value * 100).round()}%",
         child: Container(
-          // color: Theme.of(context).colorScheme.primary,
           color: Color.lerp(
             Theme.of(context).colorScheme.primary,
             Theme.of(context).colorScheme.primaryContainer,

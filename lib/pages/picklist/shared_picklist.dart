@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class SharedPicklistPage extends StatelessWidget {
   const SharedPicklistPage({super.key});
@@ -12,8 +16,6 @@ class SharedPicklistPage extends StatelessWidget {
     ConfiguredPicklistMeta picklistMeta = (ModalRoute.of(context)!
         .settings
         .arguments as Map<String, dynamic>)['picklist'];
-
-    final analysisFunction = SharedPicklistAnalysis(picklistMeta: picklistMeta);
 
     return Scaffold(
       appBar: AppBar(
@@ -38,10 +40,8 @@ class SharedPicklistPage extends StatelessWidget {
 
                   try {
                     final picklist = await picklistMeta.getPicklist();
-
                     final mutablePicklist =
                         await MutablePicklist.fromReactivePicklist(picklist);
-
                     await mutablePicklist.upload();
                   } catch (error) {
                     scaffoldMessengerState.hideCurrentSnackBar();
@@ -85,11 +85,15 @@ class SharedPicklistPage extends StatelessWidget {
                   title: Text("Export CSV"),
                   leading: Icon(Icons.download_outlined),
                 ),
-                onTap: () {
+                onTap: () async {
+                  final picklist = await picklistMeta.getPicklist();
+                  if (!context.mounted) return;
                   showModalBottomSheet(
                     context: context,
-                    builder: (context) =>
-                        PicklistExportDrawer(analysisFunction),
+                    builder: (context) => PicklistExportDrawer(
+                      picklistTitle: picklistMeta.title,
+                      weights: picklist.weights,
+                    ),
                   );
                 },
               ),
@@ -100,10 +104,127 @@ class SharedPicklistPage extends StatelessWidget {
       body: PageBody(
         padding: EdgeInsets.zero,
         bottom: false,
-        child: PicklistVisuzlization(
-          analysisFunction: analysisFunction,
-        ),
+        child: SharedPicklistView(picklistMeta: picklistMeta),
       ),
+    );
+  }
+}
+
+class SharedPicklistView extends StatefulWidget {
+  const SharedPicklistView({super.key, required this.picklistMeta});
+
+  final ConfiguredPicklistMeta picklistMeta;
+
+  @override
+  State<SharedPicklistView> createState() => _SharedPicklistViewState();
+}
+
+class _SharedPicklistViewState extends State<SharedPicklistView> {
+  Map<String, List<dynamic>>? data;
+  List<FlagConfiguration>? flags;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      flags = null;
+      error = null;
+    });
+
+    try {
+      final fetchedFlags = await getPicklistFlags();
+      final flagPaths = fetchedFlags.map((e) => e.type.path).toList();
+      final picklist = await widget.picklistMeta.getPicklist();
+      final result =
+          await lovatAPI.getPicklistAnalysis(flagPaths, picklist.weights);
+      setState(() {
+        flags = fetchedFlags;
+        data = {...result, 'flags': fetchedFlags};
+      });
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load picklist");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null || flags == null) {
+      return SkeletonListView(
+        itemBuilder: (context, index) => SkeletonListTile(),
+      );
+    }
+
+    final result = data!['result']!;
+
+    return ListView(
+      children: result
+          .map((teamData) => ListTile(
+                title: Text(teamData['team'].toString()),
+                contentPadding: const EdgeInsets.only(left: 16, right: 4),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    FlagRow(
+                      flags!,
+                      teamData['flags']
+                          .asMap()
+                          .map(
+                            (k, value) => MapEntry(
+                              value['type'],
+                              value['result'],
+                            ),
+                          )
+                          .cast<String, dynamic>(),
+                      teamData['team'],
+                      onEdit: fetchData,
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context).pushNamed(
+                            "/picklist_team_breakdown",
+                            arguments: {
+                              'team': int.parse(teamData['team'].toString()),
+                              'breakdown': teamData['breakdown'],
+                              'unweighted': teamData['unweighted'],
+                              'picklistTitle': widget.picklistMeta.title,
+                            });
+                      },
+                      icon: Icon(
+                        Icons.balance,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      tooltip: "View ${teamData['team']}'s z-scores",
+                    ),
+                    IconButton(
+                      onPressed: () {
+                        Navigator.of(context)
+                            .pushNamed("/team_lookup", arguments: {
+                          'team': int.parse(teamData['team'].toString()),
+                        });
+                      },
+                      icon: Icon(
+                        Icons.arrow_right,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                      tooltip:
+                          "Open team lookup for ${teamData['team']}",
+                    ),
+                  ],
+                ),
+              ))
+          .toList(),
     );
   }
 }

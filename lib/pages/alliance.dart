@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/alliance_analysis.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_alliance_analysis.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
@@ -16,28 +17,77 @@ class AlliancePage extends StatefulWidget {
 }
 
 class _AlliancePageState extends State<AlliancePage> {
+  Map<String, dynamic>? data;
+  String? error;
+  late List<int> teams;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      error = null;
+    });
+
+    try {
+      final result = await lovatAPI.getAllianceAnalysis(teams);
+      setState(() => data = result);
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load alliance data");
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    teams = (ModalRoute.of(context)!.settings.arguments
+        as Map<String, dynamic>)['teams'];
+    if (data == null && error == null) fetchData();
+  }
+
   @override
   Widget build(BuildContext context) {
-    List<int> teams = (ModalRoute.of(context)!.settings.arguments
-        as Map<String, dynamic>)['teams'];
     return Scaffold(
-      appBar: AppBar(title: const Text("Alliance")),
-      body: ScrollablePageBody(children: [
-        AllianceVizualization(analysisFunction: AllianceAnalysis(teams: teams))
-      ]),
+      appBar: AppBar(
+        title: const Text("Alliance"),
+        actions: [
+          if (error != null || data != null)
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: fetchData,
+            ),
+        ],
+      ),
+      body: _buildBody(),
     );
+  }
+
+  Widget _buildBody() {
+    if (error != null) {
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    return ScrollablePageBody(children: [_AllianceContent(data: data!)]);
   }
 }
 
-class AllianceVizualization extends AnalysisVisualization {
-  const AllianceVizualization({
-    super.key,
-    required AllianceAnalysis super.analysisFunction,
-  });
+class _AllianceContent extends StatefulWidget {
+  const _AllianceContent({required this.data});
+
+  final Map<String, dynamic> data;
 
   @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    Map<String, dynamic> analysisMap = snapshot.data;
+  State<_AllianceContent> createState() => _AllianceContentState();
+}
+
+class _AllianceContentState extends State<_AllianceContent> {
+  @override
+  Widget build(BuildContext context) {
+    final analysisMap = widget.data;
 
     return Column(children: [
       Row(
@@ -432,7 +482,6 @@ Container reefStack(
                   ),
               ],
             ),
-            // L1, L2, L3 rows
             for (var row = 0; row < 3; row++)
               TableRow(
                 children: [

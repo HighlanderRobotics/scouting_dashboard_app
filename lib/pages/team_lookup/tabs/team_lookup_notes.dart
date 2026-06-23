@@ -1,49 +1,87 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_notes.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class TeamLookupNotesVizualization extends AnalysisVisualization {
-  const TeamLookupNotesVizualization({
-    super.key,
-    required this.function,
-    super.updateIncrement,
-  }) : super(analysisFunction: function);
+class TeamLookupNotesTab extends StatefulWidget {
+  const TeamLookupNotesTab({super.key, required this.team});
 
-  final TeamLookupNotesAnalysis function;
+  final int team;
 
   @override
-  Widget loadingView() {
-    return PageBody(
-      bottom: false,
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-      child: SkeletonListView(
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 20),
-          child: SkeletonAvatar(
-            style: SkeletonAvatarStyle(
-              borderRadius: BorderRadius.circular(10),
-              randomHeight: true,
-              minHeight: 74,
-              maxHeight: 160,
-            ),
-          ),
-        ),
-      ),
-    );
+  State<TeamLookupNotesTab> createState() => _TeamLookupNotesTabState();
+}
+
+class _TeamLookupNotesTabState extends State<TeamLookupNotesTab> {
+  List<Note>? notes;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      notes = null;
+      error = null;
+    });
+
+    try {
+      final fetched = await lovatAPI.getNotesByTeamNumber(widget.team);
+      setState(() {
+        notes = [
+          ...fetched.where((e) => e.type == NoteType.breakDescription),
+          ...fetched.where((e) => e.type != NoteType.breakDescription),
+        ];
+      });
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load notes");
+    }
   }
 
   @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    final notes = snapshot.data as List<Note>;
+  void initState() {
+    super.initState();
+    fetchData();
+  }
 
-    return notes.isEmpty
+  @override
+  void didUpdateWidget(TeamLookupNotesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.team != widget.team) fetchData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (notes == null) {
+      return PageBody(
+        bottom: false,
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+        child: SkeletonListView(
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: SkeletonAvatar(
+              style: SkeletonAvatarStyle(
+                borderRadius: BorderRadius.circular(10),
+                randomHeight: true,
+                minHeight: 74,
+                maxHeight: 160,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return notes!.isEmpty
         ? SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -54,7 +92,7 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
                   width: 250,
                 ),
                 Text(
-                  "No notes on ${function.team}",
+                  "No notes on ${widget.team}",
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
               ],
@@ -63,11 +101,11 @@ class TeamLookupNotesVizualization extends AnalysisVisualization {
         : ScrollablePageBody(
             children: [
               NotesList(
-                notes: (notes)
+                notes: notes!
                     .map(
                       (note) => NoteWidget(
                         note,
-                        onEdit: () => super.loadData(),
+                        onEdit: fetchData,
                       ),
                     )
                     .toList(),

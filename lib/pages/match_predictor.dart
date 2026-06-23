@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/match_predictor_analysis.dart';
 import 'package:scouting_dashboard_app/color_schemes.g.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/alliance.dart';
 import 'package:scouting_dashboard_app/pages/match_schedule.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/get_match_prediction.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -19,34 +20,31 @@ class MatchPredictorPage extends StatefulWidget {
 }
 
 class _MatchPredictorPageState extends State<MatchPredictorPage> {
-  MatchPredictorAnalysis? analysisFunction;
+  Future<dynamic> _fetchPrediction(Map<String, dynamic> args) async {
+    try {
+      return await lovatAPI.getMatchPrediction(
+        int.parse(args['red1']),
+        int.parse(args['red2']),
+        int.parse(args['red3']),
+        int.parse(args['blue1']),
+        int.parse(args['blue2']),
+        int.parse(args['blue3']),
+      );
+    } on LovatAPIException catch (e) {
+      if (e.message == "Not enough data") return "not enough data";
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final String blue1 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['blue1'];
-    final String blue2 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['blue2'];
-    final String blue3 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['blue3'];
-    final String red1 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['red1'];
-    final String red2 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['red2'];
-    final String red3 = (ModalRoute.of(context)!.settings.arguments!
-        as Map<String, dynamic>)['red3'];
+    final args =
+        ModalRoute.of(context)!.settings.arguments! as Map<String, dynamic>;
 
     return DefaultTabController(
       length: 2,
       child: FutureBuilder(
-          future: MatchPredictorAnalysis(
-            red1: int.parse(red1),
-            red2: int.parse(red2),
-            red3: int.parse(red3),
-            blue1: int.parse(blue1),
-            blue2: int.parse(blue2),
-            blue3: int.parse(blue3),
-          ).getAnalysis(),
+          future: _fetchPrediction(args),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Scaffold(

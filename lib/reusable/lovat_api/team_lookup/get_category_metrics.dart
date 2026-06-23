@@ -16,8 +16,17 @@ extension GetCategoryMetrics on LovatAPI {
       throw Exception('Failed to get category metrics');
     }
 
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
+    try {
+      final json = jsonDecode(response!.body) as Map<String, dynamic>;
 
-    return json;
+      return json;
+    } on FormatException {
+      if (["TEAM_DOES_NOT_EXIST", "NO_DATA_FOR_TEAM"]
+          .contains(response!.body)) {
+        throw LovatAPIException(response.body);
+      } else {
+        rethrow;
+      }
+    }
   }
 }

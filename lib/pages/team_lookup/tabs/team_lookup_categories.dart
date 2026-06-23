@@ -1,44 +1,121 @@
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_category_metrics.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class TeamLookupCategoriesVizualization extends AnalysisVisualization {
-  const TeamLookupCategoriesVizualization({
-    super.key,
-    required this.function,
-    super.updateIncrement,
-  }) : super(analysisFunction: function);
+class TeamLookupCategoriesTab extends StatefulWidget {
+  const TeamLookupCategoriesTab({super.key, required this.team});
 
-  final TeamLookupCategoriesAnalysis function;
+  final int team;
 
   @override
-  Widget loadingView() {
-    return PageBody(
-      bottom: false,
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
-      child: SkeletonListView(
-        itemCount: metricCategories.length,
-        itemBuilder: (context, index) => Padding(
-          padding: const EdgeInsets.only(bottom: 15),
-          child: SizedBox(
-            height: 117,
-            child: SkeletonAvatar(
-              style: SkeletonAvatarStyle(
-                borderRadius: BorderRadius.circular(10),
+  State<TeamLookupCategoriesTab> createState() =>
+      _TeamLookupCategoriesTabState();
+}
+
+class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
+  Map<String, dynamic>? data;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      error = null;
+    });
+
+    try {
+      final result = await lovatAPI.getCategoryMetricsByTeamNumber(widget.team);
+      setState(() => data = result);
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (e) {
+      debugPrint(e.toString());
+      setState(() => error = "Failed to load metrics");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  @override
+  void didUpdateWidget(TeamLookupCategoriesTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.team != widget.team) fetchData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      if (error!.contains("NO_DATA_FOR_TEAM")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/no_scouters.png", width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "No data found",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 2),
+              Text(
+                "Try using data from more teams or tournaments.",
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+      if (error!.contains("TEAM_DOES_NOT_EXIST")) {
+        return PageBody(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset("assets/images/awaiting_verification.png",
+                  width: 250),
+              const SizedBox(height: 8),
+              Text(
+                "Team does not exist",
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        );
+      }
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null) {
+      return PageBody(
+        bottom: false,
+        padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
+        child: SkeletonListView(
+          itemCount: metricCategories.length,
+          itemBuilder: (context, index) => Padding(
+            padding: const EdgeInsets.only(bottom: 15),
+            child: SizedBox(
+              height: 117,
+              child: SkeletonAvatar(
+                style: SkeletonAvatarStyle(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-  }
+      );
+    }
 
-  @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
     return ScrollablePageBody(
       children: [
         MetricCategoryList(
@@ -52,8 +129,8 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                             value: (() {
                               try {
                                 return metric.valueVizualizationBuilder(
-                                    snapshot.data[metric.path]);
-                              } catch (error) {
+                                    data![metric.path]);
+                              } catch (_) {
                                 return "--";
                               }
                             })(),
@@ -66,7 +143,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                                         arguments: {
                                           'category': category,
                                           'metric': metric.path,
-                                          'team': function.team,
+                                          'team': widget.team,
                                         });
                                   },
                           ),
@@ -80,7 +157,7 @@ class TeamLookupCategoriesVizualization extends AnalysisVisualization {
                             Navigator.of(context)
                                 .pushNamed("/team_lookup_details", arguments: {
                               'category': category,
-                              'team': function.team,
+                              'team': widget.team,
                             });
                           },
                   ))

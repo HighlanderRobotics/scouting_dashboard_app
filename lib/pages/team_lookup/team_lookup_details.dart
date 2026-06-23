@@ -1,8 +1,9 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_metric_details_analysis.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_metric_details.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
@@ -110,11 +111,9 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
                           ],
                         ),
                       AnalysisOverview(
-                        analysisFunction: TeamMetricDetailsAnalysis(
-                          teamNumber: teamNumber,
-                          metric: metric,
-                        ),
-                      )
+                        teamNumber: teamNumber,
+                        metric: metric,
+                      ),
                     ],
                   ))
               .toList(),
@@ -124,26 +123,74 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
   }
 }
 
-class AnalysisOverview
-    extends AnalysisVisualization<TeamMetricDetailsAnalysis> {
+class AnalysisOverview extends StatefulWidget {
   const AnalysisOverview({
     super.key,
-    required super.analysisFunction,
+    required this.teamNumber,
+    required this.metric,
   });
 
+  final int teamNumber;
+  final CategoryMetric metric;
+
   @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    Map<String, dynamic> analysisMap = snapshot.data;
+  State<AnalysisOverview> createState() => _AnalysisOverviewState();
+}
+
+class _AnalysisOverviewState extends State<AnalysisOverview> {
+  Map<String, dynamic>? data;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      error = null;
+    });
+
+    try {
+      final result =
+          await lovatAPI.getMetricDetails(widget.teamNumber, widget.metric.path);
+      setState(() => data = result);
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load metric details");
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  @override
+  void didUpdateWidget(AnalysisOverview oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.teamNumber != widget.teamNumber ||
+        oldWidget.metric.path != widget.metric.path) {
+      fetchData();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
     return Column(
       children: [
         Row(children: [
-          if (analysisMap.containsKey('result'))
+          if (data!.containsKey('result'))
             valueBox(
               context,
               Text(
-                analysisFunction.metric
-                    .valueVizualizationBuilder(snapshot.data['result']),
+                widget.metric.valueVizualizationBuilder(data!['result']),
                 style: Theme.of(context).textTheme.headlineSmall!.merge(
                       TextStyle(
                           color:
@@ -154,15 +201,14 @@ class AnalysisOverview
               false,
             ),
           const SizedBox(width: 10),
-          if (analysisMap.containsKey('all'))
+          if (data!.containsKey('all'))
             Flexible(
               flex: 5,
               fit: FlexFit.tight,
               child: valueBox(
                 context,
                 Text(
-                  analysisFunction.metric
-                      .valueVizualizationBuilder(snapshot.data['all']),
+                  widget.metric.valueVizualizationBuilder(data!['all']),
                   style: Theme.of(context).textTheme.headlineSmall!.merge(
                         TextStyle(
                             color: Theme.of(context).colorScheme.onPrimary),
@@ -173,13 +219,13 @@ class AnalysisOverview
               ),
             ),
           const SizedBox(width: 10),
-          if (analysisMap.containsKey('difference'))
+          if (data!.containsKey('difference'))
             Flexible(
               flex: 6,
               fit: FlexFit.tight,
               child: valueBox(
                 context,
-                analysisMap['difference'] == null
+                data!['difference'] == null
                     ? Text(
                         "--",
                         style: Theme.of(context).textTheme.headlineSmall!.merge(
@@ -193,7 +239,7 @@ class AnalysisOverview
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            (snapshot.data['difference'] as num).isNegative
+                            (data!['difference'] as num).isNegative
                                 ? Icons.arrow_drop_down
                                 : Icons.arrow_drop_up,
                             color: Theme.of(context)
@@ -201,8 +247,8 @@ class AnalysisOverview
                                 .onPrimaryContainer,
                           ),
                           Text(
-                            analysisFunction.metric.valueVizualizationBuilder(
-                                (snapshot.data['difference'] as num).abs()),
+                            widget.metric.valueVizualizationBuilder(
+                                (data!['difference'] as num).abs()),
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall!
@@ -220,14 +266,13 @@ class AnalysisOverview
               ),
             ),
         ]),
-        if (analysisMap.containsKey('array') &&
-            analysisMap['array'] != null) ...[
+        if (data!.containsKey('array') && data!['array'] != null) ...[
           const SizedBox(height: 10),
-          sparkline(context, snapshot, analysisFunction.metric.max),
+          sparkline(context, data!, widget.metric.max),
         ],
-        if (analysisMap.containsKey('paths'))
+        if (data!.containsKey('paths'))
           TeamAutoPaths(
-            autoPaths: (analysisMap['paths'] as List<dynamic>)
+            autoPaths: (data!['paths'] as List<dynamic>)
                 .map((e) => AutoPath.fromMap(e))
                 .toList(),
           ),
@@ -236,7 +281,7 @@ class AnalysisOverview
   }
 
   Widget sparkline(
-      BuildContext context, AsyncSnapshot<dynamic> snapshot, double? max) {
+      BuildContext context, Map<String, dynamic> data, double? max) {
     return Column(
       children: [
         AspectRatio(
@@ -246,7 +291,7 @@ class AnalysisOverview
               borderRadius: const BorderRadius.all(Radius.circular(10)),
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
-            child: snapshot.data['array'].isEmpty
+            child: data['array'].isEmpty
                 ? const Center(
                     child: Text("No matches"),
                   )
@@ -262,11 +307,11 @@ class AnalysisOverview
                             return touchedSpots.map((touchedSpot) {
                               final matchIdentity =
                                   GameMatchIdentity.fromLongKey(
-                                      snapshot.data['array']
-                                          [touchedSpot.spotIndex]['match']);
+                                      data['array'][touchedSpot.spotIndex]
+                                          ['match']);
 
                               return LineTooltipItem(
-                                "${matchIdentity.getShortLocalizedDescription()} at ${snapshot.data['array'][touchedSpot.spotIndex]['tournamentName']}",
+                                "${matchIdentity.getShortLocalizedDescription()} at ${data['array'][touchedSpot.spotIndex]['tournamentName']}",
                                 Theme.of(context).textTheme.labelMedium!,
                               );
                             }).toList();
@@ -277,7 +322,7 @@ class AnalysisOverview
                           topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
                             axisNameWidget: Text(
-                              analysisFunction.metric.abbreviatedNameWithUnits,
+                              widget.metric.abbreviatedNameWithUnits,
                             ),
                             sideTitles: SideTitles(
                                 showTitles: true,
@@ -323,7 +368,7 @@ class AnalysisOverview
                         lineBarsData: [
                           LineChartBarData(
                             spots: (() {
-                              final List array = snapshot.data['array'];
+                              final List array = data['array'];
 
                               List<FlSpot> spots = [];
 

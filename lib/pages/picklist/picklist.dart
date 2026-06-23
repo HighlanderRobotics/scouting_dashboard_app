@@ -2,12 +2,10 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/edit_picklist_flags.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
-import 'package:scouting_dashboard_app/reusable/analysis_visualization.dart';
 import 'package:scouting_dashboard_app/reusable/download_file.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
@@ -27,8 +25,14 @@ class MyPicklistPage extends StatefulWidget {
 }
 
 class _MyPicklistPageState extends State<MyPicklistPage> {
-  GlobalKey<AnalysisVisualizationState> picklistVisualizationKey =
-      GlobalKey<AnalysisVisualizationState>();
+  // Key is recreated to force PicklistView to fully reload.
+  Key picklistViewKey = UniqueKey();
+
+  void _reloadPicklist() {
+    setState(() {
+      picklistViewKey = UniqueKey();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,8 +42,6 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
     Future<void> Function() onChanged = (ModalRoute.of(context)!
         .settings
         .arguments as Map<String, dynamic>)['onChanged'];
-
-    final analysisFunction = MyPicklistAnalysis(picklist: picklist);
 
     return Scaffold(
       appBar: AppBar(
@@ -58,11 +60,7 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
                     'picklist': picklist,
                     'onChanged': () async {
                       await onChanged();
-
-                      setState(() {
-                        picklistVisualizationKey =
-                            GlobalKey<AnalysisVisualizationState>();
-                      });
+                      _reloadPicklist();
                     }
                   });
                 },
@@ -120,8 +118,10 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
                 onTap: () {
                   showModalBottomSheet(
                     context: context,
-                    builder: (context) =>
-                        PicklistExportDrawer(analysisFunction),
+                    builder: (context) => PicklistExportDrawer(
+                      picklistTitle: picklist.title,
+                      weights: picklist.weights,
+                    ),
                   );
                 },
               ),
@@ -132,35 +132,74 @@ class _MyPicklistPageState extends State<MyPicklistPage> {
       body: PageBody(
         padding: EdgeInsets.zero,
         bottom: false,
-        child: PicklistVisuzlization(
-          analysisFunction: analysisFunction,
-          key: picklistVisualizationKey,
+        child: PicklistView(
+          key: picklistViewKey,
+          picklist: picklist,
         ),
       ),
     );
   }
 }
 
-class PicklistVisuzlization extends AnalysisVisualization {
-  const PicklistVisuzlization({
-    super.key,
-    required PicklistAnalysis super.analysisFunction,
-  });
+class PicklistView extends StatefulWidget {
+  const PicklistView({super.key, required this.picklist});
+
+  final ConfiguredPicklist picklist;
 
   @override
-  Widget loadingView() {
-    return SkeletonListView(
-      itemBuilder: (context, index) => SkeletonListTile(),
-    );
+  State<PicklistView> createState() => _PicklistViewState();
+}
+
+class _PicklistViewState extends State<PicklistView> {
+  Map<String, List<dynamic>>? data;
+  List<FlagConfiguration>? flags;
+  String? error;
+
+  Future<void> fetchData() async {
+    setState(() {
+      data = null;
+      flags = null;
+      error = null;
+    });
+
+    try {
+      final fetchedFlags = await getPicklistFlags();
+      final flagPaths = fetchedFlags.map((e) => e.type.path).toList();
+      final result = await lovatAPI.getPicklistAnalysis(
+          flagPaths, widget.picklist.weights);
+      setState(() {
+        flags = fetchedFlags;
+        data = {...result, 'flags': fetchedFlags};
+      });
+    } on LovatAPIException catch (e) {
+      setState(() => error = e.message);
+    } catch (_) {
+      setState(() => error = "Failed to load picklist");
+    }
   }
 
   @override
-  Widget loadedData(BuildContext context, AsyncSnapshot snapshot) {
-    final result = snapshot.data['result'];
-    final List<FlagConfiguration> flagConfigurations = snapshot.data['flags'];
+  void initState() {
+    super.initState();
+    fetchData();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (error != null) {
+      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
+    }
+
+    if (data == null || flags == null) {
+      return SkeletonListView(
+        itemBuilder: (context, index) => SkeletonListTile(),
+      );
+    }
+
+    final result = data!['result']!;
 
     return ListView(
-      children: (result as List<dynamic>)
+      children: result
           .map((teamData) => ListTile(
                 title: Text(teamData['team'].toString()),
                 contentPadding: const EdgeInsets.only(left: 16, right: 4),
@@ -168,7 +207,7 @@ class PicklistVisuzlization extends AnalysisVisualization {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     FlagRow(
-                      flagConfigurations,
+                      flags!,
                       teamData['flags']
                           .asMap()
                           .map(
@@ -179,26 +218,25 @@ class PicklistVisuzlization extends AnalysisVisualization {
                           )
                           .cast<String, dynamic>(),
                       teamData['team'],
-                      onEdit: () => super.loadData(),
+                      onEdit: fetchData,
                     ),
                     IconButton(
                       onPressed: () {
-                        Navigator.of(context)
-                            .pushNamed("/picklist_team_breakdown", arguments: {
-                          'team': int.parse(teamData['team'].toString()),
-                          'breakdown': teamData['breakdown'],
-                          'unweighted': teamData['unweighted'],
-                          'picklistTitle':
-                              (analysisFunction as PicklistAnalysis)
-                                  .picklistMeta
-                                  .title,
-                        });
+                        Navigator.of(context).pushNamed(
+                            "/picklist_team_breakdown",
+                            arguments: {
+                              'team': int.parse(teamData['team'].toString()),
+                              'breakdown': teamData['breakdown'],
+                              'unweighted': teamData['unweighted'],
+                              'picklistTitle': widget.picklist.meta.title,
+                            });
                       },
                       icon: Icon(
                         Icons.balance,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
-                      tooltip: "View ${teamData['team']}'s z-scores",
+                      tooltip:
+                          "View ${teamData['team']}'s z-scores",
                     ),
                     IconButton(
                       onPressed: () {
@@ -334,9 +372,14 @@ Future<int?> getRank(int team) async {
 }
 
 class PicklistExportDrawer extends StatefulWidget {
-  const PicklistExportDrawer(this.analysisFunction, {super.key});
+  const PicklistExportDrawer({
+    super.key,
+    required this.picklistTitle,
+    required this.weights,
+  });
 
-  final PicklistAnalysis analysisFunction;
+  final String picklistTitle;
+  final List<PicklistWeight> weights;
 
   @override
   State<PicklistExportDrawer> createState() => _PicklistExportDrawerState();
@@ -354,30 +397,29 @@ class _PicklistExportDrawerState extends State<PicklistExportDrawer> {
         });
         return;
       }
-      final csv = await lovatAPI.getPicklistCSV(widget.analysisFunction);
+
+      final flags = await getPicklistFlags();
+      final csv = await lovatAPI.getPicklistCSV(
+        flags: flags,
+        weights: widget.weights,
+      );
 
       final csvFile = XFile.fromData(
         utf8.encode(csv),
         mimeType: "text/csv",
       );
 
-      if (!mounted) {
-        return;
-      }
+      if (!mounted) return;
 
       if (kIsWeb) {
         await downloadFile(
-          "${widget.analysisFunction.picklistMeta.title}.csv",
+          "${widget.picklistTitle}.csv",
           await csvFile.readAsBytes(),
           "text/csv",
         );
-
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) return;
       } else {
-        Share.shareXFiles([csvFile],
-            subject: widget.analysisFunction.picklistMeta.title);
+        Share.shareXFiles([csvFile], subject: widget.picklistTitle);
       }
 
       Navigator.of(context).pop();
@@ -387,7 +429,6 @@ class _PicklistExportDrawerState extends State<PicklistExportDrawer> {
       });
     } catch (e) {
       debugPrint(e.toString());
-
       setState(() {
         errorMessage = "Failed to export data";
       });

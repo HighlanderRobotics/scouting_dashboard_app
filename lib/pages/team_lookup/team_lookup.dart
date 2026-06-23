@@ -1,9 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_breakdowns_analysis.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_categories_analysis.dart';
-import 'package:scouting_dashboard_app/analysis_functions/team_lookup_notes_analysis.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/edit_team_lookup_flag.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_breakdowns.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/tabs/team_lookup_categories.dart';
@@ -29,7 +26,6 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
   int? teamNumberForAnalysis;
 
   int flagChangeCount = 0;
-  int updateIncrement = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +76,6 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                               } else {
                                 teamNumberForAnalysis = null;
                               }
-                              updateIncrement++;
                             });
                           });
                         },
@@ -146,24 +141,17 @@ class _TeamLookupPageState extends State<TeamLookupPage> {
                 color: Theme.of(context).colorScheme.surface,
                 child: TabBarView(
                   children: [
-                    TeamLookupCategoriesVizualization(
-                      updateIncrement: updateIncrement,
-                      function: TeamLookupCategoriesAnalysis(
-                        team: teamNumberForAnalysis!,
-                      ),
+                    TeamLookupCategoriesTab(
+                      key: ValueKey('categories-$teamNumberForAnalysis'),
+                      team: teamNumberForAnalysis!,
                     ),
-                    TeamLookupBreakdownsVizualization(
-                      updateIncrement: updateIncrement,
-                      function: TeamLookupBreakdownsAnalysis(
-                        team: teamNumberForAnalysis!,
-                      ),
+                    TeamLookupBreakdownsTab(
+                      key: ValueKey('breakdowns-$teamNumberForAnalysis'),
+                      team: teamNumberForAnalysis!,
                     ),
-                    TeamLookupNotesVizualization(
-                      key: GlobalKey(),
-                      updateIncrement: updateIncrement,
-                      function: TeamLookupNotesAnalysis(
-                        team: teamNumberForAnalysis!,
-                      ),
+                    TeamLookupNotesTab(
+                      key: ValueKey('notes-$teamNumberForAnalysis'),
+                      team: teamNumberForAnalysis!,
                     ),
                   ],
                 ),

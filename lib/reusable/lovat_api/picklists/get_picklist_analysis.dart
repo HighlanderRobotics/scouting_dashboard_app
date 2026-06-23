@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
-import 'package:scouting_dashboard_app/analysis_functions/picklist_analysis.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 class PicklistAnalysisTeam {
@@ -63,8 +63,15 @@ extension GetPicklistAnalysis on LovatAPI {
     };
   }
 
-  Future<String> getPicklistCSV(PicklistAnalysis analysisFunction) async {
-    final json = await analysisFunction.getOnlineAnalysis();
+  /// Fetches the full picklist analysis and returns it as a CSV string.
+  /// [flags] are the flag configurations to include.
+  /// [weights] are the picklist weights.
+  Future<String> getPicklistCSV({
+    required List<FlagConfiguration> flags,
+    required List<PicklistWeight> weights,
+  }) async {
+    final flagPaths = flags.map((e) => e.type.path).toList();
+    final json = await getPicklistAnalysis(flagPaths, weights);
 
     final List<PicklistAnalysisTeam> teams = (json['result'] as List<dynamic>)
         .map((team) => PicklistAnalysisTeam.fromJson(team))
