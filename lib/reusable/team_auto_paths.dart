@@ -133,12 +133,12 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
           ),
           ...(selectedPath!.matches
               .map(
-                (e) => Row(
+                (match) => Row(
                   children: [
                     Flexible(
                       fit: FlexFit.tight,
                       child: Text(
-                        e.getLocalizedDescription(),
+                        match.getLocalizedDescription(abbreviateName: true),
                         style: Theme.of(context).textTheme.bodyMedium!.merge(
                               TextStyle(
                                 color: Theme.of(context)
@@ -155,7 +155,7 @@ class _TeamAutoPathsState extends State<TeamAutoPaths>
                       padding: const EdgeInsets.fromLTRB(7, 4, 7, 4),
                       radius: 7,
                       child: Text(
-                        "Score: ${numToStringRounded(selectedPath!.scores[selectedPath!.matches.indexOf(e)])}",
+                        "Score: ${numToStringRounded(selectedPath!.scores[selectedPath!.matches.indexOf(match)])}",
                         style: Theme.of(context).textTheme.bodyMedium!.merge(
                               TextStyle(
                                 color: Theme.of(context)
