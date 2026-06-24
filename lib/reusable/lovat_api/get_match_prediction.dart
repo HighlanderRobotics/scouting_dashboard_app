@@ -32,6 +32,29 @@ class MatchPrediction {
 }
 
 extension GetMatchPrediction on LovatAPI {
+  MatchPrediction? getCachedMatchPrediction(
+    int red1,
+    int red2,
+    int red3,
+    int blue1,
+    int blue2,
+    int blue3,
+  ) {
+    return getCachedData(
+      '/v1/analysis/matchprediction',
+      query: {
+        'red1': red1.toString(),
+        'red2': red2.toString(),
+        'red3': red3.toString(),
+        'blue1': blue1.toString(),
+        'blue2': blue2.toString(),
+        'blue3': blue3.toString(),
+      },
+      parser: (json) =>
+          MatchPrediction.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
   Future<MatchPrediction> getMatchPrediction(
     int red1,
     int red2,

@@ -4,6 +4,7 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_category_metrics.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
@@ -20,21 +21,40 @@ class TeamLookupCategoriesTab extends StatefulWidget {
 class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
   CategoryMetrics? data;
   String? error;
+  bool isRefreshing = false;
 
   Future<void> fetchData() async {
+    // Show stale data from cache immediately
+    final cached = lovatAPI.getCachedCategoryMetricsByTeamNumber(widget.team);
+    if (cached != null && data == null && error == null) {
+      setState(() {
+        data = cached;
+      });
+    }
+
     setState(() {
-      data = null;
-      error = null;
+      isRefreshing = true;
     });
 
     try {
       final result = await lovatAPI.getCategoryMetricsByTeamNumber(widget.team);
-      setState(() => data = result);
+      setState(() {
+        data = result;
+        error = null;
+      });
     } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
+      if (data == null) {
+        setState(() => error = e.message);
+      }
     } catch (e) {
       debugPrint(e.toString());
-      setState(() => error = "Failed to load metrics");
+      if (data == null) {
+        setState(() => error = "Failed to load metrics");
+      }
+    } finally {
+      setState(() {
+        isRefreshing = false;
+      });
     }
   }
 
@@ -47,11 +67,80 @@ class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
   @override
   void didUpdateWidget(TeamLookupCategoriesTab oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.team != widget.team) fetchData();
+    if (oldWidget.team != widget.team) {
+      setState(() {
+        data = null;
+        error = null;
+      });
+      fetchData();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    if (data != null) {
+      return Column(
+        children: [
+          StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: data != null,
+          ),
+          Expanded(
+            child: ScrollablePageBody(
+              children: [
+                MetricCategoryList(
+                  metricCategories: metricCategories
+                      .map((category) => MetricCategory(
+                            categoryName: category.localizedName,
+                            metricTiles: category.metrics
+                                .where((metric) => metric.hideOverview == false)
+                                .map(
+                                  (metric) => MetricTile(
+                                    value: (() {
+                                      try {
+                                        return metric.valueVizualizationBuilder(
+                                            data!.valueForMetric(metric));
+                                      } catch (_) {
+                                        return "--";
+                                      }
+                                    })(),
+                                    label: metric.abbreviatedLocalizedName,
+                                    onTap: metric.hideDetails
+                                        ? null
+                                        : () {
+                                            Navigator.of(context).pushNamed(
+                                                "/team_lookup_details",
+                                                arguments: {
+                                                  'category': category,
+                                                  'metric': metric.path,
+                                                  'team': widget.team,
+                                                });
+                                          },
+                                  ),
+                                )
+                                .toList(),
+                            onTap: category.metrics
+                                .where((metric) => !metric.hideDetails)
+                                .isEmpty
+                                ? null
+                                : () {
+                                    Navigator.of(context)
+                                        .pushNamed("/team_lookup_details",
+                                            arguments: {
+                                      'category': category,
+                                      'team': widget.team,
+                                    });
+                                  },
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
     if (error != null) {
       if (error!.contains("NO_DATA_FOR_TEAM")) {
         return PageBody(
@@ -95,77 +184,25 @@ class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
       return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
     }
 
-    if (data == null) {
-      return PageBody(
-        bottom: false,
-        padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
-        child: SkeletonListView(
-          itemCount: metricCategories.length,
-          itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(bottom: 15),
-            child: SizedBox(
-              height: 117,
-              child: SkeletonAvatar(
-                style: SkeletonAvatarStyle(
-                  borderRadius: BorderRadius.circular(10),
-                ),
+    return PageBody(
+      bottom: false,
+      padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
+      child: SkeletonListView(
+        itemCount: metricCategories.length,
+        itemBuilder: (context, index) => Padding(
+          padding: const EdgeInsets.only(bottom: 15),
+          child: SizedBox(
+            height: 117,
+            child: SkeletonAvatar(
+              style: SkeletonAvatarStyle(
+                borderRadius: BorderRadius.circular(10),
               ),
             ),
           ),
         ),
-      );
-    }
-
-    return ScrollablePageBody(
-      children: [
-        MetricCategoryList(
-          metricCategories: metricCategories
-              .map((category) => MetricCategory(
-                    categoryName: category.localizedName,
-                    metricTiles: category.metrics
-                        .where((metric) => metric.hideOverview == false)
-                        .map(
-                          (metric) => MetricTile(
-value: (() {
-                               try {
-                                 return metric.valueVizualizationBuilder(
-                                    data!.valueForMetric(metric));
-                               } catch (_) {
-                                 return "--";
-                               }
-                             })(),
-                            label: metric.abbreviatedLocalizedName,
-                            onTap: metric.hideDetails
-                                ? null
-                                : () {
-                                    Navigator.of(context).pushNamed(
-                                        "/team_lookup_details",
-                                        arguments: {
-                                          'category': category,
-                                          'metric': metric.path,
-                                          'team': widget.team,
-                                        });
-                                  },
-                          ),
-                        )
-                        .toList(),
-                    onTap: category.metrics
-                            .where((metric) => !metric.hideDetails)
-                            .isEmpty
-                        ? null
-                        : () {
-                            Navigator.of(context)
-                                .pushNamed("/team_lookup_details", arguments: {
-                              'category': category,
-                              'team': widget.team,
-                            });
-                          },
-                  ))
-              .toList(),
-        ),
-      ],
+      ),
     );
-  }
+}
 }
 
 class MetricCategoryList extends StatelessWidget {

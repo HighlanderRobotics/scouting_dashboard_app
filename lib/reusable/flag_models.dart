@@ -38,14 +38,10 @@ class FlagType {
       );
 
   factory FlagType.categoryMetric(CategoryMetric metric) {
-    final category =
-        metricCategories.firstWhere((e) => e.metrics.contains(metric));
-
     return FlagType(
       metric.path,
-      readableName: metric.localizedName,
-      description:
-          '${metric.localizedName} metric from ${category.localizedName.toLowerCase()} category',
+      readableName: metric.abbreviatedNameWithUnits,
+      description: metric.localizedName,
       defaultHue: 1,
       visualizationBuilder: (context, data, foregroundColor, backgroundColor) =>
           FlagTemplate(
@@ -260,6 +256,14 @@ class _NetworkFlagState extends State<NetworkFlag> {
 
     final scaffoldMessengerState = ScaffoldMessenger.of(context);
 
+    final cached = lovatAPI.getCachedFlag(widget.flag.type.path, widget.team);
+    if (cached != null) {
+      setState(() {
+        loaded = true;
+        data = cached;
+      });
+    }
+
     try {
       final result = await lovatAPI.getFlag(widget.flag.type.path, widget.team);
 
@@ -268,13 +272,15 @@ class _NetworkFlagState extends State<NetworkFlag> {
         data = result;
       });
     } catch (error) {
-      scaffoldMessengerState.showSnackBar(
-        SnackBar(
-          content: Text(
-            "Error fetching ${widget.flag.type.readableName}: $error",
+      if (data == null) {
+        scaffoldMessengerState.showSnackBar(
+          SnackBar(
+            content: Text(
+              "Error fetching ${widget.flag.type.readableName}: $error",
+            ),
           ),
-        ),
-      );
+        );
+      }
     }
   }
 

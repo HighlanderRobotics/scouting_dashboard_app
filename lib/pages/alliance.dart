@@ -6,6 +6,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/get_alliance_analysis.
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
@@ -20,20 +21,39 @@ class _AlliancePageState extends State<AlliancePage> {
   AllianceAnalysis? data;
   String? error;
   late List<int> teams;
+  bool isRefreshing = false;
 
   Future<void> fetchData() async {
+    // Show stale data from cache immediately
+    final cached = lovatAPI.getCachedAllianceAnalysis(teams);
+    if (cached != null && data == null && error == null) {
+      setState(() {
+        data = cached;
+      });
+    }
+
     setState(() {
-      data = null;
-      error = null;
+      isRefreshing = true;
     });
 
     try {
       final result = await lovatAPI.getAllianceAnalysis(teams);
-      setState(() => data = result);
+      setState(() {
+        data = result;
+        error = null;
+      });
     } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
+      if (data == null) {
+        setState(() => error = e.message);
+      }
     } catch (_) {
-      setState(() => error = "Failed to load alliance data");
+      if (data == null) {
+        setState(() => error = "Failed to load alliance data");
+      }
+    } finally {
+      setState(() {
+        isRefreshing = false;
+      });
     }
   }
 
@@ -42,7 +62,7 @@ class _AlliancePageState extends State<AlliancePage> {
     super.didChangeDependencies();
     teams = (ModalRoute.of(context)!.settings.arguments
         as Map<String, dynamic>)['teams'];
-    if (data == null && error == null) fetchData();
+    if (data == null && error == null && !isRefreshing) fetchData();
   }
 
   @override
@@ -50,20 +70,17 @@ class _AlliancePageState extends State<AlliancePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Alliance"),
-        actions: [
-          if (error != null || data != null)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: fetchData,
-            ),
-        ],
+        bottom: StaleRefreshIndicator(
+          isRefreshing: isRefreshing,
+          hasStaleData: data != null,
+        ),
       ),
       body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
-    if (error != null) {
+    if (error != null && data == null) {
       return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
     }
 

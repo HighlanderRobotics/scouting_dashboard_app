@@ -5,6 +5,15 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 extension GetMutablePicklists on LovatAPI {
+  List<MutablePicklistMeta>? getCachedMutablePicklists() {
+    return getCachedData(
+      '/v1/manager/mutablepicklists',
+      parser: (json) => (json as List<dynamic>)
+          .map((e) => MutablePicklistMeta.fromJson(e))
+          .toList(),
+    );
+  }
+
   Future<List<MutablePicklistMeta>> getMutablePicklists() async {
     final response = await get('/v1/manager/mutablepicklists');
 

@@ -5,6 +5,15 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 extension GetSharedPicklists on LovatAPI {
+  List<ConfiguredPicklistMeta>? getCachedSharedPicklists() {
+    return getCachedData(
+      '/v1/manager/picklists',
+      parser: (json) => (json as List<dynamic>)
+          .map((e) => ConfiguredPicklistMeta.fromJson(e))
+          .toList(),
+    );
+  }
+
   Future<List<ConfiguredPicklistMeta>> getSharedPicklists() async {
     final response = await get('/v1/manager/picklists');
 

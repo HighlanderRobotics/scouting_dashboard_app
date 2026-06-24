@@ -14,6 +14,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/updat
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
 class EditScoutSchedulePage extends StatefulWidget {
@@ -26,17 +27,40 @@ class EditScoutSchedulePage extends StatefulWidget {
 class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
   ServerScoutSchedule? scoutSchedule;
   String? error;
+  bool isRefreshing = false;
 
   Future<void> fetchData() async {
+    final tournament = Tournament.currentSync ?? await Tournament.getCurrent();
+
+    if (tournament != null) {
+      final cached = lovatAPI.getCachedScouterSchedule(tournament.key);
+      if (cached != null && scoutSchedule == null && error == null) {
+        setState(() {
+          scoutSchedule = cached;
+        });
+      }
+    }
+
+    setState(() {
+      isRefreshing = true;
+    });
+
     try {
-      final scoutSchedule = await lovatAPI.getScouterSchedule();
+      final data = await lovatAPI.getScouterSchedule();
 
       setState(() {
-        this.scoutSchedule = scoutSchedule;
+        scoutSchedule = data;
+        error = null;
       });
     } catch (e) {
+      if (scoutSchedule == null) {
+        setState(() {
+          error = "Failed to load scout schedule";
+        });
+      }
+    } finally {
       setState(() {
-        error = "Failed to load scout schedule";
+        isRefreshing = false;
       });
     }
   }
@@ -53,11 +77,32 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
       itemBuilder: (context, index) => SkeletonListTile(),
     );
 
+    if (error != null && scoutSchedule == null) {
+      body = FriendlyErrorView(
+        errorMessage: error!,
+        retryLabel: "Reload",
+        onRetry: () async {
+          setState(() {
+            error = null;
+          });
+
+          await fetchData();
+        },
+      );
+    }
+
     if (scoutSchedule != null) {
-      body = ListView.builder(
-        itemBuilder: (context, index) {
-          final shift = scoutSchedule!.shifts[index];
-          return Dismissible(
+      body = Column(
+        children: [
+          StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: scoutSchedule != null,
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemBuilder: (context, index) {
+                final shift = scoutSchedule!.shifts[index];
+                return Dismissible(
             key: Key(shift.id),
             direction: DismissDirection.endToStart,
             background: Container(
@@ -79,18 +124,29 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
               }
             },
             onDismissed: (direction) async {
-              try {
-                setState(() {
-                  error = null;
-                  scoutSchedule = null;
-                });
+              final removedShifts =
+                  List<ServerScoutingShift>.from(scoutSchedule!.shifts);
+              removedShifts.removeWhere((s) => s.id == shift.id);
 
+              setState(() {
+                error = null;
+                isRefreshing = true;
+                scoutSchedule!.shifts = removedShifts;
+              });
+
+              try {
                 await lovatAPI.deleteScoutScheduleShift(shift);
 
                 await fetchData();
               } catch (e) {
+                if (scoutSchedule == null) {
+                  setState(() {
+                    error = "Failed to delete shift";
+                  });
+                }
+              } finally {
                 setState(() {
-                  error = "Failed to delete shift";
+                  isRefreshing = false;
                 });
               }
             },
@@ -106,19 +162,27 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                         try {
                           setState(() {
                             error = null;
-                            scoutSchedule = null;
+                            isRefreshing = true;
                           });
 
                           await lovatAPI.updateScouterScheduleShift(shift);
 
                           await fetchData();
                         } on LovatAPIException catch (e) {
-                          setState(() {
-                            error = e.message;
-                          });
+                          if (scoutSchedule == null) {
+                            setState(() {
+                              error = e.message;
+                            });
+                          }
                         } catch (_) {
+                          if (scoutSchedule == null) {
+                            setState(() {
+                              error = "Failed to update shift";
+                            });
+                          }
+                        } finally {
                           setState(() {
-                            error = "Failed to update shift";
+                            isRefreshing = false;
                           });
                         }
                       } else {
@@ -132,21 +196,9 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
           );
         },
         itemCount: scoutSchedule!.shifts.length,
-      );
-    }
-
-    if (error != null) {
-      body = FriendlyErrorView(
-        errorMessage: error!,
-        retryLabel: "Reload",
-        onRetry: () async {
-          setState(() {
-            error = null;
-            scoutSchedule = null;
-          });
-
-          await fetchData();
-        },
+            ),
+          ),
+        ],
       );
     }
 
@@ -164,19 +216,27 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                 try {
                   setState(() {
                     error = null;
-                    scoutSchedule = null;
+                    isRefreshing = true;
                   });
 
                   await lovatAPI.createScoutScheduleShift(shift);
 
                   await fetchData();
                 } on LovatAPIException catch (e) {
-                  setState(() {
-                    error = e.message;
-                  });
+                  if (scoutSchedule == null) {
+                    setState(() {
+                      error = e.message;
+                    });
+                  }
                 } catch (_) {
+                  if (scoutSchedule == null) {
+                    setState(() {
+                      error = "Failed to create shift";
+                    });
+                  }
+                } finally {
                   setState(() {
-                    error = "Failed to create shift";
+                    isRefreshing = false;
                   });
                 }
               },
@@ -218,18 +278,25 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
   TextEditingController endFieldController = TextEditingController();
 
   Future<void> fetchData() async {
-    try {
+    final cached = lovatAPI.getCachedScouts();
+    if (cached != null && allScouts == null && errorMessage == null) {
       setState(() {
+        allScouts = cached;
+      });
+    }
+
+    try {
+      final data = await lovatAPI.getScouts();
+      setState(() {
+        allScouts = data;
         errorMessage = null;
       });
-      final allScouts = await lovatAPI.getScouts();
-      setState(() {
-        this.allScouts = allScouts;
-      });
     } catch (e) {
-      setState(() {
-        errorMessage = "Failed to load scouts";
-      });
+      if (allScouts == null) {
+        setState(() {
+          errorMessage = "Failed to load scouts";
+        });
+      }
     }
   }
 
@@ -256,13 +323,12 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
 
   @override
   Widget build(BuildContext context) {
-    if (errorMessage != null) {
+    if (errorMessage != null && allScouts == null) {
       return FriendlyErrorView(
         errorMessage: errorMessage!,
         onRetry: () async {
           setState(() {
             errorMessage = null;
-            allScouts = null;
           });
 
           await fetchData();

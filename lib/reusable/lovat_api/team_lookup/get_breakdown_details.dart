@@ -184,6 +184,20 @@ class BreakdownDetailsResponse {
 }
 
 extension GetBreakdownMetrics on LovatAPI {
+  BreakdownDetailsResponse? getCachedBreakdownDetails(
+    int teamNumber,
+    String breakdownPath,
+  ) {
+    return getCachedData(
+      '/v1/analysis/breakdown/team/$teamNumber/$breakdownPath',
+      parser: (json) => BreakdownDetailsResponse.fromJson(
+        (json as List<dynamic>).cast(),
+        teamNumber: teamNumber,
+        breakdownPath: breakdownPath,
+      ),
+    );
+  }
+
   Future<BreakdownDetailsResponse> getBreakdownDetails(
     int teamNumber,
     String breakdownPath,

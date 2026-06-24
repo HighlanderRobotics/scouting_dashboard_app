@@ -5,6 +5,7 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_metric_details.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
 class TeamLookupDetailsPage extends StatefulWidget {
@@ -139,21 +140,40 @@ class AnalysisOverview extends StatefulWidget {
 class _AnalysisOverviewState extends State<AnalysisOverview> {
   MetricDetails? data;
   String? error;
+  bool isRefreshing = false;
 
   Future<void> fetchData() async {
+    final cached =
+        lovatAPI.getCachedMetricDetails(widget.teamNumber, widget.metric.path);
+    if (cached != null && data == null && error == null) {
+      setState(() {
+        data = cached;
+      });
+    }
+
     setState(() {
-      data = null;
-      error = null;
+      isRefreshing = true;
     });
 
     try {
       final result =
           await lovatAPI.getMetricDetails(widget.teamNumber, widget.metric.path);
-      setState(() => data = result);
+      setState(() {
+        data = result;
+        error = null;
+      });
     } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
+      if (data == null) {
+        setState(() => error = e.message);
+      }
     } catch (_) {
-      setState(() => error = "Failed to load metric details");
+      if (data == null) {
+        setState(() => error = "Failed to load metric details");
+      }
+    } finally {
+      setState(() {
+        isRefreshing = false;
+      });
     }
   }
 
@@ -174,7 +194,7 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
 
   @override
   Widget build(BuildContext context) {
-    if (error != null) {
+    if (error != null && data == null) {
       return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
     }
 
@@ -186,6 +206,10 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
 
     return Column(
       children: [
+        StaleRefreshIndicator(
+          isRefreshing: isRefreshing,
+          hasStaleData: data != null,
+        ),
         Row(children: [
           if (d.hasResult)
             valueBox(

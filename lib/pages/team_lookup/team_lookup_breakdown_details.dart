@@ -6,6 +6,7 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_details.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 
 class BreakdownDetailsPage extends StatefulWidget {
   const BreakdownDetailsPage({
@@ -24,13 +25,24 @@ class BreakdownDetailsPage extends StatefulWidget {
 class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
   BreakdownDetailsResponse? response;
   bool hasError = false;
+  bool isRefreshing = false;
 
   Future<void> loadData() async {
-    try {
+    final cached = lovatAPI.getCachedBreakdownDetails(
+      widget.team,
+      widget.breakdownIdentity.path,
+    );
+    if (cached != null && response == null && !hasError) {
       setState(() {
-        hasError = false;
+        response = cached;
       });
+    }
 
+    setState(() {
+      isRefreshing = true;
+    });
+
+    try {
       final data = await lovatAPI.getBreakdownDetails(
         widget.team,
         widget.breakdownIdentity.path,
@@ -38,11 +50,17 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
 
       setState(() {
         response = data;
-        debugPrint(response.toString());
+        hasError = false;
       });
     } catch (_) {
+      if (response == null) {
+        setState(() {
+          hasError = true;
+        });
+      }
+    } finally {
       setState(() {
-        hasError = true;
+        isRefreshing = false;
       });
     }
   }
@@ -57,10 +75,19 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
   Widget build(BuildContext context) {
     Widget body = const Column(children: [LinearProgressIndicator()]);
 
-    if (hasError) body = FriendlyErrorView(onRetry: loadData);
+    if (hasError && response == null) {
+      body = FriendlyErrorView(onRetry: loadData);
+    }
 
     if (response != null) {
-      body = ScrollablePageBody(
+      body = Column(
+        children: [
+          StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: response != null,
+          ),
+          Expanded(
+            child: ScrollablePageBody(
           children: response!.matchesWithSegments
               .map((segment) {
                 return Column(
@@ -88,7 +115,10 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
               .withWidgetBetween(const Padding(
                 padding: EdgeInsets.only(top: 14),
                 child: Divider(height: 1),
-              )));
+              ))),
+          ),
+        ],
+      );
     }
 
     return Scaffold(

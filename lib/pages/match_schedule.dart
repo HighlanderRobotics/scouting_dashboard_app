@@ -14,6 +14,7 @@ import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
 import '../reusable/navigation_drawer.dart';
@@ -62,60 +63,55 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   }
 
   Future<void> fetchData({bool indicator = true}) async {
-    try {
-      if (indicator && currentTournament != null) {
-        setState(() {
-          showProgressIndicator = true;
-        });
-      }
+    final tournament = Tournament.currentSync ?? await Tournament.getCurrent();
 
-      final tournament = await Tournament.getCurrent();
+    setState(() {
+      currentTournament = tournament;
+    });
 
+    if (tournament == null) {
       setState(() {
-        currentTournament = tournament;
+        noScheduleTournament = "No tournament selected";
+        isDataFetched = true;
       });
+      return;
+    }
 
-      if (tournament == null) {
-        setState(() {
-          noScheduleTournament = "No tournament selected";
-          isDataFetched = true;
-        });
-        return;
-      }
+    final teamNumbers = _teamsFilter.isEmpty
+        ? null
+        : _teamsFilter.map((e) => e.number).toList();
 
-      final matches = await lovatAPI.getMatches(
+    if (indicator) {
+      setState(() {
+        showProgressIndicator = true;
+      });
+    }
+
+    // Show stale data from cache immediately
+    final cachedMatches = lovatAPI.getCachedMatches(
+      tournament.key,
+      teamNumbers: teamNumbers,
+    );
+    if (cachedMatches != null && matches == null && initialError == null) {
+      setState(() {
+        matches = cachedMatches;
+        nextMatch = _computeNextMatch(cachedMatches);
+        isDataFetched = true;
+      });
+    }
+
+    // Fetch fresh data
+    try {
+      final freshMatches = await lovatAPI.getMatches(
         tournament.key,
-        teamNumbers: _teamsFilter.isEmpty
-            ? null
-            : _teamsFilter.map((e) => e.number).toList(),
+        teamNumbers: teamNumbers,
       );
 
-      GameMatchIdentity? nextMatch = this.nextMatch;
-      if (_teamsFilter.isEmpty &&
-          completionFilter == CompletionFilter.any &&
-          matches.isNotEmpty) {
-        final MatchScheduleMatch? lastScouted = matches.cast().lastWhere(
-              (match) => match.isScouted,
-              orElse: () => null,
-            );
-
-        if (lastScouted == null) {
-          nextMatch = matches.first.identity;
-        } else {
-          final index = matches.indexOf(lastScouted);
-
-          if (index == matches.length - 1) {
-            nextMatch = null;
-          } else {
-            nextMatch = matches[index + 1].identity;
-          }
-        }
-      }
-
       setState(() {
-        this.matches = matches;
-        this.nextMatch = nextMatch;
+        matches = freshMatches;
+        nextMatch = _computeNextMatch(freshMatches);
         isDataFetched = true;
+        initialError = null;
       });
     } on LovatAPIException catch (e) {
       if (e.message == "Tournament not found") {
@@ -124,20 +120,46 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
               currentTournament?.localized ?? "No tournament";
           isDataFetched = true;
         });
-      } else {
+      } else if (matches == null) {
         setState(() {
           initialError = e.message;
         });
       }
     } catch (e) {
-      setState(() {
-        initialError = "An unknown error occurred";
-      });
+      if (matches == null) {
+        setState(() {
+          initialError = "An unknown error occurred";
+        });
+      }
     } finally {
       setState(() {
         showProgressIndicator = false;
       });
     }
+  }
+
+  GameMatchIdentity? _computeNextMatch(List<MatchScheduleMatch> matches) {
+    if (_teamsFilter.isEmpty &&
+        completionFilter == CompletionFilter.any &&
+        matches.isNotEmpty) {
+      final MatchScheduleMatch? lastScouted = matches.cast().lastWhere(
+            (match) => match.isScouted,
+            orElse: () => null,
+          );
+
+      if (lastScouted == null) {
+        return matches.first.identity;
+      } else {
+        final index = matches.indexOf(lastScouted);
+
+        if (index == matches.length - 1) {
+          return null;
+        } else {
+          return matches[index + 1].identity;
+        }
+      }
+    }
+    return nextMatch;
   }
 
   Future<void> fetchTeamsInTournament() async {
@@ -270,16 +292,9 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 4,
-                child: showProgressIndicator
-                    ? const LinearProgressIndicator()
-                    : Divider(
-                        height: 1,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                      ),
+              StaleRefreshIndicator(
+                isRefreshing: showProgressIndicator,
+                hasStaleData: matches != null,
               ),
             ],
           ),

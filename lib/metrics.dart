@@ -96,24 +96,24 @@ String numToStringRounded(num? num) {
 final List<MetricCategoryData> metricCategories = [
   MetricCategoryData("Score", [
     CategoryMetric(
-      localizedName: "Total",
+      localizedName: "Total score in a match",
       abbreviatedLocalizedName: "Total",
       path: "totalPoints",
     ),
     CategoryMetric(
-      localizedName: "Auto",
+      localizedName: "Total score during autonomous",
       abbreviatedLocalizedName: "Auto",
       path: "autoPoints",
     ),
     CategoryMetric(
-      localizedName: "Teleop",
+      localizedName: "Total score during teleop",
       abbreviatedLocalizedName: "Teleop",
       path: "teleopPoints",
     ),
   ]),
   MetricCategoryData("Hub", [
     CategoryMetric(
-      localizedName: "Scoring Rate (Fuel / Second)",
+      localizedName: "Fuel scored per second",
       abbreviatedLocalizedName: "Scoring Rate",
       units: " bps",
       path: "fuelPerSecond",
@@ -133,26 +133,26 @@ final List<MetricCategoryData> metricCategories = [
   ]),
   MetricCategoryData("Feeding", [
     CategoryMetric(
-      localizedName: "Time Spent Feeding",
+      localizedName: "Time spent feeding in a match",
       abbreviatedLocalizedName: "Time Feeding",
       units: "s",
       path: "timeFeeding",
     ),
     CategoryMetric(
-      localizedName: "Feeding Rate (Fuel / Second)",
+      localizedName: "Fuel fed per second",
       abbreviatedLocalizedName: "Feeding Rate",
       units: " bps",
       path: "feedingRate",
     ),
     CategoryMetric(
-      localizedName: "Feeds per match",
+      localizedName: "Feeing volleys/dumps per match",
       abbreviatedLocalizedName: "Feeds/Match",
       path: "feedsPerMatch",
     )
   ]),
   MetricCategoryData("Driving & Defense", [
     CategoryMetric(
-      localizedName: "Driver Ability",
+      localizedName: "Manually scored driving rating",
       abbreviatedLocalizedName: "Driver Ability",
       max: 5,
       units: "1-5",
@@ -160,13 +160,13 @@ final List<MetricCategoryData> metricCategories = [
       path: "driverAbility",
     ),
     CategoryMetric(
-      localizedName: "Contact Defense Time",
+      localizedName: "Time spent doing contact defense in a match",
       abbreviatedLocalizedName: "Contact Defense Time",
       units: "s",
       path: "contactDefenseTime",
     ),
     CategoryMetric(
-      localizedName: "Defense effectiveness",
+      localizedName: "Manually scored defense rating",
       abbreviatedLocalizedName: "Defense effectiveness",
       units: "1-5",
       valueToString: (val) => "$val/5",
@@ -174,13 +174,13 @@ final List<MetricCategoryData> metricCategories = [
       path: "defenseEffectiveness",
     ),
     CategoryMetric(
-      localizedName: "Camping Defense Time",
+      localizedName: "Time spent doing camping defense in a match",
       abbreviatedLocalizedName: "Camping Defense Time",
       units: "s",
       path: "campingDefenseTime",
     ),
     CategoryMetric(
-      localizedName: "Total Defense Time (Camping + Contact)",
+      localizedName: "Total defense time (camping + contact)",
       abbreviatedLocalizedName: "Total Defense Time",
       units: "s",
       path: "totalDefenseTime",
@@ -219,7 +219,8 @@ final List<MetricCategoryData> metricCategories = [
       path: "totalFuelOutputted",
     ),
     CategoryMetric(
-      localizedName: "Outpost Intakes",
+      localizedName:
+          "Number of times outpost was used to intake during a match",
       abbreviatedLocalizedName: "Outpost Intakes",
       path: "outpostIntakes",
     )

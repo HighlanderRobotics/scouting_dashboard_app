@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/get_shared_picklist_by_id.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 
 class ViewPicklistWeightsPage extends StatefulWidget {
@@ -18,20 +20,27 @@ class _ViewPicklistWeightsPageState extends State<ViewPicklistWeightsPage> {
   String? error;
 
   Future<void> fetchPicklist() async {
-    setState(() {
-      error = null;
-    });
+    final cached =
+        lovatAPI.getCachedSharedPicklistById(widget.picklistMeta.id);
+    if (cached != null && picklist == null && error == null) {
+      setState(() {
+        picklist = cached;
+      });
+    }
 
     try {
       final fetchedPicklist = await widget.picklistMeta.getPicklist();
 
       setState(() {
         picklist = fetchedPicklist;
+        error = null;
       });
     } catch (error) {
-      setState(() {
-        this.error = error.toString();
-      });
+      if (picklist == null) {
+        setState(() {
+          this.error = error.toString();
+        });
+      }
     }
   }
 

@@ -67,6 +67,19 @@ class AllianceAnalysis {
 }
 
 extension GetAllianceAnalysis on LovatAPI {
+  AllianceAnalysis? getCachedAllianceAnalysis(List<int> teams) {
+    return getCachedData(
+      '/v1/analysis/alliance',
+      query: {
+        'teamOne': teams[0].toString(),
+        'teamTwo': teams[1].toString(),
+        'teamThree': teams[2].toString(),
+      },
+      parser: (json) =>
+          AllianceAnalysis.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
   Future<AllianceAnalysis> getAllianceAnalysis(List<int> teams) async {
     final response = await get(
       '/v1/analysis/alliance',

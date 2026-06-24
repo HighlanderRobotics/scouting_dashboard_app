@@ -5,6 +5,20 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 
 extension GetNotes on LovatAPI {
+  List<Note>? getCachedNotesByTeamNumber(int teamNumber) {
+    return getCachedData(
+      '/v1/analysis/notes/team/$teamNumber',
+      parser: (json) {
+        final list = json as List<dynamic>;
+        final notes = <Note>[];
+        for (final map in list) {
+          notes.addAll(Note.fromJoinedMap(map as Map<String, dynamic>));
+        }
+        return notes;
+      },
+    );
+  }
+
   Future<List<Note>> getNotesByTeamNumber(
     int teamNumber,
   ) async {

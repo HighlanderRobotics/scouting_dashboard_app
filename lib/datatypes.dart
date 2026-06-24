@@ -11,6 +11,8 @@ class Tournament {
   String key;
   String localized;
 
+  static Tournament? _currentCache;
+
   @override
   String toString() => localized;
 
@@ -25,9 +27,14 @@ class Tournament {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('tournament', key);
     await prefs.setString('tournament_localized', localized);
+    _currentCache = this;
   }
 
+  static Tournament? get currentSync => _currentCache;
+
   static Future<Tournament?> getCurrent() async {
+    if (_currentCache != null) return _currentCache;
+
     final prefs = await SharedPreferences.getInstance();
     final key = prefs.getString('tournament');
     final name = prefs.getString('tournament_localized');
@@ -36,13 +43,15 @@ class Tournament {
       return null;
     }
 
-    return Tournament(key, name);
+    _currentCache = Tournament(key, name);
+    return _currentCache;
   }
 
   static Future<void> clearCurrent() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('tournament');
     await prefs.remove('tournament_localized');
+    _currentCache = null;
   }
 
   Future<List<MatchScheduleMatch>> getMatches() async {

@@ -6,6 +6,14 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension GetScouterSchedule on LovatAPI {
+  ServerScoutSchedule? getCachedScouterSchedule(String tournamentKey) {
+    return getCachedData(
+      '/v1/manager/tournament/$tournamentKey/scoutershifts',
+      parser: (json) =>
+          ServerScoutSchedule.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
   Future<ServerScoutSchedule> getScouterSchedule() async {
     final tournament = await Tournament.getCurrent();
 

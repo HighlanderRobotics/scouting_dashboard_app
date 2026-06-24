@@ -57,6 +57,30 @@ class PicklistAnalysisTeam {
 }
 
 extension GetPicklistAnalysis on LovatAPI {
+  List<PicklistAnalysisTeam>? getCachedPicklistAnalysis(
+    List<String> flags,
+    List<PicklistWeight> weights,
+  ) {
+    final tournament = Tournament.currentSync;
+    return getCachedData(
+      '/v1/analysis/picklist',
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+        'flags': jsonEncode(flags),
+        ...Map.fromEntries(
+          weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+        ),
+      },
+      parser: (json) {
+        final map = json as Map<String, dynamic>;
+        return (map['teams'] as List<dynamic>)
+            .map((team) =>
+                PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
+            .toList();
+      },
+    );
+  }
+
   Future<List<PicklistAnalysisTeam>> getPicklistAnalysis(
     List<String> flags,
     List<PicklistWeight> weights,

@@ -18,6 +18,14 @@ class CategoryMetrics {
 }
 
 extension GetCategoryMetrics on LovatAPI {
+  CategoryMetrics? getCachedCategoryMetricsByTeamNumber(int teamNumber) {
+    return getCachedData(
+      '/v1/analysis/category/team/$teamNumber',
+      parser: (json) =>
+          CategoryMetrics.fromJson(json as Map<String, dynamic>),
+    );
+  }
+
   Future<CategoryMetrics> getCategoryMetricsByTeamNumber(
     int teamNumber,
   ) async {

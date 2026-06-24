@@ -5,6 +5,22 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 
 extension GetScouterOverviews on LovatAPI {
+  List<ScouterOverview>? getCachedScouterOverviews({
+    String? tournamentKey,
+    bool archivedScouters = false,
+  }) {
+    return getCachedData(
+      '/v1/manager/scouterspage',
+      query: {
+        if (tournamentKey != null) 'tournamentKey': tournamentKey,
+        'archived': archivedScouters.toString(),
+      },
+      parser: (json) => (json as List<dynamic>)
+          .map((e) => ScouterOverview.fromJson(e, archived: archivedScouters))
+          .toList(),
+    );
+  }
+
   /// archivedScouters - true: show archived scouters only, false: show unarchived scouters only
   Future<List<ScouterOverview>> getScouterOverviews(
       {bool archivedScouters = false}) async {

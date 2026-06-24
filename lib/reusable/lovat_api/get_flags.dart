@@ -4,6 +4,23 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 
 extension GetFlags on LovatAPI {
+  List<dynamic>? getCachedFlags(List<String> paths, int teamNumber) {
+    final tournament = Tournament.currentSync;
+    return getCachedData(
+      '/v1/analysis/flag/team/$teamNumber',
+      query: {
+        if (tournament != null) 'tournamentKey': tournament.key,
+        'flags': jsonEncode(paths),
+      },
+      parser: (json) => json as List<dynamic>,
+    );
+  }
+
+  dynamic getCachedFlag(String path, int teamNumber) {
+    final flags = getCachedFlags([path], teamNumber);
+    return flags != null && flags.isNotEmpty ? flags.first : null;
+  }
+
   Future<List<dynamic>> getFlags(List<String> paths, int teamNumber) async {
     final tournament = await Tournament.getCurrent();
 
