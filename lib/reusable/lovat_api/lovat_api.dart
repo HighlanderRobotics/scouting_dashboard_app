@@ -147,7 +147,8 @@ class LovatAPI {
     final response = await http.get(uri, headers: headers);
 
     if (response.statusCode == 304 && cachedEntry != null) {
-      return http.Response.bytes(utf8.encode(cachedEntry.body), 200);
+      return http.Response.bytes(utf8.encode(cachedEntry.body), 200,
+          headers: {'content-type': 'application/json'});
     }
 
     if (response.statusCode == 200) {
@@ -165,7 +166,8 @@ class LovatAPI {
     final key = _cacheKey(path, query: query);
     final entry = cache.get(key);
     if (entry == null) return null;
-    return http.Response.bytes(utf8.encode(entry.body), 200);
+    return http.Response.bytes(utf8.encode(entry.body), 200,
+        headers: {'content-type': 'application/json'});
   }
 
   T? getCachedData<T>(
