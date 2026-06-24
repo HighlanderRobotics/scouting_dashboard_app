@@ -20,8 +20,7 @@ class _ViewPicklistWeightsPageState extends State<ViewPicklistWeightsPage> {
   String? error;
 
   Future<void> fetchPicklist() async {
-    final cached =
-        lovatAPI.getCachedSharedPicklistById(widget.picklistMeta.id);
+    final cached = lovatAPI.getCachedSharedPicklistById(widget.picklistMeta.id);
     if (cached != null && picklist == null && error == null) {
       setState(() {
         picklist = cached;

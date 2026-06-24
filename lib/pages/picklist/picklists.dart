@@ -224,9 +224,8 @@ class _MyPicklistsState extends State<MyPicklists> {
                     },
                   ),
                   Divider(
-                    color: Theme.of(context)
-                        .colorScheme
-                        .surfaceContainerHighest,
+                    color:
+                        Theme.of(context).colorScheme.surfaceContainerHighest,
                     height: 0,
                   ),
                 ],
@@ -380,8 +379,8 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                               await lovatAPI.deleteSharedPicklist(picklist.id);
 
                               setState(() {
-                                picklists!.removeWhere(
-                                    (p) => p.id == picklist.id);
+                                picklists!
+                                    .removeWhere((p) => p.id == picklist.id);
                               });
 
                               scaffoldMessengerState.hideCurrentSnackBar();

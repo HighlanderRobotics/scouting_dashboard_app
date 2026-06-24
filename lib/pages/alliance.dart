@@ -125,9 +125,7 @@ class _AllianceContentState extends State<_AllianceContent> {
                     InkWell(
                       onTap: () => {
                         Navigator.of(context).pushNamed("/team_lookup",
-                            arguments: <String, dynamic>{
-                              'team': teamData.team
-                            })
+                            arguments: <String, dynamic>{'team': teamData.team})
                       },
                       child: Text(
                         teamData.team.toString(),
@@ -173,16 +171,14 @@ class _AllianceContentState extends State<_AllianceContent> {
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value:
-                  Text(numToStringRounded(analysis.totalBallThroughput)),
+              value: Text(numToStringRounded(analysis.totalBallThroughput)),
               label: const Text('Total output'),
             ),
           ),
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value:
-                  Text(numToStringRounded(analysis.totalFuelOutputted)),
+              value: Text(numToStringRounded(analysis.totalFuelOutputted)),
               label: const Text('Hub shots'),
             ),
           ),
@@ -284,9 +280,8 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                               borderRadius:
                                                   const BorderRadius.all(
                                                       Radius.circular(10)),
-                                              color: autoPathColors[widget
-                                                  .data.teams
-                                                  .indexOf(e)],
+                                              color: autoPathColors[
+                                                  widget.data.teams.indexOf(e)],
                                             ),
                                           ),
                                         ),
@@ -323,8 +318,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                               null
                                           ? "--"
                                           : numToStringRounded(selectedPaths[
-                                                  widget.data.teams
-                                                      .indexOf(e)]!
+                                                  widget.data.teams.indexOf(e)]!
                                               .scores
                                               .cast<num>()
                                               .average()),
@@ -444,7 +438,11 @@ Container reefStack(
   Color? backgroundColor,
   Color? foregroundColor,
 }) {
-  final startTimeLists = [analysis.l1StartTime, analysis.l2StartTime, analysis.l3StartTime];
+  final startTimeLists = [
+    analysis.l1StartTime,
+    analysis.l2StartTime,
+    analysis.l3StartTime
+  ];
 
   return Container(
     decoration: BoxDecoration(
@@ -516,8 +514,7 @@ Container reefStack(
                       child: Text(
                         (() {
                           final list = startTimeLists[row];
-                          if (list.length <= col ||
-                              list[col] == null) {
+                          if (list.length <= col || list[col] == null) {
                             return '--';
                           }
                           return '${numToStringRounded(list[col])}s';

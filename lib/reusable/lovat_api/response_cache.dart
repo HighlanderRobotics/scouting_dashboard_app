@@ -50,8 +50,7 @@ class ResponseCache {
         decoded.forEach((key, value) {
           _cache[key] = CacheEntry.fromJson(value as Map<String, dynamic>);
         });
-      } catch (_) {
-      }
+      } catch (_) {}
     }
 
     _loaded = true;

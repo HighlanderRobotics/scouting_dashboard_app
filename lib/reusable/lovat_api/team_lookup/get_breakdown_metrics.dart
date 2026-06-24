@@ -33,8 +33,7 @@ extension GetBreakdownMetrics on LovatAPI {
   BreakdownMetrics? getCachedBreakdownMetricsByTeamNumber(int teamNumber) {
     return getCachedData(
       '/v1/analysis/breakdown/team/$teamNumber',
-      parser: (json) =>
-          BreakdownMetrics.fromJson(json as Map<String, dynamic>),
+      parser: (json) => BreakdownMetrics.fromJson(json as Map<String, dynamic>),
     );
   }
 

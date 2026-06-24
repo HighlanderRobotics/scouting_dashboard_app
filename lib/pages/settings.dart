@@ -93,7 +93,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   });
                 },
               ),
-              if (lovatAPI.getCachedUserProfile()?.role == UserRole.scoutingLead &&
+              if (lovatAPI.getCachedUserProfile()?.role ==
+                      UserRole.scoutingLead &&
                   selectedTournament != null) ...[
                 const SizedBox(height: 14),
                 FilledButton.tonalIcon(
@@ -104,7 +105,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   label: const Text("Export CSV"),
                 ),
               ],
-              if (lovatAPI.getCachedUserProfile()?.role == UserRole.scoutingLead)
+              if (lovatAPI.getCachedUserProfile()?.role ==
+                  UserRole.scoutingLead)
                 const EmailBox(),
               const AnalystsBox(),
               const SizedBox(height: 40),

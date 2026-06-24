@@ -31,7 +31,12 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
   Future<void> fetchData() async {
     // Show stale data from cache immediately
     final cached = lovatAPI.getCachedMatchPrediction(
-      _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5],
+      _teams[0],
+      _teams[1],
+      _teams[2],
+      _teams[3],
+      _teams[4],
+      _teams[5],
     );
     if (cached != null && prediction == null && error == null) {
       setState(() {
@@ -45,7 +50,12 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
 
     try {
       final result = await lovatAPI.getMatchPrediction(
-        _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5],
+        _teams[0],
+        _teams[1],
+        _teams[2],
+        _teams[3],
+        _teams[4],
+        _teams[5],
       );
       setState(() {
         prediction = result;
@@ -90,7 +100,10 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
       int.parse(args['blue2']),
       int.parse(args['blue3']),
     ];
-    if (prediction == null && error == null && !isRefreshing && !_notEnoughData) {
+    if (prediction == null &&
+        error == null &&
+        !isRefreshing &&
+        !_notEnoughData) {
       fetchData();
     }
   }
@@ -196,9 +209,9 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             appBar: AppBar(
               title: const Text("Match Predictor"),
               bottom: StaleRefreshIndicator(
-              isRefreshing: isRefreshing,
-              hasStaleData: prediction != null,
-            ),
+                isRefreshing: isRefreshing,
+                hasStaleData: prediction != null,
+              ),
             ),
             body: SafeArea(
               bottom: false,
@@ -281,24 +294,21 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                       child: InkWell(
                         onTap: () => Navigator.of(context).pushNamed(
                             "/team_lookup",
-                            arguments: <String, dynamic>{
-                              'team': e.team
-                            }),
+                            arguments: <String, dynamic>{'team': e.team}),
                         child: Container(
                           decoration: BoxDecoration(
                               color: [
                                 Theme.of(context).colorScheme.redAlliance,
                                 Theme.of(context).colorScheme.blueAlliance
                               ][alliance],
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10))),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10))),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
                                 Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       if (role != null)
                                         Tooltip(
@@ -330,9 +340,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                 ),
                                 Text(
                                   numToStringRounded(e.averagePoints),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 )
                               ],
                             ),
@@ -391,16 +400,16 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                value: Text(
-                    numToStringRounded(allianceData.totalBallThroughput)),
+                value:
+                    Text(numToStringRounded(allianceData.totalBallThroughput)),
                 label: const Text('Total output'),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                value: Text(
-                    numToStringRounded(allianceData.totalFuelOutputted)),
+                value:
+                    Text(numToStringRounded(allianceData.totalFuelOutputted)),
                 label: const Text('Hub shots'),
               ),
             ),

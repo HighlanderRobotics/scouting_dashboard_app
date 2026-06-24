@@ -233,14 +233,12 @@ class Breakdown extends StatelessWidget {
                             child: Row(
                                 children: dataIdentity.segments
                                     .where((segmentData) =>
-                                        data.segmentValue(
-                                                dataIdentity.path,
-                                                segmentData.path) !=
+                                        data.segmentValue(dataIdentity.path,
+                                            segmentData.path) !=
                                         0)
                                     .map((BreakdownSegmentData segmentData) {
-                              final analyzedSegmentValue =
-                                  data.segmentValue(
-                                      dataIdentity.path, segmentData.path);
+                              final analyzedSegmentValue = data.segmentValue(
+                                  dataIdentity.path, segmentData.path);
 
                               return segment(
                                 context,

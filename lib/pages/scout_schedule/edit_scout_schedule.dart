@@ -103,99 +103,100 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
               itemBuilder: (context, index) {
                 final shift = scoutSchedule!.shifts[index];
                 return Dismissible(
-            key: Key(shift.id),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              color: Colors.red[900],
-              child: const Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(Icons.delete),
-                    SizedBox(width: 30),
-                  ],
-                ),
-              ),
-            ),
-            onUpdate: (details) {
-              if ((details.reached && !details.previousReached) ||
-                  (!details.reached && details.previousReached)) {
-                HapticFeedback.lightImpact();
-              }
-            },
-            onDismissed: (direction) async {
-              final removedShifts =
-                  List<ServerScoutingShift>.from(scoutSchedule!.shifts);
-              removedShifts.removeWhere((s) => s.id == shift.id);
+                  key: Key(shift.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red[900],
+                    child: const Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(Icons.delete),
+                          SizedBox(width: 30),
+                        ],
+                      ),
+                    ),
+                  ),
+                  onUpdate: (details) {
+                    if ((details.reached && !details.previousReached) ||
+                        (!details.reached && details.previousReached)) {
+                      HapticFeedback.lightImpact();
+                    }
+                  },
+                  onDismissed: (direction) async {
+                    final removedShifts =
+                        List<ServerScoutingShift>.from(scoutSchedule!.shifts);
+                    removedShifts.removeWhere((s) => s.id == shift.id);
 
-              setState(() {
-                error = null;
-                isRefreshing = true;
-                scoutSchedule!.shifts = removedShifts;
-              });
+                    setState(() {
+                      error = null;
+                      isRefreshing = true;
+                      scoutSchedule!.shifts = removedShifts;
+                    });
 
-              try {
-                await lovatAPI.deleteScoutScheduleShift(shift);
+                    try {
+                      await lovatAPI.deleteScoutScheduleShift(shift);
 
-                await fetchData();
-              } catch (e) {
-                if (scoutSchedule == null) {
-                  setState(() {
-                    error = "Failed to delete shift";
-                  });
-                }
-              } finally {
-                setState(() {
-                  isRefreshing = false;
-                });
-              }
-            },
-            child: ListTile(
-              title: Text("${shift.start} to ${shift.end}"),
-              subtitle: Text(shift.allScoutsList),
-              onTap: () {
-                Navigator.of(context).pushWidget(
-                  ScoutShiftEditor(
-                    initialShift: shift.copy(),
-                    onSubmit: (shift) async {
-                      if (shift is ServerScoutingShift) {
-                        try {
-                          setState(() {
-                            error = null;
-                            isRefreshing = true;
-                          });
-
-                          await lovatAPI.updateScouterScheduleShift(shift);
-
-                          await fetchData();
-                        } on LovatAPIException catch (e) {
-                          if (scoutSchedule == null) {
-                            setState(() {
-                              error = e.message;
-                            });
-                          }
-                        } catch (_) {
-                          if (scoutSchedule == null) {
-                            setState(() {
-                              error = "Failed to update shift";
-                            });
-                          }
-                        } finally {
-                          setState(() {
-                            isRefreshing = false;
-                          });
-                        }
-                      } else {
-                        throw Exception("Invalid shift type");
+                      await fetchData();
+                    } catch (e) {
+                      if (scoutSchedule == null) {
+                        setState(() {
+                          error = "Failed to delete shift";
+                        });
                       }
+                    } finally {
+                      setState(() {
+                        isRefreshing = false;
+                      });
+                    }
+                  },
+                  child: ListTile(
+                    title: Text("${shift.start} to ${shift.end}"),
+                    subtitle: Text(shift.allScoutsList),
+                    onTap: () {
+                      Navigator.of(context).pushWidget(
+                        ScoutShiftEditor(
+                          initialShift: shift.copy(),
+                          onSubmit: (shift) async {
+                            if (shift is ServerScoutingShift) {
+                              try {
+                                setState(() {
+                                  error = null;
+                                  isRefreshing = true;
+                                });
+
+                                await lovatAPI
+                                    .updateScouterScheduleShift(shift);
+
+                                await fetchData();
+                              } on LovatAPIException catch (e) {
+                                if (scoutSchedule == null) {
+                                  setState(() {
+                                    error = e.message;
+                                  });
+                                }
+                              } catch (_) {
+                                if (scoutSchedule == null) {
+                                  setState(() {
+                                    error = "Failed to update shift";
+                                  });
+                                }
+                              } finally {
+                                setState(() {
+                                  isRefreshing = false;
+                                });
+                              }
+                            } else {
+                              throw Exception("Invalid shift type");
+                            }
+                          },
+                        ),
+                      );
                     },
                   ),
                 );
               },
-            ),
-          );
-        },
-        itemCount: scoutSchedule!.shifts.length,
+              itemCount: scoutSchedule!.shifts.length,
             ),
           ),
         ],

@@ -42,7 +42,8 @@ class PicklistAnalysisTeam {
   static PicklistAnalysisTeam fromJson(Map<String, dynamic> json) {
     List<PicklistBreakdownEntry> parseEntries(String key) {
       return (json[key] as List<dynamic>? ?? [])
-          .map((val) => PicklistBreakdownEntry.fromJson(val as Map<String, dynamic>))
+          .map((val) =>
+              PicklistBreakdownEntry.fromJson(val as Map<String, dynamic>))
           .toList();
     }
 
@@ -106,7 +107,8 @@ extension GetPicklistAnalysis on LovatAPI {
     final json = jsonDecode(response!.body) as Map<String, dynamic>;
 
     return (json['teams'] as List<dynamic>)
-        .map((team) => PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
+        .map((team) =>
+            PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
         .toList();
   }
 

@@ -2,7 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-class StaleRefreshIndicator extends StatefulWidget implements PreferredSizeWidget {
+class StaleRefreshIndicator extends StatefulWidget
+    implements PreferredSizeWidget {
   const StaleRefreshIndicator({
     super.key,
     required this.isRefreshing,

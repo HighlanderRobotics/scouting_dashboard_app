@@ -75,8 +75,7 @@ extension GetAllianceAnalysis on LovatAPI {
         'teamTwo': teams[1].toString(),
         'teamThree': teams[2].toString(),
       },
-      parser: (json) =>
-          AllianceAnalysis.fromJson(json as Map<String, dynamic>),
+      parser: (json) => AllianceAnalysis.fromJson(json as Map<String, dynamic>),
     );
   }
 

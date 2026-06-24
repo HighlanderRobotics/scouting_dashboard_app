@@ -11,9 +11,8 @@ extension GetScouts on LovatAPI {
       query: {
         'archived': archivedScouters.toString(),
       },
-      parser: (json) => (json as List<dynamic>)
-          .map((e) => Scout.fromJson(e))
-          .toList(),
+      parser: (json) =>
+          (json as List<dynamic>).map((e) => Scout.fromJson(e)).toList(),
     );
     result?.sort((a, b) => a.name.trim().compareTo(b.name.trim()));
     return result;

@@ -120,16 +120,16 @@ class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
                                 )
                                 .toList(),
                             onTap: category.metrics
-                                .where((metric) => !metric.hideDetails)
-                                .isEmpty
+                                    .where((metric) => !metric.hideDetails)
+                                    .isEmpty
                                 ? null
                                 : () {
-                                    Navigator.of(context)
-                                        .pushNamed("/team_lookup_details",
-                                            arguments: {
-                                      'category': category,
-                                      'team': widget.team,
-                                    });
+                                    Navigator.of(context).pushNamed(
+                                        "/team_lookup_details",
+                                        arguments: {
+                                          'category': category,
+                                          'team': widget.team,
+                                        });
                                   },
                           ))
                       .toList(),
@@ -202,7 +202,7 @@ class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
         ),
       ),
     );
-}
+  }
 }
 
 class MetricCategoryList extends StatelessWidget {

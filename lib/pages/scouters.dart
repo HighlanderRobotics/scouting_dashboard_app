@@ -180,43 +180,43 @@ class _ScoutersPageState extends State<ScoutersPage> {
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Scouters"),
-          actions: [
-            IconButton(
-                onPressed: () {
-                  Navigator.of(context).pushWidget(ArchivedScoutersPage(
-                    onChanged: () => fetchData(),
-                  ));
-                },
-                icon: const Icon(Icons.access_time),
-                tooltip: "View archived scouters")
-          ],
-          bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(84),
-              child: Column(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: TextField(
-                      onChanged: (text) {
-                        setState(() {
-                          filterText = text;
-                        });
-                      },
-                      decoration: const InputDecoration(
-                        filled: true,
-                        labelText: "Search",
-                      ),
-                      autofocus: false,
+        title: const Text("Scouters"),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushWidget(ArchivedScoutersPage(
+                  onChanged: () => fetchData(),
+                ));
+              },
+              icon: const Icon(Icons.access_time),
+              tooltip: "View archived scouters")
+        ],
+        bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(84),
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: TextField(
+                    onChanged: (text) {
+                      setState(() {
+                        filterText = text;
+                      });
+                    },
+                    decoration: const InputDecoration(
+                      filled: true,
+                      labelText: "Search",
                     ),
+                    autofocus: false,
                   ),
-                  StaleRefreshIndicator(
-                    isRefreshing: isRefreshing,
-                    hasStaleData: scouterOverviews != null,
-                  ),
-                ],
-              )),
-          ),
+                ),
+                StaleRefreshIndicator(
+                  isRefreshing: isRefreshing,
+                  hasStaleData: scouterOverviews != null,
+                ),
+              ],
+            )),
+      ),
       drawer: const GlobalNavigationDrawer(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {

@@ -50,8 +50,7 @@ extension GetMatchPrediction on LovatAPI {
         'blue2': blue2.toString(),
         'blue3': blue3.toString(),
       },
-      parser: (json) =>
-          MatchPrediction.fromJson(json as Map<String, dynamic>),
+      parser: (json) => MatchPrediction.fromJson(json as Map<String, dynamic>),
     );
   }
 

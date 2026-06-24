@@ -7,8 +7,7 @@ extension GetUserProfile on LovatAPI {
   LovatUserProfile? getCachedUserProfile() {
     return getCachedData(
       '/v1/manager/profile',
-      parser: (json) =>
-          LovatUserProfile.fromJson(json as Map<String, dynamic>),
+      parser: (json) => LovatUserProfile.fromJson(json as Map<String, dynamic>),
     );
   }
 

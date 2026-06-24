@@ -33,9 +33,11 @@ extension SourceTeamSettings on LovatAPI {
     // body can be "THIS_TEAM", "ALL_TEAMS", or "[1, 2, 3]"
 
     if (response!.body == 'THIS_TEAM') {
-      return const SourceTeamSettingsResponse(mode: SourceTeamSettingsMode.thisTeam);
+      return const SourceTeamSettingsResponse(
+          mode: SourceTeamSettingsMode.thisTeam);
     } else if (response.body == 'ALL_TEAMS') {
-      return const SourceTeamSettingsResponse(mode: SourceTeamSettingsMode.allTeams);
+      return const SourceTeamSettingsResponse(
+          mode: SourceTeamSettingsMode.allTeams);
     } else {
       return SourceTeamSettingsResponse(
         mode: SourceTeamSettingsMode.specificTeams,

@@ -161,8 +161,8 @@ class _PicklistViewState extends State<PicklistView> {
     final fetchedFlags = await getPicklistFlags();
     final flagPaths = fetchedFlags.map((e) => e.type.path).toList();
 
-    final cached = lovatAPI.getCachedPicklistAnalysis(
-        flagPaths, widget.picklist.weights);
+    final cached =
+        lovatAPI.getCachedPicklistAnalysis(flagPaths, widget.picklist.weights);
     if (cached != null && data == null && error == null) {
       setState(() {
         flags = fetchedFlags;
@@ -258,8 +258,7 @@ class _PicklistViewState extends State<PicklistView> {
                                   .colorScheme
                                   .onSurfaceVariant,
                             ),
-                            tooltip:
-                                "View ${teamData.teamNumber}'s z-scores",
+                            tooltip: "View ${teamData.teamNumber}'s z-scores",
                           ),
                           IconButton(
                             onPressed: () {

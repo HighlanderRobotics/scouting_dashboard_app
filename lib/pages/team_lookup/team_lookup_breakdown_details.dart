@@ -88,34 +88,36 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
           ),
           Expanded(
             child: ScrollablePageBody(
-          children: response!.matchesWithSegments
-              .map((segment) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SectionTitle(segment.segmentName),
-                    const SizedBox(height: 8),
-                    ...segment.matches
-                        .map((match) {
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(match.matchIdentity.getLocalizedDescription(
-                                  abbreviateName: true)),
-                              Text(match.sourceDescription),
-                            ],
-                          );
-                        })
-                        .toList()
-                        .withSpaceBetween(height: 7)
-                  ],
-                );
-              })
-              .toList()
-              .withWidgetBetween(const Padding(
-                padding: EdgeInsets.only(top: 14),
-                child: Divider(height: 1),
-              ))),
+                children: response!.matchesWithSegments
+                    .map((segment) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SectionTitle(segment.segmentName),
+                          const SizedBox(height: 8),
+                          ...segment.matches
+                              .map((match) {
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(match.matchIdentity
+                                        .getLocalizedDescription(
+                                            abbreviateName: true)),
+                                    Text(match.sourceDescription),
+                                  ],
+                                );
+                              })
+                              .toList()
+                              .withSpaceBetween(height: 7)
+                        ],
+                      );
+                    })
+                    .toList()
+                    .withWidgetBetween(const Padding(
+                      padding: EdgeInsets.only(top: 14),
+                      child: Divider(height: 1),
+                    ))),
           ),
         ],
       );

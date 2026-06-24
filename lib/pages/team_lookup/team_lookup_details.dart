@@ -156,8 +156,8 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
     });
 
     try {
-      final result =
-          await lovatAPI.getMetricDetails(widget.teamNumber, widget.metric.path);
+      final result = await lovatAPI.getMetricDetails(
+          widget.teamNumber, widget.metric.path);
       setState(() {
         data = result;
         error = null;
@@ -272,8 +272,8 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
                                 .onPrimaryContainer,
                           ),
                           Text(
-                            widget.metric.valueVizualizationBuilder(
-                                d.difference!.abs()),
+                            widget.metric
+                                .valueVizualizationBuilder(d.difference!.abs()),
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall!
@@ -303,8 +303,7 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
     );
   }
 
-  Widget sparkline(
-      BuildContext context, MetricDetails data, double? max) {
+  Widget sparkline(BuildContext context, MetricDetails data, double? max) {
     return Column(
       children: [
         AspectRatio(

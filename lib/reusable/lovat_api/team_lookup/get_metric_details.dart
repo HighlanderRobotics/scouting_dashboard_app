@@ -71,12 +71,10 @@ class MetricDetails {
 }
 
 extension GetMetricDetails on LovatAPI {
-  MetricDetails? getCachedMetricDetails(
-      int teamNumber, String metricPath) {
+  MetricDetails? getCachedMetricDetails(int teamNumber, String metricPath) {
     return getCachedData(
       '/v1/analysis/metric/$metricPath/team/$teamNumber',
-      parser: (json) =>
-          MetricDetails.fromJson(json as Map<String, dynamic>),
+      parser: (json) => MetricDetails.fromJson(json as Map<String, dynamic>),
     );
   }
 
