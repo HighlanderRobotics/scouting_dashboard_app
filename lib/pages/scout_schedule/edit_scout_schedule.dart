@@ -124,8 +124,10 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                     }
                   },
                   onDismissed: (direction) async {
-                    final removedShifts =
+                    final originalShifts =
                         List<ServerScoutingShift>.from(scoutSchedule!.shifts);
+                    final removedShifts =
+                        List<ServerScoutingShift>.from(originalShifts);
                     removedShifts.removeWhere((s) => s.id == shift.id);
 
                     setState(() {
@@ -139,11 +141,13 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
 
                       await fetchData();
                     } catch (e) {
-                      if (scoutSchedule == null) {
-                        setState(() {
-                          error = "Failed to delete shift";
-                        });
-                      }
+                      setState(() {
+                        scoutSchedule!.shifts = originalShifts;
+                      });
+                      if (!mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Failed to delete shift")),
+                      );
                     } finally {
                       setState(() {
                         isRefreshing = false;
@@ -170,17 +174,16 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
 
                                 await fetchData();
                               } on LovatAPIException catch (e) {
-                                if (scoutSchedule == null) {
-                                  setState(() {
-                                    error = e.message;
-                                  });
-                                }
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(e.message)),
+                                );
                               } catch (_) {
-                                if (scoutSchedule == null) {
-                                  setState(() {
-                                    error = "Failed to update shift";
-                                  });
-                                }
+                                if (!mounted) return;
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Failed to update shift")),
+                                );
                               } finally {
                                 setState(() {
                                   isRefreshing = false;
@@ -224,17 +227,15 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
 
                   await fetchData();
                 } on LovatAPIException catch (e) {
-                  if (scoutSchedule == null) {
-                    setState(() {
-                      error = e.message;
-                    });
-                  }
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(e.message)),
+                  );
                 } catch (_) {
-                  if (scoutSchedule == null) {
-                    setState(() {
-                      error = "Failed to create shift";
-                    });
-                  }
+                  if (!mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to create shift")),
+                  );
                 } finally {
                   setState(() {
                     isRefreshing = false;
