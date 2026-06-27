@@ -47,11 +47,20 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   bool fabVisible = false;
 
   Future<void> checkRole() async {
-    final profile = await lovatAPI.getUserProfile();
+    final cached = lovatAPI.getCachedUserProfile();
+    if (cached != null && isScoutingLead == null) {
+      setState(() {
+        isScoutingLead = cached.role == UserRole.scoutingLead;
+      });
+    }
 
-    setState(() {
-      isScoutingLead = profile.role == UserRole.scoutingLead;
-    });
+    try {
+      final profile = await lovatAPI.getUserProfile();
+
+      setState(() {
+        isScoutingLead = profile.role == UserRole.scoutingLead;
+      });
+    } catch (_) {}
   }
 
   Future<void> checkTournament() async {

@@ -212,6 +212,14 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
       });
     }
 
+    final cachedProfile = lovatAPI.getCachedUserProfile();
+    if (cachedProfile != null && !thisTeamLoaded) {
+      setState(() {
+        thisTeamNumber = cachedProfile.team?.number;
+        thisTeamLoaded = true;
+      });
+    }
+
     try {
       final profile = await lovatAPI.getUserProfile();
       final thisTeamNumber = profile.team?.number;
