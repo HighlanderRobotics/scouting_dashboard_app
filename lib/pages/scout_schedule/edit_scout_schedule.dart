@@ -92,17 +92,12 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
     }
 
     if (scoutSchedule != null) {
-      body = Column(
+      body = Stack(
         children: [
-          StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: scoutSchedule != null,
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemBuilder: (context, index) {
-                final shift = scoutSchedule!.shifts[index];
-                return Dismissible(
+          ListView.builder(
+            itemBuilder: (context, index) {
+              final shift = scoutSchedule!.shifts[index];
+              return Dismissible(
                   key: Key(shift.id),
                   direction: DismissDirection.endToStart,
                   background: Container(
@@ -200,6 +195,14 @@ class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
                 );
               },
               itemCount: scoutSchedule!.shifts.length,
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: StaleRefreshIndicator(
+              isRefreshing: isRefreshing,
+              hasStaleData: scoutSchedule != null,
             ),
           ),
         ],

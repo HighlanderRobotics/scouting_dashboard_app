@@ -204,13 +204,12 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
 
     final d = data!;
 
-    return Column(
+    return Stack(
       children: [
-        StaleRefreshIndicator(
-          isRefreshing: isRefreshing,
-          hasStaleData: data != null,
-        ),
-        Row(children: [
+        SingleChildScrollView(
+          child: Column(
+            children: [
+              Row(children: [
           if (d.hasResult)
             valueBox(
               context,
@@ -296,9 +295,21 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
           sparkline(context, d, widget.metric.max),
         ],
         if (d.paths.isNotEmpty)
-          TeamAutoPaths(
-            autoPaths: d.paths,
+            TeamAutoPaths(
+              autoPaths: d.paths,
+            ),
+          ],
+        ),
+        ),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: data != null,
           ),
+        ),
       ],
     );
   }

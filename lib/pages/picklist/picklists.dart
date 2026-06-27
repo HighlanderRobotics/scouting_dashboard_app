@@ -312,14 +312,9 @@ class _SharedPicklistsState extends State<SharedPicklists> {
       return const Column(children: [LinearProgressIndicator()]);
     }
 
-    return Column(
+    return Stack(
       children: [
-        StaleRefreshIndicator(
-          isRefreshing: isRefreshing,
-          hasStaleData: picklists != null,
-        ),
-        Expanded(
-          child: ScrollablePageBody(
+        ScrollablePageBody(
             padding: EdgeInsets.zero,
             children: picklists!
                 .map((picklist) => Column(
@@ -420,7 +415,14 @@ class _SharedPicklistsState extends State<SharedPicklists> {
                         ),
                       ],
                     ))
-                .toList(),
+                .toList()),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: picklists != null,
           ),
         ),
       ],
@@ -537,14 +539,9 @@ class _MutablePicklistsState extends State<MutablePicklists> {
       );
     }
 
-    return Column(
+    return Stack(
       children: [
-        StaleRefreshIndicator(
-          isRefreshing: isRefreshing,
-          hasStaleData: picklistsMeta != null,
-        ),
-        Expanded(
-          child: ScrollablePageBody(
+        ScrollablePageBody(
             padding: EdgeInsets.zero,
             children: picklistsMeta!
                 .map((picklistMeta) => Column(
@@ -668,7 +665,14 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                         ),
                       ],
                     ))
-                .toList(),
+                .toList()),
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          child: StaleRefreshIndicator(
+            isRefreshing: isRefreshing,
+            hasStaleData: picklistsMeta != null,
           ),
         ),
       ],

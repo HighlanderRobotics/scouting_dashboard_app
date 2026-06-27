@@ -81,23 +81,26 @@ class _TeamLookupBreakdownsTabState extends State<TeamLookupBreakdownsTab> {
   @override
   Widget build(BuildContext context) {
     if (data != null) {
-      return Column(
+      return Stack(
         children: [
-          StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: data != null,
+          ScrollablePageBody(
+            children: breakdowns
+                .map(
+                  (BreakdownData breakdownData) => Breakdown(
+                    dataIdentity: breakdownData,
+                    data: data!,
+                    team: widget.team,
+                  ),
+                )
+                .toList(),
           ),
-          Expanded(
-            child: ScrollablePageBody(
-              children: breakdowns
-                  .map(
-                    (BreakdownData breakdownData) => Breakdown(
-                      dataIdentity: breakdownData,
-                      data: data!,
-                      team: widget.team,
-                    ),
-                  )
-                  .toList(),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: StaleRefreshIndicator(
+              isRefreshing: isRefreshing,
+              hasStaleData: data != null,
             ),
           ),
         ],

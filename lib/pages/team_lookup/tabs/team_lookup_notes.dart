@@ -85,44 +85,47 @@ class _TeamLookupNotesTabState extends State<TeamLookupNotesTab> {
   @override
   Widget build(BuildContext context) {
     if (notes != null) {
-      return Column(
+      return Stack(
         children: [
-          StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: notes != null,
-          ),
-          Expanded(
-            child: notes!.isEmpty
-                ? SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const SizedBox(height: 100),
-                        Image.asset(
-                          'assets/images/no-notes-${Theme.of(context).brightness.name}.png',
-                          width: 250,
-                        ),
-                        Text(
-                          "No notes on ${widget.team}",
-                          style: Theme.of(context).textTheme.headlineMedium,
-                        ),
-                      ],
-                    ),
-                  )
-                : ScrollablePageBody(
+          notes!.isEmpty
+              ? SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      NotesList(
-                        notes: notes!
-                            .map(
-                              (note) => NoteWidget(
-                                note,
-                                onEdit: fetchData,
-                              ),
-                            )
-                            .toList(),
+                      const SizedBox(height: 100),
+                      Image.asset(
+                        'assets/images/no-notes-${Theme.of(context).brightness.name}.png',
+                        width: 250,
+                      ),
+                      Text(
+                        "No notes on ${widget.team}",
+                        style: Theme.of(context).textTheme.headlineMedium,
                       ),
                     ],
                   ),
+                )
+              : ScrollablePageBody(
+                  children: [
+                    NotesList(
+                      notes: notes!
+                          .map(
+                            (note) => NoteWidget(
+                              note,
+                              onEdit: fetchData,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+                ),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: StaleRefreshIndicator(
+              isRefreshing: isRefreshing,
+              hasStaleData: notes != null,
+            ),
           ),
         ],
       );

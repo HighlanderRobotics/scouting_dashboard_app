@@ -80,44 +80,47 @@ class _BreakdownDetailsPageState extends State<BreakdownDetailsPage> {
     }
 
     if (response != null) {
-      body = Column(
+      body = Stack(
         children: [
-          StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: response != null,
-          ),
-          Expanded(
-            child: ScrollablePageBody(
-                children: response!.matchesWithSegments
-                    .map((segment) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          SectionTitle(segment.segmentName),
-                          const SizedBox(height: 8),
-                          ...segment.matches
-                              .map((match) {
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(match.matchIdentity
-                                        .getLocalizedDescription(
-                                            abbreviateName: true)),
-                                    Text(match.sourceDescription),
-                                  ],
-                                );
-                              })
-                              .toList()
-                              .withSpaceBetween(height: 7)
-                        ],
-                      );
-                    })
-                    .toList()
-                    .withWidgetBetween(const Padding(
-                      padding: EdgeInsets.only(top: 14),
-                      child: Divider(height: 1),
-                    ))),
+          ScrollablePageBody(
+              children: response!.matchesWithSegments
+                  .map((segment) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SectionTitle(segment.segmentName),
+                        const SizedBox(height: 8),
+                        ...segment.matches
+                            .map((match) {
+                              return Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(match.matchIdentity
+                                      .getLocalizedDescription(
+                                          abbreviateName: true)),
+                                  Text(match.sourceDescription),
+                                ],
+                              );
+                            })
+                            .toList()
+                            .withSpaceBetween(height: 7)
+                      ],
+                    );
+                  })
+                  .toList()
+                  .withWidgetBetween(const Padding(
+                    padding: EdgeInsets.only(top: 14),
+                    child: Divider(height: 1),
+                  ))),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: StaleRefreshIndicator(
+              isRefreshing: isRefreshing,
+              hasStaleData: response != null,
+            ),
           ),
         ],
       );
