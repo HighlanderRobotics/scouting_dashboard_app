@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class BreakdownMetrics {
   const BreakdownMetrics(this._values);
@@ -30,27 +31,27 @@ class BreakdownMetrics {
 }
 
 extension GetBreakdownMetrics on LovatAPI {
-  BreakdownMetrics? getCachedBreakdownMetricsByTeamNumber(int teamNumber) {
-    return getCachedData(
-      '/v1/analysis/breakdown/team/$teamNumber',
-      parser: (json) => BreakdownMetrics.fromJson(json as Map<String, dynamic>),
+  CachedQuery<BreakdownMetrics> breakdownMetrics(int teamNumber) {
+    final path = '/v1/analysis/breakdown/team/$teamNumber';
+    return CachedQuery(
+      queryKey: ['breakdownMetrics', teamNumber],
+      queryFn: () async {
+        final response = await get(path);
+
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get breakdown metrics');
+        }
+
+        final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+        return BreakdownMetrics.fromJson(json);
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) =>
+            BreakdownMetrics.fromJson(json as Map<String, dynamic>),
+      ),
     );
-  }
-
-  Future<BreakdownMetrics> getBreakdownMetricsByTeamNumber(
-    int teamNumber,
-  ) async {
-    final response = await get(
-      '/v1/analysis/breakdown/team/$teamNumber',
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get breakdown metrics');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-    return BreakdownMetrics.fromJson(json);
   }
 }

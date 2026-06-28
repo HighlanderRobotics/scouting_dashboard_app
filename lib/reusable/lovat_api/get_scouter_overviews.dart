@@ -3,52 +3,56 @@ import 'dart:convert';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 extension GetScouterOverviews on LovatAPI {
-  List<ScouterOverview>? getCachedScouterOverviews({
-    String? tournamentKey,
-    bool archivedScouters = false,
-  }) {
-    return getCachedData(
-      '/v1/manager/scouterspage',
-      query: {
-        if (tournamentKey != null) 'tournamentKey': tournamentKey,
-        'archived': archivedScouters.toString(),
+  CachedQuery<List<ScouterOverview>> scouterOverviews(
+      {bool archivedScouters = false}) {
+    const path = '/v1/manager/scouterspage';
+    return CachedQuery(
+      queryKey: ['scouterOverviews', archivedScouters],
+      queryFn: () async {
+        final tournament = await Tournament.getCurrent();
+
+        final response = await get(
+          path,
+          query: {
+            if (tournament != null) 'tournamentKey': tournament.key,
+            'archived': archivedScouters.toString(),
+          },
+        );
+
+        if (response?.statusCode != 200) {
+          try {
+            throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+          } on LovatAPIException {
+            rethrow;
+          } catch (_) {
+            throw Exception('Failed to get scouter overviews');
+          }
+        }
+
+        final json = jsonDecode(response!.body) as List<dynamic>;
+
+        return json
+            .map((e) => ScouterOverview.fromJson(e, archived: archivedScouters))
+            .toList();
       },
-      parser: (json) => (json as List<dynamic>)
-          .map((e) => ScouterOverview.fromJson(e, archived: archivedScouters))
-          .toList(),
-    );
-  }
-
-  /// archivedScouters - true: show archived scouters only, false: show unarchived scouters only
-  Future<List<ScouterOverview>> getScouterOverviews(
-      {bool archivedScouters = false}) async {
-    final tournament = await Tournament.getCurrent();
-
-    final response = await lovatAPI.get(
-      '/v1/manager/scouterspage',
-      query: {
-        if (tournament != null) 'tournamentKey': tournament.key,
-        'archived': archivedScouters.toString(),
+      cacheReader: () {
+        final tournamentKey = Tournament.currentSync?.key;
+        return getCachedData(
+          path,
+          query: {
+            if (tournamentKey != null) 'tournamentKey': tournamentKey,
+            'archived': archivedScouters.toString(),
+          },
+          parser: (json) => (json as List<dynamic>)
+              .map((e) =>
+                  ScouterOverview.fromJson(e, archived: archivedScouters))
+              .toList(),
+        );
       },
     );
-
-    if (response?.statusCode != 200) {
-      try {
-        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
-      } on LovatAPIException {
-        rethrow;
-      } catch (_) {
-        throw Exception('Failed to get scouter overviews');
-      }
-    }
-
-    final json = jsonDecode(response!.body) as List<dynamic>;
-
-    return json
-        .map((e) => ScouterOverview.fromJson(e, archived: archivedScouters))
-        .toList();
   }
 }
 

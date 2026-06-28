@@ -302,7 +302,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                 ),
               ),
               StaleRefreshIndicator(
-                isRefreshing: showProgressIndicator,
+                isFetching: showProgressIndicator,
                 hasStaleData: matches != null,
               ),
             ],

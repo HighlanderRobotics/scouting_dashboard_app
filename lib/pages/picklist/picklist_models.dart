@@ -57,7 +57,7 @@ class ConfiguredPicklist {
   String? author;
 
   Future<List<int>> fetchTeamRankings() async {
-    final analysis = await lovatAPI.getPicklistAnalysis([], weights);
+    final analysis = await lovatAPI.picklistAnalysis([], weights).queryFn();
 
     if (analysis.isEmpty) {
       throw const LovatAPIException("Failed to fetch team rankings.");

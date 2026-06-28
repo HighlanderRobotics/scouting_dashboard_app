@@ -189,6 +189,10 @@ class LovatAPI {
     return Uri.parse(baseUrl + path).replace(queryParameters: query).toString();
   }
 
+  String cacheKeyFor(String path, {Map<String, String>? query}) {
+    return _cacheKey(path, query: query);
+  }
+
   Future<http.Response?> post(
     String path, {
     Map<String, dynamic>? body,

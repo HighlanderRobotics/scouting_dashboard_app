@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
 class AllianceTeam {
@@ -67,35 +68,33 @@ class AllianceAnalysis {
 }
 
 extension GetAllianceAnalysis on LovatAPI {
-  AllianceAnalysis? getCachedAllianceAnalysis(List<int> teams) {
-    return getCachedData(
-      '/v1/analysis/alliance',
-      query: {
-        'teamOne': teams[0].toString(),
-        'teamTwo': teams[1].toString(),
-        'teamThree': teams[2].toString(),
+  CachedQuery<AllianceAnalysis> allianceAnalysis(List<int> teams) {
+    const path = '/v1/analysis/alliance';
+    final query = {
+      'teamOne': teams[0].toString(),
+      'teamTwo': teams[1].toString(),
+      'teamThree': teams[2].toString(),
+    };
+    return CachedQuery(
+      queryKey: ['allianceAnalysis', teams[0], teams[1], teams[2]],
+      queryFn: () async {
+        final response = await get(path, query: query);
+
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get alliance analysis');
+        }
+
+        return AllianceAnalysis.fromJson(
+          jsonDecode(response!.body) as Map<String, dynamic>,
+        );
       },
-      parser: (json) => AllianceAnalysis.fromJson(json as Map<String, dynamic>),
-    );
-  }
-
-  Future<AllianceAnalysis> getAllianceAnalysis(List<int> teams) async {
-    final response = await get(
-      '/v1/analysis/alliance',
-      query: {
-        'teamOne': teams[0].toString(),
-        'teamTwo': teams[1].toString(),
-        'teamThree': teams[2].toString(),
-      },
-    );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get alliance analysis');
-    }
-
-    return AllianceAnalysis.fromJson(
-      jsonDecode(response!.body) as Map<String, dynamic>,
+      cacheReader: () => getCachedData(
+        path,
+        query: query,
+        parser: (json) =>
+            AllianceAnalysis.fromJson(json as Map<String, dynamic>),
+      ),
     );
   }
 }

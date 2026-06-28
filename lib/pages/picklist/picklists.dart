@@ -9,6 +9,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/get_s
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 
 class PicklistsPage extends StatefulWidget {
@@ -235,197 +236,142 @@ class _MyPicklistsState extends State<MyPicklists> {
   }
 }
 
-class SharedPicklists extends StatefulWidget {
+class SharedPicklists extends StatelessWidget {
   const SharedPicklists({
     super.key,
   });
 
   @override
-  State<SharedPicklists> createState() => _SharedPicklistsState();
-}
-
-class _SharedPicklistsState extends State<SharedPicklists> {
-  List<ConfiguredPicklistMeta>? picklists;
-  String? error;
-  bool isRefreshing = false;
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  Future<void> fetchData() async {
-    final cached = lovatAPI.getCachedSharedPicklists();
-    if (cached != null && picklists == null && error == null) {
-      setState(() {
-        picklists = cached;
-      });
-    }
-
-    setState(() {
-      isRefreshing = true;
-    });
-
-    try {
-      final data = await lovatAPI.getSharedPicklists();
-      setState(() {
-        picklists = data;
-        error = null;
-      });
-    } on LovatAPIException catch (e) {
-      if (e.message == "Not on team" && picklists == null) {
-        setState(() {
-          error = "Not on team";
-        });
-      } else if (picklists == null) {
-        setState(() {
-          error = e.toString();
-        });
-      }
-    } catch (e) {
-      if (picklists == null) {
-        setState(() {
-          error = e.toString();
-        });
-      }
-    } finally {
-      setState(() {
-        isRefreshing = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (error != null && picklists == null) {
-      if (error == "Not on team") {
-        return const NotOnTeamMessage();
-      }
-      return FriendlyErrorView(
-        errorMessage: error!,
-        onRetry: fetchData,
-      );
-    }
+    return StaleRefreshBuilder(
+      query: lovatAPI.sharedPicklists(),
+      builder: (context, result) {
+        final picklists = result.data;
+        if (result.hasError && picklists == null) {
+          if (result.error == "Not on team") {
+            return const NotOnTeamMessage();
+          }
+          return FriendlyErrorView.result(result);
+        }
 
-    if (picklists == null) {
-      return const Column(children: [LinearProgressIndicator()]);
-    }
+        if (picklists == null) {
+          return const Column(children: [LinearProgressIndicator()]);
+        }
 
-    return Stack(
-      children: [
-        ScrollablePageBody(
-            padding: EdgeInsets.zero,
-            children: picklists!
-                .map((picklist) => Column(
-                      children: [
-                        Dismissible(
-                          onUpdate: (details) {
-                            if ((details.reached && !details.previousReached) ||
-                                (!details.reached && details.previousReached)) {
-                              HapticFeedback.lightImpact();
-                            }
-                          },
-                          key: GlobalKey(),
-                          direction: DismissDirection.endToStart,
-                          background: Container(
-                            color: Colors.red[900],
-                            child: const Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(Icons.delete),
-                                  SizedBox(width: 30),
-                                ],
+        return Stack(
+          children: [
+            ScrollablePageBody(
+                padding: EdgeInsets.zero,
+                children: picklists
+                    .map((picklist) => Column(
+                          children: [
+                            Dismissible(
+                              onUpdate: (details) {
+                                if ((details.reached &&
+                                        !details.previousReached) ||
+                                    (!details.reached &&
+                                        details.previousReached)) {
+                                  HapticFeedback.lightImpact();
+                                }
+                              },
+                              key: GlobalKey(),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: Colors.red[900],
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(Icons.delete),
+                                      SizedBox(width: 30),
+                                    ],
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                          child: ListTile(
-                            title: Text(picklist.title),
-                            subtitle: picklist.author == null
-                                ? null
-                                : Text(picklist.author!),
-                            trailing: Icon(
-                              Icons.arrow_right,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            onTap: () {
-                              Navigator.of(context).pushNamed(
-                                "/shared_picklist",
-                                arguments: {
-                                  'picklist': picklist,
+                              child: ListTile(
+                                title: Text(picklist.title),
+                                subtitle: picklist.author == null
+                                    ? null
+                                    : Text(picklist.author!),
+                                trailing: Icon(
+                                  Icons.arrow_right,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(
+                                    "/shared_picklist",
+                                    arguments: {
+                                      'picklist': picklist,
+                                    },
+                                  );
                                 },
-                              );
-                            },
-                          ),
-                          onDismissed: (direction) async {
-                            final scaffoldMessengerState =
-                                ScaffoldMessenger.of(context);
-                            final themeData = Theme.of(context);
+                              ),
+                              onDismissed: (direction) async {
+                                final scaffoldMessengerState =
+                                    ScaffoldMessenger.of(context);
+                                final themeData = Theme.of(context);
 
-                            try {
-                              scaffoldMessengerState.showSnackBar(
-                                const SnackBar(
-                                  content: Text("Deleting..."),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
+                                try {
+                                  scaffoldMessengerState.showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Deleting..."),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
 
-                              await lovatAPI.deleteSharedPicklist(picklist.id);
+                                  await lovatAPI
+                                      .deleteSharedPicklist(picklist.id);
 
-                              setState(() {
-                                picklists!
-                                    .removeWhere((p) => p.id == picklist.id);
-                              });
+                                  result.refetch();
 
-                              scaffoldMessengerState.hideCurrentSnackBar();
+                                  scaffoldMessengerState.hideCurrentSnackBar();
 
-                              scaffoldMessengerState.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'Successfully deleted picklist "${picklist.title}"',
-                                  ),
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            } catch (error) {
-                              scaffoldMessengerState.hideCurrentSnackBar();
+                                  scaffoldMessengerState.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Successfully deleted picklist "${picklist.title}"',
+                                      ),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                } catch (error) {
+                                  scaffoldMessengerState.hideCurrentSnackBar();
 
-                              scaffoldMessengerState.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    error.toString(),
-                                    style: TextStyle(
-                                        color: themeData
-                                            .colorScheme.onErrorContainer),
-                                  ),
-                                  backgroundColor:
-                                      themeData.colorScheme.errorContainer,
-                                  behavior: SnackBarBehavior.floating,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                        Divider(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          height: 0,
-                        ),
-                      ],
-                    ))
-                .toList()),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: picklists != null,
-          ),
-        ),
-      ],
+                                  scaffoldMessengerState.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        error.toString(),
+                                        style: TextStyle(
+                                            color: themeData
+                                                .colorScheme.onErrorContainer),
+                                      ),
+                                      backgroundColor:
+                                          themeData.colorScheme.errorContainer,
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                }
+                              },
+                            ),
+                            Divider(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              height: 0,
+                            ),
+                          ],
+                        ))
+                    .toList()),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: StaleRefreshIndicator.result(result),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -464,218 +410,169 @@ class MutablePicklists extends StatefulWidget {
 }
 
 class _MutablePicklistsState extends State<MutablePicklists> {
-  List<MutablePicklistMeta>? picklistsMeta;
-  String? error;
-  bool isRefreshing = false;
   bool loading = false;
 
   @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  Future<void> fetchData() async {
-    final cached = lovatAPI.getCachedMutablePicklists();
-    if (cached != null && picklistsMeta == null && error == null) {
-      setState(() {
-        picklistsMeta = cached;
-      });
-    }
-
-    setState(() {
-      isRefreshing = true;
-    });
-
-    try {
-      final data = await lovatAPI.getMutablePicklists();
-      setState(() {
-        picklistsMeta = data;
-        error = null;
-      });
-    } on LovatAPIException catch (e) {
-      if (e.message == "Not on team" && picklistsMeta == null) {
-        setState(() {
-          error = "Not on team";
-        });
-      } else if (picklistsMeta == null) {
-        setState(() {
-          error = e.toString();
-        });
-      }
-    } catch (e) {
-      if (picklistsMeta == null) {
-        setState(() {
-          error = e.toString();
-        });
-      }
-    } finally {
-      setState(() {
-        isRefreshing = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (error != null && picklistsMeta == null) {
-      if (error == "Not on team") {
-        return const NotOnTeamMessage();
-      }
-      return FriendlyErrorView(
-        errorMessage: error!,
-        onRetry: fetchData,
-      );
-    }
+    return StaleRefreshBuilder(
+      query: lovatAPI.mutablePicklists(),
+      builder: (context, result) {
+        final picklistsMeta = result.data;
+        if (result.hasError && picklistsMeta == null) {
+          if (result.error == "Not on team") {
+            return const NotOnTeamMessage();
+          }
+          return FriendlyErrorView.result(result);
+        }
 
-    if (picklistsMeta == null) {
-      return const PageBody(
-        padding: EdgeInsets.zero,
-        child: Column(
-          children: [
-            LinearProgressIndicator(),
-          ],
-        ),
-      );
-    }
-
-    return Stack(
-      children: [
-        ScrollablePageBody(
+        if (picklistsMeta == null) {
+          return const PageBody(
             padding: EdgeInsets.zero,
-            children: picklistsMeta!
-                .map((picklistMeta) => Column(
-                      children: [
-                        Dismissible(
-                          onUpdate: (details) {
-                            if ((details.reached && !details.previousReached) ||
-                                (!details.reached && details.previousReached)) {
-                              HapticFeedback.lightImpact();
-                            }
-                          },
-                          key: GlobalKey(),
-                          direction: DismissDirection.endToStart,
-                          background: Container(
-                            color: Colors.red[900],
-                            child: const Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Icon(Icons.delete),
-                                  SizedBox(width: 30),
-                                ],
-                              ),
-                            ),
-                          ),
-                          child: ListTile(
-                            title: Text(picklistMeta.name),
-                            subtitle: picklistMeta.author == null
-                                ? null
-                                : Text(picklistMeta.author!),
-                            trailing: Icon(
-                              Icons.arrow_right,
-                              color: Theme.of(context).colorScheme.onSurface,
-                            ),
-                            onTap: () async {
-                              setState(() {
-                                loading = true;
-                              });
+            child: Column(
+              children: [
+                LinearProgressIndicator(),
+              ],
+            ),
+          );
+        }
 
-                              final scaffoldMessengerState =
-                                  ScaffoldMessenger.of(context);
-                              final themeData = Theme.of(context);
-
-                              try {
-                                Navigator.of(context).pushNamed(
-                                    '/mutable_picklist',
-                                    arguments: <String, dynamic>{
-                                      'picklist':
-                                          await picklistMeta.getPicklist(),
-                                      'callback': () => setState(() {}),
-                                    });
-                              } catch (error) {
-                                scaffoldMessengerState.showSnackBar(
-                                  SnackBar(
-                                    content: Text("Error: $error",
-                                        style: TextStyle(
-                                            color: themeData
-                                                .colorScheme.onErrorContainer)),
-                                    backgroundColor:
-                                        themeData.colorScheme.errorContainer,
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              } finally {
-                                setState(() {
-                                  loading = false;
-                                });
-                              }
-                            },
-                          ),
-                          onDismissed: (direction) async {
-                            final scaffoldMessengerState =
-                                ScaffoldMessenger.of(context);
-                            final themeData = Theme.of(context);
-
-                            scaffoldMessengerState.showSnackBar(const SnackBar(
-                              content: Text("Deleting..."),
-                              behavior: SnackBarBehavior.floating,
-                            ));
-
-                            try {
-                              await picklistMeta.delete();
-
-                              setState(() {
-                                picklistsMeta!.removeWhere(
-                                    (p) => p.uuid == picklistMeta.uuid);
-                              });
-
-                              scaffoldMessengerState.hideCurrentSnackBar();
-
-                              scaffoldMessengerState
-                                  .showSnackBar(const SnackBar(
-                                content: Text("Successfully deleted"),
-                                behavior: SnackBarBehavior.floating,
-                              ));
-                            } catch (error) {
-                              scaffoldMessengerState.hideCurrentSnackBar();
-
-                              scaffoldMessengerState.showSnackBar(SnackBar(
-                                content: Text(
-                                  "Error deleting: $error",
-                                  style: TextStyle(
-                                    color:
-                                        themeData.colorScheme.onErrorContainer,
+        return Stack(
+          children: [
+            ScrollablePageBody(
+                padding: EdgeInsets.zero,
+                children: picklistsMeta
+                    .map((picklistMeta) => Column(
+                          children: [
+                            Dismissible(
+                              onUpdate: (details) {
+                                if ((details.reached &&
+                                        !details.previousReached) ||
+                                    (!details.reached &&
+                                        details.previousReached)) {
+                                  HapticFeedback.lightImpact();
+                                }
+                              },
+                              key: GlobalKey(),
+                              direction: DismissDirection.endToStart,
+                              background: Container(
+                                color: Colors.red[900],
+                                child: const Center(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Icon(Icons.delete),
+                                      SizedBox(width: 30),
+                                    ],
                                   ),
                                 ),
-                                behavior: SnackBarBehavior.floating,
-                                backgroundColor:
-                                    themeData.colorScheme.errorContainer,
-                              ));
+                              ),
+                              child: ListTile(
+                                title: Text(picklistMeta.name),
+                                subtitle: picklistMeta.author == null
+                                    ? null
+                                    : Text(picklistMeta.author!),
+                                trailing: Icon(
+                                  Icons.arrow_right,
+                                  color:
+                                      Theme.of(context).colorScheme.onSurface,
+                                ),
+                                onTap: () async {
+                                  setState(() {
+                                    loading = true;
+                                  });
 
-                              return;
-                            }
-                          },
-                        ),
-                        Divider(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHighest,
-                          height: 0,
-                        ),
-                      ],
-                    ))
-                .toList()),
-        Positioned(
-          top: 0,
-          left: 0,
-          right: 0,
-          child: StaleRefreshIndicator(
-            isRefreshing: isRefreshing,
-            hasStaleData: picklistsMeta != null,
-          ),
-        ),
-      ],
+                                  final scaffoldMessengerState =
+                                      ScaffoldMessenger.of(context);
+                                  final themeData = Theme.of(context);
+
+                                  try {
+                                    Navigator.of(context).pushNamed(
+                                        '/mutable_picklist',
+                                        arguments: <String, dynamic>{
+                                          'picklist':
+                                              await picklistMeta.getPicklist(),
+                                          'callback': () => result.refetch(),
+                                        });
+                                  } catch (error) {
+                                    scaffoldMessengerState.showSnackBar(
+                                      SnackBar(
+                                        content: Text("Error: $error",
+                                            style: TextStyle(
+                                                color: themeData
+                                                    .colorScheme
+                                                    .onErrorContainer)),
+                                        backgroundColor:
+                                            themeData.colorScheme.errorContainer,
+                                        behavior: SnackBarBehavior.floating,
+                                      ),
+                                    );
+                                  } finally {
+                                    setState(() {
+                                      loading = false;
+                                    });
+                                  }
+                                },
+                              ),
+                              onDismissed: (direction) async {
+                                final scaffoldMessengerState =
+                                    ScaffoldMessenger.of(context);
+                                final themeData = Theme.of(context);
+
+                                scaffoldMessengerState.showSnackBar(const SnackBar(
+                                  content: Text("Deleting..."),
+                                  behavior: SnackBarBehavior.floating,
+                                ));
+
+                                try {
+                                  await picklistMeta.delete();
+
+                                  result.refetch();
+
+                                  scaffoldMessengerState.hideCurrentSnackBar();
+
+                                  scaffoldMessengerState
+                                      .showSnackBar(const SnackBar(
+                                    content: Text("Successfully deleted"),
+                                    behavior: SnackBarBehavior.floating,
+                                  ));
+                                } catch (error) {
+                                  scaffoldMessengerState.hideCurrentSnackBar();
+
+                                  scaffoldMessengerState.showSnackBar(SnackBar(
+                                    content: Text(
+                                      "Error deleting: $error",
+                                      style: TextStyle(
+                                        color:
+                                            themeData.colorScheme.onErrorContainer,
+                                      ),
+                                    ),
+                                    behavior: SnackBarBehavior.floating,
+                                    backgroundColor:
+                                        themeData.colorScheme.errorContainer,
+                                  ));
+
+                                  return;
+                                }
+                              },
+                            ),
+                            Divider(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              height: 0,
+                            ),
+                          ],
+                        ))
+                    .toList()),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: StaleRefreshIndicator.result(result),
+            ),
+          ],
+        );
+      },
     );
   }
 }

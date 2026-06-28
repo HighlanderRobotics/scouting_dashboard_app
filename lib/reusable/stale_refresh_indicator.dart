@@ -1,16 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class StaleRefreshIndicator extends StatefulWidget
     implements PreferredSizeWidget {
   const StaleRefreshIndicator({
     super.key,
-    required this.isRefreshing,
+    required this.isFetching,
     required this.hasStaleData,
   });
 
-  final bool isRefreshing;
+  StaleRefreshIndicator.result(
+    QueryResult<dynamic> result, {
+    super.key,
+  })  : isFetching = result.isFetching,
+        hasStaleData = result.data != null;
+
+  final bool isFetching;
   final bool hasStaleData;
 
   @override
@@ -33,7 +40,7 @@ class _StaleRefreshIndicatorState extends State<StaleRefreshIndicator> {
   @override
   void didUpdateWidget(StaleRefreshIndicator oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.isRefreshing != widget.isRefreshing ||
+    if (oldWidget.isFetching != widget.isFetching ||
         oldWidget.hasStaleData != widget.hasStaleData) {
       _schedule();
     }
@@ -41,7 +48,7 @@ class _StaleRefreshIndicatorState extends State<StaleRefreshIndicator> {
 
   void _schedule() {
     _timer?.cancel();
-    if (widget.isRefreshing && widget.hasStaleData) {
+    if (widget.isFetching && widget.hasStaleData) {
       _visible = false;
       _timer = Timer(const Duration(milliseconds: 1200), () {
         if (mounted) setState(() => _visible = true);
