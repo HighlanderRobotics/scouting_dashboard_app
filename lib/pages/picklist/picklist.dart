@@ -196,7 +196,8 @@ class _PicklistViewState extends State<PicklistView> {
               children: data
                   .map((teamData) => ListTile(
                         title: Text(teamData.teamNumber.toString()),
-                        contentPadding: const EdgeInsets.only(left: 16, right: 4),
+                        contentPadding:
+                            const EdgeInsets.only(left: 16, right: 4),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -217,13 +218,15 @@ class _PicklistViewState extends State<PicklistView> {
                                       'team': teamData.teamNumber,
                                       'breakdown': teamData.zScoresWeighted,
                                       'unweighted': teamData.zScoresUnweighted,
-                                      'picklistTitle': widget.picklist.meta.title,
+                                      'picklistTitle':
+                                          widget.picklist.meta.title,
                                     });
                               },
                               icon: Icon(
                                 Icons.balance,
-                                color:
-                                    Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               tooltip: "View ${teamData.teamNumber}'s z-scores",
                             ),
@@ -236,8 +239,9 @@ class _PicklistViewState extends State<PicklistView> {
                               },
                               icon: Icon(
                                 Icons.arrow_right,
-                                color:
-                                    Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               tooltip:
                                   "Open team lookup for ${teamData.teamNumber}",

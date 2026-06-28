@@ -150,7 +150,9 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
         queryKey: ['sharedPicklistAnalysis', widget.picklistMeta.id],
         queryFn: () async {
           final picklist = await widget.picklistMeta.getPicklist();
-          return lovatAPI.picklistAnalysis(flagPaths, picklist.weights).queryFn();
+          return lovatAPI
+              .picklistAnalysis(flagPaths, picklist.weights)
+              .queryFn();
         },
       ),
       builder: (context, result) {
@@ -171,7 +173,8 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
               children: data
                   .map((teamData) => ListTile(
                         title: Text(teamData.teamNumber.toString()),
-                        contentPadding: const EdgeInsets.only(left: 16, right: 4),
+                        contentPadding:
+                            const EdgeInsets.only(left: 16, right: 4),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -192,13 +195,15 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                                       'team': teamData.teamNumber,
                                       'breakdown': teamData.zScoresWeighted,
                                       'unweighted': teamData.zScoresUnweighted,
-                                      'picklistTitle': widget.picklistMeta.title,
+                                      'picklistTitle':
+                                          widget.picklistMeta.title,
                                     });
                               },
                               icon: Icon(
                                 Icons.balance,
-                                color:
-                                    Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               tooltip: "View ${teamData.teamNumber}'s z-scores",
                             ),
@@ -211,8 +216,9 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                               },
                               icon: Icon(
                                 Icons.arrow_right,
-                                color:
-                                    Theme.of(context).colorScheme.onSurfaceVariant,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                               tooltip:
                                   "Open team lookup for ${teamData.teamNumber}",

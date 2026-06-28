@@ -157,105 +157,115 @@ class AnalysisOverview extends StatelessWidget {
               child: Column(
                 children: [
                   Row(children: [
-              if (d.hasResult)
-                valueBox(
-                  context,
-                  Text(
-                    metric.valueVizualizationBuilder(d.result),
-                    style: Theme.of(context).textTheme.headlineSmall!.merge(
-                          TextStyle(
-                              color:
-                                  Theme.of(context).colorScheme.onPrimaryContainer),
+                    if (d.hasResult)
+                      valueBox(
+                        context,
+                        Text(
+                          metric.valueVizualizationBuilder(d.result),
+                          style:
+                              Theme.of(context).textTheme.headlineSmall!.merge(
+                                    TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
+                                  ),
                         ),
-                  ),
-                  "This team",
-                  false,
-                ),
-              if (d.hasResult) const SizedBox(width: 10),
-              if (d.hasAll)
-                Flexible(
-                  flex: 5,
-                  fit: FlexFit.tight,
-                  child: valueBox(
-                    context,
-                    Text(
-                      metric.valueVizualizationBuilder(d.all),
-                      style: Theme.of(context).textTheme.headlineSmall!.merge(
-                            TextStyle(
-                                color: Theme.of(context).colorScheme.onPrimary),
-                          ),
-                    ),
-                    "All teams",
-                    true,
-                  ),
-                ),
-              if (d.hasAll) const SizedBox(width: 10),
-              if (d.hasDifference)
-                Flexible(
-                  flex: 6,
-                  fit: FlexFit.tight,
-                  child: valueBox(
-                    context,
-                    d.difference == null
-                        ? Text(
-                            "--",
-                            style: Theme.of(context).textTheme.headlineSmall!.merge(
+                        "This team",
+                        false,
+                      ),
+                    if (d.hasResult) const SizedBox(width: 10),
+                    if (d.hasAll)
+                      Flexible(
+                        flex: 5,
+                        fit: FlexFit.tight,
+                        child: valueBox(
+                          context,
+                          Text(
+                            metric.valueVizualizationBuilder(d.all),
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineSmall!
+                                .merge(
                                   TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .onPrimaryContainer),
+                                          .onPrimary),
                                 ),
-                          )
-                        : Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                d.difference!.isNegative
-                                    ? Icons.arrow_drop_down
-                                    : Icons.arrow_drop_up,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              ),
-                              Text(
-                                metric
-                                    .valueVizualizationBuilder(d.difference!.abs()),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall!
-                                    .merge(
-                                      TextStyle(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .onPrimaryContainer),
-                                    ),
-                              ),
-                            ],
                           ),
-                    "Difference",
-                    false,
-                  ),
-                ),
-          ]),
-          if (d.array.isNotEmpty) ...[
-            const SizedBox(height: 10),
-            sparkline(context, d, metric.max),
-          ],
-          if (d.paths.isNotEmpty)
-              TeamAutoPaths(
-                autoPaths: d.paths,
+                          "All teams",
+                          true,
+                        ),
+                      ),
+                    if (d.hasAll) const SizedBox(width: 10),
+                    if (d.hasDifference)
+                      Flexible(
+                        flex: 6,
+                        fit: FlexFit.tight,
+                        child: valueBox(
+                          context,
+                          d.difference == null
+                              ? Text(
+                                  "--",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall!
+                                      .merge(
+                                        TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimaryContainer),
+                                      ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      d.difference!.isNegative
+                                          ? Icons.arrow_drop_down
+                                          : Icons.arrow_drop_up,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
+                                    Text(
+                                      metric.valueVizualizationBuilder(
+                                          d.difference!.abs()),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall!
+                                          .merge(
+                                            TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimaryContainer),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                          "Difference",
+                          false,
+                        ),
+                      ),
+                  ]),
+                  if (d.array.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    sparkline(context, d, metric.max),
+                  ],
+                  if (d.paths.isNotEmpty)
+                    TeamAutoPaths(
+                      autoPaths: d.paths,
+                    ),
+                ],
               ),
-            ],
-          ),
-          ),
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: StaleRefreshIndicator.result(result),
-          ),
-        ],
-      );
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: StaleRefreshIndicator.result(result),
+            ),
+          ],
+        );
       },
     );
   }

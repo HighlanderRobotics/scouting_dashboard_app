@@ -25,57 +25,57 @@ class TeamLookupCategoriesTab extends StatelessWidget {
           return Stack(
             children: [
               ScrollablePageBody(
-                  children: [
-                    MetricCategoryList(
-                      metricCategories: metricCategories
-                          .map((category) => MetricCategory(
-                                categoryName: category.localizedName,
-                                metricTiles: category.metrics
-                                    .where(
-                                        (metric) => metric.hideOverview == false)
-                                    .map(
-                                      (metric) => MetricTile(
-                                        value: (() {
-                                          try {
-                                            return metric
-                                                .valueVizualizationBuilder(
-                                                data.valueForMetric(metric));
-                                          } catch (_) {
-                                            return "--";
-                                          }
-                                        })(),
-                                        label: metric.abbreviatedLocalizedName,
-                                        onTap: metric.hideDetails
-                                            ? null
-                                            : () {
-                                                Navigator.of(context).pushNamed(
-                                                    "/team_lookup_details",
-                                                    arguments: {
-                                                      'category': category,
-                                                      'metric': metric.path,
-                                                      'team': team,
-                                                    });
-                                              },
-                                      ),
-                                    )
-                                    .toList(),
-                                onTap: category.metrics
-                                        .where((metric) => !metric.hideDetails)
-                                        .isEmpty
-                                    ? null
-                                    : () {
-                                        Navigator.of(context).pushNamed(
-                                            "/team_lookup_details",
-                                            arguments: {
-                                              'category': category,
-                                              'team': team,
-                                            });
-                                      },
-                              ))
-                          .toList(),
-                    ),
-                  ],
-                ),
+                children: [
+                  MetricCategoryList(
+                    metricCategories: metricCategories
+                        .map((category) => MetricCategory(
+                              categoryName: category.localizedName,
+                              metricTiles: category.metrics
+                                  .where(
+                                      (metric) => metric.hideOverview == false)
+                                  .map(
+                                    (metric) => MetricTile(
+                                      value: (() {
+                                        try {
+                                          return metric
+                                              .valueVizualizationBuilder(
+                                                  data.valueForMetric(metric));
+                                        } catch (_) {
+                                          return "--";
+                                        }
+                                      })(),
+                                      label: metric.abbreviatedLocalizedName,
+                                      onTap: metric.hideDetails
+                                          ? null
+                                          : () {
+                                              Navigator.of(context).pushNamed(
+                                                  "/team_lookup_details",
+                                                  arguments: {
+                                                    'category': category,
+                                                    'metric': metric.path,
+                                                    'team': team,
+                                                  });
+                                            },
+                                    ),
+                                  )
+                                  .toList(),
+                              onTap: category.metrics
+                                      .where((metric) => !metric.hideDetails)
+                                      .isEmpty
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).pushNamed(
+                                          "/team_lookup_details",
+                                          arguments: {
+                                            'category': category,
+                                            'team': team,
+                                          });
+                                    },
+                            ))
+                        .toList(),
+                  ),
+                ],
+              ),
               Positioned(
                 top: 0,
                 left: 0,

@@ -498,11 +498,10 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                       SnackBar(
                                         content: Text("Error: $error",
                                             style: TextStyle(
-                                                color: themeData
-                                                    .colorScheme
+                                                color: themeData.colorScheme
                                                     .onErrorContainer)),
-                                        backgroundColor:
-                                            themeData.colorScheme.errorContainer,
+                                        backgroundColor: themeData
+                                            .colorScheme.errorContainer,
                                         behavior: SnackBarBehavior.floating,
                                       ),
                                     );
@@ -518,7 +517,8 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                     ScaffoldMessenger.of(context);
                                 final themeData = Theme.of(context);
 
-                                scaffoldMessengerState.showSnackBar(const SnackBar(
+                                scaffoldMessengerState
+                                    .showSnackBar(const SnackBar(
                                   content: Text("Deleting..."),
                                   behavior: SnackBarBehavior.floating,
                                 ));
@@ -542,8 +542,8 @@ class _MutablePicklistsState extends State<MutablePicklists> {
                                     content: Text(
                                       "Error deleting: $error",
                                       style: TextStyle(
-                                        color:
-                                            themeData.colorScheme.onErrorContainer,
+                                        color: themeData
+                                            .colorScheme.onErrorContainer,
                                       ),
                                     ),
                                     behavior: SnackBarBehavior.floating,
