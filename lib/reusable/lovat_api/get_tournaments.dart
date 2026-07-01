@@ -28,6 +28,23 @@ extension GetTournaments on LovatAPI {
     final tournaments =
         tournamentJson.map((e) => Tournament.fromJson(e)).toList();
 
+    final now = DateTime.now();
+    int compareByDate(Tournament a, Tournament b) {
+      final aDays = a.date?.difference(now).inDays.abs();
+      final bDays = b.date?.difference(now).inDays.abs();
+      if (aDays == null && bDays == null) return 0;
+      if (aDays == null) return 1;
+      if (bDays == null) return -1;
+      return aDays.compareTo(bDays);
+    }
+
+    tournaments.sort((a, b) {
+      if (a.isParticipant != b.isParticipant) {
+        return b.isParticipant ? 1 : -1;
+      }
+      return compareByDate(a, b);
+    });
+
     return PartialTournamentList(
       tournaments: tournaments,
       total: json['count'],

@@ -6,10 +6,16 @@ import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Tournament {
-  Tournament(this.key, this.localized);
+  Tournament(this.key, this._name, {this.date, this.isParticipant = false});
 
   String key;
-  String localized;
+  String _name;
+  DateTime? date;
+  bool isParticipant;
+
+  String get localized => date?.year == DateTime.now().year
+      ? _name
+      : "${date?.year ?? ''} $_name".trim();
 
   static Tournament? _currentCache;
 
@@ -17,9 +23,12 @@ class Tournament {
   String toString() => localized;
 
   factory Tournament.fromJson(Map<String, dynamic> json) {
+    final date = DateTime.tryParse(json['date'] as String);
     return Tournament(
       json['key'],
-      "${(json['date'] as String).split('-')[0]} ${json['name']}",
+      json['name'],
+      date: date,
+      isParticipant: json['isParticipant'] as bool? ?? false,
     );
   }
 
