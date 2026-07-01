@@ -67,8 +67,8 @@ class AllianceAnalysis {
   }
 }
 
-extension GetAllianceAnalysis on LovatAPI {
-  CachedQuery<AllianceAnalysis> allianceAnalysis(List<int> teams) {
+extension AllianceAnalysisQuery on LovatAPI {
+  CachedQuery<AllianceAnalysis> allianceAnalysisQuery(List<int> teams) {
     const path = '/v1/analysis/alliance';
     final query = {
       'teamOne': teams[0].toString(),

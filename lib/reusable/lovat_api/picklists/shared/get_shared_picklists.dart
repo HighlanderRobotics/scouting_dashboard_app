@@ -5,8 +5,8 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetSharedPicklists on LovatAPI {
-  CachedQuery<List<ConfiguredPicklistMeta>> sharedPicklists() {
+extension SharedPicklistsQuery on LovatAPI {
+  CachedQuery<List<ConfiguredPicklistMeta>> sharedPicklistsQuery() {
     const path = '/v1/manager/picklists';
     return CachedQuery(
       queryKey: const ['sharedPicklists'],

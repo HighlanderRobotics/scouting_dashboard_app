@@ -29,7 +29,7 @@ class _ArchivedScoutersPageState extends State<ArchivedScoutersPage> {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.scouterOverviews(archivedScouters: true),
+      query: lovatAPI.scouterOverviewsQuery(archivedScouters: true),
       builder: (context, result) {
         final scouterOverviews = result.data;
         final tournament = Tournament.currentSync;

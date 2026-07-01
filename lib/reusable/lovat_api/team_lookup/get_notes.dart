@@ -5,8 +5,8 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetNotes on LovatAPI {
-  CachedQuery<List<Note>> notes(int teamNumber) {
+extension NotesQuery on LovatAPI {
+  CachedQuery<List<Note>> notesQuery(int teamNumber) {
     final path = '/v1/analysis/notes/team/$teamNumber';
     return CachedQuery(
       queryKey: ['notes', teamNumber],

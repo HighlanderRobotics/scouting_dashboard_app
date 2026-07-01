@@ -58,8 +58,8 @@ class PicklistAnalysisTeam {
   }
 }
 
-extension GetPicklistAnalysis on LovatAPI {
-  CachedQuery<List<PicklistAnalysisTeam>> picklistAnalysis(
+extension PicklistAnalysisQuery on LovatAPI {
+  CachedQuery<List<PicklistAnalysisTeam>> picklistAnalysisQuery(
     List<String> flags,
     List<PicklistWeight> weights,
   ) {
@@ -123,7 +123,7 @@ extension GetPicklistAnalysis on LovatAPI {
     required List<PicklistWeight> weights,
   }) async {
     final flagPaths = flags.map((e) => e.type.path).toList();
-    final teams = await picklistAnalysis(flagPaths, weights).queryFn();
+    final teams = await picklistAnalysisQuery(flagPaths, weights).queryFn();
 
     final List<String> columns = [
       "teamNumber",

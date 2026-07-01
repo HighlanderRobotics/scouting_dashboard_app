@@ -46,7 +46,7 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
         : null;
 
     return StaleRefreshBuilder(
-      query: lovatAPI.matchPrediction(
+      query: lovatAPI.matchPredictionQuery(
           _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5]),
       builder: (context, result) {
         final prediction = result.data;

@@ -177,7 +177,7 @@ class _PicklistViewState extends State<PicklistView> {
     final flagPaths = flags!.map((e) => e.type.path).toList();
 
     return StaleRefreshBuilder(
-      query: lovatAPI.picklistAnalysis(flagPaths, widget.picklist.weights),
+      query: lovatAPI.picklistAnalysisQuery(flagPaths, widget.picklist.weights),
       builder: (context, result) {
         final data = result.data;
         if (result.hasError && data == null) {

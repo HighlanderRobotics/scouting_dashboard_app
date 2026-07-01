@@ -151,7 +151,7 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
         queryFn: () async {
           final picklist = await widget.picklistMeta.getPicklist();
           return lovatAPI
-              .picklistAnalysis(flagPaths, picklist.weights)
+              .picklistAnalysisQuery(flagPaths, picklist.weights)
               .queryFn();
         },
       ),

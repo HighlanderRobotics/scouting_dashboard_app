@@ -5,8 +5,8 @@ import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetMutablePicklists on LovatAPI {
-  CachedQuery<List<MutablePicklistMeta>> mutablePicklists() {
+extension MutablePicklistsQuery on LovatAPI {
+  CachedQuery<List<MutablePicklistMeta>> mutablePicklistsQuery() {
     const path = '/v1/manager/mutablepicklists';
     return CachedQuery(
       queryKey: const ['mutablePicklists'],

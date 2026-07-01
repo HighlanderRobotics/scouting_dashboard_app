@@ -32,8 +32,8 @@ class MatchPrediction {
   }
 }
 
-extension GetMatchPrediction on LovatAPI {
-  CachedQuery<MatchPrediction> matchPrediction(
+extension MatchPredictionQuery on LovatAPI {
+  CachedQuery<MatchPrediction> matchPredictionQuery(
     int red1,
     int red2,
     int red3,

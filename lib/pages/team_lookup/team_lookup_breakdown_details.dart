@@ -26,7 +26,7 @@ class BreakdownDetailsPage extends StatelessWidget {
         title: Text("$team - ${breakdownIdentity.localizedName}"),
       ),
       body: StaleRefreshBuilder(
-        query: lovatAPI.breakdownDetails(team, breakdownIdentity.path),
+        query: lovatAPI.breakdownDetailsQuery(team, breakdownIdentity.path),
         builder: (context, result) {
           final data = result.data;
           if (result.hasError && !result.hasData) {

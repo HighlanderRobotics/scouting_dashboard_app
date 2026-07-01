@@ -137,7 +137,7 @@ class AnalysisOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.metricDetails(teamNumber, metric.path),
+      query: lovatAPI.metricDetailsQuery(teamNumber, metric.path),
       builder: (context, result) {
         final data = result.data;
         final error = result.error;

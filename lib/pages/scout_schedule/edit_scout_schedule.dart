@@ -42,7 +42,7 @@ class EditScoutSchedulePage extends StatelessWidget {
         }
 
         return StaleRefreshBuilder(
-          query: lovatAPI.scouterSchedule(tournament.key),
+          query: lovatAPI.scouterScheduleQuery(tournament.key),
           builder: (context, result) {
             final scoutSchedule = result.data;
             Widget body = SkeletonListView(

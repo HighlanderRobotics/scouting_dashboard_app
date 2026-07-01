@@ -244,7 +244,7 @@ class SharedPicklists extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.sharedPicklists(),
+      query: lovatAPI.sharedPicklistsQuery(),
       builder: (context, result) {
         final picklists = result.data;
         if (result.hasError && picklists == null) {
@@ -415,7 +415,7 @@ class _MutablePicklistsState extends State<MutablePicklists> {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.mutablePicklists(),
+      query: lovatAPI.mutablePicklistsQuery(),
       builder: (context, result) {
         final picklistsMeta = result.data;
         if (result.hasError && picklistsMeta == null) {

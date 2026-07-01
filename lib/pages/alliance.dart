@@ -31,7 +31,7 @@ class _AlliancePageState extends State<AlliancePage> {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.allianceAnalysis(teams),
+      query: lovatAPI.allianceAnalysisQuery(teams),
       builder: (context, result) {
         final data = result.data;
         Widget body;

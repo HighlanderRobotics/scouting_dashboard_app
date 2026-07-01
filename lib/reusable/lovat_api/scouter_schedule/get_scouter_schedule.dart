@@ -5,8 +5,8 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetScouterSchedule on LovatAPI {
-  CachedQuery<ServerScoutSchedule> scouterSchedule(String tournamentKey) {
+extension ScouterScheduleQuery on LovatAPI {
+  CachedQuery<ServerScoutSchedule> scouterScheduleQuery(String tournamentKey) {
     final path = '/v1/manager/tournament/$tournamentKey/scoutershifts';
     return CachedQuery(
       queryKey: ['scouterSchedule', tournamentKey],

@@ -30,8 +30,8 @@ class BreakdownMetrics {
       _values[breakdownPath] == null || _values[breakdownPath]!.isEmpty;
 }
 
-extension GetBreakdownMetrics on LovatAPI {
-  CachedQuery<BreakdownMetrics> breakdownMetrics(int teamNumber) {
+extension BreakdownMetricsQuery on LovatAPI {
+  CachedQuery<BreakdownMetrics> breakdownMetricsQuery(int teamNumber) {
     final path = '/v1/analysis/breakdown/team/$teamNumber';
     return CachedQuery(
       queryKey: ['breakdownMetrics', teamNumber],

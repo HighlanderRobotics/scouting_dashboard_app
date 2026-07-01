@@ -71,8 +71,8 @@ class MetricDetails {
   }
 }
 
-extension GetMetricDetails on LovatAPI {
-  CachedQuery<MetricDetails> metricDetails(
+extension MetricDetailsQuery on LovatAPI {
+  CachedQuery<MetricDetails> metricDetailsQuery(
     int teamNumber,
     String metricPath,
   ) {

@@ -18,8 +18,8 @@ class CategoryMetrics {
   dynamic valueForPath(String path) => _values[path];
 }
 
-extension GetCategoryMetrics on LovatAPI {
-  CachedQuery<CategoryMetrics> categoryMetrics(int teamNumber) {
+extension CategoryMetricsQuery on LovatAPI {
+  CachedQuery<CategoryMetrics> categoryMetricsQuery(int teamNumber) {
     final path = '/v1/analysis/category/team/$teamNumber';
     return CachedQuery(
       queryKey: ['categoryMetrics', teamNumber],

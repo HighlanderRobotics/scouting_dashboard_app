@@ -19,7 +19,7 @@ class TeamLookupNotesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.notes(team),
+      query: lovatAPI.notesQuery(team),
       builder: (context, result) {
         final data = result.data;
         final error = result.error;

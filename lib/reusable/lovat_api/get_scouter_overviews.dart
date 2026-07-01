@@ -5,8 +5,8 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetScouterOverviews on LovatAPI {
-  CachedQuery<List<ScouterOverview>> scouterOverviews(
+extension ScouterOverviewsQuery on LovatAPI {
+  CachedQuery<List<ScouterOverview>> scouterOverviewsQuery(
       {bool archivedScouters = false}) {
     const path = '/v1/manager/scouterspage';
     return CachedQuery(

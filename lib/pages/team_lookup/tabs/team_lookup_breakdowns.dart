@@ -19,7 +19,7 @@ class TeamLookupBreakdownsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.breakdownMetrics(team),
+      query: lovatAPI.breakdownMetricsQuery(team),
       builder: (context, result) {
         final data = result.data;
         final error = result.error;

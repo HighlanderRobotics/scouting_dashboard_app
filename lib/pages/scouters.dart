@@ -30,7 +30,7 @@ class _ScoutersPageState extends State<ScoutersPage> {
   @override
   Widget build(BuildContext context) {
     return StaleRefreshBuilder(
-      query: lovatAPI.scouterOverviews(),
+      query: lovatAPI.scouterOverviewsQuery(),
       builder: (context, result) {
         final scouterOverviews = result.data;
         final tournament = Tournament.currentSync;

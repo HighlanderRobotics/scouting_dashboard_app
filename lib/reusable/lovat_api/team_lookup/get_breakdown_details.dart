@@ -184,8 +184,8 @@ class BreakdownDetailsResponse {
   }
 }
 
-extension GetBreakdownMetrics on LovatAPI {
-  CachedQuery<BreakdownDetailsResponse> breakdownDetails(
+extension BreakdownDetailsQuery on LovatAPI {
+  CachedQuery<BreakdownDetailsResponse> breakdownDetailsQuery(
     int teamNumber,
     String breakdownPath,
   ) {
