@@ -6,128 +6,109 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_metrics.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class TeamLookupBreakdownsTab extends StatefulWidget {
+class TeamLookupBreakdownsTab extends StatelessWidget {
   const TeamLookupBreakdownsTab({super.key, required this.team});
 
   final int team;
 
   @override
-  State<TeamLookupBreakdownsTab> createState() =>
-      _TeamLookupBreakdownsTabState();
-}
-
-class _TeamLookupBreakdownsTabState extends State<TeamLookupBreakdownsTab> {
-  BreakdownMetrics? data;
-  String? error;
-
-  Future<void> fetchData() async {
-    setState(() {
-      data = null;
-      error = null;
-    });
-
-    try {
-      final result =
-          await lovatAPI.getBreakdownMetricsByTeamNumber(widget.team);
-      setState(() => data = result);
-    } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
-    } catch (_) {
-      setState(() => error = "Failed to load breakdowns");
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  @override
-  void didUpdateWidget(TeamLookupBreakdownsTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.team != widget.team) fetchData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (error != null) {
-      if (error!.contains("NO_DATA_FOR_TEAM")) {
-        return PageBody(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return StaleRefreshBuilder(
+      query: lovatAPI.breakdownMetricsQuery(team),
+      builder: (context, result) {
+        final data = result.data;
+        final error = result.error;
+        if (data != null) {
+          return Stack(
             children: [
-              Image.asset("assets/images/no_scouters.png", width: 250),
-              const SizedBox(height: 8),
-              Text(
-                "No data found",
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
+              ScrollablePageBody(
+                children: breakdowns
+                    .map(
+                      (BreakdownData breakdownData) => Breakdown(
+                        dataIdentity: breakdownData,
+                        data: data,
+                        team: team,
+                      ),
+                    )
+                    .toList(),
               ),
-              const SizedBox(height: 2),
-              Text(
-                "Try using data from more teams or tournaments.",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: StaleRefreshIndicator.result(result),
               ),
             ],
-          ),
-        );
-      }
-      if (error!.contains("TEAM_DOES_NOT_EXIST")) {
-        return PageBody(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset("assets/images/awaiting_verification.png",
-                  width: 250),
-              const SizedBox(height: 8),
-              Text(
-                "Team does not exist",
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      }
-      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
-    }
+          );
+        }
 
-    if (data == null) {
-      return PageBody(
-        bottom: false,
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
-        child: SkeletonListView(
-          itemCount: breakdowns.length,
-          itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: SizedBox(
-              height: 118,
-              child: SkeletonAvatar(
-                style: SkeletonAvatarStyle(
-                  borderRadius: BorderRadius.circular(10),
+        if (error != null) {
+          if (error.contains("NO_DATA_FOR_TEAM")) {
+            return PageBody(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/no_scouters.png", width: 250),
+                  const SizedBox(height: 8),
+                  Text(
+                    "No data found",
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Try using data from more teams or tournaments.",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+          if (error.contains("TEAM_DOES_NOT_EXIST")) {
+            return PageBody(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/awaiting_verification.png",
+                      width: 250),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Team does not exist",
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+          return FriendlyErrorView.result(result);
+        }
+
+        return PageBody(
+          bottom: false,
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 0),
+          child: SkeletonListView(
+            itemCount: breakdowns.length,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: SizedBox(
+                height: 118,
+                child: SkeletonAvatar(
+                  style: SkeletonAvatarStyle(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    }
-
-    return ScrollablePageBody(
-      children: breakdowns
-          .map(
-            (BreakdownData breakdownData) => Breakdown(
-              dataIdentity: breakdownData,
-              data: data!,
-              team: widget.team,
-            ),
-          )
-          .toList(),
+        );
+      },
     );
   }
 }
@@ -197,14 +178,12 @@ class Breakdown extends StatelessWidget {
                             child: Row(
                                 children: dataIdentity.segments
                                     .where((segmentData) =>
-                                        data.segmentValue(
-                                                dataIdentity.path,
-                                                segmentData.path) !=
+                                        data.segmentValue(dataIdentity.path,
+                                            segmentData.path) !=
                                         0)
                                     .map((BreakdownSegmentData segmentData) {
-                              final analyzedSegmentValue =
-                                  data.segmentValue(
-                                      dataIdentity.path, segmentData.path);
+                              final analyzedSegmentValue = data.segmentValue(
+                                  dataIdentity.path, segmentData.path);
 
                               return segment(
                                 context,
@@ -253,13 +232,13 @@ class Breakdown extends StatelessWidget {
                 Text(
                   "${(value * 100).round()}%",
                   style: Theme.of(context).textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.fade,
                   maxLines: 1,
                 ),
                 Text(
                   name,
                   style: Theme.of(context).textTheme.labelMedium,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.fade,
                   maxLines: 1,
                 ),
               ],

@@ -25,13 +25,14 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
     String teamNumber = routeArgs['team'].toString();
     String picklistTitle = routeArgs['picklistTitle'];
     List<PicklistBreakdownEntry> breakdown =
-        (routeArgs['breakdown'] as List<dynamic>).cast<PicklistBreakdownEntry>();
+        (routeArgs['breakdown'] as List<dynamic>)
+            .cast<PicklistBreakdownEntry>();
 
     List<PicklistBreakdownEntry> unweightedBreakdown =
-        (routeArgs['unweighted'] as List<dynamic>).cast<PicklistBreakdownEntry>();
+        (routeArgs['unweighted'] as List<dynamic>)
+            .cast<PicklistBreakdownEntry>();
 
-    unweightedBreakdown
-        .removeWhere((e) => e.result == 0);
+    unweightedBreakdown.removeWhere((e) => e.result == 0);
     unweightedBreakdown.sort((a, b) => b.result.compareTo(a.result));
 
     breakdown.removeWhere((e) => e.result == 0);
@@ -101,8 +102,8 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                         Text(
                           picklistWeights
                               .firstWhere((e) => e.path == weight.type,
-                                  orElse: () => PicklistWeight(
-                                      weight.type, weight.type))
+                                  orElse: () =>
+                                      PicklistWeight(weight.type, weight.type))
                               .localizedName,
                           overflow: TextOverflow.clip,
                           style: Theme.of(context).textTheme.titleMedium!.merge(

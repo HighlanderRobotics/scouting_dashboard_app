@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
 class MetricDataPoint {
@@ -70,19 +71,30 @@ class MetricDetails {
   }
 }
 
-extension GetMetricDetails on LovatAPI {
-  Future<MetricDetails> getMetricDetails(
-      int teamNumber, String metricPath) async {
-    final response =
-        await get('/v1/analysis/metric/$metricPath/team/$teamNumber');
+extension MetricDetailsQuery on LovatAPI {
+  CachedQuery<MetricDetails> metricDetailsQuery(
+    int teamNumber,
+    String metricPath,
+  ) {
+    final path = '/v1/analysis/metric/$metricPath/team/$teamNumber';
+    return CachedQuery(
+      queryKey: ['metricDetails', teamNumber, metricPath],
+      queryFn: () async {
+        final response = await get(path);
 
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get metric details');
-    }
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get metric details');
+        }
 
-    return MetricDetails.fromJson(
-      jsonDecode(response!.body) as Map<String, dynamic>,
+        return MetricDetails.fromJson(
+          jsonDecode(response!.body) as Map<String, dynamic>,
+        );
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) => MetricDetails.fromJson(json as Map<String, dynamic>),
+      ),
     );
   }
 }

@@ -21,6 +21,8 @@ class _InitialLoaderPageState extends State<InitialLoaderPage> {
     final navigator = Navigator.of(context);
     final prefs = await SharedPreferences.getInstance();
 
+    await lovatAPI.cache.load();
+
     // Retrieve the base API URL
     if (prefs.containsKey('api_base_url')) {
       lovatAPI.baseUrl = prefs.getString('api_base_url')!;

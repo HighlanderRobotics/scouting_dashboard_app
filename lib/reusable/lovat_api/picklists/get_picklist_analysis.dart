@@ -6,6 +6,7 @@ import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
 import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class PicklistBreakdownEntry {
   const PicklistBreakdownEntry({
@@ -42,7 +43,8 @@ class PicklistAnalysisTeam {
   static PicklistAnalysisTeam fromJson(Map<String, dynamic> json) {
     List<PicklistBreakdownEntry> parseEntries(String key) {
       return (json[key] as List<dynamic>? ?? [])
-          .map((val) => PicklistBreakdownEntry.fromJson(val as Map<String, dynamic>))
+          .map((val) =>
+              PicklistBreakdownEntry.fromJson(val as Map<String, dynamic>))
           .toList();
     }
 
@@ -56,34 +58,61 @@ class PicklistAnalysisTeam {
   }
 }
 
-extension GetPicklistAnalysis on LovatAPI {
-  Future<List<PicklistAnalysisTeam>> getPicklistAnalysis(
+extension PicklistAnalysisQuery on LovatAPI {
+  CachedQuery<List<PicklistAnalysisTeam>> picklistAnalysisQuery(
     List<String> flags,
     List<PicklistWeight> weights,
-  ) async {
-    final tournament = await Tournament.getCurrent();
+  ) {
+    const path = '/v1/analysis/picklist';
+    return CachedQuery(
+      queryKey: ['picklistAnalysis', flags, weights],
+      queryFn: () async {
+        final tournament = await Tournament.getCurrent();
 
-    final response = await get(
-      '/v1/analysis/picklist',
-      query: {
-        if (tournament != null) 'tournamentKey': tournament.key,
-        'flags': jsonEncode(flags),
-        ...Map.fromEntries(
-          weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
-        ),
+        final response = await get(
+          path,
+          query: {
+            if (tournament != null) 'tournamentKey': tournament.key,
+            'flags': jsonEncode(flags),
+            ...Map.fromEntries(
+              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+            ),
+          },
+        );
+
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get picklist analysis');
+        }
+
+        final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+        return (json['teams'] as List<dynamic>)
+            .map((team) =>
+                PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
+            .toList();
+      },
+      cacheReader: () {
+        final tournament = Tournament.currentSync;
+        return getCachedData(
+          path,
+          query: {
+            if (tournament != null) 'tournamentKey': tournament.key,
+            'flags': jsonEncode(flags),
+            ...Map.fromEntries(
+              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+            ),
+          },
+          parser: (json) {
+            final map = json as Map<String, dynamic>;
+            return (map['teams'] as List<dynamic>)
+                .map((team) =>
+                    PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
+                .toList();
+          },
+        );
       },
     );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get picklist analysis');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-    return (json['teams'] as List<dynamic>)
-        .map((team) => PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
-        .toList();
   }
 
   /// Fetches the full picklist analysis and returns it as a CSV string.
@@ -94,7 +123,7 @@ extension GetPicklistAnalysis on LovatAPI {
     required List<PicklistWeight> weights,
   }) async {
     final flagPaths = flags.map((e) => e.type.path).toList();
-    final teams = await getPicklistAnalysis(flagPaths, weights);
+    final teams = await picklistAnalysisQuery(flagPaths, weights).queryFn();
 
     final List<String> columns = [
       "teamNumber",

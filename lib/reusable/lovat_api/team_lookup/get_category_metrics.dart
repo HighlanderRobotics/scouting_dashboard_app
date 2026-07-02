@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class CategoryMetrics {
   const CategoryMetrics(this._values);
@@ -17,30 +18,37 @@ class CategoryMetrics {
   dynamic valueForPath(String path) => _values[path];
 }
 
-extension GetCategoryMetrics on LovatAPI {
-  Future<CategoryMetrics> getCategoryMetricsByTeamNumber(
-    int teamNumber,
-  ) async {
-    final response = await get(
-      '/v1/analysis/category/team/$teamNumber',
+extension CategoryMetricsQuery on LovatAPI {
+  CachedQuery<CategoryMetrics> categoryMetricsQuery(int teamNumber) {
+    final path = '/v1/analysis/category/team/$teamNumber';
+    return CachedQuery(
+      queryKey: ['categoryMetrics', teamNumber],
+      queryFn: () async {
+        final response = await get(path);
+
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get category metrics');
+        }
+
+        try {
+          final json = jsonDecode(response!.body) as Map<String, dynamic>;
+
+          return CategoryMetrics.fromJson(json);
+        } on FormatException {
+          if (["TEAM_DOES_NOT_EXIST", "NO_DATA_FOR_TEAM"]
+              .contains(response!.body)) {
+            throw LovatAPIException(response.body);
+          } else {
+            rethrow;
+          }
+        }
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) =>
+            CategoryMetrics.fromJson(json as Map<String, dynamic>),
+      ),
     );
-
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get category metrics');
-    }
-
-    try {
-      final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-      return CategoryMetrics.fromJson(json);
-    } on FormatException {
-      if (["TEAM_DOES_NOT_EXIST", "NO_DATA_FOR_TEAM"]
-          .contains(response!.body)) {
-        throw LovatAPIException(response.body);
-      } else {
-        rethrow;
-      }
-    }
   }
 }

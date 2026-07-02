@@ -6,6 +6,21 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 
 extension GetMatches on LovatAPI {
+  List<MatchScheduleMatch>? getCachedMatches(
+    String tournamentKey, {
+    List<int>? teamNumbers,
+  }) {
+    return getCachedData(
+      "/v1/manager/matches/$tournamentKey",
+      query: {
+        if (teamNumbers != null) 'teams': jsonEncode(teamNumbers),
+      },
+      parser: (json) => (json as List<dynamic>)
+          .map((e) => MatchScheduleMatch.fromJson(e, tournamentKey))
+          .toList(),
+    );
+  }
+
   Future<List<MatchScheduleMatch>> getMatches(
     String tournamentKey, {
     List<int>? teamNumbers,

@@ -6,6 +6,8 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/get_alliance_analysis.
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
@@ -17,61 +19,39 @@ class AlliancePage extends StatefulWidget {
 }
 
 class _AlliancePageState extends State<AlliancePage> {
-  AllianceAnalysis? data;
-  String? error;
   late List<int> teams;
-
-  Future<void> fetchData() async {
-    setState(() {
-      data = null;
-      error = null;
-    });
-
-    try {
-      final result = await lovatAPI.getAllianceAnalysis(teams);
-      setState(() => data = result);
-    } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
-    } catch (_) {
-      setState(() => error = "Failed to load alliance data");
-    }
-  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     teams = (ModalRoute.of(context)!.settings.arguments
         as Map<String, dynamic>)['teams'];
-    if (data == null && error == null) fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Alliance"),
-        actions: [
-          if (error != null || data != null)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: fetchData,
-            ),
-        ],
-      ),
-      body: _buildBody(),
+    return StaleRefreshBuilder(
+      query: lovatAPI.allianceAnalysisQuery(teams),
+      builder: (context, result) {
+        final data = result.data;
+        Widget body;
+        if (result.hasError && data == null) {
+          body = FriendlyErrorView.result(result);
+        } else if (data == null) {
+          body = const Center(child: CircularProgressIndicator());
+        } else {
+          body = ScrollablePageBody(children: [_AllianceContent(data: data)]);
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text("Alliance"),
+            bottom: StaleRefreshIndicator.result(result),
+          ),
+          body: body,
+        );
+      },
     );
-  }
-
-  Widget _buildBody() {
-    if (error != null) {
-      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
-    }
-
-    if (data == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    return ScrollablePageBody(children: [_AllianceContent(data: data!)]);
   }
 }
 
@@ -108,9 +88,7 @@ class _AllianceContentState extends State<_AllianceContent> {
                     InkWell(
                       onTap: () => {
                         Navigator.of(context).pushNamed("/team_lookup",
-                            arguments: <String, dynamic>{
-                              'team': teamData.team
-                            })
+                            arguments: <String, dynamic>{'team': teamData.team})
                       },
                       child: Text(
                         teamData.team.toString(),
@@ -156,16 +134,14 @@ class _AllianceContentState extends State<_AllianceContent> {
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value:
-                  Text(numToStringRounded(analysis.totalBallThroughput)),
+              value: Text(numToStringRounded(analysis.totalBallThroughput)),
               label: const Text('Total output'),
             ),
           ),
           Flexible(
             fit: FlexFit.tight,
             child: ValueTile(
-              value:
-                  Text(numToStringRounded(analysis.totalFuelOutputted)),
+              value: Text(numToStringRounded(analysis.totalFuelOutputted)),
               label: const Text('Hub shots'),
             ),
           ),
@@ -267,9 +243,8 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                               borderRadius:
                                                   const BorderRadius.all(
                                                       Radius.circular(10)),
-                                              color: autoPathColors[widget
-                                                  .data.teams
-                                                  .indexOf(e)],
+                                              color: autoPathColors[
+                                                  widget.data.teams.indexOf(e)],
                                             ),
                                           ),
                                         ),
@@ -306,8 +281,7 @@ class _AlllianceAutoPathsState extends State<AlllianceAutoPaths>
                                               null
                                           ? "--"
                                           : numToStringRounded(selectedPaths[
-                                                  widget.data.teams
-                                                      .indexOf(e)]!
+                                                  widget.data.teams.indexOf(e)]!
                                               .scores
                                               .cast<num>()
                                               .average()),
@@ -427,7 +401,11 @@ Container reefStack(
   Color? backgroundColor,
   Color? foregroundColor,
 }) {
-  final startTimeLists = [analysis.l1StartTime, analysis.l2StartTime, analysis.l3StartTime];
+  final startTimeLists = [
+    analysis.l1StartTime,
+    analysis.l2StartTime,
+    analysis.l3StartTime
+  ];
 
   return Container(
     decoration: BoxDecoration(
@@ -499,8 +477,7 @@ Container reefStack(
                       child: Text(
                         (() {
                           final list = startTimeLists[row];
-                          if (list.length <= col ||
-                              list[col] == null) {
+                          if (list.length <= col || list[col] == null) {
                             return '--';
                           }
                           return '${numToStringRounded(list[col])}s';

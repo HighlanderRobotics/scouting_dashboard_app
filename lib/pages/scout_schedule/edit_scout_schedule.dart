@@ -14,176 +14,174 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/scouter_schedule/updat
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class EditScoutSchedulePage extends StatefulWidget {
+class EditScoutSchedulePage extends StatelessWidget {
   const EditScoutSchedulePage({super.key});
 
   @override
-  State<EditScoutSchedulePage> createState() => _EditScoutSchedulePageState();
-}
-
-class _EditScoutSchedulePageState extends State<EditScoutSchedulePage> {
-  ServerScoutSchedule? scoutSchedule;
-  String? error;
-
-  Future<void> fetchData() async {
-    try {
-      final scoutSchedule = await lovatAPI.getScouterSchedule();
-
-      setState(() {
-        this.scoutSchedule = scoutSchedule;
-      });
-    } catch (e) {
-      setState(() {
-        error = "Failed to load scout schedule";
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    Widget body = SkeletonListView(
-      itemBuilder: (context, index) => SkeletonListTile(),
-    );
+    return FutureBuilder<Tournament?>(
+      future: Tournament.getCurrent(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Scaffold(
+            appBar: AppBar(title: const Text("Edit Scout Schedule")),
+            body: const Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    if (scoutSchedule != null) {
-      body = ListView.builder(
-        itemBuilder: (context, index) {
-          final shift = scoutSchedule!.shifts[index];
-          return Dismissible(
-            key: Key(shift.id),
-            direction: DismissDirection.endToStart,
-            background: Container(
-              color: Colors.red[900],
-              child: const Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Icon(Icons.delete),
-                    SizedBox(width: 30),
-                  ],
-                ),
-              ),
-            ),
-            onUpdate: (details) {
-              if ((details.reached && !details.previousReached) ||
-                  (!details.reached && details.previousReached)) {
-                HapticFeedback.lightImpact();
-              }
-            },
-            onDismissed: (direction) async {
-              try {
-                setState(() {
-                  error = null;
-                  scoutSchedule = null;
-                });
+        final tournament = snapshot.data;
+        if (tournament == null) {
+          return Scaffold(
+            appBar: AppBar(title: const Text("Edit Scout Schedule")),
+            body: const Center(child: Text("No tournament selected")),
+          );
+        }
 
-                await lovatAPI.deleteScoutScheduleShift(shift);
+        return StaleRefreshBuilder(
+          query: lovatAPI.scouterScheduleQuery(tournament.key),
+          builder: (context, result) {
+            final scoutSchedule = result.data;
+            Widget body = SkeletonListView(
+              itemBuilder: (context, index) => SkeletonListTile(),
+            );
 
-                await fetchData();
-              } catch (e) {
-                setState(() {
-                  error = "Failed to delete shift";
-                });
-              }
-            },
-            child: ListTile(
-              title: Text("${shift.start} to ${shift.end}"),
-              subtitle: Text(shift.allScoutsList),
-              onTap: () {
-                Navigator.of(context).pushWidget(
-                  ScoutShiftEditor(
-                    initialShift: shift.copy(),
-                    onSubmit: (shift) async {
-                      if (shift is ServerScoutingShift) {
-                        try {
-                          setState(() {
-                            error = null;
-                            scoutSchedule = null;
-                          });
+            if (result.hasError && scoutSchedule == null) {
+              body = FriendlyErrorView.result(
+                result,
+                retryLabel: "Reload",
+              );
+            }
 
-                          await lovatAPI.updateScouterScheduleShift(shift);
-
-                          await fetchData();
-                        } on LovatAPIException catch (e) {
-                          setState(() {
-                            error = e.message;
-                          });
-                        } catch (_) {
-                          setState(() {
-                            error = "Failed to update shift";
-                          });
-                        }
-                      } else {
-                        throw Exception("Invalid shift type");
-                      }
+            if (scoutSchedule != null) {
+              body = Stack(
+                children: [
+                  ListView.builder(
+                    itemBuilder: (context, index) {
+                      final shift = scoutSchedule.shifts[index];
+                      return Dismissible(
+                        key: Key(shift.id),
+                        direction: DismissDirection.endToStart,
+                        background: Container(
+                          color: Colors.red[900],
+                          child: const Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Icon(Icons.delete),
+                                SizedBox(width: 30),
+                              ],
+                            ),
+                          ),
+                        ),
+                        onUpdate: (details) {
+                          if ((details.reached && !details.previousReached) ||
+                              (!details.reached && details.previousReached)) {
+                            HapticFeedback.lightImpact();
+                          }
+                        },
+                        confirmDismiss: (direction) async {
+                          try {
+                            await lovatAPI.deleteScoutScheduleShift(shift);
+                            result.refetch();
+                            return true;
+                          } catch (e) {
+                            if (!context.mounted) return false;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Failed to delete shift")),
+                            );
+                            return false;
+                          }
+                        },
+                        child: ListTile(
+                          title: Text("${shift.start} to ${shift.end}"),
+                          subtitle: Text(shift.allScoutsList),
+                          onTap: () {
+                            Navigator.of(context).pushWidget(
+                              ScoutShiftEditor(
+                                initialShift: shift.copy(),
+                                onSubmit: (shift) async {
+                                  if (shift is ServerScoutingShift) {
+                                    try {
+                                      await lovatAPI
+                                          .updateScouterScheduleShift(shift);
+                                      result.refetch();
+                                    } on LovatAPIException catch (e) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        SnackBar(content: Text(e.message)),
+                                      );
+                                    } catch (_) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                                Text("Failed to update shift")),
+                                      );
+                                    }
+                                  } else {
+                                    throw Exception("Invalid shift type");
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                      );
                     },
+                    itemCount: scoutSchedule.shifts.length,
                   ),
-                );
-              },
-            ),
-          );
-        },
-        itemCount: scoutSchedule!.shifts.length,
-      );
-    }
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: StaleRefreshIndicator.result(result),
+                  ),
+                ],
+              );
+            }
 
-    if (error != null) {
-      body = FriendlyErrorView(
-        errorMessage: error!,
-        retryLabel: "Reload",
-        onRetry: () async {
-          setState(() {
-            error = null;
-            scoutSchedule = null;
-          });
-
-          await fetchData();
-        },
-      );
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Edit Scout Schedule"),
-      ),
-      body: body,
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.add),
-        onPressed: () {
-          Navigator.of(context).pushWidget(
-            ScoutShiftEditor(
-              onSubmit: (shift) async {
-                try {
-                  setState(() {
-                    error = null;
-                    scoutSchedule = null;
-                  });
-
-                  await lovatAPI.createScoutScheduleShift(shift);
-
-                  await fetchData();
-                } on LovatAPIException catch (e) {
-                  setState(() {
-                    error = e.message;
-                  });
-                } catch (_) {
-                  setState(() {
-                    error = "Failed to create shift";
-                  });
-                }
-              },
-            ),
-          );
-        },
-      ),
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text("Edit Scout Schedule"),
+              ),
+              body: body,
+              floatingActionButton: FloatingActionButton(
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  Navigator.of(context).pushWidget(
+                    ScoutShiftEditor(
+                      onSubmit: (shift) async {
+                        try {
+                          await lovatAPI.createScoutScheduleShift(shift);
+                          result.refetch();
+                        } on LovatAPIException catch (e) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(e.message)),
+                          );
+                        } catch (_) {
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text("Failed to create shift")),
+                          );
+                        }
+                      },
+                    ),
+                  );
+                },
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -218,18 +216,25 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
   TextEditingController endFieldController = TextEditingController();
 
   Future<void> fetchData() async {
-    try {
+    final cached = lovatAPI.getCachedScouts();
+    if (cached != null && allScouts == null && errorMessage == null) {
       setState(() {
+        allScouts = cached;
+      });
+    }
+
+    try {
+      final data = await lovatAPI.getScouts();
+      setState(() {
+        allScouts = data;
         errorMessage = null;
       });
-      final allScouts = await lovatAPI.getScouts();
-      setState(() {
-        this.allScouts = allScouts;
-      });
     } catch (e) {
-      setState(() {
-        errorMessage = "Failed to load scouts";
-      });
+      if (allScouts == null) {
+        setState(() {
+          errorMessage = "Failed to load scouts";
+        });
+      }
     }
   }
 
@@ -256,13 +261,12 @@ class _ScoutShiftEditorState extends State<ScoutShiftEditor> {
 
   @override
   Widget build(BuildContext context) {
-    if (errorMessage != null) {
+    if (errorMessage != null && allScouts == null) {
       return FriendlyErrorView(
         errorMessage: errorMessage!,
         onRetry: () async {
           setState(() {
             errorMessage = null;
-            allScouts = null;
           });
 
           await fetchData();

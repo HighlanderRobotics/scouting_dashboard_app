@@ -4,166 +4,150 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_category_metrics.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 
-class TeamLookupCategoriesTab extends StatefulWidget {
+class TeamLookupCategoriesTab extends StatelessWidget {
   const TeamLookupCategoriesTab({super.key, required this.team});
 
   final int team;
 
   @override
-  State<TeamLookupCategoriesTab> createState() =>
-      _TeamLookupCategoriesTabState();
-}
-
-class _TeamLookupCategoriesTabState extends State<TeamLookupCategoriesTab> {
-  CategoryMetrics? data;
-  String? error;
-
-  Future<void> fetchData() async {
-    setState(() {
-      data = null;
-      error = null;
-    });
-
-    try {
-      final result = await lovatAPI.getCategoryMetricsByTeamNumber(widget.team);
-      setState(() => data = result);
-    } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
-    } catch (e) {
-      debugPrint(e.toString());
-      setState(() => error = "Failed to load metrics");
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  @override
-  void didUpdateWidget(TeamLookupCategoriesTab oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.team != widget.team) fetchData();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (error != null) {
-      if (error!.contains("NO_DATA_FOR_TEAM")) {
-        return PageBody(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+    return StaleRefreshBuilder(
+      query: lovatAPI.categoryMetricsQuery(team),
+      builder: (context, result) {
+        final data = result.data;
+        final error = result.error;
+        if (data != null) {
+          return Stack(
             children: [
-              Image.asset("assets/images/no_scouters.png", width: 250),
-              const SizedBox(height: 8),
-              Text(
-                "No data found",
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
+              ScrollablePageBody(
+                children: [
+                  MetricCategoryList(
+                    metricCategories: metricCategories
+                        .map((category) => MetricCategory(
+                              categoryName: category.localizedName,
+                              metricTiles: category.metrics
+                                  .where(
+                                      (metric) => metric.hideOverview == false)
+                                  .map(
+                                    (metric) => MetricTile(
+                                      value: (() {
+                                        try {
+                                          return metric
+                                              .valueVizualizationBuilder(
+                                                  data.valueForMetric(metric));
+                                        } catch (_) {
+                                          return "--";
+                                        }
+                                      })(),
+                                      label: metric.abbreviatedLocalizedName,
+                                      onTap: metric.hideDetails
+                                          ? null
+                                          : () {
+                                              Navigator.of(context).pushNamed(
+                                                  "/team_lookup_details",
+                                                  arguments: {
+                                                    'category': category,
+                                                    'metric': metric.path,
+                                                    'team': team,
+                                                  });
+                                            },
+                                    ),
+                                  )
+                                  .toList(),
+                              onTap: category.metrics
+                                      .where((metric) => !metric.hideDetails)
+                                      .isEmpty
+                                  ? null
+                                  : () {
+                                      Navigator.of(context).pushNamed(
+                                          "/team_lookup_details",
+                                          arguments: {
+                                            'category': category,
+                                            'team': team,
+                                          });
+                                    },
+                            ))
+                        .toList(),
+                  ),
+                ],
               ),
-              const SizedBox(height: 2),
-              Text(
-                "Try using data from more teams or tournaments.",
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: StaleRefreshIndicator.result(result),
               ),
             ],
-          ),
-        );
-      }
-      if (error!.contains("TEAM_DOES_NOT_EXIST")) {
-        return PageBody(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset("assets/images/awaiting_verification.png",
-                  width: 250),
-              const SizedBox(height: 8),
-              Text(
-                "Team does not exist",
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        );
-      }
-      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
-    }
+          );
+        }
 
-    if (data == null) {
-      return PageBody(
-        bottom: false,
-        padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
-        child: SkeletonListView(
-          itemCount: metricCategories.length,
-          itemBuilder: (context, index) => Padding(
-            padding: const EdgeInsets.only(bottom: 15),
-            child: SizedBox(
-              height: 117,
-              child: SkeletonAvatar(
-                style: SkeletonAvatarStyle(
-                  borderRadius: BorderRadius.circular(10),
+        if (error != null) {
+          if (error.contains("NO_DATA_FOR_TEAM")) {
+            return PageBody(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/no_scouters.png", width: 250),
+                  const SizedBox(height: 8),
+                  Text(
+                    "No data found",
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    "Try using data from more teams or tournaments.",
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+          if (error.contains("TEAM_DOES_NOT_EXIST")) {
+            return PageBody(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset("assets/images/awaiting_verification.png",
+                      width: 250),
+                  const SizedBox(height: 8),
+                  Text(
+                    "Team does not exist",
+                    style: Theme.of(context).textTheme.headlineMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            );
+          }
+          return FriendlyErrorView.result(result);
+        }
+
+        return PageBody(
+          bottom: false,
+          padding: const EdgeInsets.fromLTRB(8, 16, 8, 0),
+          child: SkeletonListView(
+            itemCount: metricCategories.length,
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.only(bottom: 15),
+              child: SizedBox(
+                height: 117,
+                child: SkeletonAvatar(
+                  style: SkeletonAvatarStyle(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-      );
-    }
-
-    return ScrollablePageBody(
-      children: [
-        MetricCategoryList(
-          metricCategories: metricCategories
-              .map((category) => MetricCategory(
-                    categoryName: category.localizedName,
-                    metricTiles: category.metrics
-                        .where((metric) => metric.hideOverview == false)
-                        .map(
-                          (metric) => MetricTile(
-value: (() {
-                               try {
-                                 return metric.valueVizualizationBuilder(
-                                    data!.valueForMetric(metric));
-                               } catch (_) {
-                                 return "--";
-                               }
-                             })(),
-                            label: metric.abbreviatedLocalizedName,
-                            onTap: metric.hideDetails
-                                ? null
-                                : () {
-                                    Navigator.of(context).pushNamed(
-                                        "/team_lookup_details",
-                                        arguments: {
-                                          'category': category,
-                                          'metric': metric.path,
-                                          'team': widget.team,
-                                        });
-                                  },
-                          ),
-                        )
-                        .toList(),
-                    onTap: category.metrics
-                            .where((metric) => !metric.hideDetails)
-                            .isEmpty
-                        ? null
-                        : () {
-                            Navigator.of(context)
-                                .pushNamed("/team_lookup_details", arguments: {
-                              'category': category,
-                              'team': widget.team,
-                            });
-                          },
-                  ))
-              .toList(),
-        ),
-      ],
+        );
+      },
     );
   }
 }

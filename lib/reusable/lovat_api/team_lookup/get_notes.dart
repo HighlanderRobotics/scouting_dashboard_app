@@ -3,27 +3,43 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetNotes on LovatAPI {
-  Future<List<Note>> getNotesByTeamNumber(
-    int teamNumber,
-  ) async {
-    final response = await get('/v1/analysis/notes/team/$teamNumber');
+extension NotesQuery on LovatAPI {
+  CachedQuery<List<Note>> notesQuery(int teamNumber) {
+    final path = '/v1/analysis/notes/team/$teamNumber';
+    return CachedQuery(
+      queryKey: ['notes', teamNumber],
+      queryFn: () async {
+        final response = await get(path);
 
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get notes');
-    }
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get notes');
+        }
 
-    final json = jsonDecode(response!.body) as List<dynamic>;
+        final json = jsonDecode(response!.body) as List<dynamic>;
 
-    List<Note> notes = [];
+        List<Note> notes = [];
 
-    for (final map in json) {
-      notes.addAll(Note.fromJoinedMap(map));
-    }
+        for (final map in json) {
+          notes.addAll(Note.fromJoinedMap(map));
+        }
 
-    return notes;
+        return notes;
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) {
+          final list = json as List<dynamic>;
+          final notes = <Note>[];
+          for (final map in list) {
+            notes.addAll(Note.fromJoinedMap(map as Map<String, dynamic>));
+          }
+          return notes;
+        },
+      ),
+    );
   }
 }
 

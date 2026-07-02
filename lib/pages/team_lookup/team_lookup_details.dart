@@ -5,6 +5,8 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_metric_details.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
 class TeamLookupDetailsPage extends StatefulWidget {
@@ -122,7 +124,7 @@ class _TeamLookupDetailsPageState extends State<TeamLookupDetailsPage> {
   }
 }
 
-class AnalysisOverview extends StatefulWidget {
+class AnalysisOverview extends StatelessWidget {
   const AnalysisOverview({
     super.key,
     required this.teamNumber,
@@ -133,123 +135,53 @@ class AnalysisOverview extends StatefulWidget {
   final CategoryMetric metric;
 
   @override
-  State<AnalysisOverview> createState() => _AnalysisOverviewState();
-}
-
-class _AnalysisOverviewState extends State<AnalysisOverview> {
-  MetricDetails? data;
-  String? error;
-
-  Future<void> fetchData() async {
-    setState(() {
-      data = null;
-      error = null;
-    });
-
-    try {
-      final result =
-          await lovatAPI.getMetricDetails(widget.teamNumber, widget.metric.path);
-      setState(() => data = result);
-    } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
-    } catch (_) {
-      setState(() => error = "Failed to load metric details");
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    fetchData();
-  }
-
-  @override
-  void didUpdateWidget(AnalysisOverview oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.teamNumber != widget.teamNumber ||
-        oldWidget.metric.path != widget.metric.path) {
-      fetchData();
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (error != null) {
-      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
-    }
+    return StaleRefreshBuilder(
+      query: lovatAPI.metricDetailsQuery(teamNumber, metric.path),
+      builder: (context, result) {
+        final data = result.data;
+        final error = result.error;
+        if (error != null && data == null) {
+          return FriendlyErrorView.result(result);
+        }
 
-    if (data == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
+        if (data == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    final d = data!;
+        final d = data;
 
-    return Column(
-      children: [
-        Row(children: [
-          if (d.hasResult)
-            valueBox(
-              context,
-              Text(
-                widget.metric.valueVizualizationBuilder(d.result),
-                style: Theme.of(context).textTheme.headlineSmall!.merge(
-                      TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onPrimaryContainer),
-                    ),
-              ),
-              "This team",
-              false,
-            ),
-          if (d.hasResult) const SizedBox(width: 10),
-          if (d.hasAll)
-            Flexible(
-              flex: 5,
-              fit: FlexFit.tight,
-              child: valueBox(
-                context,
-                Text(
-                  widget.metric.valueVizualizationBuilder(d.all),
-                  style: Theme.of(context).textTheme.headlineSmall!.merge(
-                        TextStyle(
-                            color: Theme.of(context).colorScheme.onPrimary),
+        return Stack(
+          children: [
+            SingleChildScrollView(
+              child: Column(
+                children: [
+                  Row(children: [
+                    if (d.hasResult)
+                      valueBox(
+                        context,
+                        Text(
+                          metric.valueVizualizationBuilder(d.result),
+                          style:
+                              Theme.of(context).textTheme.headlineSmall!.merge(
+                                    TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer),
+                                  ),
+                        ),
+                        "This team",
+                        false,
                       ),
-                ),
-                "All teams",
-                true,
-              ),
-            ),
-          if (d.hasAll) const SizedBox(width: 10),
-          if (d.hasDifference)
-            Flexible(
-              flex: 6,
-              fit: FlexFit.tight,
-              child: valueBox(
-                context,
-                d.difference == null
-                    ? Text(
-                        "--",
-                        style: Theme.of(context).textTheme.headlineSmall!.merge(
-                              TextStyle(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .onPrimaryContainer),
-                            ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            d.difference!.isNegative
-                                ? Icons.arrow_drop_down
-                                : Icons.arrow_drop_up,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onPrimaryContainer,
-                          ),
+                    if (d.hasResult) const SizedBox(width: 10),
+                    if (d.hasAll)
+                      Flexible(
+                        flex: 5,
+                        fit: FlexFit.tight,
+                        child: valueBox(
+                          context,
                           Text(
-                            widget.metric.valueVizualizationBuilder(
-                                d.difference!.abs()),
+                            metric.valueVizualizationBuilder(d.all),
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall!
@@ -257,30 +189,88 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
                                   TextStyle(
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .onPrimaryContainer),
+                                          .onPrimary),
                                 ),
                           ),
-                        ],
+                          "All teams",
+                          true,
+                        ),
                       ),
-                "Difference",
-                false,
+                    if (d.hasAll) const SizedBox(width: 10),
+                    if (d.hasDifference)
+                      Flexible(
+                        flex: 6,
+                        fit: FlexFit.tight,
+                        child: valueBox(
+                          context,
+                          d.difference == null
+                              ? Text(
+                                  "--",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall!
+                                      .merge(
+                                        TextStyle(
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .onPrimaryContainer),
+                                      ),
+                                )
+                              : Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      d.difference!.isNegative
+                                          ? Icons.arrow_drop_down
+                                          : Icons.arrow_drop_up,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimaryContainer,
+                                    ),
+                                    Text(
+                                      metric.valueVizualizationBuilder(
+                                          d.difference!.abs()),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineSmall!
+                                          .merge(
+                                            TextStyle(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .onPrimaryContainer),
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                          "Difference",
+                          false,
+                        ),
+                      ),
+                  ]),
+                  if (d.array.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    sparkline(context, d, metric.max),
+                  ],
+                  if (d.paths.isNotEmpty)
+                    TeamAutoPaths(
+                      autoPaths: d.paths,
+                    ),
+                ],
               ),
             ),
-        ]),
-        if (d.array.isNotEmpty) ...[
-          const SizedBox(height: 10),
-          sparkline(context, d, widget.metric.max),
-        ],
-        if (d.paths.isNotEmpty)
-          TeamAutoPaths(
-            autoPaths: d.paths,
-          ),
-      ],
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: StaleRefreshIndicator.result(result),
+            ),
+          ],
+        );
+      },
     );
   }
 
-  Widget sparkline(
-      BuildContext context, MetricDetails data, double? max) {
+  Widget sparkline(BuildContext context, MetricDetails data, double? max) {
     return Column(
       children: [
         AspectRatio(
@@ -319,7 +309,7 @@ class _AnalysisOverviewState extends State<AnalysisOverview> {
                           topTitles: const AxisTitles(),
                           leftTitles: AxisTitles(
                             axisNameWidget: Text(
-                              widget.metric.abbreviatedNameWithUnits,
+                              metric.abbreviatedNameWithUnits,
                             ),
                             sideTitles: SideTitles(
                                 showTitles: true,

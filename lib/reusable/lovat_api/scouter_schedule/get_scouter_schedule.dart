@@ -1,28 +1,32 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/scout_schedule.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
-extension GetScouterSchedule on LovatAPI {
-  Future<ServerScoutSchedule> getScouterSchedule() async {
-    final tournament = await Tournament.getCurrent();
+extension ScouterScheduleQuery on LovatAPI {
+  CachedQuery<ServerScoutSchedule> scouterScheduleQuery(String tournamentKey) {
+    final path = '/v1/manager/tournament/$tournamentKey/scoutershifts';
+    return CachedQuery(
+      queryKey: ['scouterSchedule', tournamentKey],
+      queryFn: () async {
+        final response = await get(path);
 
-    if (tournament == null) {
-      throw Exception('No tournament selected');
-    }
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get scouter schedule');
+        }
 
-    final response =
-        await get('/v1/manager/tournament/${tournament.key}/scoutershifts');
+        final json = jsonDecode(response!.body) as Map<String, dynamic>;
 
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get scouter schedule');
-    }
-
-    final json = jsonDecode(response!.body) as Map<String, dynamic>;
-
-    return ServerScoutSchedule.fromJson(json);
+        return ServerScoutSchedule.fromJson(json);
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) =>
+            ServerScoutSchedule.fromJson(json as Map<String, dynamic>),
+      ),
+    );
   }
 }

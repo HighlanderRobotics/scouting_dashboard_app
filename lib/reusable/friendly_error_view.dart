@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class FriendlyErrorView extends StatelessWidget {
   const FriendlyErrorView({
@@ -7,6 +8,13 @@ class FriendlyErrorView extends StatelessWidget {
     this.onRetry,
     this.retryLabel = "Retry",
   });
+
+  FriendlyErrorView.result(
+    QueryResult<dynamic> result, {
+    super.key,
+    this.retryLabel = "Retry",
+  })  : errorMessage = result.error,
+        onRetry = result.refetch;
 
   final String? errorMessage;
   final dynamic Function()? onRetry;

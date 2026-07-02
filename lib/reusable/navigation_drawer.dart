@@ -5,8 +5,6 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/user_profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-LovatUserProfile? cachedUserProfile;
-
 class GlobalNavigationDrawer extends StatefulWidget {
   const GlobalNavigationDrawer({
     Key? key,
@@ -46,8 +44,6 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
     }
 
     if (profile != null) {
-      cachedUserProfile = profile;
-
       setState(() {
         userProfile = profile;
       });
@@ -63,7 +59,7 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
   @override
   void initState() {
     super.initState();
-    userProfile = cachedUserProfile;
+    userProfile = lovatAPI.getCachedUserProfile();
   }
 
   @override

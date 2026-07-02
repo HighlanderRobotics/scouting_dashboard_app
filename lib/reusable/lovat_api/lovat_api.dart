@@ -6,12 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/response_cache.dart';
 
 class LovatAPI {
   LovatAPI(this.baseUrl);
 
   String baseUrl;
   bool _isAuthenticating = false;
+  final ResponseCache cache = ResponseCache();
 
   // Track if Auth0 Web SDK has been initialized
   bool _webSdkInitialized = false;
@@ -134,8 +136,61 @@ class LovatAPI {
 
   Future<http.Response?> get(String path, {Map<String, String>? query}) async {
     final uri = Uri.parse(baseUrl + path).replace(queryParameters: query);
+    final key = uri.toString();
 
-    return await http.get(uri, headers: await _getHeaders());
+    final cachedEntry = cache.get(key);
+    final headers = await _getHeaders();
+    if (cachedEntry?.etag != null) {
+      headers['If-None-Match'] = cachedEntry!.etag!;
+    }
+
+    final response = await http.get(uri, headers: headers);
+
+    if (response.statusCode == 304 && cachedEntry != null) {
+      return http.Response.bytes(utf8.encode(cachedEntry.body), 200,
+          headers: {'content-type': 'application/json'});
+    }
+
+    if (response.statusCode == 200) {
+      final etag = response.headers['etag'] ?? response.headers['ETag'];
+      cache.put(key, response.body, etag: etag);
+    }
+
+    return response;
+  }
+
+  http.Response? getCachedResponse(
+    String path, {
+    Map<String, String>? query,
+  }) {
+    final key = _cacheKey(path, query: query);
+    final entry = cache.get(key);
+    if (entry == null) return null;
+    return http.Response.bytes(utf8.encode(entry.body), 200,
+        headers: {'content-type': 'application/json'});
+  }
+
+  T? getCachedData<T>(
+    String path, {
+    Map<String, String>? query,
+    required T Function(dynamic json) parser,
+  }) {
+    final key = _cacheKey(path, query: query);
+    final entry = cache.get(key);
+    if (entry == null) return null;
+    try {
+      return parser(jsonDecode(entry.body));
+    } catch (_) {
+      return null;
+    }
+  }
+
+  String _cacheKey(String path, {Map<String, String>? query}) {
+    return Uri.parse(baseUrl + path).replace(queryParameters: query).toString();
+  }
+
+  String cacheKeyFor(String path, {Map<String, String>? query}) {
+    return _cacheKey(path, query: query);
   }
 
   Future<http.Response?> post(

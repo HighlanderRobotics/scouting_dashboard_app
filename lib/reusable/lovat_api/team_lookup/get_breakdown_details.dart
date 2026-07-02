@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
 class BreakdownDetailsReport {
   const BreakdownDetailsReport({
@@ -183,24 +184,36 @@ class BreakdownDetailsResponse {
   }
 }
 
-extension GetBreakdownMetrics on LovatAPI {
-  Future<BreakdownDetailsResponse> getBreakdownDetails(
+extension BreakdownDetailsQuery on LovatAPI {
+  CachedQuery<BreakdownDetailsResponse> breakdownDetailsQuery(
     int teamNumber,
     String breakdownPath,
-  ) async {
-    final response = await get(
-      '/v1/analysis/breakdown/team/$teamNumber/$breakdownPath',
-    );
+  ) {
+    final path = '/v1/analysis/breakdown/team/$teamNumber/$breakdownPath';
+    return CachedQuery(
+      queryKey: ['breakdownDetails', teamNumber, breakdownPath],
+      queryFn: () async {
+        final response = await get(path);
 
-    if (response?.statusCode != 200) {
-      debugPrint(response?.body ?? '');
-      throw Exception('Failed to get breakdown details');
-    }
+        if (response?.statusCode != 200) {
+          debugPrint(response?.body ?? '');
+          throw Exception('Failed to get breakdown details');
+        }
 
-    return BreakdownDetailsResponse.fromJson(
-      (jsonDecode(response!.body) as List<dynamic>).cast(),
-      teamNumber: teamNumber,
-      breakdownPath: breakdownPath,
+        return BreakdownDetailsResponse.fromJson(
+          (jsonDecode(response!.body) as List<dynamic>).cast(),
+          teamNumber: teamNumber,
+          breakdownPath: breakdownPath,
+        );
+      },
+      cacheReader: () => getCachedData(
+        path,
+        parser: (json) => BreakdownDetailsResponse.fromJson(
+          (json as List<dynamic>).cast(),
+          teamNumber: teamNumber,
+          breakdownPath: breakdownPath,
+        ),
+      ),
     );
   }
 }

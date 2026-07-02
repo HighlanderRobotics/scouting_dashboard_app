@@ -12,6 +12,8 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -151,104 +153,113 @@ class PicklistView extends StatefulWidget {
 }
 
 class _PicklistViewState extends State<PicklistView> {
-  List<PicklistAnalysisTeam>? data;
   List<FlagConfiguration>? flags;
-  String? error;
-
-  Future<void> fetchData() async {
-    setState(() {
-      data = null;
-      flags = null;
-      error = null;
-    });
-
-    try {
-      final fetchedFlags = await getPicklistFlags();
-      final flagPaths = fetchedFlags.map((e) => e.type.path).toList();
-      final result = await lovatAPI.getPicklistAnalysis(
-          flagPaths, widget.picklist.weights);
-      setState(() {
-        flags = fetchedFlags;
-        data = result;
-      });
-    } on LovatAPIException catch (e) {
-      setState(() => error = e.message);
-    } catch (_) {
-      setState(() => error = "Failed to load picklist");
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    fetchData();
+    _loadFlags();
+  }
+
+  Future<void> _loadFlags() async {
+    final fetchedFlags = await getPicklistFlags();
+    if (mounted) setState(() => flags = fetchedFlags);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (error != null) {
-      return FriendlyErrorView(errorMessage: error, onRetry: fetchData);
-    }
-
-    if (data == null || flags == null) {
+    if (flags == null) {
       return SkeletonListView(
         itemBuilder: (context, index) => SkeletonListTile(),
       );
     }
 
-    final result = data!;
+    final flagPaths = flags!.map((e) => e.type.path).toList();
 
-    return ListView(
-      children: result
-          .map((teamData) => ListTile(
-                title: Text(teamData.teamNumber.toString()),
-                contentPadding: const EdgeInsets.only(left: 16, right: 4),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    FlagRow(
-                      flags!,
-                      Map.fromEntries(
-                        teamData.flags.map((e) => MapEntry(e.type, e.result)),
-                      ),
-                      teamData.teamNumber,
-                      onEdit: fetchData,
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pushNamed(
-                            "/picklist_team_breakdown",
-                            arguments: {
-                              'team': teamData.teamNumber,
-                              'breakdown': teamData.zScoresWeighted,
-                              'unweighted': teamData.zScoresUnweighted,
-                              'picklistTitle': widget.picklist.meta.title,
-                            });
-                      },
-                      icon: Icon(
-                        Icons.balance,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip:
-                          "View ${teamData.teamNumber}'s z-scores",
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context)
-                            .pushNamed("/team_lookup", arguments: {
-                          'team': teamData.teamNumber,
-                        });
-                      },
-                      icon: Icon(
-                        Icons.arrow_right,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                      tooltip: "Open team lookup for ${teamData.teamNumber}",
-                    ),
-                  ],
-                ),
-              ))
-          .toList(),
+    return StaleRefreshBuilder(
+      query: lovatAPI.picklistAnalysisQuery(flagPaths, widget.picklist.weights),
+      builder: (context, result) {
+        final data = result.data;
+        if (result.hasError && data == null) {
+          return FriendlyErrorView.result(result);
+        }
+
+        if (data == null) {
+          return SkeletonListView(
+            itemBuilder: (context, index) => SkeletonListTile(),
+          );
+        }
+
+        return Stack(
+          children: [
+            ListView(
+              children: data
+                  .map((teamData) => ListTile(
+                        title: Text(teamData.teamNumber.toString()),
+                        contentPadding:
+                            const EdgeInsets.only(left: 16, right: 4),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FlagRow(
+                              flags!,
+                              Map.fromEntries(
+                                teamData.flags
+                                    .map((e) => MapEntry(e.type, e.result)),
+                              ),
+                              teamData.teamNumber,
+                              onEdit: result.refetch,
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(
+                                    "/picklist_team_breakdown",
+                                    arguments: {
+                                      'team': teamData.teamNumber,
+                                      'breakdown': teamData.zScoresWeighted,
+                                      'unweighted': teamData.zScoresUnweighted,
+                                      'picklistTitle':
+                                          widget.picklist.meta.title,
+                                    });
+                              },
+                              icon: Icon(
+                                Icons.balance,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                              tooltip: "View ${teamData.teamNumber}'s z-scores",
+                            ),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed("/team_lookup", arguments: {
+                                  'team': teamData.teamNumber,
+                                });
+                              },
+                              icon: Icon(
+                                Icons.arrow_right,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
+                              tooltip:
+                                  "Open team lookup for ${teamData.teamNumber}",
+                            ),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: StaleRefreshIndicator.result(result),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -10,6 +10,8 @@ import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
 
 class MatchPredictorPage extends StatefulWidget {
@@ -20,158 +22,159 @@ class MatchPredictorPage extends StatefulWidget {
 }
 
 class _MatchPredictorPageState extends State<MatchPredictorPage> {
-  Future<MatchPrediction> _fetchPrediction(Map<String, dynamic> args) async {
-    try {
-      return await lovatAPI.getMatchPrediction(
-        int.parse(args['red1']),
-        int.parse(args['red2']),
-        int.parse(args['red3']),
-        int.parse(args['blue1']),
-        int.parse(args['blue2']),
-        int.parse(args['blue3']),
-      );
-    } on LovatAPIException catch (e) {
-      if (e.message == "Not enough data") {
-        throw _NotEnoughDataException();
-      }
-      rethrow;
-    }
+  late List<int> _teams;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final args =
+        ModalRoute.of(context)!.settings.arguments! as Map<String, dynamic>;
+    _teams = [
+      int.parse(args['red1']),
+      int.parse(args['red2']),
+      int.parse(args['red3']),
+      int.parse(args['blue1']),
+      int.parse(args['blue2']),
+      int.parse(args['blue3']),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
-    final args =
-        ModalRoute.of(context)!.settings.arguments! as Map<String, dynamic>;
+    final hasDrawer = ModalRoute.of(context)!.settings.arguments == null
+        ? const GlobalNavigationDrawer()
+        : null;
 
-    return DefaultTabController(
-      length: 2,
-      child: FutureBuilder<MatchPrediction>(
-          future: _fetchPrediction(args),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              if (snapshot.error is _NotEnoughDataException) {
-                return Scaffold(
-                  appBar: AppBar(
-                    title: const Text("Match Predictor"),
-                  ),
-                  body: notEnoughDataMessage(),
-                  drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                      ? const GlobalNavigationDrawer()
-                      : null,
-                );
-              }
+    return StaleRefreshBuilder(
+      query: lovatAPI.matchPredictionQuery(
+          _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5]),
+      builder: (context, result) {
+        final prediction = result.data;
+        final notEnoughData =
+            result.error?.contains("Not enough data") == true &&
+                prediction == null;
 
+        if (notEnoughData) {
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Match Predictor"),
+              bottom: StaleRefreshIndicator.result(result),
+            ),
+            body: notEnoughDataMessage(),
+            drawer: hasDrawer,
+          );
+        }
+
+        if (prediction == null) {
+          if (result.error != null) {
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text("Match Predictor"),
+                bottom: StaleRefreshIndicator.result(result),
+              ),
+              body: PageBody(child: Text("Error: ${result.error}")),
+              drawer: hasDrawer,
+            );
+          }
+
+          return Scaffold(
+            appBar: AppBar(
+              title: const Text("Match Predictor"),
+            ),
+            body: const PageBody(child: LinearProgressIndicator()),
+            drawer: hasDrawer,
+          );
+        }
+
+        return DefaultTabController(
+          length: 2,
+          child: LayoutBuilder(builder: (context, constraints) {
+            if (constraints.maxHeight > constraints.maxWidth) {
+              // Portrait
               return Scaffold(
                 appBar: AppBar(
                   title: const Text("Match Predictor"),
-                ),
-                body: PageBody(child: Text("Error: ${snapshot.error}")),
-                drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                    ? const GlobalNavigationDrawer()
-                    : null,
-              );
-            }
-
-            if (snapshot.connectionState != ConnectionState.done) {
-              return Scaffold(
-                appBar: AppBar(
-                  title: const Text("Match Predictor"),
-                ),
-                body: const PageBody(child: LinearProgressIndicator()),
-                drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                    ? const GlobalNavigationDrawer()
-                    : null,
-              );
-            }
-
-            final prediction = snapshot.data!;
-
-            return LayoutBuilder(builder: (context, constraints) {
-              if (constraints.maxHeight > constraints.maxWidth) {
-                // Portrait
-                return Scaffold(
-                  appBar: AppBar(
-                    title: const Text("Match Predictor"),
-                    bottom: PreferredSize(
-                      preferredSize: const Size.fromHeight(85),
-                      child: Column(
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: WinningPrediction(
-                              redWinning: prediction.redWinning,
-                              blueWinning: prediction.blueWinning,
-                            ),
+                  bottom: PreferredSize(
+                    preferredSize: const Size.fromHeight(89),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: WinningPrediction(
+                            redWinning: prediction.redWinning,
+                            blueWinning: prediction.blueWinning,
                           ),
-                          const TabBar(tabs: [
-                            Column(
-                              children: [
-                                Text("Red"),
-                                SizedBox(height: 7),
-                              ],
-                            ),
-                            Column(
-                              children: [
-                                Text("Blue"),
-                                SizedBox(height: 7),
-                              ],
-                            ),
-                          ]),
-                        ],
-                      ),
+                        ),
+                        const TabBar(tabs: [
+                          Column(
+                            children: [
+                              Text("Red"),
+                              SizedBox(height: 7),
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              Text("Blue"),
+                              SizedBox(height: 7),
+                            ],
+                          ),
+                        ]),
+                        StaleRefreshIndicator.result(result),
+                      ],
                     ),
                   ),
-                  body: TabBarView(children: [
-                    ScrollablePageBody(children: [
-                      allianceTab(0, prediction.redAlliance),
-                    ]),
-                    ScrollablePageBody(children: [
-                      allianceTab(1, prediction.blueAlliance),
-                    ]),
+                ),
+                body: TabBarView(children: [
+                  ScrollablePageBody(children: [
+                    allianceTab(0, prediction.redAlliance),
                   ]),
-                  drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                      ? const GlobalNavigationDrawer()
-                      : null,
-                );
-              } else {
-                // Landscape
-                return Scaffold(
-                  appBar: AppBar(title: const Text("Match Predictor")),
-                  body: SafeArea(
-                    bottom: false,
-                    child: ListView(children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: WinningPrediction(
-                          redWinning: prediction.redWinning,
-                          blueWinning: prediction.blueWinning,
+                  ScrollablePageBody(children: [
+                    allianceTab(1, prediction.blueAlliance),
+                  ]),
+                ]),
+                drawer: hasDrawer,
+              );
+            } else {
+              // Landscape
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Match Predictor"),
+                  bottom: StaleRefreshIndicator.result(result),
+                ),
+                body: SafeArea(
+                  bottom: false,
+                  child: ListView(children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: WinningPrediction(
+                        redWinning: prediction.redWinning,
+                        blueWinning: prediction.blueWinning,
+                      ),
+                    ),
+                    Row(children: [
+                      Flexible(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: allianceTab(0, prediction.redAlliance),
                         ),
                       ),
-                      Row(children: [
-                        Flexible(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: allianceTab(0, prediction.redAlliance),
-                          ),
+                      Flexible(
+                        flex: 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: allianceTab(1, prediction.blueAlliance),
                         ),
-                        Flexible(
-                          flex: 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: allianceTab(1, prediction.blueAlliance),
-                          ),
-                        ),
-                      ]),
+                      ),
                     ]),
-                  ),
-                  drawer: (ModalRoute.of(context)!.settings.arguments == null)
-                      ? const GlobalNavigationDrawer()
-                      : null,
-                );
-              }
-            });
+                  ]),
+                ),
+                drawer: hasDrawer,
+              );
+            }
           }),
+        );
+      },
     );
   }
 
@@ -221,24 +224,21 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                       child: InkWell(
                         onTap: () => Navigator.of(context).pushNamed(
                             "/team_lookup",
-                            arguments: <String, dynamic>{
-                              'team': e.team
-                            }),
+                            arguments: <String, dynamic>{'team': e.team}),
                         child: Container(
                           decoration: BoxDecoration(
                               color: [
                                 Theme.of(context).colorScheme.redAlliance,
                                 Theme.of(context).colorScheme.blueAlliance
                               ][alliance],
-                              borderRadius: const BorderRadius.all(
-                                  Radius.circular(10))),
+                              borderRadius:
+                                  const BorderRadius.all(Radius.circular(10))),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
                                 Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       if (role != null)
                                         Tooltip(
@@ -270,9 +270,8 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                                 ),
                                 Text(
                                   numToStringRounded(e.averagePoints),
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium,
+                                  style:
+                                      Theme.of(context).textTheme.titleMedium,
                                 )
                               ],
                             ),
@@ -331,16 +330,16 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                value: Text(
-                    numToStringRounded(allianceData.totalBallThroughput)),
+                value:
+                    Text(numToStringRounded(allianceData.totalBallThroughput)),
                 label: const Text('Total output'),
               ),
             ),
             Flexible(
               fit: FlexFit.tight,
               child: ValueTile(
-                value: Text(
-                    numToStringRounded(allianceData.totalFuelOutputted)),
+                value:
+                    Text(numToStringRounded(allianceData.totalFuelOutputted)),
                 label: const Text('Hub shots'),
               ),
             ),
@@ -350,8 +349,6 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
     ]);
   }
 }
-
-class _NotEnoughDataException implements Exception {}
 
 class WinningPrediction extends StatelessWidget {
   const WinningPrediction({

@@ -93,7 +93,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   });
                 },
               ),
-              if (cachedUserProfile?.role == UserRole.scoutingLead &&
+              if (lovatAPI.getCachedUserProfile()?.role ==
+                      UserRole.scoutingLead &&
                   selectedTournament != null) ...[
                 const SizedBox(height: 14),
                 FilledButton.tonalIcon(
@@ -104,7 +105,8 @@ class _SettingsPageState extends State<SettingsPage> {
                   label: const Text("Export CSV"),
                 ),
               ],
-              if (cachedUserProfile?.role == UserRole.scoutingLead)
+              if (lovatAPI.getCachedUserProfile()?.role ==
+                  UserRole.scoutingLead)
                 const EmailBox(),
               const AnalystsBox(),
               const SizedBox(height: 40),
@@ -207,6 +209,14 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
     } catch (e) {
       setState(() {
         errorMessage = "Failed to load source teams";
+      });
+    }
+
+    final cachedProfile = lovatAPI.getCachedUserProfile();
+    if (cachedProfile != null && !thisTeamLoaded) {
+      setState(() {
+        thisTeamNumber = cachedProfile.team?.number;
+        thisTeamLoaded = true;
       });
     }
 
