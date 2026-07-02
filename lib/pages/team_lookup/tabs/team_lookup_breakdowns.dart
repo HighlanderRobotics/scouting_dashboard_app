@@ -232,13 +232,13 @@ class Breakdown extends StatelessWidget {
                 Text(
                   "${(value * 100).round()}%",
                   style: Theme.of(context).textTheme.titleMedium,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.fade,
                   maxLines: 1,
                 ),
                 Text(
                   name,
                   style: Theme.of(context).textTheme.labelMedium,
-                  overflow: TextOverflow.ellipsis,
+                  overflow: TextOverflow.fade,
                   maxLines: 1,
                 ),
               ],

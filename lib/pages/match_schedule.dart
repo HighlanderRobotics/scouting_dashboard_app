@@ -45,6 +45,7 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
   bool showProgressIndicator = false;
 
   bool fabVisible = false;
+  bool scrolled = false;
 
   Future<void> checkRole() async {
     final cached = lovatAPI.getCachedUserProfile();
@@ -301,9 +302,23 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                   ],
                 ),
               ),
-              StaleRefreshIndicator(
-                isFetching: showProgressIndicator,
-                hasStaleData: matches != null,
+              Stack(
+                children: [
+                  if (!scrolled)
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Divider(
+                        height: 1,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest,
+                      ),
+                    ),
+                  StaleRefreshIndicator(
+                    isFetching: showProgressIndicator,
+                    hasStaleData: matches != null,
+                  ),
+                ],
               ),
             ],
           ),
@@ -357,6 +372,14 @@ class _MatchSchedulePageState extends State<MatchSchedulePage> {
                               }
 
                               updateFabVisibility(notification);
+
+                              final isScrolled =
+                                  notification.metrics.pixels > 0;
+                              if (isScrolled != scrolled) {
+                                setState(() {
+                                  scrolled = isScrolled;
+                                });
+                              }
 
                               return false;
                             },
