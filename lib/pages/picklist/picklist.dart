@@ -208,7 +208,7 @@ class _PicklistViewState extends State<PicklistView> {
                                     .map((e) => MapEntry(e.type, e.result)),
                               ),
                               teamData.teamNumber,
-                              onEdit: result.refetch,
+                              onEdit: _loadFlags,
                             ),
                             IconButton(
                               onPressed: () {
@@ -278,18 +278,16 @@ class FlagRow extends StatelessWidget {
     int i = -1;
 
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).pushNamed(
+      onTap: () async {
+        await Navigator.of(context).pushNamed(
           '/edit_picklist_flags',
           arguments: EditPicklistFlagsArgs(
             initialFlags: flagConfigurations,
             initialFlagValues: data,
             team: team,
-            onChange: (data) {
-              if (onEdit != null) onEdit!();
-            },
           ),
         );
+        if (onEdit != null) onEdit!();
       },
       child: Row(
         children: flagConfigurations.isEmpty

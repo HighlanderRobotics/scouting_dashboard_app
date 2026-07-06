@@ -186,7 +186,7 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
                                     .map((e) => MapEntry(e.type, e.result)),
                               ),
                               teamData.teamNumber,
-                              onEdit: result.refetch,
+                              onEdit: _loadFlags,
                             ),
                             IconButton(
                               onPressed: () {
