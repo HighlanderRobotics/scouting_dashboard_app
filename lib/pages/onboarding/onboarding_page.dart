@@ -22,6 +22,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tea
 import 'package:scouting_dashboard_app/reusable/lovat_api/source_data/source_tournaments.dart';
 import 'package:scouting_dashboard_app/reusable/models/team.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -497,6 +498,8 @@ class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
                 teams: teams.map((e) => e.number).toList(),
               );
 
+              QueryCache.clearAll();
+              lovatAPI.cache.clear();
               widget.onSubmit?.call();
               navigatorState.popUntil((a) => a.isFirst);
             } catch (e) {
@@ -520,6 +523,8 @@ class _SourceTeamSettingsPageState extends State<SourceTeamSettingsPage> {
 
         await lovatAPI.setSourceTeams(mode!);
 
+        QueryCache.clearAll();
+        lovatAPI.cache.clear();
         widget.onSubmit?.call();
       } catch (e) {
         debugPrint(e.toString());
@@ -2036,6 +2041,8 @@ class _TournamentSettingsPageState extends State<TournamentSettingsPage> {
                                 await lovatAPI
                                     .setSourceTournaments(selectedTournaments);
 
+                                QueryCache.clearAll();
+                                lovatAPI.cache.clear();
                                 await widget.onSubmit?.call();
                               } catch (e) {
                                 setState(() {

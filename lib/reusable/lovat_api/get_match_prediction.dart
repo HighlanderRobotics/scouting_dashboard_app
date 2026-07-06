@@ -52,6 +52,7 @@ extension MatchPredictionQuery on LovatAPI {
     };
     return CachedQuery(
       queryKey: ['matchPrediction', red1, red2, red3, blue1, blue2, blue3],
+      label: 'match prediction',
       queryFn: () async {
         final response = await get(path, query: query);
 
@@ -74,6 +75,7 @@ extension MatchPredictionQuery on LovatAPI {
         parser: (json) =>
             MatchPrediction.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path, query: query),
     );
   }
 }

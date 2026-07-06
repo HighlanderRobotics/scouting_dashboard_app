@@ -11,6 +11,7 @@ extension ScouterOverviewsQuery on LovatAPI {
     const path = '/v1/manager/scouterspage';
     return CachedQuery(
       queryKey: ['scouterOverviews', archivedScouters],
+      label: 'scouter overviews',
       queryFn: () async {
         final tournament = await Tournament.getCurrent();
 
@@ -50,6 +51,16 @@ extension ScouterOverviewsQuery on LovatAPI {
               .map((e) =>
                   ScouterOverview.fromJson(e, archived: archivedScouters))
               .toList(),
+        );
+      },
+      cacheTimestampReader: () {
+        final tournamentKey = Tournament.currentSync?.key;
+        return getCachedTimestamp(
+          path,
+          query: {
+            if (tournamentKey != null) 'tournamentKey': tournamentKey,
+            'archived': archivedScouters.toString(),
+          },
         );
       },
     );

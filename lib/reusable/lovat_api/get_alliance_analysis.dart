@@ -77,6 +77,7 @@ extension AllianceAnalysisQuery on LovatAPI {
     };
     return CachedQuery(
       queryKey: ['allianceAnalysis', teams[0], teams[1], teams[2]],
+      label: 'alliance analysis',
       queryFn: () async {
         final response = await get(path, query: query);
 
@@ -95,6 +96,7 @@ extension AllianceAnalysisQuery on LovatAPI {
         parser: (json) =>
             AllianceAnalysis.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path, query: query),
     );
   }
 }

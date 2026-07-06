@@ -79,6 +79,7 @@ extension MetricDetailsQuery on LovatAPI {
     final path = '/v1/analysis/metric/$metricPath/team/$teamNumber';
     return CachedQuery(
       queryKey: ['metricDetails', teamNumber, metricPath],
+      label: 'metric details',
       queryFn: () async {
         final response = await get(path);
 
@@ -95,6 +96,7 @@ extension MetricDetailsQuery on LovatAPI {
         path,
         parser: (json) => MetricDetails.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

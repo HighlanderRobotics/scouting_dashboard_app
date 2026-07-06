@@ -65,7 +65,12 @@ extension PicklistAnalysisQuery on LovatAPI {
   ) {
     const path = '/v1/analysis/picklist';
     return CachedQuery(
-      queryKey: ['picklistAnalysis', flags, weights],
+      queryKey: [
+        'picklistAnalysis',
+        flags,
+        weights.map((e) => [e.path, e.value]).toList()
+      ],
+      label: 'picklist analysis',
       queryFn: () async {
         final tournament = await Tournament.getCurrent();
 
@@ -109,6 +114,19 @@ extension PicklistAnalysisQuery on LovatAPI {
                 .map((team) =>
                     PicklistAnalysisTeam.fromJson(team as Map<String, dynamic>))
                 .toList();
+          },
+        );
+      },
+      cacheTimestampReader: () {
+        final tournament = Tournament.currentSync;
+        return getCachedTimestamp(
+          path,
+          query: {
+            if (tournament != null) 'tournamentKey': tournament.key,
+            'flags': jsonEncode(flags),
+            ...Map.fromEntries(
+              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
+            ),
           },
         );
       },

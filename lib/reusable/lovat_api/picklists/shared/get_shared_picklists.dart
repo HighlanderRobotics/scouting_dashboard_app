@@ -10,6 +10,7 @@ extension SharedPicklistsQuery on LovatAPI {
     const path = '/v1/manager/picklists';
     return CachedQuery(
       queryKey: const ['sharedPicklists'],
+      label: 'shared picklists',
       queryFn: () async {
         final response = await get(path);
 
@@ -38,6 +39,7 @@ extension SharedPicklistsQuery on LovatAPI {
             .map((e) => ConfiguredPicklistMeta.fromJson(e))
             .toList(),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

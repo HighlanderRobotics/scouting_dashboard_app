@@ -185,6 +185,13 @@ class LovatAPI {
     }
   }
 
+  DateTime? getCachedTimestamp(String path, {Map<String, String>? query}) {
+    final key = _cacheKey(path, query: query);
+    final entry = cache.get(key);
+    if (entry == null) return null;
+    return DateTime.fromMillisecondsSinceEpoch(entry.timestamp);
+  }
+
   String _cacheKey(String path, {Map<String, String>? query}) {
     return Uri.parse(baseUrl + path).replace(queryParameters: query).toString();
   }

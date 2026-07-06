@@ -35,6 +35,7 @@ extension BreakdownMetricsQuery on LovatAPI {
     final path = '/v1/analysis/breakdown/team/$teamNumber';
     return CachedQuery(
       queryKey: ['breakdownMetrics', teamNumber],
+      label: 'breakdown metrics',
       queryFn: () async {
         final response = await get(path);
 
@@ -52,6 +53,7 @@ extension BreakdownMetricsQuery on LovatAPI {
         parser: (json) =>
             BreakdownMetrics.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

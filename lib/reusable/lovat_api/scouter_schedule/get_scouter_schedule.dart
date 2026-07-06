@@ -10,6 +10,7 @@ extension ScouterScheduleQuery on LovatAPI {
     final path = '/v1/manager/tournament/$tournamentKey/scoutershifts';
     return CachedQuery(
       queryKey: ['scouterSchedule', tournamentKey],
+      label: 'scouter schedule',
       queryFn: () async {
         final response = await get(path);
 
@@ -27,6 +28,7 @@ extension ScouterScheduleQuery on LovatAPI {
         parser: (json) =>
             ServerScoutSchedule.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

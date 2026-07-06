@@ -26,6 +26,7 @@ import 'package:scouting_dashboard_app/reusable/navigation_drawer.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
+import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:scouting_dashboard_app/reusable/tournament_key_picker.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -304,6 +305,8 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
               (() async {
                 try {
                   await lovatAPI.setSourceTeams(tappedMode!);
+                  QueryCache.clearAll();
+                  lovatAPI.cache.clear();
                   await load();
                 } catch (e) {
                   setState(() {
@@ -331,6 +334,8 @@ class _TeamSourceSelectorState extends State<TeamSourceSelector> {
                         SourceTeamSettingsMode.specificTeams,
                         teams: teamNumbers,
                       );
+                      QueryCache.clearAll();
+                      lovatAPI.cache.clear();
                       await load();
                       navigator.popUntil(
                         (route) => route.settings.name == "/settings",
@@ -583,6 +588,8 @@ class _TournamentSourceSelectorSettingsPageState
 
     try {
       await lovatAPI.setSourceTournamentKeys(selectedTournamentKeys!);
+      QueryCache.clearAll();
+      lovatAPI.cache.clear();
       widget.onSubmit?.call();
       navigatorState.pop();
     } catch (e) {
@@ -1274,6 +1281,7 @@ class _DeleteConfigurationDialogState extends State<DeleteConfigurationDialog> {
 
                     final prefs = await SharedPreferences.getInstance();
 
+                    QueryCache.clearAll();
                     await prefs.clear();
                     if (kIsWeb) {
                       // Logout redirects the browser to Auth0, then back to our origin

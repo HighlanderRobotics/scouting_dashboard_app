@@ -12,7 +12,9 @@ import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_indicator.dart';
+import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/value_tile.dart';
+import 'package:skeletons_forked/skeletons_forked.dart';
 
 class MatchPredictorPage extends StatefulWidget {
   const MatchPredictorPage({super.key});
@@ -45,52 +47,121 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
         ? const GlobalNavigationDrawer()
         : null;
 
-    return StaleRefreshBuilder(
-      query: lovatAPI.matchPredictionQuery(
-          _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5]),
-      builder: (context, result) {
-        final prediction = result.data;
-        final notEnoughData =
-            result.error?.contains("Not enough data") == true &&
-                prediction == null;
+    return DefaultTabController(
+      length: 2,
+      child: StaleRefreshBuilder(
+        query: lovatAPI.matchPredictionQuery(
+            _teams[0], _teams[1], _teams[2], _teams[3], _teams[4], _teams[5]),
+        builder: (context, result) {
+          final prediction = result.data;
+          final notEnoughData =
+              result.error?.contains("Not enough data") == true &&
+                  prediction == null;
 
-        if (notEnoughData) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Match Predictor"),
-              bottom: StaleRefreshIndicator.result(result),
-            ),
-            body: notEnoughDataMessage(),
-            drawer: hasDrawer,
-          );
-        }
-
-        if (prediction == null) {
-          if (result.error != null) {
+          if (notEnoughData) {
             return Scaffold(
               appBar: AppBar(
                 title: const Text("Match Predictor"),
                 bottom: StaleRefreshIndicator.result(result),
               ),
-              body: PageBody(child: Text("Error: ${result.error}")),
+              body: notEnoughDataMessage(),
               drawer: hasDrawer,
             );
           }
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text("Match Predictor"),
-            ),
-            body: const PageBody(child: LinearProgressIndicator()),
-            drawer: hasDrawer,
-          );
-        }
+          if (prediction == null) {
+            if (result.error != null) {
+              return Scaffold(
+                appBar: AppBar(
+                  title: const Text("Match Predictor"),
+                  bottom: StaleRefreshIndicator.result(result),
+                ),
+                body: FriendlyErrorView.result(result),
+                drawer: hasDrawer,
+              );
+            }
 
-        return DefaultTabController(
-          length: 2,
-          child: LayoutBuilder(builder: (context, constraints) {
+            return LayoutBuilder(builder: (context, constraints) {
+              if (constraints.maxHeight > constraints.maxWidth) {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: const Text("Match Predictor"),
+                    bottom: PreferredSize(
+                      preferredSize: const Size.fromHeight(89),
+                      child: Column(
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: WinningPredictionSkeleton(),
+                          ),
+                          const TabBar(tabs: [
+                            Column(
+                              children: [
+                                Text("Red"),
+                                SizedBox(height: 7),
+                              ],
+                            ),
+                            Column(
+                              children: [
+                                Text("Blue"),
+                                SizedBox(height: 7),
+                              ],
+                            ),
+                          ]),
+                          StaleRefreshIndicator.result(result),
+                        ],
+                      ),
+                    ),
+                  ),
+                  body: const TabBarView(children: [
+                    ScrollablePageBody(children: [
+                      AllianceTabSkeleton(),
+                    ]),
+                    ScrollablePageBody(children: [
+                      AllianceTabSkeleton(),
+                    ]),
+                  ]),
+                  drawer: hasDrawer,
+                );
+              } else {
+                return Scaffold(
+                  appBar: AppBar(
+                    title: const Text("Match Predictor"),
+                    bottom: StaleRefreshIndicator.result(result),
+                  ),
+                  body: SafeArea(
+                    bottom: false,
+                    child: ListView(children: const [
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: WinningPredictionSkeleton(),
+                      ),
+                      Row(children: [
+                        Flexible(
+                          flex: 1,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: AllianceTabSkeleton(),
+                          ),
+                        ),
+                        Flexible(
+                          flex: 1,
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: AllianceTabSkeleton(),
+                          ),
+                        ),
+                      ]),
+                    ]),
+                  ),
+                  drawer: hasDrawer,
+                );
+              }
+            });
+          }
+
+          return LayoutBuilder(builder: (context, constraints) {
             if (constraints.maxHeight > constraints.maxWidth) {
-              // Portrait
               return Scaffold(
                 appBar: AppBar(
                   title: const Text("Match Predictor"),
@@ -135,7 +206,6 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                 drawer: hasDrawer,
               );
             } else {
-              // Landscape
               return Scaffold(
                 appBar: AppBar(
                   title: const Text("Match Predictor"),
@@ -172,9 +242,9 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
                 drawer: hasDrawer,
               );
             }
-          }),
-        );
-      },
+          });
+        },
+      ),
     );
   }
 
@@ -347,6 +417,100 @@ class _MatchPredictorPageState extends State<MatchPredictorPage> {
         ),
       ),
     ]);
+  }
+}
+
+class WinningPredictionSkeleton extends StatelessWidget {
+  const WinningPredictionSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: const BorderRadius.all(Radius.circular(7)),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: const SizedBox(
+        height: 30,
+        child: SkeletonLine(
+          style: SkeletonLineStyle(
+            height: 30,
+            borderRadius: BorderRadius.all(Radius.circular(7)),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AllianceTabSkeleton extends StatelessWidget {
+  const AllianceTabSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [0, 1, 2]
+              .map((_) => Flexible(
+                    flex: 1,
+                    child: SkeletonAvatar(
+                      style: SkeletonAvatarStyle(
+                        width: double.infinity,
+                        height: 94,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                  ))
+              .toList()
+              .cast<Widget>()
+              .withSpaceBetween(width: 15),
+        ),
+        const SizedBox(height: 15),
+        SkeletonAvatar(
+          style: SkeletonAvatarStyle(
+            width: double.infinity,
+            height: 40,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        const SizedBox(height: 15),
+        SkeletonAvatar(
+          style: SkeletonAvatarStyle(
+            width: double.infinity,
+            height: 160,
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        const SizedBox(height: 15),
+        Row(
+          children: [
+            Flexible(
+              fit: FlexFit.tight,
+              child: SkeletonAvatar(
+                style: SkeletonAvatarStyle(
+                  width: double.infinity,
+                  height: 72,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            Flexible(
+              fit: FlexFit.tight,
+              child: SkeletonAvatar(
+                style: SkeletonAvatarStyle(
+                  width: double.infinity,
+                  height: 72,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ].withSpaceBetween(width: 10),
+        ),
+      ],
+    );
   }
 }
 

@@ -10,6 +10,7 @@ extension NotesQuery on LovatAPI {
     final path = '/v1/analysis/notes/team/$teamNumber';
     return CachedQuery(
       queryKey: ['notes', teamNumber],
+      label: 'notes',
       queryFn: () async {
         final response = await get(path);
 
@@ -39,6 +40,7 @@ extension NotesQuery on LovatAPI {
           return notes;
         },
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

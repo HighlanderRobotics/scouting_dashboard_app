@@ -10,6 +10,7 @@ extension MutablePicklistsQuery on LovatAPI {
     const path = '/v1/manager/mutablepicklists';
     return CachedQuery(
       queryKey: const ['mutablePicklists'],
+      label: 'mutable picklists',
       queryFn: () async {
         final response = await get(path);
 
@@ -34,6 +35,7 @@ extension MutablePicklistsQuery on LovatAPI {
             .map((e) => MutablePicklistMeta.fromJson(e))
             .toList(),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

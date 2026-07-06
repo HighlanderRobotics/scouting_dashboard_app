@@ -23,6 +23,7 @@ extension CategoryMetricsQuery on LovatAPI {
     final path = '/v1/analysis/category/team/$teamNumber';
     return CachedQuery(
       queryKey: ['categoryMetrics', teamNumber],
+      label: 'category metrics',
       queryFn: () async {
         final response = await get(path);
 
@@ -49,6 +50,7 @@ extension CategoryMetricsQuery on LovatAPI {
         parser: (json) =>
             CategoryMetrics.fromJson(json as Map<String, dynamic>),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }

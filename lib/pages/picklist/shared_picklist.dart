@@ -148,6 +148,7 @@ class _SharedPicklistViewState extends State<SharedPicklistView> {
     return StaleRefreshBuilder<List<PicklistAnalysisTeam>>(
       query: CachedQuery(
         queryKey: ['sharedPicklistAnalysis', widget.picklistMeta.id],
+        label: 'picklist analysis',
         queryFn: () async {
           final picklist = await widget.picklistMeta.getPicklist();
           return lovatAPI

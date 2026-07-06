@@ -192,6 +192,7 @@ extension BreakdownDetailsQuery on LovatAPI {
     final path = '/v1/analysis/breakdown/team/$teamNumber/$breakdownPath';
     return CachedQuery(
       queryKey: ['breakdownDetails', teamNumber, breakdownPath],
+      label: 'breakdown details',
       queryFn: () async {
         final response = await get(path);
 
@@ -214,6 +215,7 @@ extension BreakdownDetailsQuery on LovatAPI {
           breakdownPath: breakdownPath,
         ),
       ),
+      cacheTimestampReader: () => getCachedTimestamp(path),
     );
   }
 }
