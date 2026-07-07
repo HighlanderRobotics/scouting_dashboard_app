@@ -40,6 +40,7 @@ class SingleScoutReportAnalysis {
     required this.climbStartTime,
     required this.feederType,
     required this.autoPath,
+    required this.stealerType,
     this.accuracy,
     required this.volleys,
     required this.ballsFed,
@@ -58,12 +59,13 @@ class SingleScoutReportAnalysis {
   final num campingDefenseTime;
   final num scoringRate;
   final num feedingRate;
-  final num defenseEffectiveness;
+  final num? defenseEffectiveness;
   final num feeds;
   final num? accuracy;
   final EndgameClimbResult climbResult;
   final num climbStartTime;
   final List<FeederType> feederType;
+  final List<StealerType> stealerType;
   final AutoPath autoPath;
   final num volleys;
   final num ballsFed;
@@ -88,7 +90,12 @@ class SingleScoutReportAnalysis {
       autoClimbStartTime: json['autoClimbStartTime'],
       contactDefenseTime: json['contactDefenseTime'],
       campingDefenseTime: json['campingDefenseTime'],
-      defenseEffectiveness: json["defenseEffectiveness"] + 1,
+      stealerType: ((json['stealerType'] as List<dynamic>).cast<int>())
+          .map<StealerType>((elem) => StealerType.values[elem])
+          .toList(),
+      defenseEffectiveness: json["defenseEffectiveness"] != null
+          ? json["defenseEffectiveness"] + 1
+          : null,
       feeds: json["feeds"],
       accuracy: json["accuracy"],
       climbStartTime: json["climbStartTime"],

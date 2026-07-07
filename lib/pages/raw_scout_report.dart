@@ -739,11 +739,7 @@ extension EndgameClimbResultExtension on EndgameClimbResult {
   }
 }
 
-enum FeederType {
-  continuous,
-  stopToShoot,
-  dump,
-}
+enum FeederType { continuous, stopToShoot, dump, push }
 
 extension FeederTypeName on FeederType {
   String get description {
@@ -754,8 +750,15 @@ extension FeederTypeName on FeederType {
         return "Dump";
       case FeederType.stopToShoot:
         return "Stop to Shoot";
+      case FeederType.push:
+        return "Push";
     }
   }
+}
+
+enum StealerType {
+  toAlliance,
+  toNeutral,
 }
 
 enum AutoClimbResult {
