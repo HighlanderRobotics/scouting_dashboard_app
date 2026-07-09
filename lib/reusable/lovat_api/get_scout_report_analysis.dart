@@ -106,10 +106,10 @@ class SingleScoutReportAnalysis {
         "match": "2022cc_qm14_1",
         "positions": [
           {"location": 7, "event": 0, "time": 0}, // center start
-          {"location": 10, "event": 2, "time": 4}, // cargo ship
-          {"location": 1, "event": 1, "time": 9}, // left rocket
-          {"location": 10, "event": 1, "time": 11}, // cargo ship
-          {"location": 2, "event": 2, "time": 13}, // right rocket
+          {"location": 10, "event": 3, "time": 4}, // cargo ship
+          {"location": 1, "event": 2, "time": 9}, // left rocket
+          {"location": 10, "event": 4, "time": 11}, // cargo ship
+          {"location": 2, "event": 1, "time": 13}, // right rocket
         ]
       }),
       autoScore: json["autoPath"]["autoPoints"],

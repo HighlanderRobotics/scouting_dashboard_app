@@ -383,7 +383,9 @@ class AutoPathWidget extends StatelessWidget {
                 teamColor: teamColor,
                 isHighlighted: false,
                 childBuilder: (context, teamColor, isHighlighted) =>
-                    inventory.isEmpty ? Container() : inventory.last.icon(),
+                    inventory.isEmpty
+                        ? Container(child: Text("f"))
+                        : inventory.last.icon(),
               )),
           ...(gamePieces
               .map(
@@ -690,7 +692,37 @@ class AutoPath {
   }
 
   List<GamePiece> inventoryAtTimestamp(Duration timestamp) {
-    return [];
+    final currentTimeline =
+        timeline.where((event) => event.timestamp <= timestamp);
+
+    List<GamePiece> inventory = [];
+
+    for (var event in currentTimeline) {
+      if (event.type == AutoPathEventType.pickupCargo) {
+        inventory.add(GamePiece.cargo);
+      }
+
+      if (event.type == AutoPathEventType.pickupHatch) {
+        inventory.add(GamePiece.hatch);
+      }
+
+      if (event.type == AutoPathEventType.scoreCargo) {
+        final matchingIndex =
+            inventory.lastIndexWhere((p) => p == GamePiece.cargo);
+        if (matchingIndex != -1) {
+          inventory.removeAt(matchingIndex);
+        }
+      }
+
+      if (event.type == AutoPathEventType.scoreHatch) {
+        final matchingIndex =
+            inventory.lastIndexWhere((p) => p == GamePiece.hatch);
+        if (matchingIndex != -1) {
+          inventory.removeAt(matchingIndex);
+        }
+      }
+    }
+    return inventory;
   }
 
   List<PositionedGamePiece> gamePiecePositionsAtTimestamp(Duration timestamp) {
@@ -735,9 +767,9 @@ class AutoPath {
     //     return [];
     //   }
     // }
-    return [
-      PositionedGamePiece(GamePiece.hatch, positionAtTimestamp(timestamp))
-    ];
+    return inventoryAtTimestamp(timestamp)
+        .map((a) => PositionedGamePiece(a, positionAtTimestamp(timestamp)))
+        .toList();
   }
 }
 
