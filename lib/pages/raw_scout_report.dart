@@ -9,9 +9,11 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/delete_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_events_for_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_report_analysis.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/custom_fields.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_reports_by_long_match_key.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/update_note.dart';
+import 'package:scouting_dashboard_app/reusable/models/custom_field_answer.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -530,6 +532,10 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     label: const Text("time left")))
           ],
         ),
+        if (reportAnalysis.customFieldAnswers.isNotEmpty) ...[
+          const SectionTitle("Asked by your team"),
+          ...reportAnalysis.customFieldAnswers.map(customFieldAnswer),
+        ],
         if (reportAnalysis.notes != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -566,6 +572,42 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           ),
       ].withSpaceBetween(height: 10),
     );
+  }
+
+  Widget customFieldAnswer(CustomFieldAnswerDisplay answer) {
+    switch (answer.type) {
+      case CustomFieldType.text:
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Text(
+                answer.name,
+                style: Theme.of(context).textTheme.headlineMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ),
+            Text(answer.textValue!),
+          ],
+        );
+      case CustomFieldType.number:
+        return ValueTile(
+          value: Text(numToStringRounded(answer.numberValue)),
+          label: Text(answer.name),
+        );
+      case CustomFieldType.singleSelect:
+        return ValueTile(
+          value: Text(answer.selections.first),
+          label: Text(answer.name),
+        );
+      case CustomFieldType.multiSelect:
+        return ValueTile(
+          value: Text(answer.selections.join(", ")),
+          label: Text(answer.name),
+        );
+    }
   }
 
   Widget robotBrokeBox(String description) {

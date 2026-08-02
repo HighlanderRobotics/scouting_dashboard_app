@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:scouting_dashboard_app/constants.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/custom_fields.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/mutable/create_mutable_picklist.dart';
@@ -18,23 +19,65 @@ class PicklistWeight {
     this.path,
     this.localizedName, {
     this.value = 0,
+    this.isCustom = false,
   });
 
   String path;
   String localizedName;
   double value;
+  final bool isCustom;
 
   Map<String, dynamic> toMap() => {
         'path': path,
         'localizedName': localizedName,
         'value': value,
+        'isCustom': isCustom,
       };
 
   factory PicklistWeight.fromMap(Map<String, dynamic> map) => PicklistWeight(
         map['path'],
         map['localizedName'],
         value: map['value'],
+        isCustom: map['isCustom'] ?? false,
       );
+}
+
+/// Builds the full list of picklist weights (all at value 0): the built-in
+/// [picklistWeights] plus one weight per NUMBER-type custom field in
+/// [fields]. Archived fields are labeled "(archived)" and excluded entirely
+/// when [includeArchived] is false.
+List<PicklistWeight> allPicklistWeightsFromFields(
+  List<CustomField> fields, {
+  bool includeArchived = true,
+}) {
+  return [
+    ...picklistWeights
+        .map((weight) => PicklistWeight(weight.path, weight.localizedName)),
+    ...fields
+        .where((field) =>
+            field.type == CustomFieldType.number &&
+            (includeArchived || !field.archived))
+        .map((field) => PicklistWeight(
+              field.cfPath,
+              field.archived ? '${field.name} (archived)' : field.name,
+              isCustom: true,
+            )),
+  ];
+}
+
+/// All available picklist weights: the built-in [picklistWeights] plus the
+/// team's NUMBER-type custom fields. Falls back to just the built-ins when
+/// the custom field definitions can't be fetched.
+Future<List<PicklistWeight>> getAllPicklistWeights({
+  bool includeArchived = true,
+}) async {
+  List<CustomField> fields;
+  try {
+    fields = await getCustomFieldDefinitions();
+  } catch (_) {
+    fields = [];
+  }
+  return allPicklistWeightsFromFields(fields, includeArchived: includeArchived);
 }
 
 class ConfiguredPicklist {
@@ -91,18 +134,50 @@ class ConfiguredPicklist {
     );
   }
 
-  factory ConfiguredPicklist.fromServerJSON(String json) {
+  factory ConfiguredPicklist.fromServerJSON(
+    String json, {
+    List<PicklistWeight>? allWeights,
+  }) {
     Map<String, dynamic> map = jsonDecode(json);
+
+    final Map<String, dynamic> customFieldWeights =
+        map['customFieldWeights'] is Map
+            ? Map<String, dynamic>.from(map['customFieldWeights'])
+            : {};
+
+    double valueForPath(String path) {
+      final value =
+          path.startsWith('cf_') ? customFieldWeights[path] : map[path];
+      return (value ?? 0).toDouble();
+    }
+
+    final weights = (allWeights ?? picklistWeights)
+        .map((weight) => PicklistWeight(
+              weight.path,
+              weight.localizedName,
+              value: valueForPath(weight.path),
+              isCustom: weight.isCustom,
+            ))
+        .toList();
+
+    // Custom field weights stored on the server but not in [allWeights]
+    // (e.g. when the definitions fetch failed) still get rows so their
+    // values are preserved; the raw path stands in for the name.
+    final knownPaths = weights.map((e) => e.path).toSet();
+    for (final path in customFieldWeights.keys) {
+      if (path.startsWith('cf_') && !knownPaths.contains(path)) {
+        weights.add(PicklistWeight(
+          path,
+          path,
+          value: valueForPath(path),
+          isCustom: true,
+        ));
+      }
+    }
 
     return ConfiguredPicklist(
       map['name'],
-      picklistWeights
-          .map((weight) => PicklistWeight(
-                weight.path,
-                weight.localizedName,
-                value: (map[weight.path] ?? 0).toDouble(),
-              ))
-          .toList(),
+      weights,
       map['uuid'],
       author: map.containsKey('userName') ? map['userName'] : null,
     );

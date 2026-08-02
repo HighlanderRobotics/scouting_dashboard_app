@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/custom_field_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/shared/get_shared_picklist_by_id.dart';
@@ -68,7 +69,21 @@ class _ViewPicklistWeightsPageState extends State<ViewPicklistWeightsPage> {
               .map((weight) => Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(weight.localizedName),
+                      Row(
+                        children: [
+                          Flexible(
+                            child: Text(
+                              weight.localizedName,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          if (weight.isCustom ||
+                              weight.path.startsWith('cf_')) ...[
+                            const SizedBox(width: 8),
+                            const CustomFieldIndicator(),
+                          ],
+                        ],
+                      ),
                       Slider(
                           value: weight.value, onChanged: null, min: 0, max: 1)
                     ],

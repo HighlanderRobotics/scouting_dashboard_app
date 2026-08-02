@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/custom_field_answer.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
@@ -47,6 +48,7 @@ class SingleScoutReportAnalysis {
     required this.autoScore,
     this.notes,
     this.robotBrokeDescription,
+    this.customFieldAnswers = const [],
   });
 
   final int totalPoints;
@@ -71,6 +73,7 @@ class SingleScoutReportAnalysis {
   final num autoScore;
   final String? notes;
   final String? robotBrokeDescription;
+  final List<CustomFieldAnswerDisplay> customFieldAnswers;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
@@ -102,6 +105,8 @@ class SingleScoutReportAnalysis {
           json["volleys"] != 0 ? json["totalBallsFed"] / json["volleys"] : 0,
       notes: (json['note'] as String).isEmpty ? null : json['note'],
       robotBrokeDescription: json['robotBrokeDescription'],
+      customFieldAnswers:
+          CustomFieldAnswerDisplay.listFromJson(json['customFieldAnswers']),
     );
   }
 }

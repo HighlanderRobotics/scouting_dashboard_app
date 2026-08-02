@@ -8,6 +8,30 @@ import 'package:scouting_dashboard_app/reusable/flag_models.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/stale_refresh_builder.dart';
 
+bool _isCustomWeight(PicklistWeight weight) =>
+    weight.isCustom || weight.path.startsWith('cf_');
+
+/// Serializes [weights] for the picklist analysis endpoint: built-in weights
+/// as individual query params, custom field weights combined into a single
+/// `customWeights` JSON object param (omitted entirely when there are no
+/// non-zero custom weights).
+Map<String, String> _weightsQuery(List<PicklistWeight> weights) {
+  final customWeights = Map.fromEntries(
+    weights
+        .where((e) => _isCustomWeight(e) && e.value != 0)
+        .map((e) => MapEntry(e.path, e.value)),
+  );
+
+  return {
+    ...Map.fromEntries(
+      weights
+          .where((e) => !_isCustomWeight(e))
+          .map((e) => MapEntry(e.path, e.value.toString())),
+    ),
+    if (customWeights.isNotEmpty) 'customWeights': jsonEncode(customWeights),
+  };
+}
+
 class PicklistBreakdownEntry {
   const PicklistBreakdownEntry({
     required this.type,
@@ -79,9 +103,7 @@ extension PicklistAnalysisQuery on LovatAPI {
           query: {
             if (tournament != null) 'tournamentKey': tournament.key,
             'flags': jsonEncode(flags),
-            ...Map.fromEntries(
-              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
-            ),
+            ..._weightsQuery(weights),
           },
         );
 
@@ -104,9 +126,7 @@ extension PicklistAnalysisQuery on LovatAPI {
           query: {
             if (tournament != null) 'tournamentKey': tournament.key,
             'flags': jsonEncode(flags),
-            ...Map.fromEntries(
-              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
-            ),
+            ..._weightsQuery(weights),
           },
           parser: (json) {
             final map = json as Map<String, dynamic>;
@@ -124,9 +144,7 @@ extension PicklistAnalysisQuery on LovatAPI {
           query: {
             if (tournament != null) 'tournamentKey': tournament.key,
             'flags': jsonEncode(flags),
-            ...Map.fromEntries(
-              weights.map((e) => MapEntry(e.path, e.value.toString())).toList(),
-            ),
+            ..._weightsQuery(weights),
           },
         );
       },
