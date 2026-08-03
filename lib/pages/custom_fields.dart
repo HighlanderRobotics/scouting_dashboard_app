@@ -79,12 +79,17 @@ class _CustomFieldsPageState extends State<CustomFieldsPage> {
         reorderedFields.map((field) => field.uuid).toList(),
       );
       cachedCustomFields = null;
-    } catch (_) {
+    } catch (e) {
+      // Roll the list back and surface the failure — otherwise a rejected
+      // reorder silently looks like it succeeded.
+      if (!mounted) return;
       setState(() {
         fields = previousFields;
       });
-      scaffoldMessengerState.showSnackBar(const SnackBar(
-        content: Text("Failed to reorder fields"),
+      scaffoldMessengerState.showSnackBar(SnackBar(
+        content: Text(
+          e is LovatAPIException ? e.message : "Failed to reorder fields",
+        ),
         behavior: SnackBarBehavior.floating,
       ));
     }
@@ -133,15 +138,15 @@ class _CustomFieldsPageState extends State<CustomFieldsPage> {
                     key: Key(entry.value.uuid),
                     title: Text(entry.value.name),
                     subtitle: Text(_customFieldSubtitle(entry.value)),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        menu(context, entry.value),
-                        ReorderableDragStartListener(
-                          index: entry.key,
-                          child: const Icon(Icons.drag_handle),
-                        ),
-                      ],
+                    onTap: () {
+                      Navigator.of(context).pushWidget(CustomFieldEditorPage(
+                        field: entry.value,
+                        onSaved: fetchData,
+                      ));
+                    },
+                    trailing: ReorderableDragStartListener(
+                      index: entry.key,
+                      child: const Icon(Icons.drag_handle),
                     ),
                   ),
                 )
@@ -182,43 +187,6 @@ class _CustomFieldsPageState extends State<CustomFieldsPage> {
       body: body,
     );
   }
-
-  MenuAnchor menu(BuildContext context, CustomField field) {
-    return MenuAnchor(
-      alignmentOffset: const Offset(-80, 0),
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.edit_outlined),
-          child: const Text("Edit"),
-          onPressed: () {
-            Navigator.of(context).pushWidget(CustomFieldEditorPage(
-              field: field,
-              onSaved: fetchData,
-            ));
-          },
-        ),
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.archive_outlined),
-          child: const Text("Archive"),
-          onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) => ArchiveCustomFieldDialog(
-                field: field,
-                onArchived: fetchData,
-              ),
-            );
-          },
-        ),
-      ],
-      builder: (context, controller, child) => IconButton(
-        onPressed: () {
-          controller.isOpen ? controller.close() : controller.open();
-        },
-        icon: const Icon(Icons.more_vert),
-      ),
-    );
-  }
 }
 
 class CustomFieldEditorPage extends StatefulWidget {
@@ -243,14 +211,21 @@ class _CustomFieldEditorPageState extends State<CustomFieldEditorPage> {
 
   CustomFieldType? type;
   bool submitting = false;
+  bool archiving = false;
   String? questionError;
   String? optionsError;
 
   bool get isEditing => widget.field != null;
 
+  bool get isArchived => widget.field?.archived ?? false;
+
   bool get isSelect =>
       type == CustomFieldType.singleSelect ||
       type == CustomFieldType.multiSelect;
+
+  /// Number of options that already existed on the saved field. These can't be
+  /// renamed or removed (only appended to), so their rows are locked.
+  int get lockedOptionCount => widget.field?.options.length ?? 0;
 
   TextEditingController newOptionController([String text = ""]) {
     final controller = TextEditingController(text: text);
@@ -378,14 +353,82 @@ class _CustomFieldEditorPageState extends State<CustomFieldEditorPage> {
     }
   }
 
+  Future<void> archive() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => const _ArchiveConfirmationDialog(),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    setState(() {
+      archiving = true;
+    });
+
+    final navigatorState = Navigator.of(context);
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+
+    try {
+      await lovatAPI.archiveCustomField(widget.field!.uuid);
+      cachedCustomFields = null;
+      widget.onSaved?.call();
+      scaffoldMessengerState.showSnackBar(const SnackBar(
+        content: Text("Archived custom field"),
+        behavior: SnackBarBehavior.floating,
+      ));
+      navigatorState.pop();
+    } on LovatAPIException catch (e) {
+      _showActionError("Failed to archive field: ${e.message}");
+    } catch (_) {
+      _showActionError("Failed to archive field");
+    }
+  }
+
+  Future<void> unarchive() async {
+    setState(() {
+      archiving = true;
+    });
+
+    final navigatorState = Navigator.of(context);
+    final scaffoldMessengerState = ScaffoldMessenger.of(context);
+
+    try {
+      await lovatAPI.unarchiveCustomField(widget.field!.uuid);
+      cachedCustomFields = null;
+      widget.onSaved?.call();
+      scaffoldMessengerState.showSnackBar(const SnackBar(
+        content: Text("Unarchived custom field"),
+        behavior: SnackBarBehavior.floating,
+      ));
+      navigatorState.pop();
+    } on LovatAPIException catch (e) {
+      _showActionError("Failed to unarchive field: ${e.message}");
+    } catch (_) {
+      _showActionError("Failed to unarchive field");
+    }
+  }
+
+  void _showActionError(String message) {
+    if (!mounted) return;
+    setState(() {
+      archiving = false;
+    });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final busy = submitting || archiving;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(isEditing ? "Edit Custom Field" : "New Custom Field"),
         actions: [
           IconButton(
-            onPressed: submitting || type == null ? null : save,
+            onPressed: busy || type == null ? null : save,
             icon: const Icon(Icons.check),
             tooltip: isEditing ? "Save changes" : "Create",
             color: Colors.green,
@@ -393,7 +436,7 @@ class _CustomFieldEditorPageState extends State<CustomFieldEditorPage> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(4),
-          child: submitting
+          child: busy
               ? const LinearProgressIndicator()
               : const SizedBox(height: 4),
         ),
@@ -444,33 +487,43 @@ class _CustomFieldEditorPageState extends State<CustomFieldEditorPage> {
             ),
             const SizedBox(height: 8),
             ...optionControllers.asMap().entries.map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: entry.value,
-                            decoration: InputDecoration(
-                              filled: true,
-                              labelText: "Option ${entry.key + 1}",
-                            ),
-                            textCapitalization: TextCapitalization.sentences,
+              (entry) {
+                // Options that were already saved can't be renamed or removed
+                // (only reordered/appended to), so lock their row.
+                final locked = entry.key < lockedOptionCount;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: entry.value,
+                          enabled: !locked,
+                          decoration: InputDecoration(
+                            filled: true,
+                            labelText: "Option ${entry.key + 1}",
                           ),
+                          textCapitalization: TextCapitalization.sentences,
                         ),
-                        IconButton(
-                          onPressed: () {
-                            setState(() {
-                              optionControllers.removeAt(entry.key);
-                            });
-                          },
-                          icon: const Icon(Icons.remove_circle_outline),
-                          tooltip: "Remove option",
-                        ),
-                      ],
-                    ),
+                      ),
+                      IconButton(
+                        onPressed: locked
+                            ? null
+                            : () {
+                                setState(() {
+                                  optionControllers.removeAt(entry.key);
+                                });
+                              },
+                        icon: const Icon(Icons.remove_circle_outline),
+                        tooltip: locked
+                            ? "Existing options can't be removed"
+                            : "Remove option",
+                      ),
+                    ],
                   ),
-                ),
+                );
+              },
+            ),
             if (optionsError != null) ...[
               const SizedBox(height: 2),
               Text(
@@ -494,29 +547,32 @@ class _CustomFieldEditorPageState extends State<CustomFieldEditorPage> {
               ),
             ),
           ],
+          if (isEditing) ...[
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: isArchived
+                  ? FilledButton.tonalIcon(
+                      onPressed: busy ? null : unarchive,
+                      icon: const Icon(Icons.unarchive_outlined),
+                      label: const Text("Unarchive field"),
+                    )
+                  : FilledButton.tonalIcon(
+                      onPressed: busy ? null : archive,
+                      icon: const Icon(Icons.archive_outlined),
+                      label: const Text("Archive field"),
+                    ),
+            ),
+          ],
         ],
       ),
     );
   }
 }
 
-class ArchiveCustomFieldDialog extends StatefulWidget {
-  const ArchiveCustomFieldDialog({
-    super.key,
-    required this.field,
-    this.onArchived,
-  });
-
-  final CustomField field;
-  final Function()? onArchived;
-
-  @override
-  State<ArchiveCustomFieldDialog> createState() =>
-      _ArchiveCustomFieldDialogState();
-}
-
-class _ArchiveCustomFieldDialogState extends State<ArchiveCustomFieldDialog> {
-  bool submitting = false;
+/// Confirmation dialog for archiving; pops with `true` when confirmed.
+class _ArchiveConfirmationDialog extends StatelessWidget {
+  const _ArchiveConfirmationDialog();
 
   @override
   Widget build(BuildContext context) {
@@ -526,57 +582,12 @@ class _ArchiveCustomFieldDialogState extends State<ArchiveCustomFieldDialog> {
           "Scouts will stop seeing this question in Lovat Collection. Answers already collected stay in your data, and you can unarchive it later."),
       actions: [
         TextButton(
-          onPressed: submitting
-              ? null
-              : () {
-                  Navigator.of(context).pop();
-                },
+          onPressed: () => Navigator.of(context).pop(false),
           child: const Text("Cancel"),
         ),
         FilledButton(
-          onPressed: submitting
-              ? null
-              : () async {
-                  setState(() {
-                    submitting = true;
-                  });
-
-                  final navigatorState = Navigator.of(context);
-                  final scaffoldMessengerState = ScaffoldMessenger.of(context);
-
-                  try {
-                    await lovatAPI.archiveCustomField(widget.field.uuid);
-                    cachedCustomFields = null;
-                    widget.onArchived?.call();
-                    navigatorState.pop();
-                  } on LovatAPIException catch (e) {
-                    scaffoldMessengerState.showSnackBar(SnackBar(
-                      content: Text("Failed to archive field: ${e.message}"),
-                      behavior: SnackBarBehavior.floating,
-                    ));
-                    setState(() {
-                      submitting = false;
-                    });
-                  } catch (_) {
-                    scaffoldMessengerState.showSnackBar(const SnackBar(
-                      content: Text("Failed to archive field"),
-                      behavior: SnackBarBehavior.floating,
-                    ));
-                    setState(() {
-                      submitting = false;
-                    });
-                  }
-                },
-          child: submitting
-              ? const SizedBox(
-                  height: 16,
-                  width: 16,
-                  child: CircularProgressIndicator(
-                    valueColor: AlwaysStoppedAnimation(Colors.white),
-                    strokeWidth: 2,
-                  ),
-                )
-              : const Text("Archive"),
+          onPressed: () => Navigator.of(context).pop(true),
+          child: const Text("Archive"),
         ),
       ],
     );
@@ -629,27 +640,6 @@ class _ArchivedCustomFieldsPageState extends State<ArchivedCustomFieldsPage> {
     fetchData();
   }
 
-  Future<void> unarchive(CustomField field) async {
-    final scaffoldMessengerState = ScaffoldMessenger.of(context);
-
-    try {
-      await lovatAPI.unarchiveCustomField(field.uuid);
-      cachedCustomFields = null;
-      widget.onChanged?.call();
-      fetchData();
-    } on LovatAPIException catch (e) {
-      scaffoldMessengerState.showSnackBar(SnackBar(
-        content: Text("Failed to unarchive field: ${e.message}"),
-        behavior: SnackBarBehavior.floating,
-      ));
-    } catch (_) {
-      scaffoldMessengerState.showSnackBar(const SnackBar(
-        content: Text("Failed to unarchive field"),
-        behavior: SnackBarBehavior.floating,
-      ));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget body = SkeletonListView(
@@ -680,7 +670,15 @@ class _ArchivedCustomFieldsPageState extends State<ArchivedCustomFieldsPage> {
                 (field) => ListTile(
                   title: Text(field.name),
                   subtitle: Text(_customFieldSubtitle(field)),
-                  trailing: menu(context, field),
+                  onTap: () {
+                    Navigator.of(context).pushWidget(CustomFieldEditorPage(
+                      field: field,
+                      onSaved: () {
+                        fetchData();
+                        widget.onChanged?.call();
+                      },
+                    ));
+                  },
                 ),
               )
               .toList(),
@@ -697,25 +695,6 @@ class _ArchivedCustomFieldsPageState extends State<ArchivedCustomFieldsPage> {
         title: const Text("Archived Custom Fields"),
       ),
       body: body,
-    );
-  }
-
-  MenuAnchor menu(BuildContext context, CustomField field) {
-    return MenuAnchor(
-      alignmentOffset: const Offset(-80, 0),
-      menuChildren: [
-        MenuItemButton(
-          leadingIcon: const Icon(Icons.unarchive_outlined),
-          child: const Text("Unarchive"),
-          onPressed: () => unarchive(field),
-        ),
-      ],
-      builder: (context, controller, child) => IconButton(
-        onPressed: () {
-          controller.isOpen ? controller.close() : controller.open();
-        },
-        icon: const Icon(Icons.more_vert),
-      ),
     );
   }
 }

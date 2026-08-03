@@ -67,17 +67,24 @@ class InsetPicker<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // A null onChanged means the picker is disabled — gray it out so it's
+    // clear the selection can't be changed.
+    final bool disabled = onChanged == null;
+
     return EmphasizedContainer(
       padding: EdgeInsets.zero,
-      child: RadioGroup<T>(
-        groupValue: selectedItem,
-        onChanged:
-            onChanged != null ? (value) => onChanged!(value) : (value) {},
-        child: Column(
-          children: items
-              .map((item) =>
-                  itemSelector(context, item, selected: item == selectedItem))
-              .toList(),
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0,
+        child: RadioGroup<T>(
+          groupValue: selectedItem,
+          onChanged:
+              onChanged != null ? (value) => onChanged!(value) : (value) {},
+          child: Column(
+            children: items
+                .map((item) =>
+                    itemSelector(context, item, selected: item == selectedItem))
+                .toList(),
+          ),
         ),
       ),
     );
