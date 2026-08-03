@@ -8,6 +8,9 @@ import 'package:scouting_dashboard_app/reusable/page_body.dart';
 import 'package:scouting_dashboard_app/reusable/push_widget_extension.dart';
 import 'package:scouting_dashboard_app/reusable/scrollable_page_body.dart';
 import 'package:skeletons_forked/skeletons_forked.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+const _customFieldsGuideUrl = "https://learn.lovat.app/guides/custom-fields";
 
 String _customFieldSubtitle(CustomField field) {
   if (field.type == CustomFieldType.singleSelect ||
@@ -119,7 +122,15 @@ class _CustomFieldsPageState extends State<CustomFieldsPage> {
                 "Tap + to ask your scouts extra questions after each match.",
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
-              )
+              ),
+              const SizedBox(height: 8),
+              TextButton(
+                onPressed: () => launchUrl(
+                  Uri.parse(_customFieldsGuideUrl),
+                  mode: LaunchMode.externalApplication,
+                ),
+                child: const Text("Learn more"),
+              ),
             ],
           ),
         );
