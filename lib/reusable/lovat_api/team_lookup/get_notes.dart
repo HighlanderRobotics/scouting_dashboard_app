@@ -67,15 +67,41 @@ class Note {
     required this.body,
     required this.matchIdentity,
     this.author,
+    this.sourceTeam,
     this.uuid,
+    this.teamNumber,
     this.type = NoteType.note,
     this.customTextAnswers = const [],
   });
 
+  Note copyWith({int? teamNumber}) => Note(
+        body: body,
+        matchIdentity: matchIdentity,
+        author: author,
+        sourceTeam: sourceTeam,
+        uuid: uuid,
+        teamNumber: teamNumber ?? this.teamNumber,
+        type: type,
+        customTextAnswers: customTextAnswers,
+      );
+
   final String body;
   final GameMatchIdentity matchIdentity;
+
+  /// The scout's name, only present for the viewer's own team. For other teams
+  /// it's null and [sourceTeam] is used for anonymized attribution instead.
   final String? author;
+
+  /// The team whose scout wrote the report, used to attribute other teams'
+  /// notes as "Scouter from <team>".
+  final int? sourceTeam;
+
+  /// The scout report's uuid, used to open its raw data page.
   final String? uuid;
+
+  /// The team being looked up (injected by the tab), used when navigating to
+  /// the raw report page.
+  final int? teamNumber;
   final NoteType type;
 
   /// Text custom field answers from the same report, in field order. Only set
@@ -97,7 +123,8 @@ class Note {
             .map(CustomTextAnswer.fromJson),
     ];
 
-    final hasNote = json["notes"] is String && (json["notes"] as String).isNotEmpty;
+    final hasNote =
+        json["notes"] is String && (json["notes"] as String).isNotEmpty;
 
     return [
       // One card per report: the written note (if any) together with that
@@ -109,6 +136,7 @@ class Note {
           matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
               tournamentName: json['tournamentName']),
           author: json['scouterName'],
+          sourceTeam: (json['sourceTeam'] as num?)?.toInt(),
           uuid: json['uuid'],
           customTextAnswers: customTextAnswers,
         ),
@@ -120,6 +148,7 @@ class Note {
             matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
                 tournamentName: json['tournamentName']),
             author: json['scouterName'],
+            sourceTeam: (json['sourceTeam'] as num?)?.toInt(),
             uuid: json['uuid'],
             type: NoteType.breakDescription),
     ];

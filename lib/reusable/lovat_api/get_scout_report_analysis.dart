@@ -49,6 +49,9 @@ class SingleScoutReportAnalysis {
     this.notes,
     this.robotBrokeDescription,
     this.customFieldAnswers = const [],
+    this.canModify = false,
+    this.customFieldsAreOwnTeam = true,
+    this.customFieldsSourceTeam,
   });
 
   final int totalPoints;
@@ -74,6 +77,18 @@ class SingleScoutReportAnalysis {
   final String? notes;
   final String? robotBrokeDescription;
   final List<CustomFieldAnswerDisplay> customFieldAnswers;
+
+  /// Whether the viewer (a scouting lead of the report's team) may edit this
+  /// report's text custom field answers.
+  final bool canModify;
+
+  /// Whether the custom questions belong to the viewer's own team. False when
+  /// viewing another team's shared report, so the section isn't mislabeled
+  /// "Asked by your team".
+  final bool customFieldsAreOwnTeam;
+
+  /// The team whose custom questions these answers belong to.
+  final int? customFieldsSourceTeam;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
@@ -107,6 +122,9 @@ class SingleScoutReportAnalysis {
       robotBrokeDescription: json['robotBrokeDescription'],
       customFieldAnswers:
           CustomFieldAnswerDisplay.listFromJson(json['customFieldAnswers']),
+      canModify: json['canModify'] == true,
+      customFieldsAreOwnTeam: json['customFieldsAreOwnTeam'] != false,
+      customFieldsSourceTeam: (json['customFieldsSourceTeam'] as num?)?.toInt(),
     );
   }
 }

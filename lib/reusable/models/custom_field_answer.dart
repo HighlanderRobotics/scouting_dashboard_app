@@ -3,6 +3,7 @@ import 'package:scouting_dashboard_app/reusable/lovat_api/custom_fields.dart';
 /// A custom field answer as returned in raw scout report responses.
 class CustomFieldAnswerDisplay {
   const CustomFieldAnswerDisplay({
+    this.uuid,
     required this.fieldUuid,
     required this.name,
     required this.type,
@@ -14,6 +15,9 @@ class CustomFieldAnswerDisplay {
     this.selections = const [],
   });
 
+  /// The answer's own uuid, used to edit it. Null on responses from servers
+  /// that predate editable answers.
+  final String? uuid;
   final String fieldUuid;
   final String name;
   final CustomFieldType type;
@@ -79,6 +83,7 @@ class CustomFieldAnswerDisplay {
     final selections = json['selections'];
 
     final answer = CustomFieldAnswerDisplay(
+      uuid: json['uuid'] is String ? json['uuid'] : null,
       fieldUuid: fieldUuid,
       name: name,
       type: type,

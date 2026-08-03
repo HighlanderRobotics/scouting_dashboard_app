@@ -11,7 +11,14 @@ class CustomFieldIndicator extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.secondaryContainer,
+          // The container colors in this scheme are identical, so a plain
+          // container fill gives no separation on a *Container background. A
+          // translucent tint of the text color reads as a soft pill on any
+          // background without competing with nearby dividers.
+          color: Theme.of(context)
+              .colorScheme
+              .onSecondaryContainer
+              .withValues(alpha: 0.16),
           borderRadius: BorderRadius.circular(4),
         ),
         child: Text(

@@ -166,6 +166,25 @@ extension CustomFields on LovatAPI {
     }
   }
 
+  /// Edits the text of a single TEXT custom field answer. Only permitted for
+  /// scouting leads of the field's team (enforced server-side).
+  Future<void> updateCustomFieldAnswer(String answerUuid, String value) async {
+    final response = await put(
+      '/v1/manager/customfields/answers/$answerUuid',
+      body: {'value': value},
+    );
+
+    if (response?.statusCode != 200) {
+      try {
+        throw LovatAPIException(jsonDecode(response!.body)['displayError']);
+      } on LovatAPIException {
+        rethrow;
+      } catch (_) {
+        throw Exception('Failed to update custom field answer');
+      }
+    }
+  }
+
   Future<void> archiveCustomField(String uuid) async {
     final response = await post('/v1/manager/customfields/$uuid/archive');
 
