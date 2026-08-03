@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
+import 'package:scouting_dashboard_app/reusable/custom_field_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/emphasized_container.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
@@ -290,14 +291,65 @@ class NoteWidget extends StatelessWidget {
                 ],
               ],
             ),
-            Text(
-              note.body,
-              style: Theme.of(context).textTheme.bodyMedium!.merge(
-                    TextStyle(
-                      color: foregroundColor ??
-                          Theme.of(context).colorScheme.onPrimaryContainer,
+            if (note.body.isNotEmpty)
+              Text(
+                note.body,
+                style: Theme.of(context).textTheme.bodyMedium!.merge(
+                      TextStyle(
+                        color: foregroundColor ??
+                            Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                     ),
-                  ),
+              ),
+            // Text custom field answers from the same report, each below a
+            // divider and labeled with its question + the Custom marker.
+            ...note.customTextAnswers.map(
+              (answer) => Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Divider(
+                      height: 1,
+                      color: (foregroundColor ??
+                              Theme.of(context).colorScheme.onPrimaryContainer)
+                          .withValues(alpha: 0.25),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            answer.name,
+                            style: Theme.of(context).textTheme.labelLarge!.merge(
+                                  TextStyle(
+                                    color: foregroundColor ??
+                                        Theme.of(context)
+                                            .colorScheme
+                                            .onPrimaryContainer,
+                                  ),
+                                ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const CustomFieldIndicator(),
+                      ],
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      answer.value,
+                      style: Theme.of(context).textTheme.bodyMedium!.merge(
+                            TextStyle(
+                              color: foregroundColor ??
+                                  Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer,
+                            ),
+                          ),
+                    ),
+                  ],
+                ),
+              ),
             ),
             if (note.author != null) ...[
               const SizedBox(height: 4),
