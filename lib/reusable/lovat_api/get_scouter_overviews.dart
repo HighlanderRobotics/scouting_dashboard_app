@@ -10,7 +10,9 @@ extension ScouterOverviewsQuery on LovatAPI {
       {bool archivedScouters = false}) {
     const path = '/v1/manager/scouterspage';
     return CachedQuery(
-      queryKey: ['scouterOverviews', archivedScouters],
+      // Include the current tournament (resolved inside queryFn) in the cache
+      // key so switching tournaments doesn't serve the previous one's scouters.
+      queryKey: ['scouterOverviews', archivedScouters, Tournament.currentSync?.key],
       label: 'scouter overviews',
       queryFn: () async {
         final tournament = await Tournament.getCurrent();

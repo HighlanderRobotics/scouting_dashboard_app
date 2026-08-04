@@ -91,6 +91,10 @@ extension PicklistAnalysisQuery on LovatAPI {
     return CachedQuery(
       queryKey: [
         'picklistAnalysis',
+        // The analysis is scoped to the current tournament (resolved inside
+        // queryFn), so it must be part of the in-memory cache key — otherwise
+        // switching tournaments serves the previous tournament's cached result.
+        Tournament.currentSync?.key,
         flags,
         weights.map((e) => [e.path, e.value]).toList()
       ],
