@@ -278,7 +278,11 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ),
           actions: [
-            if (widget.canModify == null || widget.canModify!)
+            // Gate on the report's own fetched permission (same value the
+            // custom-answer editor uses), not the caller-supplied hint — which
+            // is only a heuristic when opened from the Notes tab and would show
+            // Delete/Edit to a non-lead own-team member the server then rejects.
+            if (reportAnalysis!.canModify)
               IconButton(
                 icon: const Icon(Icons.delete),
                 tooltip: "Delete report",
@@ -567,7 +571,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                               ),
                     ),
                   ),
-                  if (widget.canModify == null || widget.canModify!)
+                  if (reportAnalysis.canModify)
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
