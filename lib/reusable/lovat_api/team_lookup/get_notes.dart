@@ -55,11 +55,17 @@ class CustomTextAnswer {
   final String name;
   final String value;
 
-  factory CustomTextAnswer.fromJson(Map<String, dynamic> json) =>
-      CustomTextAnswer(
-        name: json['name'] as String,
-        value: json['value'] as String,
-      );
+  /// Tolerant parse: returns null for a malformed or blank text answer so one
+  /// bad entry can't throw and take down the entire Notes tab. Also skips
+  /// whitespace-only values, matching the raw-report surface which hides them.
+  static CustomTextAnswer? tryFromJson(Map<String, dynamic> json) {
+    final name = json['name'];
+    final value = json['value'];
+    if (name is! String || value is! String || value.trim().isEmpty) {
+      return null;
+    }
+    return CustomTextAnswer(name: name, value: value);
+  }
 }
 
 class Note {
@@ -120,7 +126,8 @@ class Note {
       if (json['customTextAnswers'] is List)
         ...(json['customTextAnswers'] as List)
             .whereType<Map<String, dynamic>>()
-            .map(CustomTextAnswer.fromJson),
+            .map(CustomTextAnswer.tryFromJson)
+            .whereType<CustomTextAnswer>(),
     ];
 
     final hasNote =
