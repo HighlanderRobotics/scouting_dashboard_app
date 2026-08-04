@@ -540,7 +540,9 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
           SectionTitle(
             reportAnalysis.customFieldsAreOwnTeam
                 ? "Asked by your team"
-                : "Asked by ${reportAnalysis.customFieldsSourceTeam}",
+                : reportAnalysis.customFieldsSourceTeam != null
+                    ? "Asked by ${reportAnalysis.customFieldsSourceTeam}"
+                    : "Asked by another team",
           ),
           // One group so the section title sits as close to the first answer as
           // built-in sections do, with uniform spacing between answers of any
