@@ -342,7 +342,10 @@ class NoteWidget extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            const CustomFieldIndicator(),
+                            CustomFieldIndicator(
+                              backgroundColor: scheme.primary,
+                              foregroundColor: scheme.onPrimary,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 3),
@@ -488,47 +491,55 @@ class _ExpandableTextState extends State<ExpandableText> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // The full text is always laid out; only the revealed height
-            // animates and clips it, so the text never snaps when collapsing.
-            TweenAnimationBuilder<double>(
-              tween:
-                  Tween<double>(end: expanded ? fullHeight : collapsedHeight),
-              duration: _duration,
-              curve: _curve,
-              child: Text(widget.text, style: widget.style),
-              builder: (context, height, child) {
-                Widget clipped = ClipRect(
-                  child: SizedBox(
-                    height: height,
-                    width: double.infinity,
-                    child: OverflowBox(
-                      alignment: Alignment.topLeft,
-                      minHeight: 0,
-                      maxHeight: double.infinity,
-                      child: child,
+            // Tapping the body text itself toggles expansion, same as the
+            // button. This GestureDetector sits inside the note card's InkWell
+            // and claims taps on the text region, so only taps elsewhere on the
+            // card (match name, custom answers, etc.) open the raw report.
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => _toggle(maxWidth),
+              // The full text is always laid out; only the revealed height
+              // animates and clips it, so the text never snaps when collapsing.
+              child: TweenAnimationBuilder<double>(
+                tween:
+                    Tween<double>(end: expanded ? fullHeight : collapsedHeight),
+                duration: _duration,
+                curve: _curve,
+                child: Text(widget.text, style: widget.style),
+                builder: (context, height, child) {
+                  Widget clipped = ClipRect(
+                    child: SizedBox(
+                      height: height,
+                      width: double.infinity,
+                      child: OverflowBox(
+                        alignment: Alignment.topLeft,
+                        minHeight: 0,
+                        maxHeight: double.infinity,
+                        child: child,
+                      ),
                     ),
-                  ),
-                );
-                // Soft-fade the bottom edge while any text is still hidden.
-                if (height < fullHeight - 0.5) {
-                  final fadeStop = (1 - (18 / height)).clamp(0.0, 1.0);
-                  clipped = ShaderMask(
-                    blendMode: BlendMode.dstIn,
-                    shaderCallback: (rect) => LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: const [
-                        Colors.white,
-                        Colors.white,
-                        Colors.transparent,
-                      ],
-                      stops: [0.0, fadeStop, 1.0],
-                    ).createShader(rect),
-                    child: clipped,
                   );
-                }
-                return clipped;
-              },
+                  // Soft-fade the bottom edge while any text is still hidden.
+                  if (height < fullHeight - 0.5) {
+                    final fadeStop = (1 - (18 / height)).clamp(0.0, 1.0);
+                    clipped = ShaderMask(
+                      blendMode: BlendMode.dstIn,
+                      shaderCallback: (rect) => LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: const [
+                          Colors.white,
+                          Colors.white,
+                          Colors.transparent,
+                        ],
+                        stops: [0.0, fadeStop, 1.0],
+                      ).createShader(rect),
+                      child: clipped,
+                    );
+                  }
+                  return clipped;
+                },
+              ),
             ),
             const SizedBox(height: 3),
             GestureDetector(
