@@ -252,6 +252,11 @@ class _NetworkFlagState extends State<NetworkFlag> {
     setState(() {
       loaded = false;
       loadingTeam = widget.team;
+      // Drop the previous team's value so it can't leak into the new team's
+      // load: without this, a failed fetch with no cache for the new team hits
+      // the `data == null` guard as false, silently swallowing the error
+      // snackbar and leaving the flag stuck on the skeleton.
+      data = null;
     });
 
     final scaffoldMessengerState = ScaffoldMessenger.of(context);
