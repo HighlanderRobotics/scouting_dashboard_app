@@ -110,11 +110,13 @@ class _StaleRefreshBuilderState<T> extends State<StaleRefreshBuilder<T>> {
   }
 
   bool _keyEquals(List<dynamic> a, List<dynamic> b) {
-    if (a.length != b.length) return false;
-    for (var i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return false;
-    }
-    return true;
+    // Compare by the same serialization QueryCache uses for its keys. A shallow
+    // element-wise `!=` compared nested List/Map elements by identity, so keys
+    // containing nested collections (e.g. picklistAnalysis' flags/weights, which
+    // are rebuilt into fresh instances every build) always looked "changed" —
+    // causing needless refetch churn and, worse, discarding in-flight results
+    // whose key instance no longer matched _activeKey.
+    return QueryCache._keyToString(a) == QueryCache._keyToString(b);
   }
 
   Future<void> _fetch() async {
