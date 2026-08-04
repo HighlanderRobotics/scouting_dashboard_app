@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/metrics.dart';
 import 'package:scouting_dashboard_app/pages/team_lookup/team_lookup_breakdown_details.dart';
+import 'package:scouting_dashboard_app/reusable/custom_field_indicator.dart';
 import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/team_lookup/get_breakdown_metrics.dart';
@@ -24,10 +25,15 @@ class TeamLookupBreakdownsTab extends StatelessWidget {
         final data = result.data;
         final error = result.error;
         if (data != null) {
+          final allBreakdowns = [
+            ...breakdowns,
+            ...customFieldBreakdowns(data),
+          ];
+
           return Stack(
             children: [
               ScrollablePageBody(
-                children: breakdowns
+                children: allBreakdowns
                     .map(
                       (BreakdownData breakdownData) => Breakdown(
                         dataIdentity: breakdownData,
@@ -113,6 +119,31 @@ class TeamLookupBreakdownsTab extends StatelessWidget {
   }
 }
 
+/// Builds breakdowns for the viewing team's custom select fields from the
+/// `customFields` metadata the server includes inline in the breakdown metrics
+/// response, with one segment per option (in options order) plus segments for
+/// any recorded answer no longer among the field's current options.
+List<BreakdownData> customFieldBreakdowns(BreakdownMetrics data) {
+  return data.customFields.map((field) {
+    final answerKeys =
+        data.breakdown(field.metricKey)?.keys ?? const <String>[];
+
+    return BreakdownData(
+      localizedName: field.name,
+      path: field.metricKey,
+      segments: [
+        ...field.options,
+        ...answerKeys.where((key) => !field.options.contains(key)),
+      ]
+          .map((option) => BreakdownSegmentData(
+                localizedNameSingular: option,
+                path: option,
+              ))
+          .toList(),
+    );
+  }).toList();
+}
+
 class Breakdown extends StatelessWidget {
   const Breakdown({
     super.key,
@@ -145,15 +176,31 @@ class Breakdown extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        dataIdentity.localizedName,
-                        style: Theme.of(context).textTheme.titleMedium!.merge(
-                              TextStyle(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                dataIdentity.localizedName,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium!
+                                    .merge(
+                                      TextStyle(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
                               ),
                             ),
+                            if (dataIdentity.path.startsWith('cf_')) ...[
+                              const SizedBox(width: 8),
+                              const CustomFieldIndicator(),
+                            ],
+                          ],
+                        ),
                       ),
                       Icon(
                         Icons.navigate_next,

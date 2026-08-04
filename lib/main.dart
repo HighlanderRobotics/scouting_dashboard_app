@@ -18,6 +18,7 @@ import 'package:scouting_dashboard_app/pages/picklist/shared_picklist.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_team_breakdown.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklists.dart';
 import 'package:scouting_dashboard_app/pages/picklist/view_picklist_weights.dart';
+import 'package:scouting_dashboard_app/pages/custom_fields.dart';
 import 'package:scouting_dashboard_app/pages/preview_over.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/pages/scan_qr_codes.dart';
@@ -94,6 +95,7 @@ void main() async {
                 .submitText,
           ),
       '/scouters': (context) => const ScoutersPage(),
+      '/custom_fields': (context) => const CustomFieldsPage(),
       // '/set-api-url': (context) => const SetAPIUrlPage(),
     },
     onGenerateRoute: (settings) {

@@ -9,9 +9,11 @@ import 'package:scouting_dashboard_app/reusable/friendly_error_view.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/delete_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_events_for_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_report_analysis.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/custom_fields.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/get_scout_reports_by_long_match_key.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/update_note.dart';
+import 'package:scouting_dashboard_app/reusable/models/custom_field_answer.dart';
 import 'package:scouting_dashboard_app/reusable/models/match.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
@@ -276,7 +278,11 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ),
           ),
           actions: [
-            if (widget.canModify == null || widget.canModify!)
+            // Gate on the report's own fetched permission (same value the
+            // custom-answer editor uses), not the caller-supplied hint — which
+            // is only a heuristic when opened from the Notes tab and would show
+            // Delete/Edit to a non-lead own-team member the server then rejects.
+            if (reportAnalysis!.canModify)
               IconButton(
                 icon: const Icon(Icons.delete),
                 tooltip: "Delete report",
@@ -530,6 +536,25 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                     label: const Text("time left")))
           ],
         ),
+        if (reportAnalysis.customFieldAnswers.isNotEmpty) ...[
+          SectionTitle(
+            reportAnalysis.customFieldsAreOwnTeam
+                ? "Asked by your team"
+                : reportAnalysis.customFieldsSourceTeam != null
+                    ? "Asked by ${reportAnalysis.customFieldsSourceTeam}"
+                    : "Asked by another team",
+          ),
+          // One group so the section title sits as close to the first answer as
+          // built-in sections do, with uniform spacing between answers of any
+          // type (text, number, select).
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 12,
+            children: reportAnalysis.customFieldAnswers
+                .map(customFieldAnswer)
+                .toList(),
+          ),
+        ],
         if (reportAnalysis.notes != null)
           Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -548,7 +573,7 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
                               ),
                     ),
                   ),
-                  if (widget.canModify == null || widget.canModify!)
+                  if (reportAnalysis.canModify)
                     IconButton(
                       icon: const Icon(Icons.edit),
                       onPressed: () {
@@ -565,6 +590,75 @@ class _RawScoutReportPageState extends State<RawScoutReportPage> {
             ],
           ),
       ].withSpaceBetween(height: 10),
+    );
+  }
+
+  Widget customFieldAnswer(CustomFieldAnswerDisplay answer) {
+    // Scouting leads of the report's team can fix a typed answer's text.
+    final canEdit = answer.type == CustomFieldType.text &&
+        (reportAnalysis?.canModify ?? false) &&
+        answer.uuid != null;
+
+    final String value;
+    switch (answer.type) {
+      case CustomFieldType.text:
+        value = answer.textValue ?? "";
+        break;
+      case CustomFieldType.number:
+        value = numToStringRounded(answer.numberValue);
+        break;
+      case CustomFieldType.singleSelect:
+        value = answer.selections.isNotEmpty ? answer.selections.first : "";
+        break;
+      case CustomFieldType.multiSelect:
+        value = answer.selections.join(", ");
+        break;
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // A field label, deliberately smaller than the built-in section
+        // headings so it doesn't read as a built-in metric.
+        Row(
+          children: [
+            // Already grouped under the "Asked by your team" heading, so the
+            // question name alone suffices — no separate Custom badge needed.
+            Expanded(
+              child: Text(
+                answer.name,
+                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+            ),
+            if (canEdit)
+              // Tightly constrained so the edit affordance doesn't inflate
+              // the label row taller than a plain (non-text) answer's label.
+              IconButton(
+                icon: const Icon(Icons.edit, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 36, minHeight: 28),
+                visualDensity: VisualDensity.compact,
+                onPressed: () {
+                  Navigator.of(context).pushWidget(NotesEditor(
+                    title: "Edit answer",
+                    initialNotes: answer.textValue,
+                    uuid: answer.uuid,
+                    onSubmit: (v) =>
+                        lovatAPI.updateCustomFieldAnswer(answer.uuid!, v),
+                    onSubmitted: () => fetchData(),
+                  ));
+                },
+              ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        // Match the built-in Notes body (default text style) so custom
+        // answers and notes read at the same size.
+        Text(value),
+      ],
     );
   }
 
@@ -953,11 +1047,20 @@ class NotesEditor extends StatefulWidget {
     super.key,
     this.initialNotes,
     this.onSubmitted,
-    required this.uuid,
+    this.uuid,
+    this.title = "Edit Notes",
+    this.onSubmit,
   });
 
   final String? initialNotes;
-  final String uuid;
+
+  /// Report uuid whose notes are updated when [onSubmit] is not provided.
+  final String? uuid;
+  final String title;
+
+  /// Custom save action for the entered text. When null, the text is saved as
+  /// the report's notes via [uuid].
+  final Future<void> Function(String value)? onSubmit;
   final dynamic Function()? onSubmitted;
 
   @override
@@ -992,7 +1095,11 @@ class _NotesEditorState extends State<NotesEditor> {
     });
 
     try {
-      await lovatAPI.updateNote(widget.uuid, notes);
+      if (widget.onSubmit != null) {
+        await widget.onSubmit!(notes);
+      } else {
+        await lovatAPI.updateNote(widget.uuid!, notes);
+      }
       if (navigation.canPop()) {
         navigation.pop();
       }
@@ -1016,7 +1123,7 @@ class _NotesEditorState extends State<NotesEditor> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Edit Notes"),
+          title: Text(widget.title),
           actions: [
             IconButton(
               icon: const Icon(Icons.check),

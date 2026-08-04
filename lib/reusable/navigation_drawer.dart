@@ -129,6 +129,16 @@ class _GlobalNavigationDrawerState extends State<GlobalNavigationDrawer> {
                       ModalRoute.of(context)?.settings.name == "/scouters",
                   icon: Icons.supervised_user_circle,
                 ),
+                DrawerDestination(
+                  label: "Custom Fields",
+                  onTap: () {
+                    Navigator.pushNamedAndRemoveUntil(
+                        context, "/custom_fields", (route) => false);
+                  },
+                  isSelected:
+                      ModalRoute.of(context)?.settings.name == "/custom_fields",
+                  icon: Icons.dynamic_form,
+                ),
               ],
               if (selectedTournament != null) ...[
                 DrawerDestination(

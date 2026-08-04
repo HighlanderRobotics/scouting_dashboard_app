@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:scouting_dashboard_app/pages/raw_scout_report.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/lovat_api.dart';
+import 'package:scouting_dashboard_app/reusable/models/custom_field_answer.dart';
 import 'package:scouting_dashboard_app/reusable/models/robot_roles.dart';
 import 'package:scouting_dashboard_app/reusable/team_auto_paths.dart';
 
@@ -47,6 +48,10 @@ class SingleScoutReportAnalysis {
     required this.autoScore,
     this.notes,
     this.robotBrokeDescription,
+    this.customFieldAnswers = const [],
+    this.canModify = false,
+    this.customFieldsAreOwnTeam = true,
+    this.customFieldsSourceTeam,
   });
 
   final int totalPoints;
@@ -71,6 +76,19 @@ class SingleScoutReportAnalysis {
   final num autoScore;
   final String? notes;
   final String? robotBrokeDescription;
+  final List<CustomFieldAnswerDisplay> customFieldAnswers;
+
+  /// Whether the viewer (a scouting lead of the report's team) may edit this
+  /// report's text custom field answers.
+  final bool canModify;
+
+  /// Whether the custom questions belong to the viewer's own team. False when
+  /// viewing another team's shared report, so the section isn't mislabeled
+  /// "Asked by your team".
+  final bool customFieldsAreOwnTeam;
+
+  /// The team whose custom questions these answers belong to.
+  final int? customFieldsSourceTeam;
 
   factory SingleScoutReportAnalysis.fromJson(Map<String, dynamic> json) {
     return SingleScoutReportAnalysis(
@@ -102,6 +120,11 @@ class SingleScoutReportAnalysis {
           json["volleys"] != 0 ? json["totalBallsFed"] / json["volleys"] : 0,
       notes: (json['note'] as String).isEmpty ? null : json['note'],
       robotBrokeDescription: json['robotBrokeDescription'],
+      customFieldAnswers:
+          CustomFieldAnswerDisplay.listFromJson(json['customFieldAnswers']),
+      canModify: json['canModify'] == true,
+      customFieldsAreOwnTeam: json['customFieldsAreOwnTeam'] != false,
+      customFieldsSourceTeam: (json['customFieldsSourceTeam'] as num?)?.toInt(),
     );
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:scouting_dashboard_app/constants.dart';
 import 'package:scouting_dashboard_app/datatypes.dart';
 import 'package:scouting_dashboard_app/pages/picklist/picklist_models.dart';
+import 'package:scouting_dashboard_app/reusable/custom_field_indicator.dart';
+import 'package:scouting_dashboard_app/reusable/lovat_api/custom_fields.dart';
 import 'package:scouting_dashboard_app/reusable/lovat_api/picklists/get_picklist_analysis.dart';
 import 'package:scouting_dashboard_app/reusable/page_body.dart';
 
@@ -16,6 +18,47 @@ class PicklistTeamBreakdownPage extends StatefulWidget {
 class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
   bool useSameHeights = false;
   bool weighted = true;
+
+  @override
+  void initState() {
+    super.initState();
+    loadCustomFieldDefinitions();
+  }
+
+  /// Ensures custom field definitions are cached so `cf_` weight paths
+  /// resolve to their field names.
+  Future<void> loadCustomFieldDefinitions() async {
+    if (cachedCustomFields != null) return;
+
+    try {
+      await getCustomFieldDefinitions();
+    } catch (_) {
+      return;
+    }
+
+    if (mounted) setState(() {});
+  }
+
+  PicklistWeight resolveWeight(String type) {
+    return picklistWeights.firstWhere(
+      (e) => e.path == type,
+      orElse: () {
+        if (type.startsWith('cf_')) {
+          final uuid = type.substring('cf_'.length);
+          final matches =
+              (cachedCustomFields ?? []).where((field) => field.uuid == uuid);
+
+          return PicklistWeight(
+            type,
+            matches.isEmpty ? type : matches.first.name,
+            isCustom: true,
+          );
+        }
+
+        return PicklistWeight(type, type);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,6 +120,8 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                   ? activeList.indexOf(weight).isOdd
                   : activeList.indexOf(weight).isEven;
 
+              final resolvedWeight = resolveWeight(weight.type);
+
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOutCubicEmphasized,
@@ -99,20 +144,33 @@ class _PicklistTeamBreakdownPageState extends State<PicklistTeamBreakdownPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          picklistWeights
-                              .firstWhere((e) => e.path == weight.type,
-                                  orElse: () =>
-                                      PicklistWeight(weight.type, weight.type))
-                              .localizedName,
-                          overflow: TextOverflow.clip,
-                          style: Theme.of(context).textTheme.titleMedium!.merge(
-                              TextStyle(
-                                  color: alternate
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context)
-                                          .colorScheme
-                                          .onPrimaryContainer)),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  resolvedWeight.localizedName,
+                                  overflow: TextOverflow.clip,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .titleMedium!
+                                      .merge(TextStyle(
+                                          color: alternate
+                                              ? Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimary
+                                              : Theme.of(context)
+                                                  .colorScheme
+                                                  .onPrimaryContainer)),
+                                ),
+                              ),
+                              if (resolvedWeight.isCustom ||
+                                  weight.type.startsWith('cf_')) ...[
+                                const SizedBox(width: 8),
+                                const CustomFieldIndicator(),
+                              ],
+                            ],
+                          ),
                         ),
                         Text(
                           weight.result.toStringAsFixed(2),

@@ -47,20 +47,72 @@ extension NotesQuery on LovatAPI {
 
 enum NoteType { note, breakDescription }
 
+/// A free-form ("Text") custom field answer attached to a scout report, shown
+/// below the report's note on the same card.
+class CustomTextAnswer {
+  const CustomTextAnswer({required this.name, required this.value});
+
+  final String name;
+  final String value;
+
+  /// Tolerant parse: returns null for a malformed or blank text answer so one
+  /// bad entry can't throw and take down the entire Notes tab. Also skips
+  /// whitespace-only values, matching the raw-report surface which hides them.
+  static CustomTextAnswer? tryFromJson(Map<String, dynamic> json) {
+    final name = json['name'];
+    final value = json['value'];
+    if (name is! String || value is! String || value.trim().isEmpty) {
+      return null;
+    }
+    return CustomTextAnswer(name: name, value: value);
+  }
+}
+
 class Note {
   const Note({
     required this.body,
     required this.matchIdentity,
     this.author,
+    this.sourceTeam,
     this.uuid,
+    this.teamNumber,
     this.type = NoteType.note,
+    this.customTextAnswers = const [],
   });
+
+  Note copyWith({int? teamNumber}) => Note(
+        body: body,
+        matchIdentity: matchIdentity,
+        author: author,
+        sourceTeam: sourceTeam,
+        uuid: uuid,
+        teamNumber: teamNumber ?? this.teamNumber,
+        type: type,
+        customTextAnswers: customTextAnswers,
+      );
 
   final String body;
   final GameMatchIdentity matchIdentity;
+
+  /// The scout's name, only present for the viewer's own team. For other teams
+  /// it's null and [sourceTeam] is used for anonymized attribution instead.
   final String? author;
+
+  /// The team whose scout wrote the report, used to attribute other teams'
+  /// notes as "Scouter from <team>".
+  final int? sourceTeam;
+
+  /// The scout report's uuid, used to open its raw data page.
   final String? uuid;
+
+  /// The team being looked up (injected by the tab), used when navigating to
+  /// the raw report page.
+  final int? teamNumber;
   final NoteType type;
+
+  /// Text custom field answers from the same report, in field order. Only set
+  /// on [NoteType.note] cards.
+  final List<CustomTextAnswer> customTextAnswers;
 
   factory Note.fromJson(Map<String, dynamic> json) => Note(
         body: json['notes'],
@@ -70,16 +122,30 @@ class Note {
         uuid: json['uuid'],
       );
   static List<Note> fromJoinedMap(Map<String, dynamic> json) {
+    final customTextAnswers = <CustomTextAnswer>[
+      if (json['customTextAnswers'] is List)
+        ...(json['customTextAnswers'] as List)
+            .whereType<Map<String, dynamic>>()
+            .map(CustomTextAnswer.tryFromJson)
+            .whereType<CustomTextAnswer>(),
+    ];
+
+    final hasNote =
+        json["notes"] is String && (json["notes"] as String).isNotEmpty;
+
     return [
-      if (json.containsKey("notes") &&
-          json["notes"].runtimeType == String &&
-          (json["notes"] as String).isNotEmpty)
+      // One card per report: the written note (if any) together with that
+      // report's text custom answers. Emitted when either is present, so a
+      // report with only a custom answer still gets a card.
+      if (hasNote || customTextAnswers.isNotEmpty)
         Note(
-          body: json['notes'],
+          body: hasNote ? json['notes'] as String : "",
           matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
               tournamentName: json['tournamentName']),
           author: json['scouterName'],
+          sourceTeam: (json['sourceTeam'] as num?)?.toInt(),
           uuid: json['uuid'],
+          customTextAnswers: customTextAnswers,
         ),
       if (json.containsKey("robotBrokeDescription") &&
           json["robotBrokeDescription"].runtimeType == String &&
@@ -89,6 +155,7 @@ class Note {
             matchIdentity: GameMatchIdentity.fromLongKey(json['match'],
                 tournamentName: json['tournamentName']),
             author: json['scouterName'],
+            sourceTeam: (json['sourceTeam'] as num?)?.toInt(),
             uuid: json['uuid'],
             type: NoteType.breakDescription),
     ];

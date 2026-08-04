@@ -22,8 +22,9 @@ class AllianceTeam {
   RobotRoles? get robotRole => role == null ? null : RobotRoles.values[role!];
 
   factory AllianceTeam.fromJson(Map<String, dynamic> json) {
+    final teamValue = json['team'];
     return AllianceTeam(
-      team: json['team'] as int,
+      team: teamValue is int ? teamValue : int.parse(teamValue.toString()),
       role: json['role'] as int?,
       averagePoints: (json['averagePoints'] as num?)?.toDouble(),
       paths: (json['paths'] as List<dynamic>? ?? [])
@@ -49,20 +50,24 @@ class AllianceAnalysis {
   final List<num?> l1StartTime;
   final List<num?> l2StartTime;
   final List<num?> l3StartTime;
-  final num totalFuelOutputted;
-  final num totalBallThroughput;
+  final num? totalFuelOutputted;
+  final num? totalBallThroughput;
 
   factory AllianceAnalysis.fromJson(Map<String, dynamic> json) {
+    // The server omits/nulls these fields for alliances with too little data
+    // (e.g. a team with fewer than two recorded matches). Parse defensively so
+    // one weak alliance doesn't crash the whole Match Predictor / Alliance page;
+    // consumers already render "Not enough data" / "--" for empty/null values.
     return AllianceAnalysis(
-      teams: (json['teams'] as List<dynamic>)
+      teams: (json['teams'] as List<dynamic>? ?? const [])
           .map((e) => AllianceTeam.fromJson(e as Map<String, dynamic>))
           .toList(),
       totalPoints: (json['totalPoints'] as num?)?.toDouble(),
-      l1StartTime: (json['l1StartTime'] as List<dynamic>).cast<num?>(),
-      l2StartTime: (json['l2StartTime'] as List<dynamic>).cast<num?>(),
-      l3StartTime: (json['l3StartTime'] as List<dynamic>).cast<num?>(),
-      totalFuelOutputted: json['totalFuelOutputted'] as num,
-      totalBallThroughput: json['totalBallThroughput'] as num,
+      l1StartTime: (json['l1StartTime'] as List<dynamic>? ?? const []).cast<num?>(),
+      l2StartTime: (json['l2StartTime'] as List<dynamic>? ?? const []).cast<num?>(),
+      l3StartTime: (json['l3StartTime'] as List<dynamic>? ?? const []).cast<num?>(),
+      totalFuelOutputted: json['totalFuelOutputted'] as num?,
+      totalBallThroughput: json['totalBallThroughput'] as num?,
     );
   }
 }

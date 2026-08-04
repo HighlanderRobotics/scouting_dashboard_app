@@ -22,12 +22,18 @@ class TeamLookupCategoriesTab extends StatelessWidget {
         final data = result.data;
         final error = result.error;
         if (data != null) {
+          final customFieldCategory = customFieldMetricCategory(data);
+          final allCategories = [
+            ...metricCategories,
+            if (customFieldCategory != null) customFieldCategory,
+          ];
+
           return Stack(
             children: [
               ScrollablePageBody(
                 children: [
                   MetricCategoryList(
-                    metricCategories: metricCategories
+                    metricCategories: allCategories
                         .map((category) => MetricCategory(
                               categoryName: category.localizedName,
                               metricTiles: category.metrics
@@ -150,6 +156,39 @@ class TeamLookupCategoriesTab extends StatelessWidget {
       },
     );
   }
+}
+
+/// Builds an "Asked by your team" category from the `customFields` metadata
+/// array the server includes inline in the category metrics response (entries
+/// like `{uuid, metricKey, name, order, average}`), or null when the viewing
+/// team has no answered custom number fields. The tiles read their values from
+/// the flat `cf_<uuid>` keys of the response, exactly like built-in metrics.
+MetricCategoryData? customFieldMetricCategory(CategoryMetrics data) {
+  final metadata = data.valueForPath('customFields');
+  if (metadata is! List) return null;
+
+  final entries = metadata
+      .whereType<Map<String, dynamic>>()
+      .where(
+          (entry) => entry['metricKey'] is String && entry['name'] is String)
+      .toList();
+
+  if (entries.isEmpty) return null;
+
+  entries.sort((a, b) =>
+      ((a['order'] as num?) ?? 0).compareTo((b['order'] as num?) ?? 0));
+
+  return MetricCategoryData(
+    "Asked by your team",
+    entries
+        .map((entry) => CategoryMetric(
+              localizedName: entry['name'],
+              abbreviatedLocalizedName: entry['name'],
+              path: entry['metricKey'],
+              hideFlag: true,
+            ))
+        .toList(),
+  );
 }
 
 class MetricCategoryList extends StatelessWidget {
